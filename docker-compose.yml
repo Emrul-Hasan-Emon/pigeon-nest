@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: pigeon_nest
+    ports:
+      - "5432:5432"
+    volumes:
+      - pigeon_nest_pgdata:/var/lib/postgresql/data
+
+volumes:
+  pigeon_nest_pgdata:
