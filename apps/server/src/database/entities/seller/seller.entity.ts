@@ -1,6 +1,7 @@
 import { Column, Entity, OneToMany, OneToOne } from 'typeorm';
 import { BaseEntity } from '../base.entity';
 import { SellerStatus } from '../../enums/seller-status.enum';
+import { SellerActiveStatus } from '../../enums/seller-active-status.enum';
 import { decimalTransformer } from '../../utils/decimal.transformer';
 import { Shop } from '../shop/shop.entity';
 import { SellerProduct } from '../product/seller-product.entity';
@@ -26,6 +27,18 @@ export class Seller extends BaseEntity {
   @Column({ nullable: true })
   avatarPath: string;
 
+  @Column({ nullable: true })
+  nidFrontImageUrl: string;
+
+  @Column({ nullable: true })
+  nidFrontImagePath: string;
+
+  @Column({ nullable: true })
+  nidBackImageUrl: string;
+
+  @Column({ nullable: true })
+  nidBackImagePath: string;
+
   @Column({ default: false })
   emailVerified: boolean;
 
@@ -47,8 +60,13 @@ export class Seller extends BaseEntity {
   @Column({ type: 'jsonb', nullable: true })
   payoutAccountInfo: Record<string, unknown> | null;
 
-  @Column({ default: true })
-  isActive: boolean;
+  // Set by admin only. Self-registered sellers start inactive.
+  @Column({ type: 'varchar', default: SellerActiveStatus.INACTIVE })
+  activeStatus: SellerActiveStatus;
+
+  // Why an admin rejected the seller; cleared when the seller resubmits.
+  @Column({ type: 'text', nullable: true })
+  rejectionReason: string | null;
 
   @OneToOne(() => Shop, (shop) => shop.seller)
   shop: Shop;
