@@ -7,6 +7,8 @@ import { DatabaseModule } from './database/database.module';
 import { createTypeOrmConfig } from './database/config/typeorm.config';
 import { FileManagementModule } from './file-management/file-management.module';
 import { AuthModule } from './auth/auth.module';
+import { CatalogModule } from './catalog/catalog.module';
+import { SellerModule } from './seller/seller.module';
 
 @Module({
   imports: [
@@ -18,6 +20,8 @@ import { AuthModule } from './auth/auth.module';
     DatabaseModule,
     FileManagementModule,
     AuthModule,
+    CatalogModule,
+    SellerModule,
   ],
   controllers: [AppController],
   providers: [AppService],
