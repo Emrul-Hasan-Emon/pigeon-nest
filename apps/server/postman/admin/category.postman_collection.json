@@ -1,0 +1,198 @@
+{
+  "info": {
+    "name": "Pigeon Nest - Admin Category",
+    "description": "Admin Category Management endpoints. Requires {{adminToken}} (admin bearer JWT) and {{baseUrl}} (e.g. http://localhost:3000/api/v1).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000/api/v1" },
+    { "key": "adminToken", "value": "" },
+    { "key": "categoryId", "value": "1" },
+    { "key": "parentCategoryId", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "List Categories",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/categories?limit=20&offset=0",
+          "host": ["{{baseUrl}}"],
+          "path": ["categories"],
+          "query": [
+            { "key": "limit", "value": "20" },
+            { "key": "offset", "value": "0" },
+            { "key": "search", "value": "", "disabled": true },
+            { "key": "isActive", "value": "true", "disabled": true }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Create Category (JSON)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Electronics\",\n  \"sortOrder\": 0,\n  \"isActive\": true\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/categories",
+          "host": ["{{baseUrl}}"],
+          "path": ["categories"]
+        }
+      }
+    },
+    {
+      "name": "Create Category (with image, multipart)",
+      "request": {
+        "method": "POST",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            { "key": "name", "value": "Fashion", "type": "text" },
+            { "key": "parentId", "value": "", "type": "text", "disabled": true },
+            { "key": "sortOrder", "value": "0", "type": "text" },
+            { "key": "isActive", "value": "true", "type": "text" },
+            { "key": "image", "type": "file", "src": [] }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/categories",
+          "host": ["{{baseUrl}}"],
+          "path": ["categories"]
+        }
+      }
+    },
+    {
+      "name": "Create Nested Category",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Mobiles\",\n  \"parentId\": {{parentCategoryId}}\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/categories",
+          "host": ["{{baseUrl}}"],
+          "path": ["categories"]
+        }
+      }
+    },
+    {
+      "name": "Update Category - Rename",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Mobile Phones\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/categories/{{categoryId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["categories", "{{categoryId}}"]
+        }
+      }
+    },
+    {
+      "name": "Update Category - Move Parent",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"parentId\": {{parentCategoryId}}\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/categories/{{categoryId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["categories", "{{categoryId}}"]
+        }
+      }
+    },
+    {
+      "name": "Update Category - Detach to Top-level",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"parentId\": null\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/categories/{{categoryId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["categories", "{{categoryId}}"]
+        }
+      }
+    },
+    {
+      "name": "Update Category - Replace Image",
+      "request": {
+        "method": "PATCH",
+        "body": {
+          "mode": "formdata",
+          "formdata": [{ "key": "image", "type": "file", "src": [] }]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/categories/{{categoryId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["categories", "{{categoryId}}"]
+        }
+      }
+    },
+    {
+      "name": "Retrieve Category by Id (expect 405)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/categories/{{categoryId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["categories", "{{categoryId}}"]
+        }
+      }
+    },
+    {
+      "name": "Delete Category",
+      "request": {
+        "method": "DELETE",
+        "url": {
+          "raw": "{{baseUrl}}/categories/{{categoryId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["categories", "{{categoryId}}"]
+        }
+      }
+    },
+    {
+      "name": "Get Parent Chain",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/categories/parent-chain?categoryIds={{categoryId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["categories", "parent-chain"],
+          "query": [{ "key": "categoryIds", "value": "{{categoryId}}" }]
+        }
+      }
+    },
+    {
+      "name": "Get Category Tree",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/categories/tree?categoryName=",
+          "host": ["{{baseUrl}}"],
+          "path": ["categories", "tree"],
+          "query": [{ "key": "categoryName", "value": "", "disabled": true }]
+        }
+      }
+    }
+  ]
+}
