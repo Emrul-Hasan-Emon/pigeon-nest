@@ -3,10 +3,17 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 import { AuthGuard } from './guards/auth.guard';
 import { RolesGuard } from './guards/roles.guard';
+import { AdminAuthController } from './admin-auth.controller';
+import { AdminAuthService } from './admin-auth.service';
+import { SellerAuthController } from './seller-auth.controller';
+import { SellerAuthService } from './seller-auth.service';
+import { SellerAccessGuard } from './guards/seller-access.guard';
+import { SellerModule } from '../seller/seller.module';
 
 @Global()
 @Module({
   imports: [
+    SellerModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -20,7 +27,14 @@ import { RolesGuard } from './guards/roles.guard';
       }),
     }),
   ],
-  providers: [AuthGuard, RolesGuard],
-  exports: [JwtModule, AuthGuard, RolesGuard],
+  controllers: [AdminAuthController, SellerAuthController],
+  providers: [
+    AuthGuard,
+    RolesGuard,
+    SellerAccessGuard,
+    AdminAuthService,
+    SellerAuthService,
+  ],
+  exports: [JwtModule, AuthGuard, RolesGuard, SellerAccessGuard],
 })
 export class AuthModule {}
