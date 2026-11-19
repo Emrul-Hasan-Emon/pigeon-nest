@@ -13,12 +13,21 @@ import { FileInfo } from '../types/file-info.type';
 export class S3StorageProvider implements StorageProvider {
   private readonly bucket: string;
   private readonly region: string;
-  private readonly client: S3Client;
+  private client: S3Client | undefined;
 
   constructor(private readonly configService: ConfigService) {
     this.bucket = this.configService.get<string>('AWS_S3_BUCKET_NAME', '');
     this.region = this.configService.get<string>('AWS_REGION', '');
-    this.client = new S3Client({ region: this.region });
+  }
+
+  // Built on first use, not in the constructor: this provider is always
+  // instantiated regardless of STORAGE_DRIVER, and the S3 SDK throws if
+  // region is empty — which it is until a bucket actually exists.
+  private getClient(): S3Client {
+    if (!this.client) {
+      this.client = new S3Client({ region: this.region });
+    }
+    return this.client;
   }
 
   async upload(file: Express.Multer.File, folder: string): Promise<FileInfo> {
@@ -26,7 +35,7 @@ export class S3StorageProvider implements StorageProvider {
     const ext = extname(file.originalname);
     const filePath = `${folder}/${file.fieldname}-${uniqueSuffix}${ext}`;
 
-    await this.client.send(
+    await this.getClient().send(
       new PutObjectCommand({
         Bucket: this.bucket,
         Key: filePath,
@@ -43,7 +52,7 @@ export class S3StorageProvider implements StorageProvider {
   }
 
   async remove(filePath: string): Promise<void> {
-    await this.client
+    await this.getClient()
       .send(new DeleteObjectCommand({ Bucket: this.bucket, Key: filePath }))
       .catch(() => undefined);
   }
