@@ -59,3 +59,44 @@ export interface SellerLoginResponse {
   accessToken: string;
   seller: SellerView;
 }
+
+export type SellerStatusChangeAction =
+  | 'baseline'
+  | 'registered'
+  | 'admin_created'
+  | 'approved'
+  | 'rejected'
+  | 'resubmitted'
+  | 'admin_updated';
+
+/** One row of the append-only status log. Admin-only. */
+export interface SellerStatusHistoryEntry {
+  id: number;
+  sellerId: number;
+  seller: { id: number; name: string; phone: string | null; email: string | null } | null;
+  fromStatus: SellerStatus | null;
+  toStatus: SellerStatus;
+  fromActiveStatus: SellerActiveStatus | null;
+  toActiveStatus: SellerActiveStatus;
+  action: SellerStatusChangeAction;
+  reason: string | null;
+  createdBy: number | null;
+  creatorType: 'admin' | 'seller' | 'user' | null;
+  creatorName: string | null;
+  createdAt: string;
+}
+
+export interface SellerStatusHistoryParams {
+  search?: string;
+  sellerId?: number;
+  action?: SellerStatusChangeAction;
+  toStatus?: SellerStatus;
+  toActiveStatus?: SellerActiveStatus;
+  cursor?: number;
+  limit?: number;
+}
+
+export interface SellerStatusHistoryResponse {
+  results: SellerStatusHistoryEntry[];
+  nextCursor: number | null;
+}
