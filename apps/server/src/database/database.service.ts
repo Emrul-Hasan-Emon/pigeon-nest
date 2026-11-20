@@ -7,6 +7,7 @@ import { Attribute } from './entities/attribute/attribute.entity';
 import { AttributeValue } from './entities/attribute/attribute-value.entity';
 import { User } from './entities/person/user.entity';
 import { AdminUser } from './entities/person/admin-user.entity';
+import { UserStatusChangeHistory } from './entities/person/user-status-change-history.entity';
 import { Address } from './entities/person/address.entity';
 import { Country } from './entities/zone/country.entity';
 import { Division } from './entities/zone/division.entity';
@@ -16,6 +17,8 @@ import { ShippingZone } from './entities/zone/shipping-zone.entity';
 import { Language } from './entities/language/language.entity';
 import { Seller } from './entities/seller/seller.entity';
 import { SellerPayout } from './entities/seller/seller-payout.entity';
+import { SellerProductStatusChangeHistory } from './entities/product/seller-product-status-change-history.entity';
+import { SellerStatusChangeHistory } from './entities/seller/seller-status-change-history.entity';
 import { Shop } from './entities/shop/shop.entity';
 import { SellerProduct } from './entities/product/seller-product.entity';
 import { SellerProductSku } from './entities/product/seller-product-sku.entity';
@@ -34,6 +37,10 @@ import { CouponHistoryLog } from './entities/coupon/coupon-history-log.entity';
 import { Review } from './entities/review/review.entity';
 import { Wishlist } from './entities/wishlist/wishlist.entity';
 import { Payment } from './entities/payment/payment.entity';
+import { PaymentAttachment } from './entities/payment/payment-attachment.entity';
+import { PaymentStatusHistory } from './entities/payment/payment-status-history.entity';
+import { OrderUpdate } from './entities/order/order-update.entity';
+import { OrderUpdateAttachment } from './entities/order/order-update-attachment.entity';
 import { PaymentGateway } from './entities/payment/payment-gateway.entity';
 import { Banner } from './entities/banner/banner.entity';
 import { HomepageSection } from './entities/homepage/homepage-section.entity';
@@ -49,6 +56,7 @@ export class DatabaseService implements OnApplicationBootstrap {
   attribute: Repository<Attribute>;
   attributeValue: Repository<AttributeValue>;
   user: Repository<User>;
+  userStatusChangeHistory: Repository<UserStatusChangeHistory>;
   adminUser: Repository<AdminUser>;
   address: Repository<Address>;
   country: Repository<Country>;
@@ -58,6 +66,8 @@ export class DatabaseService implements OnApplicationBootstrap {
   shippingZone: Repository<ShippingZone>;
   language: Repository<Language>;
   seller: Repository<Seller>;
+  sellerStatusChangeHistory: Repository<SellerStatusChangeHistory>;
+  sellerProductStatusChangeHistory: Repository<SellerProductStatusChangeHistory>;
   sellerPayout: Repository<SellerPayout>;
   shop: Repository<Shop>;
   sellerProduct: Repository<SellerProduct>;
@@ -78,6 +88,10 @@ export class DatabaseService implements OnApplicationBootstrap {
   wishlist: Repository<Wishlist>;
   payment: Repository<Payment>;
   paymentGateway: Repository<PaymentGateway>;
+  paymentAttachment: Repository<PaymentAttachment>;
+  paymentStatusHistory: Repository<PaymentStatusHistory>;
+  orderUpdate: Repository<OrderUpdate>;
+  orderUpdateAttachment: Repository<OrderUpdateAttachment>;
   banner: Repository<Banner>;
   homepageSection: Repository<HomepageSection>;
   pageSettings: Repository<PageSettings>;
@@ -95,6 +109,8 @@ export class DatabaseService implements OnApplicationBootstrap {
     @InjectRepository(AttributeValue)
     private attributeValueRepository: Repository<AttributeValue>,
     @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(UserStatusChangeHistory)
+    private userStatusChangeHistoryRepository: Repository<UserStatusChangeHistory>,
     @InjectRepository(AdminUser)
     private adminUserRepository: Repository<AdminUser>,
     @InjectRepository(Address) private addressRepository: Repository<Address>,
@@ -109,6 +125,10 @@ export class DatabaseService implements OnApplicationBootstrap {
     @InjectRepository(Language)
     private languageRepository: Repository<Language>,
     @InjectRepository(Seller) private sellerRepository: Repository<Seller>,
+    @InjectRepository(SellerProductStatusChangeHistory)
+    private sellerProductStatusChangeHistoryRepository: Repository<SellerProductStatusChangeHistory>,
+    @InjectRepository(SellerStatusChangeHistory)
+    private sellerStatusChangeHistoryRepository: Repository<SellerStatusChangeHistory>,
     @InjectRepository(SellerPayout)
     private sellerPayoutRepository: Repository<SellerPayout>,
     @InjectRepository(Shop) private shopRepository: Repository<Shop>,
@@ -143,6 +163,14 @@ export class DatabaseService implements OnApplicationBootstrap {
     @InjectRepository(Payment) private paymentRepository: Repository<Payment>,
     @InjectRepository(PaymentGateway)
     private paymentGatewayRepository: Repository<PaymentGateway>,
+    @InjectRepository(PaymentAttachment)
+    private paymentAttachmentRepository: Repository<PaymentAttachment>,
+    @InjectRepository(PaymentStatusHistory)
+    private paymentStatusHistoryRepository: Repository<PaymentStatusHistory>,
+    @InjectRepository(OrderUpdate)
+    private orderUpdateRepository: Repository<OrderUpdate>,
+    @InjectRepository(OrderUpdateAttachment)
+    private orderUpdateAttachmentRepository: Repository<OrderUpdateAttachment>,
     @InjectRepository(Banner) private bannerRepository: Repository<Banner>,
     @InjectRepository(HomepageSection)
     private homepageSectionRepository: Repository<HomepageSection>,
@@ -162,6 +190,7 @@ export class DatabaseService implements OnApplicationBootstrap {
     this.attribute = this.attributeRepository;
     this.attributeValue = this.attributeValueRepository;
     this.user = this.userRepository;
+    this.userStatusChangeHistory = this.userStatusChangeHistoryRepository;
     this.adminUser = this.adminUserRepository;
     this.address = this.addressRepository;
     this.country = this.countryRepository;
@@ -171,6 +200,9 @@ export class DatabaseService implements OnApplicationBootstrap {
     this.shippingZone = this.shippingZoneRepository;
     this.language = this.languageRepository;
     this.seller = this.sellerRepository;
+    this.sellerStatusChangeHistory = this.sellerStatusChangeHistoryRepository;
+    this.sellerProductStatusChangeHistory =
+      this.sellerProductStatusChangeHistoryRepository;
     this.sellerPayout = this.sellerPayoutRepository;
     this.shop = this.shopRepository;
     this.sellerProduct = this.sellerProductRepository;
@@ -191,6 +223,10 @@ export class DatabaseService implements OnApplicationBootstrap {
     this.wishlist = this.wishlistRepository;
     this.payment = this.paymentRepository;
     this.paymentGateway = this.paymentGatewayRepository;
+    this.paymentAttachment = this.paymentAttachmentRepository;
+    this.paymentStatusHistory = this.paymentStatusHistoryRepository;
+    this.orderUpdate = this.orderUpdateRepository;
+    this.orderUpdateAttachment = this.orderUpdateAttachmentRepository;
     this.banner = this.bannerRepository;
     this.homepageSection = this.homepageSectionRepository;
     this.pageSettings = this.pageSettingsRepository;
