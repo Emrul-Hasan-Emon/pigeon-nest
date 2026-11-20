@@ -21,6 +21,9 @@ import {
   CursorPagination,
 } from '../../../shared/decorators/cursor-pagination-params.decorator';
 import { ParseIdPipe } from '../../../shared/pipes/parse-id.pipe';
+import { CurrentUser } from '../../../auth/decorators/current-user.decorator';
+import { JwtPayload } from '../../../auth/interfaces/jwt-payload.interface';
+import { ProductStatusHistoryService } from '../services/product-status-history.service';
 import { AdminProductService } from '../services/admin-product.service';
 import { CreateProductDto } from '../dtos/create-product.dto';
 import { UpdateProductDto } from '../dtos/update-product.dto';
@@ -45,7 +48,10 @@ interface ProductUploadedFiles {
 @Roles(AuthUserType.ADMIN)
 @Controller({ path: 'api/admin/products', version: '1' })
 export class AdminProductController {
-  constructor(private readonly adminProductService: AdminProductService) {}
+  constructor(
+    private readonly adminProductService: AdminProductService,
+    private readonly historyService: ProductStatusHistoryService,
+  ) {}
 
   @Get()
   list(
@@ -62,17 +68,25 @@ export class AdminProductController {
 
   // JSON body; creates the product together with its SKUs.
   @Post()
-  create(@Body() dto: CreateProductDto) {
-    return this.adminProductService.create(dto);
+  async create(@Body() dto: CreateProductDto, @CurrentUser() user: JwtPayload) {
+    return this.adminProductService.create(
+      dto,
+      await this.historyService.adminActor(user),
+    );
   }
 
   // JSON body; updates product fields and updates/creates/removes SKUs.
   @Patch(':id')
-  update(
+  async update(
     @Param('id', ParseIdPipe) id: number,
     @Body() dto: UpdateProductDto,
+    @CurrentUser() user: JwtPayload,
   ) {
-    return this.adminProductService.update(id, dto);
+    return this.adminProductService.update(
+      id,
+      dto,
+      await this.historyService.adminActor(user),
+    );
   }
 
   // Multipart: thumbnailImage, removeThumbnail, mediaFiles[], removeMediaFilesIds.
