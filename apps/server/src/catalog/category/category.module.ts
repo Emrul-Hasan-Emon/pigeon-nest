@@ -5,5 +5,6 @@ import { AdminCategoryService } from './services/admin-category.service';
 @Module({
   controllers: [AdminCategoryController],
   providers: [AdminCategoryService],
+  exports: [AdminCategoryService],
 })
 export class CategoryModule {}

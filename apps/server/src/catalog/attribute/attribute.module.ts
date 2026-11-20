@@ -6,5 +6,6 @@ import { AdminAttributeService } from './services/admin-attribute.service';
 @Module({
   controllers: [AdminAttributeController, AdminAttributeValueController],
   providers: [AdminAttributeService],
+  exports: [AdminAttributeService],
 })
 export class AttributeModule {}
