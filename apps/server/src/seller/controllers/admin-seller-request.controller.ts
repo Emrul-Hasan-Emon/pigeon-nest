@@ -13,6 +13,8 @@ import { AuthGuard } from '../../auth/guards/auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Roles } from '../../auth/decorators/roles.decorator';
 import { AuthUserType } from '../../database/enums/auth-user-type.enum';
+import { CurrentUser } from '../../auth/decorators/current-user.decorator';
+import { JwtPayload } from '../../auth/interfaces/jwt-payload.interface';
 import {
   CursorPaginationParams,
   CursorPagination,
@@ -40,13 +42,20 @@ export class AdminSellerRequestController {
 
   @Post(':id/approve')
   @HttpCode(HttpStatus.OK)
-  approve(@Param('id', ParseIdPipe) id: number) {
-    return this.adminSellerRequestService.approve(id);
+  approve(
+    @Param('id', ParseIdPipe) id: number,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.adminSellerRequestService.approve(id, user);
   }
 
   @Post(':id/reject')
   @HttpCode(HttpStatus.OK)
-  reject(@Param('id', ParseIdPipe) id: number, @Body() dto: RejectSellerDto) {
-    return this.adminSellerRequestService.reject(id, dto.reason);
+  reject(
+    @Param('id', ParseIdPipe) id: number,
+    @Body() dto: RejectSellerDto,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.adminSellerRequestService.reject(id, dto.reason, user);
   }
 }

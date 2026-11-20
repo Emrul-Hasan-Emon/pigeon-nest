@@ -16,6 +16,8 @@ import { AuthGuard } from '../../auth/guards/auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Roles } from '../../auth/decorators/roles.decorator';
 import { AuthUserType } from '../../database/enums/auth-user-type.enum';
+import { CurrentUser } from '../../auth/decorators/current-user.decorator';
+import { JwtPayload } from '../../auth/interfaces/jwt-payload.interface';
 import {
   CursorPaginationParams,
   CursorPagination,
@@ -58,12 +60,20 @@ export class AdminSellerController {
 
   @Post()
   @UseInterceptors(SELLER_FILE_FIELDS)
-  create(@Body() dto: CreateSellerDto, @UploadedFiles() files?: SellerFiles) {
-    return this.adminSellerService.create(dto, {
-      avatar: files?.avatar?.[0],
-      nidFrontImage: files?.nidFrontImage?.[0],
-      nidBackImage: files?.nidBackImage?.[0],
-    });
+  create(
+    @Body() dto: CreateSellerDto,
+    @CurrentUser() user: JwtPayload,
+    @UploadedFiles() files?: SellerFiles,
+  ) {
+    return this.adminSellerService.create(
+      dto,
+      {
+        avatar: files?.avatar?.[0],
+        nidFrontImage: files?.nidFrontImage?.[0],
+        nidBackImage: files?.nidBackImage?.[0],
+      },
+      user,
+    );
   }
 
   @Patch(':id')
@@ -71,12 +81,18 @@ export class AdminSellerController {
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateSellerDto,
+    @CurrentUser() user: JwtPayload,
     @UploadedFiles() files?: SellerFiles,
   ) {
-    return this.adminSellerService.update(id, dto, {
-      avatar: files?.avatar?.[0],
-      nidFrontImage: files?.nidFrontImage?.[0],
-      nidBackImage: files?.nidBackImage?.[0],
-    });
+    return this.adminSellerService.update(
+      id,
+      dto,
+      {
+        avatar: files?.avatar?.[0],
+        nidFrontImage: files?.nidFrontImage?.[0],
+        nidBackImage: files?.nidBackImage?.[0],
+      },
+      user,
+    );
   }
 }
