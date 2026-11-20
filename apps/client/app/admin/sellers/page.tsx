@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
+import { ReasonModal } from '@/components/admin/sellers/reason-modal';
 import { SellerTable } from '@/components/admin/sellers/seller-table';
 import { useToast } from '@/components/ui/toast';
 import { useDebouncedValue } from '@/lib/hooks/use-debounced-value';
@@ -26,6 +27,7 @@ export default function AdminSellersPage() {
   const [nextCursor, setNextCursor] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [suspending, setSuspending] = useState<Seller | null>(null);
 
   const fetchFirstPage = useCallback(async () => {
     setLoading(true);
@@ -78,9 +80,22 @@ export default function AdminSellersPage() {
     setSellers((current) => current.filter((row) => row.id !== id));
   }
 
-  async function handleChangeActive(seller: Seller, activeStatus: SellerActiveStatus) {
+  // Suspending needs a note, so it goes through the reason prompt first.
+  function handleChangeActive(seller: Seller, activeStatus: SellerActiveStatus) {
+    if (activeStatus === 'suspended' && seller.activeStatus !== 'suspended') {
+      setSuspending(seller);
+      return;
+    }
+    applyActiveStatus(seller, activeStatus);
+  }
+
+  async function applyActiveStatus(
+    seller: Seller,
+    activeStatus: SellerActiveStatus,
+    reason?: string,
+  ) {
     try {
-      const updated = await updateSeller(seller.id, { activeStatus });
+      const updated = await updateSeller(seller.id, { activeStatus, reason });
       replaceRow(updated);
     } catch (error) {
       if (error instanceof NotFoundApiError) {
@@ -149,6 +164,20 @@ export default function AdminSellersPage() {
         <p className="py-10 text-center text-muted-foreground">Loading…</p>
       ) : (
         <SellerTable sellers={sellers} onChangeActive={handleChangeActive} />
+      )}
+
+      {suspending && (
+        <ReasonModal
+          title={`Suspend ${suspending.name}?`}
+          label="Reason (required, saved in the status history)"
+          confirmLabel="Suspend"
+          onConfirm={async (reason) => {
+            const seller = suspending;
+            setSuspending(null);
+            await applyActiveStatus(seller, 'suspended', reason);
+          }}
+          onClose={() => setSuspending(null)}
+        />
       )}
 
       {!loading && nextCursor !== null && (
