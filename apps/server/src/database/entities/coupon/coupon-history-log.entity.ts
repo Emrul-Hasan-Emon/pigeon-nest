@@ -3,7 +3,6 @@ import { BaseEntity } from '../base.entity';
 import { Coupon } from './coupon.entity';
 import { User } from '../person/user.entity';
 import { Order } from '../order/order.entity';
-import { decimalTransformer } from '../../utils/decimal.transformer';
 
 @Entity()
 export class CouponHistoryLog extends BaseEntity {
@@ -35,18 +34,12 @@ export class CouponHistoryLog extends BaseEntity {
   couponCode: string;
 
   @Column({
-    type: 'decimal',
-    precision: 12,
-    scale: 2,
-    transformer: decimalTransformer,
+    type: 'double precision',
   })
   discountAmount: number;
 
   @Column({
-    type: 'decimal',
-    precision: 12,
-    scale: 2,
-    transformer: decimalTransformer,
+    type: 'double precision',
   })
   orderTotal: number;
 }

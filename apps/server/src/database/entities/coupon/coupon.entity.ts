@@ -2,7 +2,6 @@ import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 import { BaseEntity } from '../base.entity';
 import { Seller } from '../seller/seller.entity';
 import { CouponType } from '../../enums/coupon-type.enum';
-import { decimalTransformer } from '../../utils/decimal.transformer';
 
 @Entity()
 export class Coupon extends BaseEntity {
@@ -21,28 +20,19 @@ export class Coupon extends BaseEntity {
   type: CouponType;
 
   @Column({
-    type: 'decimal',
-    precision: 12,
-    scale: 2,
-    transformer: decimalTransformer,
+    type: 'double precision',
   })
   amount: number;
 
   @Column({
-    type: 'decimal',
-    precision: 12,
-    scale: 2,
+    type: 'double precision',
     default: 0,
-    transformer: decimalTransformer,
   })
   minOrderAmount: number;
 
   @Column({
-    type: 'decimal',
-    precision: 12,
-    scale: 2,
+    type: 'double precision',
     nullable: true,
-    transformer: decimalTransformer,
   })
   maxDiscountAmount: number | null;
 
