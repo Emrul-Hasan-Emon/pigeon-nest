@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
   PayloadTooLargeException,
@@ -24,6 +25,12 @@ import { SellerProductMedia } from '../../../database/entities/product-media/sel
 import { Seller } from '../../../database/entities/seller/seller.entity';
 import { SellerStatus } from '../../../database/enums/seller-status.enum';
 import { SellerActiveStatus } from '../../../database/enums/seller-active-status.enum';
+import { ProductStatus } from '../../../database/enums/product-status.enum';
+import { ProductActiveStatus } from '../../../database/enums/product-active-status.enum';
+import { ProductStatusChangeAction } from '../../../database/enums/product-status-change-action.enum';
+import { AuthUserType } from '../../../database/enums/auth-user-type.enum';
+import { Actor } from '../../../shared/types/actor.type';
+import { ProductStatusHistoryService } from './product-status-history.service';
 import { MediaType } from '../../../database/enums/media-type.enum';
 import { CreateProductDto } from '../dtos/create-product.dto';
 import { UpdateProductDto } from '../dtos/update-product.dto';
@@ -47,6 +54,12 @@ export interface ProductMediaFiles {
   mediaFiles?: Express.Multer.File[];
 }
 
+// Set when the caller is a seller: limits every call to that seller's own
+// products and applies the status locks.
+export interface SellerScope {
+  sellerId: number;
+}
+
 interface SkuChangePlan {
   removeIds: number[];
   updates: Array<{ existing: SellerProductSku; dto: UpdateProductSkuDto }>;
@@ -58,10 +71,15 @@ export class AdminProductService {
   constructor(
     private readonly databaseService: DatabaseService,
     private readonly fileUploadService: FileUploadService,
+    private readonly historyService: ProductStatusHistoryService,
     @InjectDataSource() private readonly dataSource: DataSource,
   ) {}
 
-  async list(query: ListProductQueryDto, pagination: CursorPagination) {
+  async list(
+    query: ListProductQueryDto,
+    pagination: CursorPagination,
+    scope?: SellerScope,
+  ) {
     const qb = this.databaseService.sellerProduct
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.seller', 'seller')
@@ -81,8 +99,9 @@ export class AdminProductService {
         { sellerSearch: likeContains(query.sellerSearch) },
       );
     }
-    if (query.sellerId !== undefined) {
-      qb.andWhere('product.sellerId = :sellerId', { sellerId: query.sellerId });
+    const sellerId = scope ? scope.sellerId : query.sellerId;
+    if (sellerId !== undefined) {
+      qb.andWhere('product.sellerId = :sellerId', { sellerId });
     }
     if (query.categoryId !== undefined) {
       qb.andWhere('product.categoryId = :categoryId', {
@@ -94,18 +113,18 @@ export class AdminProductService {
         collectionId: query.collectionId,
       });
     }
-    if (query.isPublished !== undefined) {
-      qb.andWhere('product.isPublished = :isPublished', {
-        isPublished: query.isPublished,
+    if (query.status !== undefined) {
+      qb.andWhere('product.status = :status', { status: query.status });
+    }
+    if (query.activeStatus !== undefined) {
+      qb.andWhere('product.activeStatus = :activeStatus', {
+        activeStatus: query.activeStatus,
       });
     }
     if (query.isFeatured !== undefined) {
       qb.andWhere('product.isFeatured = :isFeatured', {
         isFeatured: query.isFeatured,
       });
-    }
-    if (query.isActive !== undefined) {
-      qb.andWhere('product.isActive = :isActive', { isActive: query.isActive });
     }
     if (pagination.cursor > 0) {
       qb.andWhere('product.id < :cursor', { cursor: pagination.cursor });
@@ -119,11 +138,35 @@ export class AdminProductService {
     };
   }
 
-  async details(id: number) {
-    return this.toResponse(await this.findOrThrow(id));
+  async details(id: number, scope?: SellerScope) {
+    return this.toResponse(await this.findOrThrow(id, scope));
   }
 
-  async create(dto: CreateProductDto) {
+  async create(dto: CreateProductDto, actor: Actor) {
+    const isSeller = actor.type === AuthUserType.SELLER;
+    const status = isSeller
+      ? ProductStatus.APPROVED
+      : (dto.status ?? ProductStatus.APPROVED);
+    const activeStatus = dto.activeStatus ?? ProductActiveStatus.ACTIVE;
+    if (
+      isSeller &&
+      (dto.status !== undefined ||
+        activeStatus === ProductActiveStatus.SUSPENDED)
+    ) {
+      throw new ForbiddenException(
+        'Only an admin can set status or suspend a product',
+      );
+    }
+    if (
+      (status === ProductStatus.REJECTED ||
+        activeStatus === ProductActiveStatus.SUSPENDED) &&
+      !dto.reason
+    ) {
+      throw new BadRequestException(
+        'A reason is required when rejecting or suspending a product',
+      );
+    }
+
     await this.assertSellerIsEligible(dto.sellerId);
     await this.assertCategoryExists(dto.categoryId);
     if (dto.collectionId != null) {
@@ -161,8 +204,12 @@ export class AdminProductService {
           slug,
           description: dto.description,
           isFeatured: dto.isFeatured ?? false,
-          isPublished: dto.isPublished ?? true,
-          isActive: dto.isActive ?? true,
+          status,
+          activeStatus,
+          rejectionReason:
+            status === ProductStatus.REJECTED ? dto.reason : null,
+          suspensionReason:
+            activeStatus === ProductActiveStatus.SUSPENDED ? dto.reason : null,
           seoTitle: dto.seoTitle,
           seoDescription: dto.seoDescription,
         }),
@@ -171,18 +218,33 @@ export class AdminProductService {
       for (const [index, sku] of dto.skus.entries()) {
         await this.insertSku(manager, product.id, sku, index === defaultIndex);
       }
+      await this.historyService.record(manager, {
+        sellerProductId: product.id,
+        fromStatus: null,
+        fromActiveStatus: null,
+        toStatus: status,
+        toActiveStatus: activeStatus,
+        action: isSeller
+          ? ProductStatusChangeAction.SELLER_CREATED
+          : ProductStatusChangeAction.ADMIN_CREATED,
+        reason: dto.reason,
+        actor,
+      });
       return product.id;
     });
 
     return this.details(productId);
   }
 
-  async update(id: number, dto: UpdateProductDto) {
-    const product = await this.databaseService.sellerProduct.findOne({
-      where: { id },
-    });
-    if (!product) {
-      throw new NotFoundException('Product not found');
+  async update(
+    id: number,
+    dto: UpdateProductDto,
+    actor: Actor,
+    scope?: SellerScope,
+  ) {
+    const product = await this.loadScoped(id, scope);
+    if (scope) {
+      this.assertSellerCanTouch(product);
     }
 
     const patch: Record<string, unknown> = {};
@@ -204,8 +266,6 @@ export class AdminProductService {
     }
     if (dto.description !== undefined) patch.description = dto.description;
     if (dto.isFeatured !== undefined) patch.isFeatured = dto.isFeatured;
-    if (dto.isPublished !== undefined) patch.isPublished = dto.isPublished;
-    if (dto.isActive !== undefined) patch.isActive = dto.isActive;
     if (dto.seoTitle !== undefined) patch.seoTitle = dto.seoTitle;
     if (dto.seoDescription !== undefined) {
       patch.seoDescription = dto.seoDescription;
@@ -217,25 +277,63 @@ export class AdminProductService {
         : null;
 
     await this.runTransaction(async (manager) => {
+      // Lock the row so a concurrent admin decision (reject / suspend) cannot
+      // slip in between the seller's permission check and the write.
+      const locked = await manager.findOne(SellerProduct, {
+        where: { id },
+        lock: { mode: 'pessimistic_write' },
+      });
+      if (!locked) {
+        throw new NotFoundException('Product not found');
+      }
+      if (scope) {
+        this.assertSellerCanTouch(locked);
+      }
+      const change = this.resolveStatusChange(locked, dto, actor);
+      Object.assign(patch, change?.patch);
+
       if (Object.keys(patch).length > 0) {
         await manager.update(SellerProduct, id, patch);
       }
       if (plan) {
         await this.applySkuChanges(manager, id, plan);
       }
+      if (change) {
+        await this.historyService.record(manager, {
+          sellerProductId: id,
+          fromStatus: locked.status,
+          fromActiveStatus: locked.activeStatus,
+          toStatus: change.toStatus,
+          toActiveStatus: change.toActiveStatus,
+          action:
+            actor.type === AuthUserType.SELLER
+              ? ProductStatusChangeAction.SELLER_UPDATED
+              : ProductStatusChangeAction.ADMIN_UPDATED,
+          reason: dto.reason,
+          actor,
+        });
+      }
     });
 
-    return this.details(id);
+    return this.details(id, scope);
   }
 
-  async remove(id: number) {
-    const product = await this.databaseService.sellerProduct.findOne({
-      where: { id },
-    });
-    if (!product) {
-      throw new NotFoundException('Product not found');
+  async remove(id: number, scope?: SellerScope) {
+    const product = await this.loadScoped(id, scope);
+    if (scope) {
+      this.assertSellerCanTouch(product);
     }
     await this.dataSource.transaction(async (manager) => {
+      if (scope) {
+        const locked = await manager.findOne(SellerProduct, {
+          where: { id },
+          lock: { mode: 'pessimistic_write' },
+        });
+        if (!locked) {
+          throw new NotFoundException('Product not found');
+        }
+        this.assertSellerCanTouch(locked);
+      }
       // Free the slug so the seller can reuse the name; the DB unique
       // constraint on (sellerId, slug) also covers soft-deleted rows.
       await manager.update(SellerProduct, id, {
@@ -252,12 +350,11 @@ export class AdminProductService {
     id: number,
     dto: UpdateProductMediaFilesDto,
     files: ProductMediaFiles,
+    scope?: SellerScope,
   ) {
-    const product = await this.databaseService.sellerProduct.findOne({
-      where: { id },
-    });
-    if (!product) {
-      throw new NotFoundException('Product not found');
+    const product = await this.loadScoped(id, scope);
+    if (scope) {
+      this.assertSellerCanTouch(product);
     }
 
     const newThumbnail = files.thumbnailImage;
@@ -335,6 +432,16 @@ export class AdminProductService {
       let sortOrder = (maxRow?.max ?? -1) + 1;
 
       await this.runTransaction(async (manager) => {
+        if (scope) {
+          const locked = await manager.findOne(SellerProduct, {
+            where: { id },
+            lock: { mode: 'pessimistic_write' },
+          });
+          if (!locked) {
+            throw new NotFoundException('Product not found');
+          }
+          this.assertSellerCanTouch(locked);
+        }
         if (thumbnail) {
           await manager.update(SellerProduct, id, {
             thumbnailUrl: thumbnail.fileUrl,
@@ -376,7 +483,7 @@ export class AdminProductService {
       throw error;
     }
 
-    return this.details(id);
+    return this.details(id, scope);
   }
 
   // ---- SKU helpers ----
@@ -387,8 +494,12 @@ export class AdminProductService {
     dto: CreateProductSkuDto,
     isDefault: boolean,
   ) {
-    const { variants, discountedPriceStartDate, discountedPriceEndDate, ...rest } =
-      dto;
+    const {
+      variants,
+      discountedPriceStartDate,
+      discountedPriceEndDate,
+      ...rest
+    } = dto;
     const saved = await manager.save(
       manager.create(SellerProductSku, {
         ...rest,
@@ -481,9 +592,7 @@ export class AdminProductService {
           throw new BadRequestException('price is required for a new SKU');
         }
         if (!item.variants || item.variants.length === 0) {
-          throw new BadRequestException(
-            'variants are required for a new SKU',
-          );
+          throw new BadRequestException('variants are required for a new SKU');
         }
         await this.assertVariantsAreValid(item.variants);
         this.assertDiscountIsValid(
@@ -667,9 +776,12 @@ export class AdminProductService {
     };
   }
 
-  private async findOrThrow(id: number): Promise<SellerProduct> {
+  private async findOrThrow(
+    id: number,
+    scope?: SellerScope,
+  ): Promise<SellerProduct> {
     const product = await this.databaseService.sellerProduct.findOne({
-      where: { id },
+      where: { id, ...(scope ? { sellerId: scope.sellerId } : {}) },
       relations: {
         seller: true,
         category: true,
@@ -682,6 +794,105 @@ export class AdminProductService {
       throw new NotFoundException('Product not found');
     }
     return product;
+  }
+
+  // A seller only ever finds their own products; anything else is a 404.
+  private async loadScoped(
+    id: number,
+    scope?: SellerScope,
+  ): Promise<SellerProduct> {
+    const product = await this.databaseService.sellerProduct.findOne({
+      where: { id, ...(scope ? { sellerId: scope.sellerId } : {}) },
+    });
+    if (!product) {
+      throw new NotFoundException('Product not found');
+    }
+    return product;
+  }
+
+  // Rejected and suspended products are frozen for the seller.
+  private assertSellerCanTouch(
+    product: Pick<
+      SellerProduct,
+      'status' | 'activeStatus' | 'rejectionReason' | 'suspensionReason'
+    >,
+  ) {
+    if (product.status === ProductStatus.REJECTED) {
+      throw new ForbiddenException({
+        statusCode: 403,
+        error: 'Forbidden',
+        code: 'PRODUCT_REJECTED',
+        message: `This product was rejected by an admin, so you cannot change it.${
+          product.rejectionReason ? ` Reason: ${product.rejectionReason}` : ''
+        }`,
+      });
+    }
+    if (product.activeStatus === ProductActiveStatus.SUSPENDED) {
+      throw new ForbiddenException({
+        statusCode: 403,
+        error: 'Forbidden',
+        code: 'PRODUCT_SUSPENDED',
+        message: `This product was suspended by an admin, so you cannot change it.${
+          product.suspensionReason ? ` Reason: ${product.suspensionReason}` : ''
+        }`,
+      });
+    }
+  }
+
+  // Works out whether this edit moves status / activeStatus. Returns null when
+  // nothing changes (no history row, no patch).
+  private resolveStatusChange(
+    current: SellerProduct,
+    dto: UpdateProductDto,
+    actor: Actor,
+  ) {
+    const isSeller = actor.type === AuthUserType.SELLER;
+    if (
+      isSeller &&
+      (dto.status !== undefined ||
+        dto.activeStatus === ProductActiveStatus.SUSPENDED)
+    ) {
+      throw new ForbiddenException(
+        'Only an admin can change status or suspend a product',
+      );
+    }
+
+    const toStatus = dto.status ?? current.status;
+    const toActiveStatus = dto.activeStatus ?? current.activeStatus;
+    if (
+      toStatus === current.status &&
+      toActiveStatus === current.activeStatus
+    ) {
+      return null;
+    }
+
+    const newlyRejected =
+      toStatus === ProductStatus.REJECTED &&
+      current.status !== ProductStatus.REJECTED;
+    const newlySuspended =
+      toActiveStatus === ProductActiveStatus.SUSPENDED &&
+      current.activeStatus !== ProductActiveStatus.SUSPENDED;
+    if ((newlyRejected || newlySuspended) && !dto.reason) {
+      throw new BadRequestException(
+        'A reason is required when rejecting or suspending a product',
+      );
+    }
+
+    const patch: Record<string, unknown> = {
+      status: toStatus,
+      activeStatus: toActiveStatus,
+    };
+    if (toStatus !== ProductStatus.REJECTED) {
+      patch.rejectionReason = null;
+    } else if (newlyRejected) {
+      patch.rejectionReason = dto.reason;
+    }
+    if (toActiveStatus !== ProductActiveStatus.SUSPENDED) {
+      patch.suspensionReason = null;
+    } else if (newlySuspended) {
+      patch.suspensionReason = dto.reason;
+    }
+    return { patch, toStatus, toActiveStatus };
   }
 
   private async assertSellerIsEligible(sellerId: number) {
