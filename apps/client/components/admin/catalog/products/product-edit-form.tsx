@@ -1,10 +1,8 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { updateProduct, type UpdateProductPayload } from '@/lib/api/products';
-import { getCategoryTree } from '@/lib/api/categories';
-import { listCollections } from '@/lib/api/collections';
-import { listAttributes } from '@/lib/api/attributes';
+import type { UpdateProductPayload } from '@/lib/api/products';
+import { adminProductPortal, type ProductPortal } from '@/lib/products/portal';
 import { flattenCategoryTree } from '@/lib/category-tree';
 import { ApiError } from '@/lib/api/http';
 import { useToast } from '@/components/ui/toast';
@@ -15,7 +13,7 @@ import {
   validateSkuDrafts,
   type SkuDraft,
 } from './product-sku-editor';
-import type { Product } from '@/types/product';
+import type { Product, ProductActiveStatus, ProductStatus } from '@/types/product';
 import type { CategoryTreeNode } from '@/types/category';
 import type { Collection } from '@/types/collection';
 import type { Attribute } from '@/types/attribute';
@@ -26,8 +24,9 @@ interface FormState {
   name: string;
   description: string;
   isFeatured: boolean;
-  isPublished: boolean;
-  isActive: boolean;
+  status: ProductStatus;
+  activeStatus: ProductActiveStatus;
+  reason: string;
   seoTitle: string;
   seoDescription: string;
 }
@@ -39,8 +38,9 @@ function toFormState(product: Product): FormState {
     name: product.name,
     description: product.description ?? '',
     isFeatured: product.isFeatured,
-    isPublished: product.isPublished,
-    isActive: product.isActive,
+    status: product.status,
+    activeStatus: product.activeStatus,
+    reason: '',
     seoTitle: product.seoTitle ?? '',
     seoDescription: product.seoDescription ?? '',
   };
@@ -49,7 +49,16 @@ function toFormState(product: Product): FormState {
 const fieldClass =
   'mt-1 w-full rounded-md border border-input px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none';
 
-export function ProductEditForm({ product }: { product: Product }) {
+export function ProductEditForm({
+  product,
+  portal = adminProductPortal,
+  onSaved,
+}: {
+  product: Product;
+  portal?: ProductPortal;
+  onSaved?: (product: Product) => void;
+}) {
+  const isAdmin = portal.kind === 'admin';
   const { showToast } = useToast();
 
   const [current, setCurrent] = useState(product);
@@ -66,18 +75,25 @@ export function ProductEditForm({ product }: { product: Product }) {
   const [submitting, setSubmitting] = useState(false);
 
   const categoryOptions = useMemo(() => flattenCategoryTree(tree), [tree]);
+  const statusChanged = form.status !== initial.status || form.activeStatus !== initial.activeStatus;
+  const needsReason =
+    (form.status === 'rejected' && initial.status !== 'rejected') ||
+    (form.activeStatus === 'suspended' && initial.activeStatus !== 'suspended');
 
   useEffect(() => {
-    getCategoryTree()
+    portal
+      .categoryTree()
       .then(setTree)
       .catch(() => showToast('Failed to load categories.', 'error'));
-    listCollections({ isActive: true, limit: 100 })
-      .then((response) => setCollections(response.results))
+    portal
+      .collections()
+      .then(setCollections)
       .catch(() => showToast('Failed to load collections.', 'error'));
-    listAttributes({ isActive: true, limit: 100 })
-      .then((response) => setAttributes(response.results))
+    portal
+      .attributes()
+      .then(setAttributes)
       .catch(() => showToast('Failed to load attributes.', 'error'));
-  }, [showToast]);
+  }, [portal, showToast]);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -87,6 +103,9 @@ export function ProductEditForm({ product }: { product: Product }) {
     if (!form.name.trim()) return setNameError('Name is required.');
     const skuError = validateSkuDrafts(skus);
     if (skuError) return setGeneralError(skuError);
+    if (isAdmin && needsReason && !form.reason.trim()) {
+      return setGeneralError('A reason is required when rejecting or suspending a product.');
+    }
 
     const payload: UpdateProductPayload = {};
     if (form.name !== initial.name) payload.name = form.name;
@@ -95,9 +114,12 @@ export function ProductEditForm({ product }: { product: Product }) {
     if (form.collectionId !== initial.collectionId) {
       payload.collectionId = form.collectionId ? Number(form.collectionId) : null;
     }
-    if (form.isFeatured !== initial.isFeatured) payload.isFeatured = form.isFeatured;
-    if (form.isPublished !== initial.isPublished) payload.isPublished = form.isPublished;
-    if (form.isActive !== initial.isActive) payload.isActive = form.isActive;
+    if (isAdmin && form.isFeatured !== initial.isFeatured) payload.isFeatured = form.isFeatured;
+    if (isAdmin && form.status !== initial.status) payload.status = form.status;
+    if (form.activeStatus !== initial.activeStatus) payload.activeStatus = form.activeStatus;
+    if (isAdmin && (payload.status || payload.activeStatus) && form.reason.trim()) {
+      payload.reason = form.reason.trim();
+    }
     if (form.seoTitle !== initial.seoTitle) payload.seoTitle = form.seoTitle;
     if (form.seoDescription !== initial.seoDescription) payload.seoDescription = form.seoDescription;
 
@@ -107,8 +129,9 @@ export function ProductEditForm({ product }: { product: Product }) {
 
     setSubmitting(true);
     try {
-      const updated = await updateProduct(current.id, payload);
+      const updated = await portal.update(current.id, payload);
       setCurrent(updated);
+      onSaved?.(updated);
       setForm(toFormState(updated));
       setSkus((updated.skus ?? []).map(skuToDraft));
       showToast('Product updated.', 'success');
@@ -187,30 +210,65 @@ export function ProductEditForm({ product }: { product: Product }) {
             />
           </label>
 
-          <label className="flex items-center gap-2 text-sm text-foreground">
-            <input
-              type="checkbox"
-              checked={form.isFeatured}
-              onChange={(event) => setForm((f) => ({ ...f, isFeatured: event.target.checked }))}
-            />
-            Featured
+          {isAdmin && (
+            <label className="flex items-center gap-2 text-sm text-foreground">
+              <input
+                type="checkbox"
+                checked={form.isFeatured}
+                onChange={(event) => setForm((f) => ({ ...f, isFeatured: event.target.checked }))}
+              />
+              Featured
+            </label>
+          )}
+          {isAdmin && (
+            <label className="text-sm text-foreground">
+              Review status
+              <select
+                className={fieldClass}
+                value={form.status}
+                onChange={(event) =>
+                  setForm((f) => ({ ...f, status: event.target.value as ProductStatus }))
+                }
+              >
+                <option value="approved">Approved</option>
+                <option value="pending">Pending</option>
+                <option value="rejected">Rejected</option>
+              </select>
+            </label>
+          )}
+          <label className="text-sm text-foreground">
+            Activity
+            <select
+              className={fieldClass}
+              value={form.activeStatus}
+              onChange={(event) =>
+                setForm((f) => ({ ...f, activeStatus: event.target.value as ProductActiveStatus }))
+              }
+            >
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+              {(isAdmin || form.activeStatus === 'suspended') && (
+                <option value="suspended" disabled={!isAdmin}>
+                  Suspended
+                </option>
+              )}
+            </select>
           </label>
-          <label className="flex items-center gap-2 text-sm text-foreground">
-            <input
-              type="checkbox"
-              checked={form.isPublished}
-              onChange={(event) => setForm((f) => ({ ...f, isPublished: event.target.checked }))}
-            />
-            Published
-          </label>
-          <label className="flex items-center gap-2 text-sm text-foreground">
-            <input
-              type="checkbox"
-              checked={form.isActive}
-              onChange={(event) => setForm((f) => ({ ...f, isActive: event.target.checked }))}
-            />
-            Active
-          </label>
+          {isAdmin && statusChanged && (
+            <label className="text-sm text-foreground md:col-span-2">
+              Reason {needsReason ? '(required for reject / suspend)' : '(optional)'}
+              <textarea
+                className={fieldClass}
+                rows={2}
+                maxLength={1000}
+                value={form.reason}
+                onChange={(event) => setForm((f) => ({ ...f, reason: event.target.value }))}
+              />
+              <span className="mt-1 block text-xs text-muted-foreground">
+                Saved in the status history and shown to the seller.
+              </span>
+            </label>
+          )}
 
           <label className="text-sm text-foreground">
             SEO title
