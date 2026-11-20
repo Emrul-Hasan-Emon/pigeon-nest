@@ -1,3 +1,12 @@
+export type ProductStatus = 'approved' | 'pending' | 'rejected';
+export type ProductActiveStatus = 'active' | 'inactive' | 'suspended';
+export type ProductStatusChangeAction =
+  | 'baseline'
+  | 'admin_created'
+  | 'seller_created'
+  | 'admin_updated'
+  | 'seller_updated';
+
 export interface ProductSeller {
   id: number;
   name: string;
@@ -72,8 +81,11 @@ export interface Product {
   thumbnailUrl: string | null;
   thumbnailPath: string | null;
   isFeatured: boolean;
-  isPublished: boolean;
-  isActive: boolean;
+  /** Visible on the storefront only when approved AND active. */
+  status: ProductStatus;
+  activeStatus: ProductActiveStatus;
+  rejectionReason: string | null;
+  suspensionReason: string | null;
   seoTitle: string | null;
   seoDescription: string | null;
   media?: ProductMedia[];
@@ -93,9 +105,49 @@ export interface ProductListParams {
   sellerSearch?: string;
   categoryId?: number;
   collectionId?: number;
-  isPublished?: boolean;
+  status?: ProductStatus;
+  activeStatus?: ProductActiveStatus;
   isFeatured?: boolean;
-  isActive?: boolean;
   cursor?: number;
   limit?: number;
+}
+
+export interface SellerProductListParams {
+  search?: string;
+  categoryId?: number;
+  collectionId?: number;
+  status?: ProductStatus;
+  activeStatus?: ProductActiveStatus;
+  cursor?: number;
+  limit?: number;
+}
+
+export interface ProductStatusHistoryEntry {
+  id: number;
+  sellerProductId: number;
+  product?: { id: number; name: string; sellerId: number; seller?: { id: number; name: string } };
+  fromStatus: ProductStatus | null;
+  toStatus: ProductStatus;
+  fromActiveStatus: ProductActiveStatus | null;
+  toActiveStatus: ProductActiveStatus;
+  action: ProductStatusChangeAction;
+  reason: string | null;
+  creatorName: string | null;
+  creatorType: 'admin' | 'seller' | 'user' | null;
+  createdAt: string;
+}
+
+export interface ProductStatusHistoryParams {
+  search?: string;
+  productId?: number;
+  action?: ProductStatusChangeAction;
+  toStatus?: ProductStatus;
+  toActiveStatus?: ProductActiveStatus;
+  cursor?: number;
+  limit?: number;
+}
+
+export interface ProductStatusHistoryResponse {
+  results: ProductStatusHistoryEntry[];
+  nextCursor: number | null;
 }
