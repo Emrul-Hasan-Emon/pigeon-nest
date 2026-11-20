@@ -1,18 +1,22 @@
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 import { BaseEntity } from '../base.entity';
 import { User } from './user.entity';
-import { Division } from '../zone/division.entity';
-import { District } from '../zone/district.entity';
 import { AddressType } from '../../enums/address-type.enum';
 
+// A customer's saved delivery address. Orders copy the address they were placed
+// with, so editing or deleting one never changes an order.
 @Entity()
+@Index('UQ_address_default_per_user', ['userId'], {
+  unique: true,
+  where: '"isDefault" = true AND "deletedAt" IS NULL',
+})
 export class Address extends BaseEntity {
-  @Index()
+  @Index('IDX_address_userId')
   @Column()
   userId: number;
 
   @ManyToOne(() => User, (user) => user.addresses, { onDelete: 'CASCADE' })
-  @JoinColumn()
+  @JoinColumn({ name: 'userId', foreignKeyConstraintName: 'FK_address_userId' })
   user: User;
 
   @Column({ type: 'varchar', default: AddressType.SHIPPING })
@@ -21,31 +25,28 @@ export class Address extends BaseEntity {
   @Column({ type: 'varchar', length: 255 })
   recipientName: string;
 
-  @Column()
+  @Column({ type: 'varchar', length: 20 })
   phone: string;
 
+  // ISO 3166-1 alpha-2, e.g. BD
+  @Column({ type: 'varchar', length: 2 })
+  countryCode: string;
+
+  // State, province or division.
+  @Column({ type: 'varchar', length: 120, nullable: true })
+  state: string | null;
+
+  // City or district.
+  @Column({ type: 'varchar', length: 120 })
+  city: string;
+
+  // The full address in words: house, road, area, landmarks.
   @Column({ type: 'text' })
   address: string;
 
-  @Index()
-  @Column({ type: 'int', nullable: true })
-  divisionId: number | null;
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  zipCode: string | null;
 
-  @ManyToOne(() => Division, { onDelete: 'SET NULL' })
-  @JoinColumn({ name: 'divisionId' })
-  division: Division;
-
-  @Index()
-  @Column({ type: 'int', nullable: true })
-  districtId: number | null;
-
-  @ManyToOne(() => District, { onDelete: 'SET NULL' })
-  @JoinColumn()
-  district: District;
-
-  @Column({ nullable: true })
-  zipCode: string;
-
-  @Column({ default: false })
+  @Column({ type: 'boolean', default: false })
   isDefault: boolean;
 }
