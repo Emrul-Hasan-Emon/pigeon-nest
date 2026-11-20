@@ -26,7 +26,7 @@ export default function SellerLoginPage() {
     try {
       const response = await sellerLogin(phone, password);
       setSellerToken(response.accessToken);
-      router.replace('/seller/profile');
+      router.replace('/seller/dashboard');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Login failed.');
     } finally {

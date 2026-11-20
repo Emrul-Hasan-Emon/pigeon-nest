@@ -64,7 +64,7 @@ export default function SellerRegisterPage() {
         nidBackImage: nidBack,
       });
       setSellerToken(response.accessToken);
-      router.replace('/seller/profile');
+      router.replace('/seller/dashboard');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Registration failed.');
     } finally {
