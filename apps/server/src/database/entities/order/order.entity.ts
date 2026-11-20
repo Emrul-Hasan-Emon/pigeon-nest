@@ -5,6 +5,7 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
+  Relation,
 } from 'typeorm';
 import { BaseEntity } from '../base.entity';
 import { User } from '../person/user.entity';
@@ -16,8 +17,8 @@ import { PaymentGateway } from '../payment/payment-gateway.entity';
 import { OrderStatus } from '../../enums/order-status.enum';
 import { DeliveryType } from '../../enums/delivery-type.enum';
 import { PaymentStatus } from '../../enums/payment-status.enum';
-import { decimalTransformer } from '../../utils/decimal.transformer';
 import { OrderItem } from './order-item.entity';
+import { Cart } from '../cart/cart.entity';
 import { OrderStatusHistory } from './order-status-history.entity';
 
 @Entity()
@@ -25,13 +26,30 @@ export class Order extends BaseEntity {
   @Column({ unique: true })
   orderNumber: string;
 
-  @Index()
-  @Column()
-  userId: number;
+  // The cart this order was checked out from (empty for orders staff create).
+  @Index('IDX_order_cartId')
+  @Column({ type: 'int', nullable: true })
+  cartId: number | null;
 
-  @ManyToOne(() => User, { onDelete: 'RESTRICT' })
+  @ManyToOne(() => Cart, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'cartId', foreignKeyConstraintName: 'FK_order_cartId' })
+  cart: Relation<Cart> | null;
+
+  // Empty for a guest order; the guest is then known by guestSessionId.
+  @Index()
+  @Column({ type: 'int', nullable: true })
+  userId: number | null;
+
+  @ManyToOne(() => User, { onDelete: 'RESTRICT', nullable: true })
   @JoinColumn({ name: 'userId' })
-  user: User;
+  user: User | null;
+
+  @Index('IDX_order_guestSessionId')
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  guestSessionId: string | null;
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  contactEmail: string | null;
 
   @Index()
   @Column()
@@ -52,48 +70,33 @@ export class Order extends BaseEntity {
   @Column({ type: 'int', nullable: true })
   couponId: number | null;
 
-  @Column({ nullable: true })
-  couponCode: string;
+  @Column({ type: 'varchar', nullable: true })
+  couponCode: string | null;
 
   @Column({
-    type: 'decimal',
-    precision: 12,
-    scale: 2,
-    transformer: decimalTransformer,
+    type: 'double precision',
   })
   total: number; // Summation of all order items totalPrice
 
   @Column({
-    type: 'decimal',
-    precision: 12,
-    scale: 2,
-    transformer: decimalTransformer,
+    type: 'double precision',
   })
   subtotal: number; // Summation of all order items totalDiscountedPrice
 
   @Column({
-    type: 'decimal',
-    precision: 12,
-    scale: 2,
+    type: 'double precision',
     default: 0,
-    transformer: decimalTransformer,
   })
   deliveryCharge: number;
 
   @Column({
-    type: 'decimal',
-    precision: 12,
-    scale: 2,
+    type: 'double precision',
     default: 0,
-    transformer: decimalTransformer,
   })
   discountAmount: number;
 
   @Column({
-    type: 'decimal',
-    precision: 12,
-    scale: 2,
-    transformer: decimalTransformer,
+    type: 'double precision',
   })
   payableAmount: number; // subtotal + deliveryCharge - discountAmount
 
@@ -105,15 +108,25 @@ export class Order extends BaseEntity {
   @JoinColumn()
   paymentGateway: PaymentGateway;
 
+  @Column({ type: 'varchar', length: 255 })
+  paymentGatewayName: string;
+
   @Column()
   paymentGatewaySlug: string;
 
   @Index()
-  @Column({ type: 'varchar', length: 255, default: PaymentStatus.PENDING })
+  @Column({ type: 'varchar', default: PaymentStatus.DUE })
   paymentStatus: PaymentStatus;
 
+  // What staff have recorded as received so far.
+  @Column({
+    type: 'double precision',
+    default: 0,
+  })
+  amountPaid: number;
+
   @Column({ type: 'text', nullable: true })
-  note: string;
+  note: string | null;
 
   @Column({ type: 'varchar', length: 255 })
   recipientName: string;
@@ -123,6 +136,26 @@ export class Order extends BaseEntity {
 
   @Column({ type: 'text' })
   deliveryAddress: string;
+
+  @Index('IDX_order_countryCode')
+  @Column({ type: 'varchar', length: 2 })
+  countryCode: string;
+
+  @Column({ type: 'varchar', length: 100 })
+  countryName: string;
+
+  @Column({ type: 'varchar', length: 120, nullable: true })
+  state: string | null;
+
+  @Column({ type: 'varchar', length: 120 })
+  city: string;
+
+  // Shipping as quoted when the order was placed.
+  @Column({ type: 'int', nullable: true })
+  deliveryEstimatedDays: number | null;
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  shippingZoneName: string | null;
 
   @Column({ type: 'int', nullable: true })
   divisionId: number | null;
@@ -145,8 +178,8 @@ export class Order extends BaseEntity {
   @JoinColumn({ name: 'areaId' })
   area: Area;
 
-  @Column({ nullable: true })
-  zipCode: string;
+  @Column({ type: 'varchar', nullable: true })
+  zipCode: string | null;
 
   @OneToMany(() => OrderItem, (item) => item.order)
   items: OrderItem[];

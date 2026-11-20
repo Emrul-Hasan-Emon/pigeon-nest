@@ -15,9 +15,14 @@ export class OrderStatusHistory extends BaseEntity {
   @JoinColumn()
   order: Order;
 
+  // Null for the first entry, when the order was placed.
+  @Column({ type: 'varchar', nullable: true })
+  fromStatus: OrderStatus | null;
+
+  // The status the order moved to. Who moved it is in the creator columns.
   @Column({ type: 'varchar' })
   status: OrderStatus;
 
   @Column({ type: 'text', nullable: true })
-  note: string;
+  note: string | null;
 }

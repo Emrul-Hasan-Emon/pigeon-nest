@@ -3,7 +3,6 @@ import { BaseEntity } from '../base.entity';
 import { Order } from './order.entity';
 import { SellerProduct } from '../product/seller-product.entity';
 import { SellerProductSku } from '../product/seller-product-sku.entity';
-import { decimalTransformer } from '../../utils/decimal.transformer';
 
 @Entity()
 export class OrderItem extends BaseEntity {
@@ -39,36 +38,24 @@ export class OrderItem extends BaseEntity {
   quantity: number;
 
   @Column({
-    type: 'decimal',
-    precision: 12,
-    scale: 2,
-    transformer: decimalTransformer,
+    type: 'double precision',
   })
   unitPrice: number;
 
   @Column({
-    type: 'decimal',
-    precision: 12,
-    scale: 2,
+    type: 'double precision',
     nullable: true,
-    transformer: decimalTransformer,
   })
   unitDiscountedPrice: number | null;
 
   @Column({
-    type: 'decimal',
-    precision: 12,
-    scale: 2,
-    transformer: decimalTransformer,
+    type: 'double precision',
   })
   totalPrice: number; // totalPrice = unitPrice * quantity
 
   @Column({
-    type: 'decimal',
-    precision: 12,
-    scale: 2,
+    type: 'double precision',
     nullable: true,
-    transformer: decimalTransformer,
   })
   totalDiscountedPrice: number | null; // totalDiscountedPrice = unitDiscountedPrice * quantity
 }
