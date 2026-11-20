@@ -1,84 +1,37 @@
-import { Transform, Type } from 'class-transformer';
+import { Transform } from 'class-transformer';
 import {
-  ArrayMaxSize,
-  IsArray,
   IsBoolean,
-  IsInt,
+  IsEnum,
   IsNotEmpty,
-  IsOptional,
   IsString,
-  Max,
   MaxLength,
-  Min,
-  ValidateNested,
 } from 'class-validator';
 import { IsDefinedWhenPresent } from '../../../shared/decorators/defined-when-present.decorator';
-import { MAX_INT32 } from '../../../shared/constants/limits';
 import { trimString } from '../../../shared/utils/transform.util';
-import { UpdateProductSkuDto } from './update-product-sku.dto';
+import { ProductStatus } from '../../../database/enums/product-status.enum';
+import { ProductActiveStatus } from '../../../database/enums/product-active-status.enum';
+import { UpdateProductBaseDto } from './update-seller-product-base.dto';
 
-// `null` is rejected everywhere except `collectionId` (null detaches it).
-export class UpdateProductDto {
-  @IsDefinedWhenPresent()
-  @IsInt()
-  @Min(1)
-  @Max(MAX_INT32)
-  categoryId?: number;
-
-  @IsOptional()
-  @IsInt()
-  @Min(1)
-  @Max(MAX_INT32)
-  collectionId?: number | null;
-
-  @IsDefinedWhenPresent()
-  @Transform(trimString)
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(400)
-  name?: string;
-
-  @IsDefinedWhenPresent()
-  @IsString()
-  @MaxLength(20000)
-  description?: string;
-
+// Admin edit.
+export class UpdateProductDto extends UpdateProductBaseDto {
   @IsDefinedWhenPresent()
   @IsBoolean()
   isFeatured?: boolean;
 
   @IsDefinedWhenPresent()
-  @IsBoolean()
-  isPublished?: boolean;
+  @IsEnum(ProductStatus)
+  status?: ProductStatus;
 
   @IsDefinedWhenPresent()
-  @IsBoolean()
-  isActive?: boolean;
+  @IsEnum(ProductActiveStatus)
+  activeStatus?: ProductActiveStatus;
 
+  // Required when this edit moves the product to rejected or suspended;
+  // saved in the status history and shown to the seller.
   @IsDefinedWhenPresent()
+  @Transform(trimString)
   @IsString()
-  @MaxLength(255)
-  seoTitle?: string;
-
-  @IsDefinedWhenPresent()
-  @IsString()
+  @IsNotEmpty()
   @MaxLength(1000)
-  seoDescription?: string;
-
-  // Entries with `id` update that SKU; entries without `id` create a new one.
-  @IsDefinedWhenPresent()
-  @IsArray()
-  @ArrayMaxSize(100)
-  @ValidateNested({ each: true })
-  @Type(() => UpdateProductSkuDto)
-  skus?: UpdateProductSkuDto[];
-
-  // SKUs to soft-delete.
-  @IsDefinedWhenPresent()
-  @IsArray()
-  @ArrayMaxSize(100)
-  @IsInt({ each: true })
-  @Min(1, { each: true })
-  @Max(MAX_INT32, { each: true })
-  removeSkuIds?: number[];
+  reason?: string;
 }
