@@ -6,6 +6,7 @@ import { Attribute } from './entities/attribute/attribute.entity';
 import { AttributeValue } from './entities/attribute/attribute-value.entity';
 import { User } from './entities/person/user.entity';
 import { AdminUser } from './entities/person/admin-user.entity';
+import { UserStatusChangeHistory } from './entities/person/user-status-change-history.entity';
 import { Address } from './entities/person/address.entity';
 import { Country } from './entities/zone/country.entity';
 import { Division } from './entities/zone/division.entity';
@@ -15,6 +16,8 @@ import { ShippingZone } from './entities/zone/shipping-zone.entity';
 import { Language } from './entities/language/language.entity';
 import { Seller } from './entities/seller/seller.entity';
 import { SellerPayout } from './entities/seller/seller-payout.entity';
+import { SellerProductStatusChangeHistory } from './entities/product/seller-product-status-change-history.entity';
+import { SellerStatusChangeHistory } from './entities/seller/seller-status-change-history.entity';
 import { Shop } from './entities/shop/shop.entity';
 import { SellerProduct } from './entities/product/seller-product.entity';
 import { SellerProductSku } from './entities/product/seller-product-sku.entity';
@@ -33,6 +36,10 @@ import { CouponHistoryLog } from './entities/coupon/coupon-history-log.entity';
 import { Review } from './entities/review/review.entity';
 import { Wishlist } from './entities/wishlist/wishlist.entity';
 import { Payment } from './entities/payment/payment.entity';
+import { PaymentAttachment } from './entities/payment/payment-attachment.entity';
+import { PaymentStatusHistory } from './entities/payment/payment-status-history.entity';
+import { OrderUpdate } from './entities/order/order-update.entity';
+import { OrderUpdateAttachment } from './entities/order/order-update-attachment.entity';
 import { PaymentGateway } from './entities/payment/payment-gateway.entity';
 import { Banner } from './entities/banner/banner.entity';
 import { HomepageSection } from './entities/homepage/homepage-section.entity';
@@ -48,6 +55,7 @@ export const DATABASE_ENTITIES = [
   Attribute,
   AttributeValue,
   User,
+  UserStatusChangeHistory,
   AdminUser,
   Address,
   Country,
@@ -57,6 +65,8 @@ export const DATABASE_ENTITIES = [
   ShippingZone,
   Language,
   Seller,
+  SellerStatusChangeHistory,
+  SellerProductStatusChangeHistory,
   SellerPayout,
   Shop,
   SellerProduct,
@@ -77,6 +87,10 @@ export const DATABASE_ENTITIES = [
   Wishlist,
   Payment,
   PaymentGateway,
+  PaymentAttachment,
+  PaymentStatusHistory,
+  OrderUpdate,
+  OrderUpdateAttachment,
   Banner,
   HomepageSection,
   PageSettings,
