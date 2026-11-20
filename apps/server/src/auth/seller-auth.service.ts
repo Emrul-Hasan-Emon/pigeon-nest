@@ -6,10 +6,12 @@ import { Seller } from '../database/entities/seller/seller.entity';
 import { AuthUserType } from '../database/enums/auth-user-type.enum';
 import { SellerActiveStatus } from '../database/enums/seller-active-status.enum';
 import { SellerStatus } from '../database/enums/seller-status.enum';
+import { SellerStatusChangeAction } from '../database/enums/seller-status-change-action.enum';
 import {
   CommonSellerService,
   SellerImages,
 } from '../seller/services/common-seller.service';
+import { SellerStatusHistoryService } from '../seller/services/seller-status-history.service';
 import { SellerLoginDto } from './dtos/seller-login.dto';
 import { SellerRegisterDto } from './dtos/seller-register.dto';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
@@ -25,6 +27,7 @@ export class SellerAuthService {
     private readonly databaseService: DatabaseService,
     private readonly jwtService: JwtService,
     private readonly commonSellerService: CommonSellerService,
+    private readonly sellerStatusHistoryService: SellerStatusHistoryService,
   ) {}
 
   // Any status may log in — pending, approved, rejected, inactive, suspended.
@@ -56,7 +59,20 @@ export class SellerAuthService {
       status: SellerStatus.PENDING,
       activeStatus: SellerActiveStatus.INACTIVE,
     });
-    const saved = await this.commonSellerService.saveWithImages(seller, images);
+    const saved = await this.commonSellerService.saveWithImages(
+      seller,
+      images,
+      (manager, result) =>
+        this.sellerStatusHistoryService.record(manager, {
+          sellerId: result.id,
+          fromStatus: null,
+          fromActiveStatus: null,
+          toStatus: result.status,
+          toActiveStatus: result.activeStatus,
+          action: SellerStatusChangeAction.REGISTERED,
+          actor: this.sellerStatusHistoryService.sellerActor(result),
+        }),
+    );
     return this.issueSession(saved);
   }
 
