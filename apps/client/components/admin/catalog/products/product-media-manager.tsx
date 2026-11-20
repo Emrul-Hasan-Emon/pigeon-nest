@@ -1,13 +1,19 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { updateProductMediaFiles } from '@/lib/api/products';
+import { adminProductPortal, type ProductPortal } from '@/lib/products/portal';
 import { ApiError } from '@/lib/api/http';
 import { useToast } from '@/components/ui/toast';
 import type { Product, ProductMedia } from '@/types/product';
 
 // Thumbnail + gallery, saved together through PATCH /products/:id/media-files.
-export function ProductMediaManager({ product }: { product: Product }) {
+export function ProductMediaManager({
+  product,
+  portal = adminProductPortal,
+}: {
+  product: Product;
+  portal?: ProductPortal;
+}) {
   const { showToast } = useToast();
 
   const [thumbnailUrl, setThumbnailUrl] = useState(product.thumbnailUrl);
@@ -39,7 +45,7 @@ export function ProductMediaManager({ product }: { product: Product }) {
   async function handleSave() {
     setSaving(true);
     try {
-      const updated = await updateProductMediaFiles(product.id, {
+      const updated = await portal.updateMedia(product.id, {
         thumbnailImage: newThumbnail,
         removeThumbnail,
         mediaFiles: newFiles,

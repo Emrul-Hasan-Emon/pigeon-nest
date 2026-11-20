@@ -3,11 +3,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { createProduct, updateProductMediaFiles } from '@/lib/api/products';
 import { listSellers } from '@/lib/api/sellers';
-import { getCategoryTree } from '@/lib/api/categories';
-import { listCollections } from '@/lib/api/collections';
-import { listAttributes } from '@/lib/api/attributes';
+import { adminProductPortal, type ProductPortal } from '@/lib/products/portal';
 import { flattenCategoryTree } from '@/lib/category-tree';
 import { ApiError } from '@/lib/api/http';
 import { useToast } from '@/components/ui/toast';
@@ -18,6 +15,7 @@ import {
   validateSkuDrafts,
   type SkuDraft,
 } from './product-sku-editor';
+import type { ProductActiveStatus, ProductStatus } from '@/types/product';
 import type { Seller } from '@/types/seller';
 import type { CategoryTreeNode } from '@/types/category';
 import type { Collection } from '@/types/collection';
@@ -30,8 +28,9 @@ interface FormState {
   name: string;
   description: string;
   isFeatured: boolean;
-  isPublished: boolean;
-  isActive: boolean;
+  status: ProductStatus;
+  activeStatus: ProductActiveStatus;
+  reason: string;
   seoTitle: string;
   seoDescription: string;
 }
@@ -43,8 +42,9 @@ const EMPTY: FormState = {
   name: '',
   description: '',
   isFeatured: false,
-  isPublished: true,
-  isActive: true,
+  status: 'approved',
+  activeStatus: 'active',
+  reason: '',
   seoTitle: '',
   seoDescription: '',
 };
@@ -52,7 +52,8 @@ const EMPTY: FormState = {
 const fieldClass =
   'mt-1 w-full rounded-md border border-input px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none';
 
-export function ProductCreateForm() {
+export function ProductCreateForm({ portal = adminProductPortal }: { portal?: ProductPortal }) {
+  const isAdmin = portal.kind === 'admin';
   const router = useRouter();
   const { showToast } = useToast();
 
@@ -72,25 +73,31 @@ export function ProductCreateForm() {
   const [submitting, setSubmitting] = useState(false);
 
   const categoryOptions = useMemo(() => flattenCategoryTree(tree), [tree]);
+  const needsReason = form.status === 'rejected' || form.activeStatus === 'suspended';
   const thumbnailPreview = useMemo(
     () => (thumbnail ? URL.createObjectURL(thumbnail) : null),
     [thumbnail],
   );
 
   useEffect(() => {
-    listSellers({ status: 'approved', activeStatus: 'active', limit: 100 })
-      .then((response) => setSellers(response.results))
-      .catch(() => showToast('Failed to load sellers.', 'error'));
-    getCategoryTree()
+    if (isAdmin) {
+      listSellers({ status: 'approved', activeStatus: 'active', limit: 100 })
+        .then((response) => setSellers(response.results))
+        .catch(() => showToast('Failed to load sellers.', 'error'));
+    }
+    portal
+      .categoryTree()
       .then(setTree)
       .catch(() => showToast('Failed to load categories.', 'error'));
-    listCollections({ isActive: true, limit: 100 })
-      .then((response) => setCollections(response.results))
+    portal
+      .collections()
+      .then(setCollections)
       .catch(() => showToast('Failed to load collections.', 'error'));
-    listAttributes({ isActive: true, limit: 100 })
-      .then((response) => setAttributes(response.results))
+    portal
+      .attributes()
+      .then(setAttributes)
       .catch(() => showToast('Failed to load attributes.', 'error'));
-  }, [showToast]);
+  }, [isAdmin, portal, showToast]);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -99,23 +106,31 @@ export function ProductCreateForm() {
     setGeneralError(null);
 
     if (!form.name.trim()) return setNameError('Name is required.');
-    if (!form.sellerId) return setSellerError('Seller is required.');
+    if (isAdmin && !form.sellerId) return setSellerError('Seller is required.');
     if (!form.categoryId) return setGeneralError('Category is required.');
+    if (isAdmin && needsReason && !form.reason.trim()) {
+      return setGeneralError('A reason is required when rejecting or suspending a product.');
+    }
     const skuError = validateSkuDrafts(skus);
     if (skuError) return setGeneralError(skuError);
 
     setSubmitting(true);
     let createdId: number | null = null;
     try {
-      const product = await createProduct({
-        sellerId: Number(form.sellerId),
+      const product = await portal.create({
+        ...(isAdmin ? { sellerId: Number(form.sellerId) } : {}),
         categoryId: Number(form.categoryId),
         collectionId: form.collectionId ? Number(form.collectionId) : undefined,
         name: form.name,
         description: form.description || undefined,
-        isFeatured: form.isFeatured,
-        isPublished: form.isPublished,
-        isActive: form.isActive,
+        ...(isAdmin
+          ? {
+              isFeatured: form.isFeatured,
+              status: form.status,
+              ...(form.reason.trim() ? { reason: form.reason.trim() } : {}),
+            }
+          : {}),
+        activeStatus: form.activeStatus,
         seoTitle: form.seoTitle || undefined,
         seoDescription: form.seoDescription || undefined,
         skus: buildCreateSkus(skus),
@@ -123,17 +138,17 @@ export function ProductCreateForm() {
       createdId = product.id;
 
       if (thumbnail || gallery.length > 0) {
-        await updateProductMediaFiles(product.id, {
+        await portal.updateMedia(product.id, {
           thumbnailImage: thumbnail,
           mediaFiles: gallery,
         });
       }
       showToast('Product created.', 'success');
-      router.push(`/admin/catalog/products/${product.id}`);
+      router.push(portal.afterCreatePath(product.id));
     } catch (error) {
       if (createdId !== null) {
         showToast('Product created, but uploading media failed. Add it from the edit page.', 'error');
-        router.push(`/admin/catalog/products/${createdId}/edit`);
+        router.push(portal.editPath(createdId));
         return;
       }
       if (error instanceof ApiError) {
@@ -153,7 +168,7 @@ export function ProductCreateForm() {
     <div className="max-w-4xl">
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-foreground">Add product</h1>
-        <Link href="/admin/catalog/products" className="text-sm text-muted-foreground hover:text-foreground">
+        <Link href={portal.basePath} className="text-sm text-muted-foreground hover:text-foreground">
           ← Back
         </Link>
       </div>
@@ -165,6 +180,7 @@ export function ProductCreateForm() {
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {isAdmin && (
             <label className="text-sm text-foreground">
               Seller *
               <select
@@ -181,6 +197,7 @@ export function ProductCreateForm() {
               </select>
               {sellerError && <p className="mt-1 text-xs text-destructive">{sellerError}</p>}
             </label>
+            )}
 
             <label className="text-sm text-foreground">
               Category *
@@ -234,30 +251,58 @@ export function ProductCreateForm() {
               />
             </label>
 
-            <label className="flex items-center gap-2 text-sm text-foreground">
-              <input
-                type="checkbox"
-                checked={form.isFeatured}
-                onChange={(event) => setForm((f) => ({ ...f, isFeatured: event.target.checked }))}
-              />
-              Featured
+            {isAdmin && (
+              <label className="flex items-center gap-2 text-sm text-foreground">
+                <input
+                  type="checkbox"
+                  checked={form.isFeatured}
+                  onChange={(event) => setForm((f) => ({ ...f, isFeatured: event.target.checked }))}
+                />
+                Featured
+              </label>
+            )}
+            {isAdmin && (
+              <label className="text-sm text-foreground">
+                Review status
+                <select
+                  className={fieldClass}
+                  value={form.status}
+                  onChange={(event) =>
+                    setForm((f) => ({ ...f, status: event.target.value as ProductStatus }))
+                  }
+                >
+                  <option value="approved">Approved</option>
+                  <option value="pending">Pending</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+              </label>
+            )}
+            <label className="text-sm text-foreground">
+              Activity
+              <select
+                className={fieldClass}
+                value={form.activeStatus}
+                onChange={(event) =>
+                  setForm((f) => ({ ...f, activeStatus: event.target.value as ProductActiveStatus }))
+                }
+              >
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+                {isAdmin && <option value="suspended">Suspended</option>}
+              </select>
             </label>
-            <label className="flex items-center gap-2 text-sm text-foreground">
-              <input
-                type="checkbox"
-                checked={form.isPublished}
-                onChange={(event) => setForm((f) => ({ ...f, isPublished: event.target.checked }))}
-              />
-              Published
-            </label>
-            <label className="flex items-center gap-2 text-sm text-foreground">
-              <input
-                type="checkbox"
-                checked={form.isActive}
-                onChange={(event) => setForm((f) => ({ ...f, isActive: event.target.checked }))}
-              />
-              Active
-            </label>
+            {isAdmin && needsReason && (
+              <label className="text-sm text-foreground md:col-span-2">
+                Reason (required for reject / suspend)
+                <textarea
+                  className={fieldClass}
+                  rows={2}
+                  maxLength={1000}
+                  value={form.reason}
+                  onChange={(event) => setForm((f) => ({ ...f, reason: event.target.value }))}
+                />
+              </label>
+            )}
 
             <label className="text-sm text-foreground">
               SEO title

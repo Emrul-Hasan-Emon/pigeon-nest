@@ -1,15 +1,18 @@
 'use client';
 
 import Link from 'next/link';
-import type { Product } from '@/types/product';
+import { PRODUCT_ACTIVE_STYLES, PRODUCT_STATUS_STYLES } from '@/components/products/status-badges';
+import type { Product, ProductActiveStatus, ProductStatus } from '@/types/product';
 
 export function ProductTable({
   products,
-  onToggleActive,
+  onChangeStatus,
+  onChangeActive,
   onDelete,
 }: {
   products: Product[];
-  onToggleActive: (product: Product) => void;
+  onChangeStatus: (product: Product, status: ProductStatus) => void;
+  onChangeActive: (product: Product, activeStatus: ProductActiveStatus) => void;
   onDelete: (product: Product) => void;
 }) {
   return (
@@ -21,8 +24,8 @@ export function ProductTable({
             <th className="px-4 py-3 text-left font-medium text-muted-foreground">Name</th>
             <th className="px-4 py-3 text-left font-medium text-muted-foreground">Seller</th>
             <th className="px-4 py-3 text-left font-medium text-muted-foreground">Category</th>
-            <th className="px-4 py-3 text-left font-medium text-muted-foreground">Published</th>
             <th className="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
+            <th className="px-4 py-3 text-left font-medium text-muted-foreground">Activity</th>
             <th className="px-4 py-3 text-right font-medium text-muted-foreground">Actions</th>
           </tr>
         </thead>
@@ -54,28 +57,30 @@ export function ProductTable({
               <td className="px-4 py-3 text-muted-foreground">{product.seller?.name ?? '—'}</td>
               <td className="px-4 py-3 text-muted-foreground">{product.category?.name ?? '—'}</td>
               <td className="px-4 py-3">
-                <span
-                  className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                    product.isPublished
-                      ? 'bg-emerald-100 text-emerald-700'
-                      : 'bg-muted text-muted-foreground'
-                  }`}
+                <select
+                  aria-label={`Status of ${product.name}`}
+                  value={product.status}
+                  onChange={(event) => onChangeStatus(product, event.target.value as ProductStatus)}
+                  className={`rounded-full border-0 px-2.5 py-0.5 text-xs font-medium capitalize ${PRODUCT_STATUS_STYLES[product.status]}`}
                 >
-                  {product.isPublished ? 'Published' : 'Unpublished'}
-                </span>
+                  <option value="approved">Approved</option>
+                  <option value="pending">Pending</option>
+                  <option value="rejected">Rejected</option>
+                </select>
               </td>
               <td className="px-4 py-3">
-                <button
-                  type="button"
-                  onClick={() => onToggleActive(product)}
-                  className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                    product.isActive
-                      ? 'bg-emerald-100 text-emerald-700'
-                      : 'bg-muted text-muted-foreground'
-                  }`}
+                <select
+                  aria-label={`Activity of ${product.name}`}
+                  value={product.activeStatus}
+                  onChange={(event) =>
+                    onChangeActive(product, event.target.value as ProductActiveStatus)
+                  }
+                  className={`rounded-full border-0 px-2.5 py-0.5 text-xs font-medium capitalize ${PRODUCT_ACTIVE_STYLES[product.activeStatus]}`}
                 >
-                  {product.isActive ? 'Active' : 'Inactive'}
-                </button>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                  <option value="suspended">Suspended</option>
+                </select>
               </td>
               <td className="px-4 py-3 text-right">
                 <div className="flex justify-end gap-3">

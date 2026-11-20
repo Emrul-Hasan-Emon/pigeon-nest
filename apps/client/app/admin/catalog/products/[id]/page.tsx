@@ -6,6 +6,12 @@ import Link from 'next/link';
 import { getProduct } from '@/lib/api/products';
 import { NotFoundApiError } from '@/lib/api/http';
 import { useToast } from '@/components/ui/toast';
+import { ProductStatusHistoryPanel } from '@/components/admin/catalog/products/product-status-history-panel';
+import {
+  isProductVisible,
+  ProductActiveBadge,
+  ProductStatusBadge,
+} from '@/components/products/status-badges';
 import type { Product } from '@/types/product';
 
 export default function ProductDetailsPage() {
@@ -62,19 +68,14 @@ export default function ProductDetailsPage() {
       </div>
 
       <div className="mb-5 flex flex-wrap gap-2 text-sm">
+        <ProductStatusBadge status={product.status} />
+        <ProductActiveBadge status={product.activeStatus} />
         <span
           className={`rounded-full px-3 py-1 text-xs font-medium ${
-            product.isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
+            isProductVisible(product) ? 'bg-emerald-100 text-emerald-700' : 'bg-muted text-muted-foreground'
           }`}
         >
-          {product.isActive ? 'Active' : 'Inactive'}
-        </span>
-        <span
-          className={`rounded-full px-3 py-1 text-xs font-medium ${
-            product.isPublished ? 'bg-muted' : 'bg-amber-100 text-amber-700'
-          }`}
-        >
-          {product.isPublished ? 'Published' : 'Unpublished'}
+          {isProductVisible(product) ? 'Visible on storefront' : 'Hidden from storefront'}
         </span>
         {product.isFeatured && (
           <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
@@ -85,6 +86,21 @@ export default function ProductDetailsPage() {
           {product.skus?.length ?? 0} SKUs
         </span>
       </div>
+
+      {(product.rejectionReason || product.suspensionReason) && (
+        <div className="mb-5 space-y-1 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+          {product.rejectionReason && (
+            <p>
+              <span className="font-medium">Rejected:</span> {product.rejectionReason}
+            </p>
+          )}
+          {product.suspensionReason && (
+            <p>
+              <span className="font-medium">Suspended:</span> {product.suspensionReason}
+            </p>
+          )}
+        </div>
+      )}
 
       <div className="mb-5 grid grid-cols-1 gap-4 md:grid-cols-3">
         <div className="md:col-span-1">
@@ -250,6 +266,8 @@ export default function ProductDetailsPage() {
           </table>
         </div>
       </div>
+
+      <ProductStatusHistoryPanel productId={product.id} />
     </div>
   );
 }
