@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { PhoneInput } from '@/components/phone-input';
+import { SellerSidebar } from '@/components/seller/seller-sidebar';
 import { StatusBanner } from '@/components/seller/status-banner';
 import { useToast } from '@/components/ui/toast';
 import { changeMyPassword, getMyProfile, updateMyProfile } from '@/lib/api/seller-portal';
@@ -132,13 +133,8 @@ export default function SellerProfilePage() {
     'mt-1 w-full rounded-md border border-input px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none disabled:opacity-60';
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="flex h-14 items-center justify-between bg-topbar px-6 text-topbar-foreground">
-        <span className="text-sm font-semibold tracking-wide">Pigeon Nest · Seller</span>
-        <button type="button" onClick={logout} className="text-sm opacity-80 hover:opacity-100">
-          Log out
-        </button>
-      </header>
+    <div className="min-h-screen bg-background pl-56">
+      <SellerSidebar active="profile" />
 
       <main className="mx-auto max-w-3xl px-6 py-6">
         <h1 className="mb-4 text-2xl font-bold text-foreground">My profile</h1>
