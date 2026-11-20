@@ -3,8 +3,8 @@ import { BaseEntity } from '../base.entity';
 import { Order } from '../order/order.entity';
 import { PaymentGateway } from './payment-gateway.entity';
 import { PaymentStatus } from '../../enums/payment-status.enum';
-import { decimalTransformer } from '../../utils/decimal.transformer';
 import { User } from '../person/user.entity';
+import { AuthUserType } from '../../enums/auth-user-type.enum';
 
 @Entity()
 export class Payment extends BaseEntity {
@@ -16,13 +16,13 @@ export class Payment extends BaseEntity {
   @JoinColumn({ name: 'orderId' })
   order: Order;
 
-  @Index()
-  @Column()
-  userId: number;
+  @Index('IDX_payment_userId')
+  @Column({ type: 'int', nullable: true })
+  userId: number | null;
 
-  @ManyToOne(() => User, { onDelete: 'RESTRICT' })
-  @JoinColumn({ name: 'userId' })
-  user: User;
+  @ManyToOne(() => User, { onDelete: 'RESTRICT', nullable: true })
+  @JoinColumn({ name: 'userId', foreignKeyConstraintName: 'FK_payment_userId' })
+  user: User | null;
 
   @Index()
   @Column()
@@ -32,23 +32,27 @@ export class Payment extends BaseEntity {
   @JoinColumn()
   paymentGateway: PaymentGateway;
 
+  @Column({ type: 'varchar', length: 255 })
+  paymentGatewayName: string;
+
   @Column()
   paymentGatewaySlug: string;
 
+  // What the customer wrote (or staff wrote when marking it paid).
+  @Column({ type: 'text', nullable: true })
+  description: string | null;
+
   @Index()
-  @Column({ type: 'varchar', default: PaymentStatus.PENDING })
+  @Column({ type: 'varchar', default: PaymentStatus.DUE })
   status: PaymentStatus;
 
   @Column({
-    type: 'decimal',
-    precision: 12,
-    scale: 2,
-    transformer: decimalTransformer,
+    type: 'double precision',
   })
   amount: number;
 
-  @Column({ nullable: true })
-  transactionId: string;
+  @Column({ type: 'varchar', nullable: true })
+  transactionId: string | null;
 
   @Column({ type: 'jsonb', nullable: true })
   metaData: Record<string, unknown> | null;
@@ -58,4 +62,22 @@ export class Payment extends BaseEntity {
 
   @Column({ type: 'timestamptz', nullable: true })
   paidAt: Date | null;
+
+  // Set when staff reverse a receipt (money that was recorded but did not arrive,
+  // or was recorded by mistake). A reversed row is kept as a record; its status
+  // goes back to due and it no longer counts towards what the order has received.
+  @Column({ type: 'timestamptz', nullable: true })
+  reversedAt: Date | null;
+
+  @Column({ type: 'int', nullable: true })
+  reversedBy: number | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  reversedByType: AuthUserType | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  reversedByName: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  reversalReason: string | null;
 }

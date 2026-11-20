@@ -13,14 +13,16 @@ export class PaymentGateway extends BaseEntity {
   @Column({ type: 'varchar', length: 255, default: PaymentGatewayType.MFS })
   type: PaymentGatewayType;
 
-  @Column({ default: false })
+  // Every gateway is manual for now: the customer pays outside the site and
+  // the order carries the proof they enter.
+  @Column({ default: true })
   isManual: boolean;
 
   @Column({ nullable: true })
   provider: string;
 
-  @Column({ nullable: true })
-  description: string;
+  @Column({ type: 'text', nullable: true })
+  description: string | null;
 
   @Column({ nullable: true })
   iconUrl: string;
