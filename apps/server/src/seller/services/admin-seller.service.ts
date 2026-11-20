@@ -1,8 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import { DatabaseService } from '../../database/database.service';
 import { SellerActiveStatus } from '../../database/enums/seller-active-status.enum';
 import { SellerStatus } from '../../database/enums/seller-status.enum';
+import { SellerStatusChangeAction } from '../../database/enums/seller-status-change-action.enum';
+import { JwtPayload } from '../../auth/interfaces/jwt-payload.interface';
 import { CreateSellerDto } from '../dtos/create-seller.dto';
 import { UpdateSellerDto } from '../dtos/update-seller.dto';
 import { ListSellerQueryDto } from '../dtos/list-seller-query.dto';
@@ -10,12 +12,14 @@ import { CursorPagination } from '../../shared/decorators/cursor-pagination-para
 import { getCursorPaginateData } from '../../shared/utils/cursor-paginate.util';
 import { likeContains } from '../../shared/utils/like.util';
 import { CommonSellerService, SellerImages } from './common-seller.service';
+import { SellerStatusHistoryService } from './seller-status-history.service';
 
 @Injectable()
 export class AdminSellerService {
   constructor(
     private readonly databaseService: DatabaseService,
     private readonly commonSellerService: CommonSellerService,
+    private readonly sellerStatusHistoryService: SellerStatusHistoryService,
   ) {}
 
   async list(query: ListSellerQueryDto, pagination: CursorPagination) {
@@ -59,7 +63,7 @@ export class AdminSellerService {
     );
   }
 
-  async create(dto: CreateSellerDto, images?: SellerImages) {
+  async create(dto: CreateSellerDto, images: SellerImages, user: JwtPayload) {
     await this.commonSellerService.assertEmailIsUnique(dto.email);
     await this.commonSellerService.assertPhoneIsUnique(dto.phone);
 
@@ -74,13 +78,34 @@ export class AdminSellerService {
       activeStatus: SellerActiveStatus.ACTIVE,
     });
 
+    const actor = await this.sellerStatusHistoryService.resolveActor(user);
     return this.commonSellerService.toSafeSeller(
-      await this.commonSellerService.saveWithImages(seller, images),
+      await this.commonSellerService.saveWithImages(
+        seller,
+        images,
+        (manager, saved) =>
+          this.sellerStatusHistoryService.record(manager, {
+            sellerId: saved.id,
+            fromStatus: null,
+            fromActiveStatus: null,
+            toStatus: saved.status,
+            toActiveStatus: saved.activeStatus,
+            action: SellerStatusChangeAction.ADMIN_CREATED,
+            actor,
+          }),
+      ),
     );
   }
 
-  async update(id: number, dto: UpdateSellerDto, images?: SellerImages) {
+  async update(
+    id: number,
+    dto: UpdateSellerDto,
+    images: SellerImages,
+    user: JwtPayload,
+  ) {
     const seller = await this.commonSellerService.findOrThrow(id);
+    const fromStatus = seller.status;
+    const fromActiveStatus = seller.activeStatus;
 
     if (dto.name !== undefined) {
       seller.name = dto.name;
@@ -107,19 +132,52 @@ export class AdminSellerService {
     }
     if (dto.status !== undefined) {
       seller.status = dto.status;
-      if (dto.status === SellerStatus.APPROVED) {
-        seller.rejectionReason = null;
-      }
-    }
-    if (dto.rejectionReason !== undefined) {
-      seller.rejectionReason = dto.rejectionReason;
     }
     if (dto.activeStatus !== undefined) {
       seller.activeStatus = dto.activeStatus;
     }
 
+    const statusChanged =
+      seller.status !== fromStatus || seller.activeStatus !== fromActiveStatus;
+    const becomesRejected =
+      seller.status === SellerStatus.REJECTED &&
+      fromStatus !== SellerStatus.REJECTED;
+    const becomesSuspended =
+      seller.activeStatus === SellerActiveStatus.SUSPENDED &&
+      fromActiveStatus !== SellerActiveStatus.SUSPENDED;
+
+    if ((becomesRejected || becomesSuspended) && !dto.reason) {
+      throw new BadRequestException(
+        'A reason is required when rejecting or suspending a seller',
+      );
+    }
+    if (becomesRejected) {
+      seller.rejectionReason = dto.reason ?? null;
+    } else if (seller.status === SellerStatus.APPROVED) {
+      seller.rejectionReason = null;
+    }
+
+    const actor = statusChanged
+      ? await this.sellerStatusHistoryService.resolveActor(user)
+      : undefined;
+
     return this.commonSellerService.toSafeSeller(
-      await this.commonSellerService.saveWithImages(seller, images),
+      await this.commonSellerService.saveWithImages(
+        seller,
+        images,
+        actor &&
+          ((manager, saved) =>
+            this.sellerStatusHistoryService.record(manager, {
+              sellerId: saved.id,
+              fromStatus,
+              fromActiveStatus,
+              toStatus: saved.status,
+              toActiveStatus: saved.activeStatus,
+              action: SellerStatusChangeAction.ADMIN_UPDATED,
+              reason: dto.reason,
+              actor,
+            })),
+      ),
     );
   }
 }
