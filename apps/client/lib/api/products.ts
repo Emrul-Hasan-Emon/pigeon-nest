@@ -2,8 +2,12 @@ import { http } from './http';
 import { ENDPOINTS } from '../endpoints';
 import type {
   Product,
+  ProductActiveStatus,
   ProductListParams,
   ProductListResponse,
+  ProductStatus,
+  ProductStatusHistoryParams,
+  ProductStatusHistoryResponse,
 } from '@/types/product';
 
 export interface SkuVariantPayload {
@@ -34,14 +38,20 @@ export interface UpdateSkuPayload extends Partial<Omit<CreateSkuPayload, 'varian
 }
 
 export interface CreateProductPayload {
-  sellerId: number;
+  /** Admin only: the seller the product is created for. */
+  sellerId?: number;
   categoryId: number;
   collectionId?: number;
   name: string;
   description?: string;
+  /** Admin only. */
   isFeatured?: boolean;
-  isPublished?: boolean;
-  isActive?: boolean;
+  /** Admin only. New products default to approved. */
+  status?: ProductStatus;
+  /** Sellers may only send active or inactive. */
+  activeStatus?: ProductActiveStatus;
+  /** Admin only: required when the product is rejected or suspended. */
+  reason?: string;
   seoTitle?: string;
   seoDescription?: string;
   skus: CreateSkuPayload[];
@@ -52,9 +62,14 @@ export interface UpdateProductPayload {
   collectionId?: number | null;
   name?: string;
   description?: string;
+  /** Admin only. */
   isFeatured?: boolean;
-  isPublished?: boolean;
-  isActive?: boolean;
+  /** Admin only. */
+  status?: ProductStatus;
+  /** Sellers may only send active or inactive. */
+  activeStatus?: ProductActiveStatus;
+  /** Admin only: required when this edit rejects or suspends the product. */
+  reason?: string;
   seoTitle?: string;
   seoDescription?: string;
   skus?: UpdateSkuPayload[];
@@ -97,4 +112,21 @@ export function updateProductMediaFiles(id: number, payload: ProductMediaFilesPa
     form.append('removeMediaFilesIds', String(mediaId));
   }
   return http.patch<Product>(ENDPOINTS.admin.products.mediaFiles(id), form);
+}
+
+export function listProductStatusHistory(params: ProductStatusHistoryParams) {
+  return http.get<ProductStatusHistoryResponse>(ENDPOINTS.admin.productStatusHistory.list, {
+    ...params,
+  });
+}
+
+export function buildMediaForm(payload: ProductMediaFilesPayload) {
+  const form = new FormData();
+  if (payload.thumbnailImage) form.append('thumbnailImage', payload.thumbnailImage);
+  if (payload.removeThumbnail) form.append('removeThumbnail', 'true');
+  for (const file of payload.mediaFiles ?? []) form.append('mediaFiles', file);
+  for (const mediaId of payload.removeMediaFilesIds ?? []) {
+    form.append('removeMediaFilesIds', String(mediaId));
+  }
+  return form;
 }

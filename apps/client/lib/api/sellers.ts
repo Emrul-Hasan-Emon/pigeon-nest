@@ -6,6 +6,8 @@ import type {
   SellerListResponse,
   SellerActiveStatus,
   SellerStatus,
+  SellerStatusHistoryParams,
+  SellerStatusHistoryResponse,
 } from '@/types/seller';
 
 export interface SellerWritePayload {
@@ -16,7 +18,8 @@ export interface SellerWritePayload {
   commissionRate?: number;
   status?: SellerStatus;
   activeStatus?: SellerActiveStatus;
-  rejectionReason?: string;
+  /** Note for the status history; required when rejecting or suspending. */
+  reason?: string;
   avatar?: File | null;
   nidFrontImage?: File | null;
   nidBackImage?: File | null;
@@ -34,9 +37,7 @@ function buildBody(payload: SellerWritePayload): FormData | Record<string, unkno
     }
     if (payload.status !== undefined) form.set('status', payload.status);
     if (payload.activeStatus !== undefined) form.set('activeStatus', payload.activeStatus);
-    if (payload.rejectionReason !== undefined) {
-      form.set('rejectionReason', payload.rejectionReason);
-    }
+    if (payload.reason !== undefined) form.set('reason', payload.reason);
     if (payload.avatar) form.set('avatar', payload.avatar);
     if (payload.nidFrontImage) form.set('nidFrontImage', payload.nidFrontImage);
     if (payload.nidBackImage) form.set('nidBackImage', payload.nidBackImage);
@@ -51,7 +52,7 @@ function buildBody(payload: SellerWritePayload): FormData | Record<string, unkno
   if (payload.commissionRate !== undefined) json.commissionRate = payload.commissionRate;
   if (payload.status !== undefined) json.status = payload.status;
   if (payload.activeStatus !== undefined) json.activeStatus = payload.activeStatus;
-  if (payload.rejectionReason !== undefined) json.rejectionReason = payload.rejectionReason;
+  if (payload.reason !== undefined) json.reason = payload.reason;
   return json;
 }
 
@@ -81,6 +82,14 @@ export function approveSellerRequest(id: number) {
   return http.post<Seller>(ENDPOINTS.admin.sellerRequests.approve(id));
 }
 
-export function rejectSellerRequest(id: number, reason?: string) {
-  return http.post<Seller>(ENDPOINTS.admin.sellerRequests.reject(id), reason ? { reason } : {});
+export function rejectSellerRequest(id: number, reason: string) {
+  return http.post<Seller>(ENDPOINTS.admin.sellerRequests.reject(id), { reason });
+}
+
+// --- status change history (admin only, read only) -------------------------
+
+export function listSellerStatusHistory(params: SellerStatusHistoryParams) {
+  return http.get<SellerStatusHistoryResponse>(ENDPOINTS.admin.sellerStatusHistory.list, {
+    ...params,
+  });
 }
