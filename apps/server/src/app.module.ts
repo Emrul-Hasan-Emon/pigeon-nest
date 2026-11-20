@@ -9,6 +9,12 @@ import { FileManagementModule } from './file-management/file-management.module';
 import { AuthModule } from './auth/auth.module';
 import { CatalogModule } from './catalog/catalog.module';
 import { SellerModule } from './seller/seller.module';
+import { ContentModule } from './content/content.module';
+import { StorefrontModule } from './storefront/storefront.module';
+import { PaymentModule } from './payment/payment.module';
+import { SettingsModule } from './settings/settings.module';
+import { CartModule } from './cart/cart.module';
+import { OrderModule } from './order/order.module';
 
 @Module({
   imports: [
@@ -22,6 +28,12 @@ import { SellerModule } from './seller/seller.module';
     AuthModule,
     CatalogModule,
     SellerModule,
+    ContentModule,
+    StorefrontModule,
+    PaymentModule,
+    SettingsModule,
+    CartModule,
+    OrderModule,
   ],
   controllers: [AppController],
   providers: [AppService],
