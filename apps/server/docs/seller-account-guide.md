@@ -42,7 +42,7 @@ APPROVAL STATUS
 ```text
   pending    The seller registered and is waiting for an admin to review them.
   approved   An admin accepted the seller.
-  rejected   An admin turned the registration down (a reason may be given).
+  rejected   An admin turned the registration down (a reason is always given).
 ```
 
 ACTIVITY STATUS
@@ -168,8 +168,9 @@ APPROVE
 
 REJECT
   Effect:  status becomes rejected, activity becomes inactive.
-  Reason:  the admin may type a reason (up to 1000 characters). If typed, the
-           seller sees it on their profile page. Leaving it empty is allowed.
+  Reason:  REQUIRED (up to 1000 characters). The seller sees it on their
+           profile page and it is saved in the status history. Leaving it
+           empty, or typing only spaces, is refused and nothing changes.
   Seller:  can still log in, sees "rejected" plus the reason, and can fix
            their profile.
 
@@ -194,13 +195,16 @@ The admin controls everything about any seller:
   - name, email, phone, password, commission rate, payout info, photos
   - approval status (pending / approved / rejected)
   - activity status (active / inactive / suspended)
-  - rejection reason (visible to the seller)
+  - a note explaining the change (required to reject or suspend, see section 15)
 
 Important behaviours
   - The two labels are independent here. Changing one does not automatically
     change the other. (Only the Approve and Reject buttons change both
     together.)
   - Setting approval status to "approved" clears any old rejection reason.
+  - Rejecting or suspending through Edit, or through the activity dropdown on
+    the list, asks for a note first. Without it nothing is changed.
+  - Every change of status or activity is recorded in the status history.
   - The change takes effect immediately, even for a seller who is logged in
     right now. Suspending a logged-in seller blocks their very next action.
   - The sellers list can be filtered by approval status and by activity status,
@@ -212,9 +216,10 @@ Typical admin actions and their meaning
   Goal                                   Do this
   -------------------------------------  -----------------------------------
   Let a new seller start selling         Approve from Pending requests
-  Turn a seller down                     Reject (add a reason)
+  Turn a seller down                     Reject (a reason is required)
   Pause a seller temporarily             Set activity to inactive
-  Freeze a seller for a serious issue    Set activity to suspended
+  Freeze a seller for a serious issue    Set activity to suspended (reason
+                                         required)
   Bring a seller back                    Set activity to active
   Reconsider a rejected seller           Set status to approved, or wait for
                                          the seller to resubmit (7B)
@@ -314,7 +319,8 @@ form once, by a data update.
   Photos       JPG, PNG, WEBP, GIF, AVIF, HEIC. Max 10 MB each. The file is
                checked by its real content, not just its name, so a renamed
                text file is refused. Empty files are refused.
-  Reason       Rejection reason: optional, up to 1000 characters.
+  Reason       Needed to reject or suspend a seller; optional for other
+               admin changes. Up to 1000 characters.
 ```
 
 If any one field is wrong, NOTHING is saved and no photos are kept.
@@ -394,7 +400,8 @@ Story 4 - Admin onboards a seller by hand
   approved + active at once. He logs in, and can change his password.
 
 Story 5 - Suspension
-  A seller is approved + active. The admin sets activity to suspended. The
+  A seller is approved + active. The admin sets activity to suspended and
+  must type a reason, which is saved in the status history. The
   seller, still logged in, tries to change their email and is refused
   immediately. They can still log in and read "Account suspended". The admin
   later sets activity back to active and the same session works again.
@@ -438,6 +445,9 @@ Story 9 - Pending but suspended
   Phone or email already used by someone else   Refused: already in use
   Approve/reject on a non-pending seller        Refused: conflict
   Approve/reject on a suspended seller          Refused: conflict
+  Reject or suspend without a reason (or only   Refused: reason required;
+  spaces)                                       nothing is changed
+  Seller session on the status history          Refused: not allowed
   Product for a not-approved/not-active seller  Refused: conflict
 ```
 
@@ -446,7 +456,58 @@ For sellers, pending/rejected/inactive/suspended states also carry a short code
 apps use to show the right banner.
 
 
-15. FOR THE TECHNICALLY CURIOUS
+15. THE STATUS HISTORY (AUDIT LOG)
+----------------------------------
+
+Every time a seller's approval status or activity status is set, the system
+writes one line to a permanent log. Nothing is ever edited or deleted from it.
+Only admins can see it. Sellers cannot.
+
+What one line contains
+  - Which seller it is about.
+  - The status and the activity status BEFORE and AFTER (both pairs are stored
+    on every line, so one line shows the complete change).
+  - What happened: registered, created by admin, approved, rejected,
+    resubmitted, changed by admin, or "starting point".
+  - The note (reason), if any.
+  - Who did it: their id, their type (admin or seller) and their name as it was
+    at that moment.
+  - When it happened.
+
+When a line is written
+  - A seller registers themselves ("registered", done by the seller).
+  - An admin creates a seller ("created by admin").
+  - An admin approves or rejects a registration.
+  - A rejected seller edits their profile and goes back to pending
+    ("resubmitted", done by the seller).
+  - An admin edits a seller and the approval status or the activity status
+    actually changes ("changed by admin").
+  - NOT written: a save that changes neither status, a password change, a
+    refused action, or an admin choosing the value the seller already has.
+  - The status change and its log line are saved together. If one fails, both
+    are cancelled, so the log can never disagree with the seller.
+
+The note is REQUIRED in two cases
+  - Rejecting a seller (from the pending list, or by editing the status).
+  - Suspending a seller (from the Sellers list dropdown, or by editing).
+  A blank note, or one with only spaces, is refused and nothing changes. Every
+  other change may carry an optional note (for example "on holiday"). When an
+  admin rejects a seller, the same text is also what the seller reads on their
+  profile page. The suspension note is for admins only.
+
+Sellers that existed before the log was introduced each received one
+"starting point" line, written by "System", so every seller has a timeline.
+
+Where the admin sees it
+  - Seller details page (Sellers -> Edit): the "Status history" section lists
+    that seller's lines, newest first, 10 at a time with a "Load more" button.
+  - Sellers -> Status history: one page listing the lines of every seller,
+    newest first, with a "Load more" button. It can be searched by seller name,
+    email or phone and filtered by event (registered, approved, ...), by the new
+    approval status and by the new activity status.
+
+
+16. FOR THE TECHNICALLY CURIOUS
 -------------------------------
 
   Seller endpoints
@@ -463,7 +524,8 @@ apps use to show the right banner.
     PATCH /v1/api/admin/sellers/:id
     GET   /v1/api/admin/seller-requests
     POST  /v1/api/admin/seller-requests/:id/approve
-    POST  /v1/api/admin/seller-requests/:id/reject
+    POST  /v1/api/admin/seller-requests/:id/reject   (body: reason, required)
+    GET   /v1/api/admin/seller-status-history
 
   The seller's permissions are re-read from the database on every request, which
   is why admin changes apply to sessions that are already open.
@@ -474,7 +536,7 @@ apps use to show the right banner.
   seller accounts.
 
 
-16. QUICK DECISION CHART
+17. QUICK DECISION CHART
 ------------------------
 
   Is the seller suspended?

@@ -6,7 +6,7 @@ behaviour is supposed to be. This document is about how to check it.
 
 There are two parts:
 
-1. **Automated API suite** (`seller_account_test.py`): 267 checks, about two
+1. **Automated API suite** (`seller_account_test.py`): 489 checks, about two
    minutes, covers the rules end to end.
 2. **Manual UI checklist** (section 5): the browser flows the script cannot
    see.
@@ -34,7 +34,7 @@ python3 seller_account_test.py
 Output prints one `PASS` / `FAIL` line per check, then a summary:
 
 ```text
-==== 267/267 passed, 0 failed ====
+==== 489/489 passed, 0 failed ====
 ```
 
 Exit code is 0 when everything passes and 1 otherwise. Failed checks print
@@ -163,9 +163,9 @@ rejected, suspended, pending+suspended, approved+suspended.
 | Approve a pending seller | `approved` + `active`, reason cleared; existing token gets full access |
 | Approve again; reject an approved seller | 409 |
 | Reject with a reason (trimmed) | `rejected` + `inactive`; seller sees the reason and can log in |
+| Reject with no body, blank, empty-string or null reason (reason is required) | 400, seller stays pending |
 | Reject again; approve a rejected seller directly | 409 |
 | Rejected seller edits and reappears in the list, then can be approved | checked |
-| Reject with no body, blank reason | 200, no reason stored |
 | Reason 1001 characters, wrong type, extra field | 400; 1000 characters is accepted |
 | Approve or reject a pending seller who is suspended | 409, suspension untouched |
 | Unknown seller id | 404 |
@@ -182,7 +182,8 @@ rejected, suspended, pending+suspended, approved+suspended.
 | Old `isActive` query parameter | 400 |
 | List search matches phone; rows expose `activeStatus` and `rejectionReason`, not `isActive` | checked |
 | Admin sets `activeStatus` to active, inactive, suspended | 200 |
-| Update rejects invalid `activeStatus`, `isActive`, local-format phone, duplicate phone, reason over 1000 characters | 400 |
+| Update rejects invalid `activeStatus`, `isActive`, local-format phone, duplicate phone, `reason` over 1000 characters, and the old `rejectionReason` field | 400 |
+| Admin sets `activeStatus` to suspended or status to rejected without a `reason` | 400 (see section H) |
 | Update normalises a spaced international phone | 200 |
 | Setting `status` to approved clears the rejection reason | checked |
 
@@ -192,6 +193,69 @@ rejected, suspended, pending+suspended, approved+suspended.
 |---|---|
 | Admin creates a product for an approved + active seller | 201 |
 | Same for pending, approved+inactive, rejected, approved+suspended, pending+suspended | 409 |
+
+### H. Status change history (`/v1/api/admin/seller-status-history`)
+
+Every change of `status` or `activeStatus` is written to an append-only log in
+the same transaction as the change. Rejecting or suspending needs a note.
+
+| Case | Expected |
+|---|---|
+| Registration writes exactly one `registered` row: from nothing to pending + inactive, tracker fields are the seller (id, type `seller`, name), no reason, no `passwordHash` in the response | checked |
+| Failed registrations (invalid or duplicate phone) write no history | checked |
+| Admin-created seller writes one `admin_created` row (approved + active) with the admin as creator; a failed create writes nothing | checked |
+| Approve adds an `approved` row (pending/inactive to approved/active, by the admin, no reason); a refused approve (409) writes nothing | checked |
+| Reject without a reason: 400, nothing changes, no row. Reject with a reason adds a `rejected` row holding the trimmed reason, and the seller sees the same reason | checked |
+| Password change and a no-op save write no row; a real edit by a rejected seller adds a `resubmitted` row (rejected to pending, creator is the seller with the current name); editing a pending seller writes no row | checked |
+| Admin suspends without a reason, with a blank reason, or rejects through PATCH without a reason | 400, seller unchanged, no row |
+| Admin suspends with a reason | 200, one `admin_updated` row with from/to pairs, note and the admin as creator |
+| Same status set again, or editing only the name | no row |
+| Un-suspend needs no reason; an optional note is accepted and stored; rows appear newest first | checked |
+| Reject through PATCH with a reason: the seller sees that reason, row logged; approving through PATCH clears the rejection reason | checked |
+| Six simultaneous approvals of one pending seller | one 200, five 409, exactly one `approved` row |
+| List: no token 401, garbage token 401, seller token 403 | checked |
+| POST, PUT, PATCH, DELETE on the history (read-only) | 404 |
+| Newest first across all sellers; cursor walk with limit 2 returns every row of one seller exactly once | checked |
+| Filters: `sellerId`, `action` (including `baseline`), `toStatus`, `toActiveStatus`, combinations; search by phone or name (any case); `%` is literal; no match returns an empty page; unknown seller id returns an empty page | 200 |
+| Invalid `sellerId` (0, text, negative, too big, decimal), invalid `action`/`toStatus`/`toActiveStatus`, unknown param, limit 101, huge cursor, search over 200 characters | 400 |
+| Every pre-existing non-test seller has at least one history row (baseline migration) | checked |
+| History rows disappear with a hard-deleted seller (foreign key cascade) | checked |
+
+### I. Product status, activity and the seller product API
+
+Products have `status` (approved / pending / rejected, admin only) and
+`activeStatus` (active / inactive / suspended; a seller may only pick active or
+inactive). New products default to approved + active. Rejected or suspended
+products are frozen for the seller. `isActive` / `isPublished` no longer exist:
+a product is visible only when approved and active.
+
+| Case | Expected |
+|---|---|
+| Seller product API without a token, with an admin token, or as a pending / inactive / suspended / rejected seller | 401 / 403 / 403 |
+| Seller creates a product | 201, approved + active, history row `seller_created` (tracker = seller) |
+| Seller starts a product inactive | 201 |
+| Seller sends `status`, `sellerId`, `isFeatured`, `reason`, `isActive`, `isPublished` or `activeStatus: suspended` | 400 |
+| Another seller reads, edits, deletes or changes media of the product | 404 |
+| Seller list: own products only, filters status and activeStatus, `sellerId` param | filters work; `sellerId` and invalid enums -> 400 |
+| Seller toggles active / inactive | 200, `seller_updated` rows with before and after |
+| Same value sent again | 200, no history row |
+| Admin sets pending | 200 without a reason; seller can still edit and toggle |
+| Admin rejects without a reason, blank, or 1001 characters | 400, nothing changes |
+| Rejected product: seller edit, toggle, delete, media | 403 `PRODUCT_REJECTED` with the reason in the message |
+| Rejected product: seller reads it | 200 with `rejectionReason` |
+| Admin approves | reason cleared, seller unlocked |
+| Admin suspends without a reason | 400 |
+| Suspended product: seller edit, set active, delete, media | 403 `PRODUCT_SUSPENDED` with the reason |
+| Admin sets inactive or active again | suspension reason cleared, seller unlocked |
+| Rejected + suspended together with one reason | both reasons stored; seller blocked |
+| Admin create defaults, with status/activity + reason, without reason for reject/suspend | 201 / 201 / 400 |
+| Admin list `status` and `activeStatus` filters, combined; old `isActive` / `isPublished` params | filter works; old params -> 400 |
+| 3 seller edits racing an admin suspend (parallel) | only 200 or 403; suspend lands; later edits 403 |
+| Seller deletes an approved product; history survives | 200; admin history still lists the product name |
+| `GET /admin/product-status-history`: auth, filters (productId, search, action, toStatus, toActiveStatus), cursor paging, validation | 401 / 403 for non-admins; filters work; bad input 400; read-only |
+| `GET /seller/dashboard`: auth (401 / 403 admin / 403 inactive seller), every count equals the database (total, status, activity, visible, locked, SKUs), other sellers not counted | checked |
+| `GET /seller/catalog/{categories/tree,collections,attributes}` | seller 200 (active items only), admin 403, no token 401, inactive seller 403 |
+| Every pre-existing product has a `baseline` history row; history rows cascade with a hard-deleted product | checked |
 
 ## 5. Manual UI checklist
 
@@ -212,7 +276,7 @@ sellers afterwards (see section 6).
 | 7 | Log in with the number typed with a space (`98123 45670`) and the right password. | Works, banner "Awaiting approval" |
 | 8 | Open `/admin/login`, sign in as admin, open Sellers -> Pending requests. | The seller is listed with phone and email |
 | 9 | Search `zzzz`, then `98123`. | "No pending requests." then the seller again |
-| 10 | Click Reject, type a reason, confirm. | Seller leaves the list, toast shown. Database: `rejected` + `inactive`, reason saved |
+| 10 | Click Reject, type a reason (required), confirm. | Seller leaves the list, toast shown. Database: `rejected` + `inactive`, reason saved |
 | 11 | As the seller, reload `/seller/profile`. | Banner "Registration rejected" with the reason. Button reads "Save and resubmit" |
 | 12 | Change only the password (current + new) and submit. | "Password changed." Banner still "Registration rejected" |
 | 13 | Change the name and click Save and resubmit. | Toast "resubmitted". Banner "Awaiting approval". Seller is back in the admin list |
@@ -224,12 +288,29 @@ sellers afterwards (see section 6).
 | 19 | Set Activity to Active, reload. | Banner "Account active" |
 | 20 | Log in again with the new password, then the old one. | New works, old is refused |
 | 21 | Admin: Sellers -> Add seller with a phone (country picker), password, no email. | Created as Approved + Active. Can log in on `/seller/login` |
-| 22 | Admin: edit a seller, set Status to Rejected. | A "Rejection reason" box appears |
+| 22 | Admin: edit a seller, set Status to Rejected. | A required "Reason" box appears |
 | 23 | Admin: Add product, open the seller dropdown. | Lists only approved + active sellers |
 | 24 | Register with an image as NID front / back / avatar. | Registration succeeds; admin pending list shows the thumbnails |
 
-Steps 21 to 24 are not part of the checks the author ran in the browser; the
-API rules behind them are covered by the script.
+| 25 | Admin: Pending requests -> Reject, leave the box empty or type only spaces. | The Reject button stays disabled. Nothing changes |
+| 26 | Type a reason and confirm. | Seller leaves the list. Database: `rejected` + `inactive`; a `rejected` history row holds the reason |
+| 27 | Admin: Sellers, change a seller's Activity dropdown to Suspended. | A "Suspend" prompt asks for a reason. Confirm is disabled until one is typed; nothing is saved before that |
+| 28 | Confirm with a reason. | Dropdown shows Suspended; a history row holds the reason |
+| 29 | Admin: edit a seller and set Status to Rejected (or Activity to Suspended) with an empty reason box. | The box is marked required; the form cannot be submitted with it empty or only spaces |
+| 30 | Admin: open a seller's details page and scroll down. | "Status history" lists that seller's changes newest first (change, note, who) with Load more when over 10 rows |
+| 31 | Admin: Sellers -> Status history. | All sellers' changes, newest first. Search, the Event, New status and New activity filters narrow the list; Load more pages 20 at a time |
+| 32 | Log in as a seller and try to open `/admin/sellers/status-history`. | Seller cannot use admin pages; the API returns 403 |
+| 33 | Seller: open `/seller/products`. | Own products only, with Status and Activity columns, search and filters. Active / inactive dropdown on normal rows; rejected / suspended rows show a badge, the admin's reason and only "View" |
+| 34 | Seller: open a rejected or suspended product. | A red banner with the reason; every field and button is disabled |
+| 35 | Seller: Add product. | Form has no Seller, Featured or Review status fields; Activity offers only Active / Inactive. After saving you land on the product page |
+| 36 | Admin: Products list. | Status and Activity columns plus filters for both. Setting Rejected or Suspended opens a reason prompt (Confirm disabled until a note is typed; nothing saved before) |
+| 37 | Admin: product details page. | Status and Activity badges, "Visible / Hidden from storefront", the reasons, and a Status history section |
+| 38 | Admin: Products -> Status history (or sidebar "Product history"). | All products' changes newest first with product, seller, note and who; filters and Load more work |
+| 39 | Seller: log in. | You land on `/seller/dashboard`: counts for total, visible, locked, SKUs, approved / pending / rejected, active / inactive / suspended, out-of-stock SKUs. A seller who is not approved + active sees the status banner instead of numbers |
+| 40 | Look at every seller page. | The navigation (Dashboard, Products, Profile, Log out) is a left sidebar, not a top bar |
+
+Steps 21 to 24 and 32 were not clicked through in the browser by the author; the
+API rules behind them are covered by the script. Steps 25 to 31 and 33 to 38 were (33 to 38 with a seller and products created for the test).
 
 ## 6. Cleaning up
 
