@@ -3,9 +3,12 @@ import { BaseEntity } from '../base.entity';
 import { Cart } from './cart.entity';
 import { SellerProduct } from '../product/seller-product.entity';
 import { SellerProductSku } from '../product/seller-product-sku.entity';
-import { decimalTransformer } from '../../utils/decimal.transformer';
 
 @Entity()
+@Index('UQ_cart_item_cart_sku', ['cartId', 'sellerProductSkuId'], {
+  unique: true,
+  where: '"deletedAt" IS NULL',
+})
 export class CartItem extends BaseEntity {
   @Index()
   @Column()
@@ -35,36 +38,24 @@ export class CartItem extends BaseEntity {
   quantity: number;
 
   @Column({
-    type: 'decimal',
-    precision: 12,
-    scale: 2,
-    transformer: decimalTransformer,
+    type: 'double precision',
   })
   unitPrice: number;
 
   @Column({
-    type: 'decimal',
-    precision: 12,
-    scale: 2,
+    type: 'double precision',
     nullable: true,
-    transformer: decimalTransformer,
   })
   unitDiscountedPrice: number | null;
 
   @Column({
-    type: 'decimal',
-    precision: 12,
-    scale: 2,
-    transformer: decimalTransformer,
+    type: 'double precision',
   })
   totalPrice: number;
 
   @Column({
-    type: 'decimal',
-    precision: 12,
-    scale: 2,
+    type: 'double precision',
     nullable: true,
-    transformer: decimalTransformer,
   })
   totalDiscountedPrice: number | null;
 }
