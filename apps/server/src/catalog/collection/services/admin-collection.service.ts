@@ -121,6 +121,19 @@ export class AdminCollectionService {
       );
     }
 
+    const sectionCount = await this.databaseService.homepageSection
+      .createQueryBuilder('section')
+      .where(
+        `(section.config -> 'collectionIds' @> CAST(:ids AS jsonb) OR section.config -> 'collectionId' = CAST(:id AS jsonb))`,
+        { ids: JSON.stringify([id]), id: JSON.stringify(id) },
+      )
+      .getCount();
+    if (sectionCount > 0) {
+      throw new ConflictException(
+        'Collection is used by a homepage section and cannot be deleted',
+      );
+    }
+
     await this.databaseService.collection.delete(id);
 
     if (collection.imagePath) {

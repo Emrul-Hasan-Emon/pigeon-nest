@@ -145,6 +145,19 @@ export class AdminCategoryService {
       );
     }
 
+    const sectionCount = await this.databaseService.homepageSection
+      .createQueryBuilder('section')
+      .where(
+        `(section.config -> 'categoryIds' @> CAST(:ids AS jsonb) OR section.config -> 'categoryId' = CAST(:id AS jsonb))`,
+        { ids: JSON.stringify([id]), id: JSON.stringify(id) },
+      )
+      .getCount();
+    if (sectionCount > 0) {
+      throw new ConflictException(
+        'Category is used by a homepage section and cannot be deleted',
+      );
+    }
+
     await this.databaseService.category.delete(id);
 
     if (category.imagePath) {
