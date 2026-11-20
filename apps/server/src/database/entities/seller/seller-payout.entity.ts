@@ -2,7 +2,6 @@ import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 import { BaseEntity } from '../base.entity';
 import { Seller } from './seller.entity';
 import { PayoutStatus } from '../../enums/payout-status.enum';
-import { decimalTransformer } from '../../utils/decimal.transformer';
 
 @Entity()
 export class SellerPayout extends BaseEntity {
@@ -21,26 +20,17 @@ export class SellerPayout extends BaseEntity {
   periodEnd: string;
 
   @Column({
-    type: 'decimal',
-    precision: 12,
-    scale: 2,
-    transformer: decimalTransformer,
+    type: 'double precision',
   })
   grossAmount: number;
 
   @Column({
-    type: 'decimal',
-    precision: 12,
-    scale: 2,
-    transformer: decimalTransformer,
+    type: 'double precision',
   })
   commissionAmount: number;
 
   @Column({
-    type: 'decimal',
-    precision: 12,
-    scale: 2,
-    transformer: decimalTransformer,
+    type: 'double precision',
   })
   netAmount: number;
 

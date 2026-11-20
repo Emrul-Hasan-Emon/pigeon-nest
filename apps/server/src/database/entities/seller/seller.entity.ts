@@ -2,10 +2,10 @@ import { Column, Entity, OneToMany, OneToOne } from 'typeorm';
 import { BaseEntity } from '../base.entity';
 import { SellerStatus } from '../../enums/seller-status.enum';
 import { SellerActiveStatus } from '../../enums/seller-active-status.enum';
-import { decimalTransformer } from '../../utils/decimal.transformer';
 import { Shop } from '../shop/shop.entity';
 import { SellerProduct } from '../product/seller-product.entity';
 import { SellerPayout } from './seller-payout.entity';
+import { SellerStatusChangeHistory } from './seller-status-change-history.entity';
 
 @Entity()
 export class Seller extends BaseEntity {
@@ -49,11 +49,8 @@ export class Seller extends BaseEntity {
   status: SellerStatus;
 
   @Column({
-    type: 'decimal',
-    precision: 5,
-    scale: 2,
+    type: 'double precision',
     default: 0,
-    transformer: decimalTransformer,
   })
   commissionRate: number;
 
@@ -76,4 +73,7 @@ export class Seller extends BaseEntity {
 
   @OneToMany(() => SellerPayout, (payout) => payout.seller)
   payouts: SellerPayout[];
+
+  @OneToMany(() => SellerStatusChangeHistory, (entry) => entry.seller)
+  statusHistory: SellerStatusChangeHistory[];
 }
