@@ -17,7 +17,7 @@ interface FormState {
   commissionRate: number;
   status: SellerStatus;
   activeStatus: SellerActiveStatus;
-  rejectionReason: string;
+  reason: string;
   avatar: File | null;
   nidFrontImage: File | null;
   nidBackImage: File | null;
@@ -32,7 +32,7 @@ function toFormState(seller?: Seller): FormState {
     commissionRate: seller?.commissionRate ?? 0,
     status: seller?.status ?? 'approved',
     activeStatus: seller?.activeStatus ?? 'active',
-    rejectionReason: seller?.rejectionReason ?? '',
+    reason: '',
     avatar: null,
     nidFrontImage: null,
     nidBackImage: null,
@@ -78,6 +78,14 @@ export function SellerForm({ seller }: { seller?: Seller }) {
     setBackPreview(file ? URL.createObjectURL(file) : (seller?.nidBackImageUrl ?? null));
   }
 
+  // Status/activity edits are logged; rejecting or suspending needs a note.
+  const statusChanged =
+    isEdit && (form.status !== initial.status || form.activeStatus !== initial.activeStatus);
+  const reasonRequired =
+    isEdit &&
+    ((form.status === 'rejected' && initial.status !== 'rejected') ||
+      (form.activeStatus === 'suspended' && initial.activeStatus !== 'suspended'));
+
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setNameError(null);
@@ -90,6 +98,10 @@ export function SellerForm({ seller }: { seller?: Seller }) {
     }
     if (!form.phone && (!isEdit || initial.phone)) {
       setEmailError('Enter a valid phone number (with country).');
+      return;
+    }
+    if (isEdit && reasonRequired && !form.reason.trim()) {
+      setGeneralError('A reason is required when rejecting or suspending a seller.');
       return;
     }
     if (!isEdit && form.password.trim().length < 6) {
@@ -110,9 +122,7 @@ export function SellerForm({ seller }: { seller?: Seller }) {
         }
         if (form.status !== initial.status) payload.status = form.status;
         if (form.activeStatus !== initial.activeStatus) payload.activeStatus = form.activeStatus;
-        if (form.status === 'rejected' && form.rejectionReason !== initial.rejectionReason) {
-          payload.rejectionReason = form.rejectionReason;
-        }
+        if (statusChanged && form.reason.trim()) payload.reason = form.reason.trim();
         if (form.avatar) payload.avatar = form.avatar;
         if (form.nidFrontImage) payload.nidFrontImage = form.nidFrontImage;
         if (form.nidBackImage) payload.nidBackImage = form.nidBackImage;
@@ -276,18 +286,24 @@ export function SellerForm({ seller }: { seller?: Seller }) {
             </label>
           )}
 
-          {isEdit && form.status === 'rejected' && (
+          {statusChanged && (
             <label className="text-sm text-foreground md:col-span-2">
-              Rejection reason (shown to the seller)
+              {reasonRequired
+                ? 'Reason * (required to reject or suspend; saved in the status history)'
+                : 'Note (optional, saved in the status history)'}
               <textarea
                 rows={2}
                 maxLength={1000}
+                required={reasonRequired}
                 className="mt-1 w-full rounded-md border border-input px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none"
-                value={form.rejectionReason}
-                onChange={(event) =>
-                  setForm((f) => ({ ...f, rejectionReason: event.target.value }))
-                }
+                value={form.reason}
+                onChange={(event) => setForm((f) => ({ ...f, reason: event.target.value }))}
               />
+              {form.status === 'rejected' && initial.status !== 'rejected' && (
+                <span className="mt-1 block text-xs text-muted-foreground">
+                  The seller will see this reason.
+                </span>
+              )}
             </label>
           )}
         </div>

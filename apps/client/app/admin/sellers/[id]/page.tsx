@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { SellerForm } from '@/components/admin/sellers/seller-form';
+import { SellerStatusHistoryPanel } from '@/components/admin/sellers/seller-status-history-panel';
 import { getSeller } from '@/lib/api/sellers';
 import { NotFoundApiError } from '@/lib/api/http';
 import { useToast } from '@/components/ui/toast';
@@ -34,5 +35,10 @@ export default function EditSellerPage() {
   }
   if (!seller) return null;
 
-  return <SellerForm seller={seller} key={seller.id} />;
+  return (
+    <>
+      <SellerForm seller={seller} key={seller.id} />
+      <SellerStatusHistoryPanel sellerId={seller.id} />
+    </>
+  );
 }

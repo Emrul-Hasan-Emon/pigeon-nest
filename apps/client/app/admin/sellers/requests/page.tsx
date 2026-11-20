@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Modal } from '@/components/ui/modal';
+import { ReasonModal } from '@/components/admin/sellers/reason-modal';
 import { useToast } from '@/components/ui/toast';
 import { useDebouncedValue } from '@/lib/hooks/use-debounced-value';
 import { approveSellerRequest, listSellerRequests, rejectSellerRequest } from '@/lib/api/sellers';
@@ -33,7 +33,6 @@ export default function SellerRequestsPage() {
   const [busyId, setBusyId] = useState<number | null>(null);
 
   const [rejecting, setRejecting] = useState<Seller | null>(null);
-  const [reason, setReason] = useState('');
 
   const fetchFirstPage = useCallback(async () => {
     setLoading(true);
@@ -95,21 +94,19 @@ export default function SellerRequestsPage() {
     }
   }
 
-  async function handleReject() {
+  async function handleReject(reason: string) {
     if (!rejecting) return;
     const seller = rejecting;
     setBusyId(seller.id);
     try {
-      await rejectSellerRequest(seller.id, reason.trim() || undefined);
+      await rejectSellerRequest(seller.id, reason);
       dropRow(seller.id);
       showToast(`${seller.name} rejected.`, 'success');
       setRejecting(null);
-      setReason('');
     } catch (error) {
       if (error instanceof ApiError && (error.status === 404 || error.status === 409)) {
         dropRow(seller.id);
         setRejecting(null);
-        setReason('');
       }
       showToast(error instanceof ApiError ? error.message : 'Failed to reject.', 'error');
     } finally {
@@ -172,10 +169,7 @@ export default function SellerRequestsPage() {
                 <button
                   type="button"
                   disabled={busyId === seller.id}
-                  onClick={() => {
-                    setRejecting(seller);
-                    setReason('');
-                  }}
+                  onClick={() => setRejecting(seller)}
                   className="rounded-md border border-destructive px-4 py-2 text-sm font-semibold text-destructive hover:bg-destructive/10 disabled:opacity-50"
                 >
                   Reject
@@ -200,35 +194,14 @@ export default function SellerRequestsPage() {
       )}
 
       {rejecting && (
-        <Modal title={`Reject ${rejecting.name}?`} onClose={() => setRejecting(null)} widthClassName="max-w-md">
-          <label className="block text-sm text-foreground">
-            Reason (optional, shown to the seller)
-            <textarea
-              rows={3}
-              maxLength={1000}
-              value={reason}
-              onChange={(event) => setReason(event.target.value)}
-              className="mt-1 w-full rounded-md border border-input px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none"
-            />
-          </label>
-          <div className="mt-4 flex justify-end gap-2">
-            <button
-              type="button"
-              onClick={() => setRejecting(null)}
-              className="rounded-md border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              disabled={busyId === rejecting.id}
-              onClick={handleReject}
-              className="rounded-md bg-destructive px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50"
-            >
-              Reject
-            </button>
-          </div>
-        </Modal>
+        <ReasonModal
+          title={`Reject ${rejecting.name}?`}
+          label="Reason (required, shown to the seller and saved in the history)"
+          confirmLabel="Reject"
+          busy={busyId === rejecting.id}
+          onConfirm={handleReject}
+          onClose={() => setRejecting(null)}
+        />
       )}
     </div>
   );
