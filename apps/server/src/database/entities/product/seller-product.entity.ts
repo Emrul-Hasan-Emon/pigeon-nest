@@ -12,6 +12,9 @@ import { Seller } from '../seller/seller.entity';
 import { Category } from '../category/category.entity';
 import { Collection } from '../collection/collection.entity';
 import { SellerProductSku } from './seller-product-sku.entity';
+import { ProductStatus } from '../../enums/product-status.enum';
+import { ProductActiveStatus } from '../../enums/product-active-status.enum';
+import { SellerProductStatusChangeHistory } from './seller-product-status-change-history.entity';
 import { SellerProductMedia } from '../product-media/seller-product-media.entity';
 
 @Entity()
@@ -63,11 +66,21 @@ export class SellerProduct extends BaseEntity {
   @Column({ default: false })
   isFeatured: boolean;
 
-  @Column({ default: false })
-  isPublished: boolean;
+  // A product is visible on the storefront only when it is approved AND active.
+  @Index()
+  @Column({ type: 'varchar', default: ProductStatus.APPROVED })
+  status: ProductStatus;
 
-  @Column({ default: true })
-  isActive: boolean;
+  @Index()
+  @Column({ type: 'varchar', default: ProductActiveStatus.ACTIVE })
+  activeStatus: ProductActiveStatus;
+
+  // Why an admin rejected / suspended the product; shown to the seller.
+  @Column({ type: 'text', nullable: true })
+  rejectionReason: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  suspensionReason: string | null;
 
   @Column({ nullable: true })
   seoTitle: string;
@@ -80,4 +93,10 @@ export class SellerProduct extends BaseEntity {
 
   @OneToMany(() => SellerProductMedia, (media) => media.product)
   media: SellerProductMedia[];
+
+  @OneToMany(
+    () => SellerProductStatusChangeHistory,
+    (history) => history.product,
+  )
+  statusHistory: SellerProductStatusChangeHistory[];
 }
