@@ -1,78 +1,47 @@
-import { Transform, Type } from 'class-transformer';
+import { Transform } from 'class-transformer';
 import {
-  ArrayMaxSize,
-  ArrayMinSize,
-  IsArray,
   IsBoolean,
+  IsEnum,
   IsInt,
   IsNotEmpty,
-  IsOptional,
   IsString,
   Max,
   MaxLength,
   Min,
-  ValidateNested,
 } from 'class-validator';
 import { IsDefinedWhenPresent } from '../../../shared/decorators/defined-when-present.decorator';
 import { MAX_INT32 } from '../../../shared/constants/limits';
 import { trimString } from '../../../shared/utils/transform.util';
-import { CreateProductSkuDto } from './create-product-sku.dto';
+import { ProductStatus } from '../../../database/enums/product-status.enum';
+import { ProductActiveStatus } from '../../../database/enums/product-active-status.enum';
+import { CreateProductBaseDto } from './create-seller-product-base.dto';
 
-export class CreateProductDto {
+// Admin creating a product on behalf of a seller.
+export class CreateProductDto extends CreateProductBaseDto {
   @IsInt()
   @Min(1)
   @Max(MAX_INT32)
   sellerId: number;
 
-  @IsInt()
-  @Min(1)
-  @Max(MAX_INT32)
-  categoryId: number;
-
-  // null is accepted and means "no collection".
-  @IsOptional()
-  @IsInt()
-  @Min(1)
-  @Max(MAX_INT32)
-  collectionId?: number | null;
-
-  @Transform(trimString)
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(400)
-  name: string;
-
-  @IsDefinedWhenPresent()
-  @IsString()
-  @MaxLength(20000)
-  description?: string;
-
   @IsDefinedWhenPresent()
   @IsBoolean()
   isFeatured?: boolean;
 
+  // New products default to approved + active.
   @IsDefinedWhenPresent()
-  @IsBoolean()
-  isPublished?: boolean;
+  @IsEnum(ProductStatus)
+  status?: ProductStatus;
 
   @IsDefinedWhenPresent()
-  @IsBoolean()
-  isActive?: boolean;
+  @IsEnum(ProductActiveStatus)
+  activeStatus?: ProductActiveStatus;
 
+  // Required when the product starts rejected or suspended; saved in the
+  // status history and shown to the seller.
   @IsDefinedWhenPresent()
+  @Transform(trimString)
   @IsString()
-  @MaxLength(255)
-  seoTitle?: string;
-
-  @IsDefinedWhenPresent()
-  @IsString()
+  @IsNotEmpty()
   @MaxLength(1000)
-  seoDescription?: string;
-
-  @IsArray()
-  @ArrayMinSize(1)
-  @ArrayMaxSize(100)
-  @ValidateNested({ each: true })
-  @Type(() => CreateProductSkuDto)
-  skus: CreateProductSkuDto[];
+  reason?: string;
 }

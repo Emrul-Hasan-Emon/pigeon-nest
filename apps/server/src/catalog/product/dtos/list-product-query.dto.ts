@@ -1,6 +1,7 @@
 import { Transform, Type } from 'class-transformer';
 import {
   IsBoolean,
+  IsEnum,
   IsInt,
   IsOptional,
   IsString,
@@ -8,6 +9,8 @@ import {
   MaxLength,
   Min,
 } from 'class-validator';
+import { ProductStatus } from '../../../database/enums/product-status.enum';
+import { ProductActiveStatus } from '../../../database/enums/product-active-status.enum';
 import { MAX_INT32 } from '../../../shared/constants/limits';
 import { parseBoolean } from '../../../shared/utils/transform.util';
 
@@ -45,19 +48,17 @@ export class ListProductQueryDto {
   collectionId?: number;
 
   @IsOptional()
-  @Transform(parseBoolean)
-  @IsBoolean()
-  isPublished?: boolean;
+  @IsEnum(ProductStatus)
+  status?: ProductStatus;
+
+  @IsOptional()
+  @IsEnum(ProductActiveStatus)
+  activeStatus?: ProductActiveStatus;
 
   @IsOptional()
   @Transform(parseBoolean)
   @IsBoolean()
   isFeatured?: boolean;
-
-  @IsOptional()
-  @Transform(parseBoolean)
-  @IsBoolean()
-  isActive?: boolean;
 
   // Read directly by @CursorPaginationParams(), not used here — declared so
   // the whitelist validator doesn't reject them as unknown properties.
