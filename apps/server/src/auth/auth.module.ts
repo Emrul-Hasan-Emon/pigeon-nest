@@ -9,11 +9,17 @@ import { SellerAuthController } from './seller-auth.controller';
 import { SellerAuthService } from './seller-auth.service';
 import { SellerAccessGuard } from './guards/seller-access.guard';
 import { SellerModule } from '../seller/seller.module';
+import { UserModule } from '../user/user.module';
+import { UserAuthController } from './user-auth.controller';
+import { UserAuthService } from './user-auth.service';
+import { UserAccessGuard } from './guards/user-access.guard';
+import { OptionalCustomerGuard } from './guards/optional-customer.guard';
 
 @Global()
 @Module({
   imports: [
     SellerModule,
+    UserModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -27,14 +33,24 @@ import { SellerModule } from '../seller/seller.module';
       }),
     }),
   ],
-  controllers: [AdminAuthController, SellerAuthController],
+  controllers: [AdminAuthController, SellerAuthController, UserAuthController],
   providers: [
     AuthGuard,
     RolesGuard,
     SellerAccessGuard,
+    UserAccessGuard,
+    OptionalCustomerGuard,
     AdminAuthService,
     SellerAuthService,
+    UserAuthService,
   ],
-  exports: [JwtModule, AuthGuard, RolesGuard, SellerAccessGuard],
+  exports: [
+    JwtModule,
+    AuthGuard,
+    RolesGuard,
+    SellerAccessGuard,
+    UserAccessGuard,
+    OptionalCustomerGuard,
+  ],
 })
 export class AuthModule {}
