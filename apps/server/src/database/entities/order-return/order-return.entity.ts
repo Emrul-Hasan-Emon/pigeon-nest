@@ -9,7 +9,6 @@ import {
 import { BaseEntity } from '../base.entity';
 import { Order } from '../order/order.entity';
 import { User } from '../person/user.entity';
-import { decimalTransformer } from '../../utils/decimal.transformer';
 import { OrderReturnItem } from './order-return-item.entity';
 import { OrderReturnStatusHistory } from './order-return-status-history.entity';
 
@@ -42,10 +41,7 @@ export class OrderReturn extends BaseEntity {
   reason: string;
 
   @Column({
-    type: 'decimal',
-    precision: 12,
-    scale: 2,
-    transformer: decimalTransformer,
+    type: 'double precision',
   })
   refundAmount: number;
 
