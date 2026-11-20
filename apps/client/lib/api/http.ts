@@ -1,8 +1,10 @@
 import { getAdminToken } from '../auth/admin-token';
 import { getSellerToken } from '../auth/seller-token';
+import { getUserToken } from '../auth/user-token';
+import { getCartSession } from '../cart/session';
 
 // Versioned API root, e.g. http://localhost:3100/v1/api. Each role appends
-// its own segment (/admin or /seller).
+// its own segment (/admin, /seller or /user).
 const API_ROOT = (
   process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3000/v1/api'
 ).replace(/\/+$/, '');
@@ -11,6 +13,8 @@ export class ApiError extends Error {
   constructor(
     public readonly status: number,
     message: string,
+    /** Item-by-item reasons the server sends with some conflicts (e.g. stock changed at checkout). */
+    public readonly issues: string[] = [],
   ) {
     super(message);
   }
@@ -42,11 +46,12 @@ async function request<T>(
     body?: unknown;
     query?: Query;
   } = {},
+  extraHeaders?: () => Record<string, string>,
 ): Promise<T> {
   const { method = 'GET', body, query } = options;
   const token = getToken();
 
-  const headers: Record<string, string> = {};
+  const headers: Record<string, string> = { ...(extraHeaders?.() ?? {}) };
   if (token) {
     headers.Authorization = `Bearer ${token}`;
   }
@@ -78,30 +83,36 @@ async function request<T>(
       (Array.isArray(data?.message) && data.message.join(', ')) ||
       response.statusText;
 
+    const issues: string[] = Array.isArray(data?.issues) ? data.issues.filter((i: unknown) => typeof i === 'string') : [];
     if (response.status === 404) {
-      throw new NotFoundApiError(response.status, message);
+      throw new NotFoundApiError(response.status, message, issues);
     }
     if (response.status === 409) {
-      throw new ConflictApiError(response.status, message);
+      throw new ConflictApiError(response.status, message, issues);
     }
-    throw new ApiError(response.status, message);
+    throw new ApiError(response.status, message, issues);
   }
 
   return data as T;
 }
 
-function createClient(segment: string, getToken: () => string | null) {
+function createClient(
+  segment: string,
+  getToken: () => string | null,
+  extraHeaders?: () => Record<string, string>,
+) {
   const base = `${API_ROOT}${segment}`;
   return {
     get: <T>(path: string, query?: Record<string, unknown>) =>
-      request<T>(base, getToken, path, { method: 'GET', query: query as Query }),
+      request<T>(base, getToken, path, { method: 'GET', query: query as Query }, extraHeaders),
     post: <T>(path: string, body?: unknown) =>
-      request<T>(base, getToken, path, { method: 'POST', body }),
+      request<T>(base, getToken, path, { method: 'POST', body }, extraHeaders),
     put: <T>(path: string, body?: unknown) =>
-      request<T>(base, getToken, path, { method: 'PUT', body }),
+      request<T>(base, getToken, path, { method: 'PUT', body }, extraHeaders),
     patch: <T>(path: string, body?: unknown) =>
-      request<T>(base, getToken, path, { method: 'PATCH', body }),
-    delete: <T>(path: string) => request<T>(base, getToken, path, { method: 'DELETE' }),
+      request<T>(base, getToken, path, { method: 'PATCH', body }, extraHeaders),
+    delete: <T>(path: string) =>
+      request<T>(base, getToken, path, { method: 'DELETE' }, extraHeaders),
   };
 }
 
@@ -110,3 +121,10 @@ export const http = createClient('/admin', getAdminToken);
 
 /** Seller API (`/v1/api/seller`), authenticated with the seller token. */
 export const sellerHttp = createClient('/seller', getSellerToken);
+
+/** User API (`/v1/api/user`), authenticated with the user token. */
+export const userHttp = createClient('/user', getUserToken, (): Record<string, string> => {
+  // A guest's cart is identified by this header; a signed-in customer needs none.
+  const session = getUserToken() ? null : getCartSession();
+  return session ? { 'x-cart-session': session } : {};
+});
