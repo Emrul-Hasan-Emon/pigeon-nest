@@ -1,13 +1,13 @@
 import { Transform } from 'class-transformer';
-import { IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
 
 export class RejectSellerDto {
-  // Shown to the seller. Blank is treated as "no reason".
-  @IsOptional()
+  // Required. Shown to the seller and saved in the status history.
   @Transform(({ value }: { value: unknown }) =>
-    typeof value === 'string' ? value.trim() || undefined : value,
+    typeof value === 'string' ? value.trim() : value,
   )
   @IsString()
+  @IsNotEmpty()
   @MaxLength(1000)
-  reason?: string;
+  reason: string;
 }

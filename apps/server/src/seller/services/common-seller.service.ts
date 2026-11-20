@@ -4,7 +4,8 @@ import {
   NotFoundException,
   PayloadTooLargeException,
 } from '@nestjs/common';
-import { QueryFailedError } from 'typeorm';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource, EntityManager, QueryFailedError } from 'typeorm';
 import { DatabaseService } from '../../database/database.service';
 import { FileUploadService } from '../../file-management/file-upload.service';
 import { FileInfo } from '../../file-management/types/file-info.type';
@@ -34,6 +35,7 @@ export class CommonSellerService {
   constructor(
     private readonly databaseService: DatabaseService,
     private readonly fileUploadService: FileUploadService,
+    @InjectDataSource() private readonly dataSource: DataSource,
   ) {}
 
   async findOrThrow(id: number): Promise<Seller> {
@@ -69,7 +71,13 @@ export class CommonSellerService {
   // Validates the images, uploads them, saves the seller, then deletes the
   // replaced files. If saving fails the new uploads are removed again, so a
   // failure never leaves orphans or loses the old files.
-  async saveWithImages(seller: Seller, images?: SellerImages): Promise<Seller> {
+  // `afterSave` runs inside the same transaction as the seller save (used to
+  // write the status history), so both succeed or both roll back.
+  async saveWithImages(
+    seller: Seller,
+    images?: SellerImages,
+    afterSave?: (manager: EntityManager, saved: Seller) => Promise<void>,
+  ): Promise<Seller> {
     for (const [field] of IMAGE_FIELDS) {
       const file = images?.[field];
       if (!file) continue;
@@ -91,7 +99,11 @@ export class CommonSellerService {
         seller[pathKey] = info.filePath;
         seller[urlKey] = info.fileUrl;
       }
-      const saved = await this.databaseService.seller.save(seller);
+      const saved = await this.dataSource.transaction(async (manager) => {
+        const result = await manager.getRepository(Seller).save(seller);
+        if (afterSave) await afterSave(manager, result);
+        return result;
+      });
       for (const path of stalePaths) {
         await this.fileUploadService.removeFile(path).catch(() => undefined);
       }

@@ -3,15 +3,18 @@ import * as bcrypt from 'bcryptjs';
 import { DatabaseService } from '../../database/database.service';
 import { Seller } from '../../database/entities/seller/seller.entity';
 import { SellerStatus } from '../../database/enums/seller-status.enum';
+import { SellerStatusChangeAction } from '../../database/enums/seller-status-change-action.enum';
 import { ChangeSellerPasswordDto } from '../dtos/change-seller-password.dto';
 import { UpdateSellerProfileDto } from '../dtos/update-seller-profile.dto';
 import { CommonSellerService, SellerImages } from './common-seller.service';
+import { SellerStatusHistoryService } from './seller-status-history.service';
 
 @Injectable()
 export class SellerProfileService {
   constructor(
     private readonly databaseService: DatabaseService,
     private readonly commonSellerService: CommonSellerService,
+    private readonly sellerStatusHistoryService: SellerStatusHistoryService,
   ) {}
 
   getProfile(seller: Seller) {
@@ -51,11 +54,27 @@ export class SellerProfileService {
       return this.commonSellerService.toSellerView(seller);
     }
 
-    if (seller.status === SellerStatus.REJECTED) {
+    const resubmitting = seller.status === SellerStatus.REJECTED;
+    if (resubmitting) {
       seller.status = SellerStatus.PENDING;
       seller.rejectionReason = null;
     }
-    const saved = await this.commonSellerService.saveWithImages(seller, images);
+    const saved = await this.commonSellerService.saveWithImages(
+      seller,
+      images,
+      resubmitting
+        ? (manager, result) =>
+            this.sellerStatusHistoryService.record(manager, {
+              sellerId: result.id,
+              fromStatus: SellerStatus.REJECTED,
+              fromActiveStatus: result.activeStatus,
+              toStatus: result.status,
+              toActiveStatus: result.activeStatus,
+              action: SellerStatusChangeAction.RESUBMITTED,
+              actor: this.sellerStatusHistoryService.sellerActor(result),
+            })
+        : undefined,
+    );
     return this.commonSellerService.toSellerView(saved);
   }
 

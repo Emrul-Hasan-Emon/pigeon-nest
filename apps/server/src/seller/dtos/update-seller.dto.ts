@@ -66,9 +66,14 @@ export class UpdateSellerDto {
   @IsEnum(SellerActiveStatus)
   activeStatus?: SellerActiveStatus;
 
-  // Cleared automatically when status becomes approved.
+  // Note for the status history. Required when this request rejects or
+  // suspends the seller; optional for any other status change. When it
+  // rejects the seller it is also the reason the seller sees.
   @IsOptional()
+  @Transform(({ value }: { value: unknown }) =>
+    typeof value === 'string' ? value.trim() || undefined : value,
+  )
   @IsString()
   @MaxLength(1000)
-  rejectionReason?: string;
+  reason?: string;
 }
