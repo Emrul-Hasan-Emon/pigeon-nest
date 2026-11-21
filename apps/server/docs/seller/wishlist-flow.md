@@ -18,6 +18,7 @@ never who. There is nothing a seller can change.
 
 In the portal
 -------------
+- Menu > Wishlist: the top 50 most saved products with total saves.
 - Dashboard: a "Wishlist demand" section with total saves, products saved and the
   top five.
 - Products list: a "Saved by" column and a "Most saved first" sort.

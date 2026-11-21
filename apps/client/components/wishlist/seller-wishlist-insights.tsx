@@ -6,22 +6,22 @@ import { getWishlistInsights } from '@/lib/api/wishlist';
 import type { SellerWishlistInsights } from '@/types/wishlist';
 
 /** How often this seller's products are saved. Counts only: customers are never shown. */
-export function SellerWishlistInsightsPanel() {
+export function SellerWishlistInsightsPanel({ limit = 5, title = 'Wishlist demand' }: { limit?: number; title?: string }) {
   const [data, setData] = useState<SellerWishlistInsights | null>(null);
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
-    getWishlistInsights(5)
+    getWishlistInsights(limit)
       .then(setData)
       .catch(() => setFailed(true));
-  }, []);
+  }, [limit]);
 
-  if (failed) return null;
-  if (!data) return null;
+  if (failed) return <p role="alert" className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">Could not load wishlist numbers.</p>;
+  if (!data) return <p className="py-10 text-center text-muted-foreground">Loading…</p>;
 
   return (
     <section className="mb-6" aria-label="Wishlist demand">
-      <h2 className="mb-1 text-base font-semibold text-foreground">Wishlist demand</h2>
+      <h2 className="mb-1 text-base font-semibold text-foreground">{title}</h2>
       <p className="mb-3 text-sm text-muted-foreground">How many customers saved your products to buy later. You see the counts, not who.</p>
       <div className="mb-4 grid grid-cols-2 gap-4 lg:grid-cols-4">
         <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
