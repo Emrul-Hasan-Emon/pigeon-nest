@@ -26,13 +26,14 @@ export function ProductTable({
             <th className="px-4 py-3 text-left font-medium text-muted-foreground">Category</th>
             <th className="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
             <th className="px-4 py-3 text-left font-medium text-muted-foreground">Activity</th>
+            <th className="px-4 py-3 text-right font-medium text-muted-foreground" title="Customers who saved this product to their wishlist">Saved by</th>
             <th className="px-4 py-3 text-right font-medium text-muted-foreground">Actions</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-border">
           {products.length === 0 && (
             <tr>
-              <td colSpan={7} className="px-4 py-6 text-center text-muted-foreground">
+              <td colSpan={8} className="px-4 py-6 text-center text-muted-foreground">
                 No products found.
               </td>
             </tr>
@@ -82,6 +83,7 @@ export function ProductTable({
                   <option value="suspended">Suspended</option>
                 </select>
               </td>
+              <td className="px-4 py-3 text-right tabular-nums text-muted-foreground">{product.wishlistCount ?? 0}</td>
               <td className="px-4 py-3 text-right">
                 <div className="flex justify-end gap-3">
                   <Link
