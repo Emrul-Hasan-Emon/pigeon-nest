@@ -64,7 +64,7 @@ export function SellerTable({
               <td className="px-4 py-3 font-medium text-foreground">{seller.name}</td>
               <td className="px-4 py-3 text-muted-foreground">{seller.email ?? '—'}</td>
               <td className="px-4 py-3 text-muted-foreground">{seller.phone ?? '—'}</td>
-              <td className="px-4 py-3 text-muted-foreground">{seller.commissionRate}%</td>
+              <td className="px-4 py-3 text-muted-foreground">{seller.commission ? `${seller.commission.type === 'percentage' ? `${seller.commission.value}%` : `${seller.commission.value} / order`}${seller.commission.source === 'global' ? ' (global)' : ''}` : '—'}</td>
               <td className="px-4 py-3">
                 <span
                   className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${STATUS_STYLES[seller.status]}`}
