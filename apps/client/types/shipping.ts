@@ -62,10 +62,11 @@ export interface SettingItem {
   label: string;
   description: string;
   group: string;
-  type: 'decimal' | 'int' | 'boolean';
+  type: 'decimal' | 'int' | 'boolean' | 'enum';
   min?: number;
   max?: number;
-  default: number | boolean;
-  value: number | boolean;
+  options?: string[];
+  default: number | boolean | string;
+  value: number | boolean | string;
   isDefault: boolean;
 }

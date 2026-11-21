@@ -71,6 +71,15 @@ export const ENDPOINTS = {
       types: '/payment-gateways/types',
     },
     settings: { list: '/settings' },
+    commission: {
+      balances: '/commission/balances',
+      balance: (sellerId: Id) => `/commission/balances/${sellerId}`,
+      disburse: (sellerId: Id) => `/commission/balances/${sellerId}/disbursements`,
+      history: '/commission/history',
+      disbursements: resource('/commission/disbursements'),
+      rule: (sellerId: Id) => `/sellers/${sellerId}/commission-setting`,
+      settingHistory: '/seller-settings/history',
+    },
     countries: { list: '/countries' },
     shippingZones: {
       ...resource('/shipping-zones'),
@@ -114,6 +123,13 @@ export const ENDPOINTS = {
       mediaFiles: (productId: Id) => `/products/${productId}/media-files`,
     },
     dashboard: '/dashboard',
+    commission: {
+      balance: '/commission/balance',
+      history: '/commission/history',
+      disbursements: resource('/commission/disbursements'),
+      rule: '/commission/setting',
+      settingHistory: '/commission/setting/history',
+    },
     ...staffOrders,
     catalog: {
       categoryTree: '/catalog/categories/tree',

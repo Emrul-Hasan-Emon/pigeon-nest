@@ -29,7 +29,8 @@ export interface Seller {
   emailVerified: boolean;
   phoneVerified: boolean;
   status: SellerStatus;
-  commissionRate: number;
+  /** The rule that applies: the seller's own, else the global one. */
+  commission?: { type: 'percentage' | 'fixed'; value: number | null; source: 'seller' | 'global' };
   payoutAccountInfo: Record<string, unknown> | null;
   activeStatus: SellerActiveStatus;
   rejectionReason: string | null;
