@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { SellerSidebar } from '@/components/seller/seller-sidebar';
 import { StatusBanner } from '@/components/seller/status-banner';
+import { SellerWishlistInsightsPanel } from '@/components/wishlist/seller-wishlist-insights';
 import { getSellerDashboard, type SellerDashboardSummary } from '@/lib/api/seller-products';
 import { getMyProfile } from '@/lib/api/seller-portal';
 import { ApiError } from '@/lib/api/http';
@@ -134,6 +135,8 @@ export default function SellerDashboardPage() {
             <Section title="Stock">
               <Stat label="Out-of-stock SKUs" value={summary.outOfStockSkus} tone={summary.outOfStockSkus ? 'warn' : 'default'} />
             </Section>
+
+            <SellerWishlistInsightsPanel />
           </>
         )}
       </main>
