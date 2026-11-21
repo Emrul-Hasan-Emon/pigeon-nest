@@ -21,6 +21,7 @@ import { SellerProductMedia } from '../product-media/seller-product-media.entity
 @Entity()
 @Unique(['sellerId', 'slug'])
 @Check('CHK_seller_product_wishlistCount', '"wishlistCount" >= 0')
+@Check('CHK_seller_product_rating', '"ratingCount" >= 0 AND "ratingSum" >= 0 AND "ratingAverage" BETWEEN 0 AND 5')
 export class SellerProduct extends BaseEntity {
   @Index()
   @Column()
@@ -73,6 +74,18 @@ export class SellerProduct extends BaseEntity {
   @Index('IDX_seller_product_wishlistCount')
   @Column({ type: 'int', default: 0 })
   wishlistCount: number;
+
+  // Published, not-deleted reviews only. Recomputed inside the same transaction
+  // as every review change, with the product row locked.
+  @Column({ type: 'int', default: 0 })
+  ratingCount: number;
+
+  @Column({ type: 'int', default: 0 })
+  ratingSum: number;
+
+  @Index('IDX_seller_product_ratingAverage')
+  @Column({ type: 'double precision', default: 0 })
+  ratingAverage: number;
 
   // A product is visible on the storefront only when it is approved AND active.
   @Index()
