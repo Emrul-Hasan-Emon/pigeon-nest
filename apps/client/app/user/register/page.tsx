@@ -7,6 +7,7 @@ import { PhoneInput } from '@/components/phone-input';
 import { userRegister } from '@/lib/api/user-portal';
 import { ApiError } from '@/lib/api/http';
 import { setUserToken } from '@/lib/auth/user-token';
+import { safeNextPath, useNextQuery } from '@/lib/auth/next-path';
 import { mergeGuestCarts } from '@/lib/api/cart';
 
 const INPUT =
@@ -14,6 +15,7 @@ const INPUT =
 
 export default function UserRegisterPage() {
   const router = useRouter();
+  const nextQuery = useNextQuery();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
@@ -40,7 +42,7 @@ export default function UserRegisterPage() {
       });
       setUserToken(response.accessToken);
       await mergeGuestCarts();
-      router.replace('/user/profile');
+      router.replace(safeNextPath(new URLSearchParams(window.location.search).get('next'), '/user/profile'));
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Registration failed.');
     } finally {
@@ -100,7 +102,7 @@ export default function UserRegisterPage() {
 
         <p className="mt-4 text-center text-sm text-muted-foreground">
           Already registered?{' '}
-          <Link href="/user/login" className="font-medium text-primary hover:opacity-70">
+          <Link href={`/user/login${nextQuery}`} className="font-medium text-primary hover:opacity-70">
             Sign in
           </Link>
         </p>
