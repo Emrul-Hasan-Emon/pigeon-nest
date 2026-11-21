@@ -119,7 +119,12 @@ export function MyOrderDetail({ id, placed, initial }: { id: number; placed?: bo
                 {i.sku.label && <p className="text-xs text-st-slate">{i.sku.label}</p>}
                 <p className="text-xs text-st-slate">{money(i.unitPayable)} × {i.quantity}</p>
               </div>
-              <p className="shrink-0 text-sm font-semibold text-st-ink">{money(i.lineTotal)}</p>
+              <div className="shrink-0 text-right">
+                <p className="text-sm font-semibold text-st-ink">{money(i.lineTotal)}</p>
+                {order.status === 'delivered' && (
+                  <Link href={`/reviews?item=${i.id}`} className="mt-1 inline-block text-xs font-medium text-st-teal underline">Write a review</Link>
+                )}
+              </div>
             </li>
           ))}
         </ul>
