@@ -81,6 +81,8 @@ export interface Product {
   thumbnailUrl: string | null;
   thumbnailPath: string | null;
   isFeatured: boolean;
+  /** How many customers have this product in their wishlist. */
+  wishlistCount: number;
   /** Visible on the storefront only when approved AND active. */
   status: ProductStatus;
   activeStatus: ProductActiveStatus;
@@ -108,9 +110,13 @@ export interface ProductListParams {
   status?: ProductStatus;
   activeStatus?: ProductActiveStatus;
   isFeatured?: boolean;
+  sort?: ProductListSort;
   cursor?: number;
   limit?: number;
 }
+
+/** mostSaved pages by offset: `cursor` is how many rows were already served. */
+export type ProductListSort = 'newest' | 'mostSaved';
 
 export interface SellerProductListParams {
   search?: string;
@@ -118,6 +124,7 @@ export interface SellerProductListParams {
   collectionId?: number;
   status?: ProductStatus;
   activeStatus?: ProductActiveStatus;
+  sort?: ProductListSort;
   cursor?: number;
   limit?: number;
 }
