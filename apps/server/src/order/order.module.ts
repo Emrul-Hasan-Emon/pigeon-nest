@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { CommissionModule } from '../commission/commission.module';
 import { CartModule } from '../cart/cart.module';
 import { UserModule } from '../user/user.module';
 import { SettingsModule } from '../settings/settings.module';
@@ -21,7 +22,7 @@ import { OrderViewService } from './services/order-view.service';
 import { UserOrderService } from './services/user-order.service';
 
 @Module({
-  imports: [CartModule, SettingsModule, UserModule],
+  imports: [CommissionModule, CartModule, SettingsModule, UserModule],
   controllers: [
     UserCheckoutController,
     UserOrderController,
