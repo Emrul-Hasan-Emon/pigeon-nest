@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Stars } from '@/components/reviews/stars';
 import { productHref } from '@/lib/api/storefront';
 import type { StoreProduct } from '@/types/storefront';
 import { WishlistButton } from './wishlist-button';
@@ -71,6 +72,13 @@ export function ProductCard({ product, layout = 'grid' }: { product: StoreProduc
       <div className="mt-2 flex flex-1 flex-col">
         <h3 className="line-clamp-2 text-[13px] font-medium leading-snug text-st-ink">{product.name}</h3>
         {product.seller && <p className="truncate text-xs text-st-slate">{product.seller.name}</p>}
+        {product.ratingCount > 0 && (
+          <p className="mt-0.5 flex items-center gap-1 text-xs text-st-slate">
+            <Stars value={product.ratingAverage} size={12} />
+            <span aria-hidden>({product.ratingCount})</span>
+            <span className="sr-only">{product.ratingAverage} out of 5 from {product.ratingCount} reviews</span>
+          </p>
+        )}
         <Price product={product} className="mt-1 text-sm" />
       </div>
     </Link>

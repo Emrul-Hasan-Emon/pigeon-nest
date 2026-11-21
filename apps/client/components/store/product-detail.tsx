@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useCart } from '@/lib/cart/cart-context';
 import { ApiError } from '@/lib/api/http';
+import { Stars } from '@/components/reviews/stars';
+import { ProductReviews } from './product-reviews';
 import { SellerCartPanel } from './seller-cart-panel';
 import { WishlistButton } from './wishlist-button';
 import { money } from './product-card';
@@ -164,6 +166,12 @@ export function ProductDetailView({ product }: { product: ProductDetail }) {
         {/* buy box */}
         <div className="min-w-0">
           <h1 className="font-display text-2xl font-semibold leading-tight text-st-ink sm:text-3xl">{product.name}</h1>
+          {product.ratingCount > 0 && (
+            <a href="#reviews" className="mt-1 inline-flex items-center gap-2 text-sm text-st-slate hover:text-st-ink">
+              <Stars value={product.ratingAverage} />
+              <span>{product.ratingAverage.toFixed(1)} · {product.ratingCount} {product.ratingCount === 1 ? 'review' : 'reviews'}</span>
+            </a>
+          )}
           <p className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-st-slate">
             <span>
               Sold by{' '}
@@ -288,6 +296,8 @@ export function ProductDetailView({ product }: { product: ProductDetail }) {
           {sku && <p className="mt-3 text-xs text-st-slate">SKU {sku.sku}</p>}
         </div>
       </div>
+
+      <ProductReviews productId={product.id} />
 
       {product.related.length > 0 && (
         <section className="mt-10" aria-label="Related products">

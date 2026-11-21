@@ -28,6 +28,8 @@ export interface StoreProduct {
   thumbnailUrl: string | null;
   price: number | null;
   discountedPrice: number | null;
+  ratingAverage: number;
+  ratingCount: number;
   seller: { id: number; name: string } | null;
   category: { id: number; name: string; slug: string } | null;
 }
@@ -147,6 +149,8 @@ export interface ProductDetail {
   description: string | null;
   thumbnailUrl: string | null;
   isFeatured: boolean;
+  ratingAverage: number;
+  ratingCount: number;
   seoTitle: string | null;
   seoDescription: string | null;
   category: Crumb | null;
