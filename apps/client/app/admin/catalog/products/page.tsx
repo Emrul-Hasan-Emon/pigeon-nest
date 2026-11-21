@@ -9,7 +9,7 @@ import { useToast } from '@/components/ui/toast';
 import { useDebouncedValue } from '@/lib/hooks/use-debounced-value';
 import { deleteProduct, listProducts, updateProduct } from '@/lib/api/products';
 import { ApiError, ConflictApiError, NotFoundApiError } from '@/lib/api/http';
-import type { Product, ProductActiveStatus, ProductStatus } from '@/types/product';
+import type { Product, ProductActiveStatus, ProductListSort, ProductStatus } from '@/types/product';
 
 const PAGE_SIZE = 20;
 
@@ -30,6 +30,7 @@ export default function AdminProductsPage() {
   const debouncedSellerSearch = useDebouncedValue(sellerSearch);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [activeFilter, setActiveFilter] = useState<ActiveFilter>('all');
+  const [sort, setSort] = useState<ProductListSort>('newest');
 
   const [products, setProducts] = useState<Product[]>([]);
   const [nextCursor, setNextCursor] = useState<number | null>(null);
@@ -46,8 +47,9 @@ export default function AdminProductsPage() {
       sellerSearch: debouncedSellerSearch.trim() || undefined,
       status: statusFilter === 'all' ? undefined : statusFilter,
       activeStatus: activeFilter === 'all' ? undefined : activeFilter,
+      sort: sort === 'newest' ? undefined : sort,
     }),
-    [debouncedSearch, debouncedSellerSearch, statusFilter, activeFilter],
+    [debouncedSearch, debouncedSellerSearch, statusFilter, activeFilter, sort],
   );
 
   const fetchFirstPage = useCallback(async () => {
@@ -229,6 +231,15 @@ export default function AdminProductsPage() {
           <option value="active">Active</option>
           <option value="inactive">Inactive</option>
           <option value="suspended">Suspended</option>
+        </select>
+        <select
+          value={sort}
+          onChange={(event) => setSort(event.target.value as ProductListSort)}
+          className="rounded-md border border-input bg-card px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none"
+          aria-label="Sort"
+        >
+          <option value="newest">Newest first</option>
+          <option value="mostSaved">Most saved first</option>
         </select>
       </div>
 
