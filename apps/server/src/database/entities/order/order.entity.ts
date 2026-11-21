@@ -17,6 +17,7 @@ import { PaymentGateway } from '../payment/payment-gateway.entity';
 import { OrderStatus } from '../../enums/order-status.enum';
 import { DeliveryType } from '../../enums/delivery-type.enum';
 import { PaymentStatus } from '../../enums/payment-status.enum';
+import { CommissionType } from '../../enums/commission-type.enum';
 import { OrderItem } from './order-item.entity';
 import { Cart } from '../cart/cart.entity';
 import { OrderStatusHistory } from './order-status-history.entity';
@@ -99,6 +100,23 @@ export class Order extends BaseEntity {
     type: 'double precision',
   })
   payableAmount: number; // subtotal + deliveryCharge - discountAmount
+
+  // The platform's cut, worked out from `subtotal` when the order was placed
+  // with the seller's rate (or the global one). Fixed at placement, so a later
+  // rate change never touches an old order.
+  @Column({ type: 'double precision', default: 0 })
+  systemCommission: number;
+
+  // payableAmount - systemCommission
+  @Column({ type: 'double precision', default: 0 })
+  sellerAmount: number;
+
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  commissionType: CommissionType | null;
+
+  // The percentage or fixed amount that was applied.
+  @Column({ type: 'double precision', nullable: true })
+  commissionValue: number | null;
 
   @Index()
   @Column()
