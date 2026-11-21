@@ -15,7 +15,9 @@ export interface SellerWritePayload {
   email?: string | null;
   phone?: string | null;
   password?: string;
-  commissionRate?: number;
+  /** Send both to set or change the seller's own commission. */
+  commissionType?: 'percentage' | 'fixed';
+  commissionAmount?: number;
   status?: SellerStatus;
   activeStatus?: SellerActiveStatus;
   /** Note for the status history; required when rejecting or suspending. */
@@ -32,8 +34,9 @@ function buildBody(payload: SellerWritePayload): FormData | Record<string, unkno
     if (payload.email) form.set('email', payload.email);
     if (payload.phone) form.set('phone', payload.phone);
     if (payload.password) form.set('password', payload.password);
-    if (payload.commissionRate !== undefined) {
-      form.set('commissionRate', String(payload.commissionRate));
+    if (payload.commissionType !== undefined && payload.commissionAmount !== undefined) {
+      form.set('commissionType', payload.commissionType);
+      form.set('commissionAmount', String(payload.commissionAmount));
     }
     if (payload.status !== undefined) form.set('status', payload.status);
     if (payload.activeStatus !== undefined) form.set('activeStatus', payload.activeStatus);
@@ -49,7 +52,10 @@ function buildBody(payload: SellerWritePayload): FormData | Record<string, unkno
   if (payload.email) json.email = payload.email;
   if (payload.phone) json.phone = payload.phone;
   if (payload.password) json.password = payload.password;
-  if (payload.commissionRate !== undefined) json.commissionRate = payload.commissionRate;
+  if (payload.commissionType !== undefined && payload.commissionAmount !== undefined) {
+    json.commissionType = payload.commissionType;
+    json.commissionAmount = payload.commissionAmount;
+  }
   if (payload.status !== undefined) json.status = payload.status;
   if (payload.activeStatus !== undefined) json.activeStatus = payload.activeStatus;
   if (payload.reason !== undefined) json.reason = payload.reason;

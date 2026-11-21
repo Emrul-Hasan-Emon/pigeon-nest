@@ -100,6 +100,8 @@ export interface PaymentHistoryEntry {
 export interface OrderDetail extends OrderSummary {
   cartId: number | null;
   items: OrderItemView[];
+  /** Staff only: the platform's cut, fixed when the order was placed. */
+  commission?: { type: 'percentage' | 'fixed' | null; value: number | null; systemCommission: number; sellerAmount: number };
   totals: {
     listTotal: number;
     subtotal: number;

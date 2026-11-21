@@ -39,6 +39,6 @@ export function quoteShipping(country: string, deliveryType: DeliveryType) {
 export function listSettings() {
   return http.get<SettingItem[]>(E.settings.list);
 }
-export function updateSettings(settings: Record<string, number | boolean>) {
+export function updateSettings(settings: Record<string, number | boolean | string>) {
   return http.patch<SettingItem[]>(E.settings.list, { settings });
 }
