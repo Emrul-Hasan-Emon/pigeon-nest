@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { AddressBook } from '@/components/addresses/address-book';
+import { AdminReviewList } from '@/components/admin/reviews/review-list';
 import { AdminWishlistList } from '@/components/admin/wishlist/wishlist-list';
 import { UserForm } from '@/components/admin/users/user-form';
 import { getUser } from '@/lib/api/users';
@@ -48,6 +49,11 @@ export default function UserDetailsPage() {
         <h2 className="mb-1 text-lg font-semibold text-foreground">Wishlist</h2>
         <p className="mb-3 text-sm text-muted-foreground">Products this customer saved, with live price and stock. Read only.</p>
         <AdminWishlistList userId={user.id} />
+      </section>
+      <section aria-label="Reviews" className="max-w-6xl">
+        <h2 className="mb-1 text-lg font-semibold text-foreground">Reviews</h2>
+        <p className="mb-3 text-sm text-muted-foreground">What this customer wrote. Open a review to hide or restore it.</p>
+        <AdminReviewList userId={user.id} />
       </section>
     </div>
   );
