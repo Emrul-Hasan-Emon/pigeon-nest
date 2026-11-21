@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { CommissionModule } from '../commission/commission.module';
 import { AdminSellerController } from './controllers/admin-seller.controller';
 import { AdminSellerRequestController } from './controllers/admin-seller-request.controller';
 import { AdminSellerStatusHistoryController } from './controllers/admin-seller-status-history.controller';
@@ -10,6 +11,7 @@ import { SellerProfileService } from './services/seller-profile.service';
 import { SellerStatusHistoryService } from './services/seller-status-history.service';
 
 @Module({
+  imports: [CommissionModule],
   controllers: [
     AdminSellerController,
     AdminSellerRequestController,

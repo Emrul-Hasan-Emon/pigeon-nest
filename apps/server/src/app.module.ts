@@ -9,6 +9,7 @@ import { FileManagementModule } from './file-management/file-management.module';
 import { AuthModule } from './auth/auth.module';
 import { CatalogModule } from './catalog/catalog.module';
 import { SellerModule } from './seller/seller.module';
+import { CommissionModule } from './commission/commission.module';
 import { ContentModule } from './content/content.module';
 import { StorefrontModule } from './storefront/storefront.module';
 import { PaymentModule } from './payment/payment.module';
@@ -28,6 +29,7 @@ import { OrderModule } from './order/order.module';
     AuthModule,
     CatalogModule,
     SellerModule,
+    CommissionModule,
     ContentModule,
     StorefrontModule,
     PaymentModule,

@@ -1,6 +1,7 @@
-import { Transform, Type } from 'class-transformer';
+import { Transform } from 'class-transformer';
 import {
   IsEmail,
+  IsEnum,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -10,6 +11,8 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
+import { CommissionType } from '../../database/enums/commission-type.enum';
+import { MAX_DECIMAL_12_2 } from '../../shared/constants/limits';
 import { IsInternationalPhone } from '../../shared/validators/international-phone.decorator';
 import { trimString } from '../../shared/utils/transform.util';
 
@@ -39,12 +42,19 @@ export class CreateSellerDto {
   @MaxLength(72)
   password: string;
 
+  // The seller's own commission. Send both fields, or neither to use the global setting.
   @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
+  @IsEnum(CommissionType)
+  commissionType?: CommissionType;
+
+  @IsOptional()
+  @Transform(({ value }: { value: unknown }) =>
+    typeof value === 'string' ? (value.trim() === '' ? undefined : Number(value)) : value,
+  )
+  @IsNumber({ allowNaN: false, allowInfinity: false, maxDecimalPlaces: 2 })
   @Min(0)
-  @Max(100)
-  commissionRate?: number;
+  @Max(MAX_DECIMAL_12_2)
+  commissionAmount?: number;
 
   @IsOptional()
   @Transform(({ value }) =>
