@@ -490,3 +490,25 @@ sort on products. Migration `Wishlist1796300000000` (reshapes the empty first ta
 - [x] Frontend
 - [x] Tests
 - [ ] QA
+
+## Reviews
+
+Verified-purchase reviews: only a delivered order line can be reviewed (one live review per line), 1 to 5 stars,
+optional title and text, up to 5 photos, published at once, hidden by a moderator with a reason. Customers edit for
+30 days (edit history kept) or delete (then may review again). `seller_product.ratingCount|ratingSum|ratingAverage`
+are rebuilt from published reviews inside the same transaction with the product row locked. Helpful votes (one per
+customer) and reports (customer and seller; admin hides the text or dismisses). Threaded replies in `review_reply`
+(`parentId`, `depth`, `path`, `authorType` + `authorId` stored on every reply, depth cap 4 then "@name", 200 per thread):
+only the reviewer, the product's seller and Support may write; others read and report. Public names are masked
+("Rahim K."); sellers never see who. Tables `review`, `review_attachment`, `review_edit_history`,
+`review_status_history`, `review_helpful_vote`, `review_report`, `review_reply`, all with tracker fields. Customer:
+reviews on the product page (breakdown, photo and star filters, helpful sort, threads), `/reviews` (To review, My
+reviews), "Write a review" on delivered orders. Seller: `/seller/reviews` (summary, filters, replies, report),
+Rating column on products. Admin: `/admin/reviews`, a review's page (hide, restore, thread, reports, histories),
+`/admin/reviews/reports` queue, per-user reviews. Migration `Reviews1796400000000` (replaces the empty first review
+table). Docs: `apps/server/docs/review-guide.md` plus `user|seller|admin/review-flow.md`. Tests: `review_test.py` (378).
+
+- [x] Backend
+- [x] Frontend
+- [x] Tests
+- [ ] QA
