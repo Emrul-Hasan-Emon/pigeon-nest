@@ -36,6 +36,8 @@ export interface ProductCard {
   thumbnailUrl: string | null;
   price: number | null;
   discountedPrice: number | null;
+  ratingAverage: number;
+  ratingCount: number;
   seller: { id: number; name: string } | null;
   category: { id: number; name: string; slug: string } | null;
 }
@@ -216,6 +218,8 @@ export class StorefrontProductService {
         thumbnailUrl: p.thumbnailUrl ?? null,
         price: sku ? Number(sku.price) : null,
         discountedPrice: live ? Number(sku.discountedPrice) : null,
+        ratingAverage: p.ratingAverage,
+        ratingCount: p.ratingCount,
         seller: p.seller ? { id: p.seller.id, name: p.seller.name } : null,
         category: p.category
           ? { id: p.category.id, name: p.category.name, slug: p.category.slug }
