@@ -1,4 +1,5 @@
 import {
+  Check,
   Column,
   Entity,
   Index,
@@ -19,6 +20,7 @@ import { SellerProductMedia } from '../product-media/seller-product-media.entity
 
 @Entity()
 @Unique(['sellerId', 'slug'])
+@Check('CHK_seller_product_wishlistCount', '"wishlistCount" >= 0')
 export class SellerProduct extends BaseEntity {
   @Index()
   @Column()
@@ -65,6 +67,12 @@ export class SellerProduct extends BaseEntity {
 
   @Column({ default: false })
   isFeatured: boolean;
+
+  // How many customers have this product in their wishlist. Kept in step with
+  // the wishlist table inside the same transaction as every add / remove.
+  @Index('IDX_seller_product_wishlistCount')
+  @Column({ type: 'int', default: 0 })
+  wishlistCount: number;
 
   // A product is visible on the storefront only when it is approved AND active.
   @Index()
