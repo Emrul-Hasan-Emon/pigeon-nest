@@ -34,7 +34,7 @@ import { ProductStatusHistoryService } from './product-status-history.service';
 import { MediaType } from '../../../database/enums/media-type.enum';
 import { CreateProductDto } from '../dtos/create-product.dto';
 import { UpdateProductDto } from '../dtos/update-product.dto';
-import { ListProductQueryDto } from '../dtos/list-product-query.dto';
+import { ListProductQueryDto, ProductListSort } from '../dtos/list-product-query.dto';
 import { CreateProductSkuDto } from '../dtos/create-product-sku.dto';
 import { UpdateProductSkuDto } from '../dtos/update-product-sku.dto';
 import { SkuVariantPairDto } from '../dtos/sku-variant-pair.dto';
@@ -85,8 +85,13 @@ export class AdminProductService {
       .leftJoinAndSelect('product.seller', 'seller')
       .leftJoinAndSelect('product.category', 'category')
       .leftJoinAndSelect('product.collection', 'collection')
-      .orderBy('product.id', 'DESC')
       .take(pagination.limit);
+    const mostSaved = query.sort === ProductListSort.MOST_SAVED;
+    if (mostSaved) {
+      qb.orderBy('product.wishlistCount', 'DESC').addOrderBy('product.id', 'DESC').skip(pagination.cursor);
+    } else {
+      qb.orderBy('product.id', 'DESC');
+    }
 
     if (query.search) {
       qb.andWhere('product.name ILIKE :search', {
@@ -126,11 +131,19 @@ export class AdminProductService {
         isFeatured: query.isFeatured,
       });
     }
-    if (pagination.cursor > 0) {
+    if (!mostSaved && pagination.cursor > 0) {
       qb.andWhere('product.id < :cursor', { cursor: pagination.cursor });
     }
 
     const results = await qb.getMany();
+    if (mostSaved) {
+      // Offset paging: the next cursor is how many rows have been served.
+      const size = pagination.limit - 1;
+      return {
+        results: results.slice(0, size).map((product) => this.toResponse(product)),
+        nextCursor: results.length > size ? pagination.cursor + size : null,
+      };
+    }
     const page = getCursorPaginateData(results, pagination.limit);
     return {
       ...page,
