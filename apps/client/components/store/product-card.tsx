@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { productHref } from '@/lib/api/storefront';
 import type { StoreProduct } from '@/types/storefront';
+import { WishlistButton } from './wishlist-button';
 
 export const money = (value: number) => `৳${value.toLocaleString('en-US')}`;
 
@@ -27,7 +28,8 @@ export function ProductCard({ product, layout = 'grid' }: { product: StoreProduc
 
   if (layout === 'list') {
     return (
-      <Link href={productHref(product)} className="flex items-center gap-3 rounded-xl border border-st-line bg-white p-2 transition-shadow hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-st-teal">
+      <div className="relative">
+      <Link href={productHref(product)} className="flex items-center gap-3 rounded-xl border border-st-line bg-white p-2 pr-12 transition-shadow hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-st-teal">
         <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-st-dove">
           {product.thumbnailUrl && (
             // eslint-disable-next-line @next/next/no-img-element
@@ -40,10 +42,13 @@ export function ProductCard({ product, layout = 'grid' }: { product: StoreProduc
         </div>
         <Price product={product} />
       </Link>
+      <WishlistButton productId={product.id} name={product.name} className="absolute right-2 top-1/2 -translate-y-1/2 border border-st-line" />
+      </div>
     );
   }
 
   return (
+    <div className="relative h-full">
     <Link href={productHref(product)} className="group flex h-full flex-col rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-st-teal">
       <div className="relative aspect-square overflow-hidden rounded-xl bg-st-ink-2">
         {product.thumbnailUrl ? (
@@ -69,5 +74,7 @@ export function ProductCard({ product, layout = 'grid' }: { product: StoreProduc
         <Price product={product} className="mt-1 text-sm" />
       </div>
     </Link>
+    <WishlistButton productId={product.id} name={product.name} className="absolute right-2 top-2" />
+    </div>
   );
 }
