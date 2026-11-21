@@ -83,6 +83,8 @@ export interface Product {
   isFeatured: boolean;
   /** How many customers have this product in their wishlist. */
   wishlistCount: number;
+  ratingAverage: number;
+  ratingCount: number;
   /** Visible on the storefront only when approved AND active. */
   status: ProductStatus;
   activeStatus: ProductActiveStatus;
