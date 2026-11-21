@@ -47,7 +47,7 @@ const effective = (k: string) =>
         AND (${k}."discountedPriceEndDate" IS NULL OR ${k}."discountedPriceEndDate" > now())
         THEN ${k}."discountedPrice" ELSE ${k}.price END`;
 
-const LIVE_SKU = (k: string) =>
+export const LIVE_SKU = (k: string) =>
   `${k}."sellerProductId" = p.id AND ${k}."isActive" = true AND ${k}."deletedAt" IS NULL`;
 
 // The price shown on a card: the default SKU if it is live, else the cheapest live SKU.
