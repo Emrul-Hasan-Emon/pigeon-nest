@@ -112,6 +112,8 @@ export class OrderViewService {
       cartId: order.cartId,
       items: (order.items ?? []).map((i) => this.item(i)),
       totals: this.totals(order),
+      // The platform's cut is for staff only; customers never see it.
+      ...(viewer === AuthUserType.USER ? {} : { commission: this.commission(order) }),
       delivery: {
         type: order.deliveryType,
         estimatedDays: order.deliveryEstimatedDays,
@@ -197,6 +199,15 @@ export class OrderViewService {
       deliveryType: order.deliveryType,
       countryCode: order.countryCode,
       countryName: order.countryName,
+    };
+  }
+
+  private commission(order: Order) {
+    return {
+      type: order.commissionType,
+      value: order.commissionValue,
+      systemCommission: order.systemCommission,
+      sellerAmount: order.sellerAmount,
     };
   }
 

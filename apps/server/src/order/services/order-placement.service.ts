@@ -15,6 +15,7 @@ import { PaymentStatus } from '../../database/enums/payment-status.enum';
 import { GATEWAY_TYPE_LABELS, proofFieldsFor } from '../../payment/utils/payment-gateway.util';
 import { ShippingQuote, ShippingZoneService } from '../../settings/services/shipping-zone.service';
 import { countryName } from '../../settings/utils/countries';
+import { CommissionService } from '../../commission/services/commission.service';
 import { newOrderNumber } from '../utils/order-number.util';
 import { tidy } from '../../shared/utils/money.util';
 
@@ -67,6 +68,7 @@ export class OrderPlacementService {
   constructor(
     private readonly db: DatabaseService,
     private readonly shipping: ShippingZoneService,
+    private readonly commission: CommissionService,
   ) {}
 
   async activeGateway(id: number): Promise<PaymentGateway> {
@@ -164,6 +166,8 @@ export class OrderPlacementService {
     const total = round2(p.lines.reduce((n, l) => n + l.unitPrice * l.quantity, 0));
     const subtotal = round2(p.lines.reduce((n, l) => n + l.unitPayable * l.quantity, 0));
     const payable = round2(subtotal + p.quote.charge);
+    // Same rule for every way an order is placed: customer, guest, seller or admin.
+    const earned = await this.commission.forNewOrder(manager, p.sellerId, subtotal, payable);
     const stamp = {
       createdBy: p.placedBy.id,
       creatorType: p.placedBy.type,
@@ -190,6 +194,10 @@ export class OrderPlacementService {
       deliveryCharge: p.quote.charge,
       discountAmount: 0,
       payableAmount: payable,
+      systemCommission: earned.commission,
+      sellerAmount: earned.sellerAmount,
+      commissionType: earned.type,
+      commissionValue: earned.value,
       paymentGatewayId: p.gateway.id,
       paymentGatewayName: p.gateway.name,
       paymentGatewaySlug: p.gateway.slug,
