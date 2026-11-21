@@ -25,6 +25,12 @@ import { SellerProductSkuVariant } from './entities/product/seller-product-sku-v
 import { SellerProductMedia } from './entities/product-media/seller-product-media.entity';
 import { Order } from './entities/order/order.entity';
 import { OrderItem } from './entities/order/order-item.entity';
+import { SellerSetting } from './entities/commission/seller-setting.entity';
+import { SellerSettingHistory } from './entities/commission/seller-setting-history.entity';
+import { SystemCommission } from './entities/commission/system-commission.entity';
+import { SystemCommissionHistory } from './entities/commission/system-commission-history.entity';
+import { SystemCommissionDisburse } from './entities/commission/system-commission-disburse.entity';
+import { SystemCommissionDisburseAttachment } from './entities/commission/system-commission-disburse-attachment.entity';
 import { OrderStatusHistory } from './entities/order/order-status-history.entity';
 import { OrderReturn } from './entities/order-return/order-return.entity';
 import { OrderReturnItem } from './entities/order-return/order-return-item.entity';
@@ -76,6 +82,12 @@ export const DATABASE_ENTITIES = [
   Order,
   OrderItem,
   OrderStatusHistory,
+  SellerSetting,
+  SellerSettingHistory,
+  SystemCommission,
+  SystemCommissionHistory,
+  SystemCommissionDisburse,
+  SystemCommissionDisburseAttachment,
   OrderReturn,
   OrderReturnItem,
   OrderReturnStatusHistory,
