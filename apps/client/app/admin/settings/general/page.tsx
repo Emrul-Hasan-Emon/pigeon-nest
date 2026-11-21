@@ -32,9 +32,13 @@ export default function GeneralSettingsPage() {
     if (!items) return;
     setError(null);
 
-    const changes: Record<string, number | boolean> = {};
+    const changes: Record<string, number | boolean | string> = {};
     for (const s of items) {
       const value = draft[s.key];
+      if (s.type === 'enum') {
+        if (value !== s.value) changes[s.key] = value as string;
+        continue;
+      }
       if (s.type === 'boolean') {
         if (value !== s.value) changes[s.key] = value as boolean;
         continue;
@@ -82,6 +86,32 @@ export default function GeneralSettingsPage() {
                 {s.label}
                 <input className={fieldClass} inputMode="decimal" value={draft[s.key] as string} onChange={(e) => setDraft((d) => ({ ...d, [s.key]: e.target.value }))} />
                 <span className="mt-1 block text-xs text-muted-foreground">{s.description}</span>
+              </label>
+            ),
+          )}
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+        <h2 className="mb-1 font-semibold text-foreground">Seller commission</h2>
+        <p className="mb-4 text-xs text-muted-foreground">
+          The platform&apos;s cut of each order, taken from the item subtotal and counted once the order is fully paid.
+          A seller with their own rate (set on the seller&apos;s page) uses that instead. Changes affect new orders only.
+        </p>
+        <div className="space-y-4">
+          {items.filter((s) => s.group === 'commission').map((s) =>
+            s.type === 'enum' ? (
+              <label key={s.key} className="block text-sm text-foreground">
+                {s.label}
+                <select className={fieldClass} value={draft[s.key] as string} onChange={(e) => setDraft((d) => ({ ...d, [s.key]: e.target.value }))}>
+                  {s.options?.map((o) => <option key={o} value={o}>{o === 'percentage' ? 'Percentage of the subtotal' : 'Fixed amount per order'}</option>)}
+                </select>
+              </label>
+            ) : (
+              <label key={s.key} className="block text-sm text-foreground">
+                {draft['commission.type'] === 'percentage' ? 'Commission percentage' : 'Commission amount per order'}
+                <input className={fieldClass} inputMode="decimal" value={draft[s.key] as string} onChange={(e) => setDraft((d) => ({ ...d, [s.key]: e.target.value }))} />
+                <span className="mt-1 block text-xs text-muted-foreground">{draft['commission.type'] === 'percentage' ? 'From 0 to 100, at most 2 decimals.' : 'At most 2 decimals.'}</span>
               </label>
             ),
           )}

@@ -145,6 +145,12 @@ export function OrderDetailView({ role, id }: { role: StaffRole; id: number }) {
         <div className="flex justify-between border-t border-border pt-1 text-base font-semibold text-foreground"><dt>Payable</dt><dd>{money(order.totals.payable)}</dd></div>
         <div className="flex justify-between text-muted-foreground"><dt>Received</dt><dd>{money(order.totals.amountPaid)}</dd></div>
         <div className="flex justify-between font-medium text-foreground"><dt>Balance due</dt><dd>{money(order.totals.balanceDue)}</dd></div>
+        {order.commission && (
+          <>
+            <div className="flex justify-between border-t border-border pt-1 text-muted-foreground"><dt>Platform commission{order.commission.type && ` (${order.commission.type === 'percentage' ? `${order.commission.value}% of items` : 'fixed'})`}</dt><dd>{money(order.commission.systemCommission)}</dd></div>
+            <div className="flex justify-between text-muted-foreground"><dt>Seller amount</dt><dd>{money(order.commission.sellerAmount)}</dd></div>
+          </>
+        )}
       </dl>
 
       <PaymentPanel role={role} order={order} onChanged={() => { showToast('Payment recorded.', 'success'); load(); }} onError={fail} />

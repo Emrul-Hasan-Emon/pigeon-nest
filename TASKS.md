@@ -452,3 +452,24 @@ smallest payment is 0.01. Tests updated, new J1b float section in
 - [x] Backend
 - [x] Tests
 - [ ] QA
+
+## Seller Commission
+
+Platform commission on every seller's orders. Global rate in System Settings (`commission.type`,
+`commission.amount`); a seller can have their own rate in the new `seller_setting` table (admin sets it when
+creating or editing a seller, or on the seller's commission page; seller can only view), with a generic
+`seller_setting_history`. The old `seller.commissionRate` column moved into it (migration `SellerCommission`).
+Every order flow (customer, guest, seller, admin) works out `systemCommission` from the item subtotal
+(capped at payable) and `sellerAmount = payable - systemCommission` at placement. The commission counts when
+the order becomes fully paid: `system_commission` (total, due, paid) and `system_commission_history` (ledger)
+are updated in one transaction under a row lock; a payment reversal or a cancel soft-deletes the ledger row and
+takes the amount back, reopening a paid order earns it again. Admin records what a seller handed over
+(`system_commission_disburse` + `_attachments`, optional files, cannot exceed due). Admin and seller screens
+(balances, ledger, payments, rate history); the order page shows commission to staff only. All lists are cursor
+paged and sellers only see their own rows. Docs: `apps/server/docs/commission-guide.md`. Tests:
+`commission_test.py` (232); other suites updated and their cleanup now clears commission rows.
+
+- [x] Backend
+- [x] Frontend
+- [x] Tests
+- [ ] QA

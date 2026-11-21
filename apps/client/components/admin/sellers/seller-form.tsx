@@ -14,7 +14,8 @@ interface FormState {
   email: string;
   phone: string;
   password: string;
-  commissionRate: number;
+  commissionType: '' | 'percentage' | 'fixed';
+  commissionAmount: string;
   status: SellerStatus;
   activeStatus: SellerActiveStatus;
   reason: string;
@@ -29,7 +30,9 @@ function toFormState(seller?: Seller): FormState {
     email: seller?.email ?? '',
     phone: seller?.phone ?? '',
     password: '',
-    commissionRate: seller?.commissionRate ?? 0,
+    // Empty type = no own rate: the global rate applies.
+    commissionType: seller?.commission?.source === 'seller' ? seller.commission.type : '',
+    commissionAmount: seller?.commission?.source === 'seller' ? String(seller.commission.value) : '',
     status: seller?.status ?? 'approved',
     activeStatus: seller?.activeStatus ?? 'active',
     reason: '',
@@ -109,6 +112,24 @@ export function SellerForm({ seller }: { seller?: Seller }) {
       return;
     }
 
+    let rule: { type: 'percentage' | 'fixed'; amount: number } | null = null;
+    if (form.commissionType !== '') {
+      const amount = Number(form.commissionAmount);
+      if (form.commissionAmount.trim() === '' || !Number.isFinite(amount) || amount < 0) {
+        setGeneralError('Enter a commission amount of 0 or more.');
+        return;
+      }
+      if (Math.round(amount * 100) / 100 !== amount) {
+        setGeneralError('The commission amount can have at most 2 decimals.');
+        return;
+      }
+      if (form.commissionType === 'percentage' && amount > 100) {
+        setGeneralError('A percentage commission cannot be more than 100.');
+        return;
+      }
+      rule = { type: form.commissionType, amount };
+    }
+
     setSubmitting(true);
     try {
       if (isEdit) {
@@ -117,8 +138,9 @@ export function SellerForm({ seller }: { seller?: Seller }) {
         if (form.email !== initial.email) payload.email = form.email || undefined;
         if (form.phone !== initial.phone) payload.phone = form.phone || undefined;
         if (form.password) payload.password = form.password;
-        if (form.commissionRate !== initial.commissionRate) {
-          payload.commissionRate = form.commissionRate;
+        if (rule && (form.commissionType !== initial.commissionType || form.commissionAmount !== initial.commissionAmount)) {
+          payload.commissionType = rule.type;
+          payload.commissionAmount = rule.amount;
         }
         if (form.status !== initial.status) payload.status = form.status;
         if (form.activeStatus !== initial.activeStatus) payload.activeStatus = form.activeStatus;
@@ -136,7 +158,7 @@ export function SellerForm({ seller }: { seller?: Seller }) {
           email: form.email || undefined,
           phone: form.phone || undefined,
           password: form.password,
-          commissionRate: form.commissionRate,
+          ...(rule ? { commissionType: rule.type, commissionAmount: rule.amount } : {}),
           avatar: form.avatar,
           nidFrontImage: form.nidFrontImage,
           nidBackImage: form.nidBackImage,
@@ -202,20 +224,35 @@ export function SellerForm({ seller }: { seller?: Seller }) {
             {nameError && <p className="mt-1 text-xs text-destructive">{nameError}</p>}
           </label>
 
-          <label className="text-sm text-foreground">
-            Commission rate (%)
-            <input
-              type="number"
-              step="0.01"
-              min={0}
-              max={100}
-              className="mt-1 w-full rounded-md border border-input px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none"
-              value={form.commissionRate}
-              onChange={(event) =>
-                setForm((f) => ({ ...f, commissionRate: Number(event.target.value) }))
-              }
-            />
-          </label>
+          <div className="text-sm text-foreground">
+            <span className="block">Commission</span>
+            <div className="mt-1 flex gap-2">
+              <select
+                className="w-1/2 rounded-md border border-input px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none"
+                value={form.commissionType}
+                aria-label="Commission type"
+                onChange={(event) =>
+                  setForm((f) => ({ ...f, commissionType: event.target.value as FormState['commissionType'] }))
+                }
+              >
+                {initial.commissionType === '' && <option value="">Use the global rate</option>}
+                <option value="percentage">Percentage of the subtotal</option>
+                <option value="fixed">Fixed amount per order</option>
+              </select>
+              <input
+                inputMode="decimal"
+                disabled={form.commissionType === ''}
+                placeholder={form.commissionType === 'percentage' ? '0 to 100' : 'Amount'}
+                aria-label="Commission amount"
+                className="w-1/2 rounded-md border border-input px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none disabled:opacity-50"
+                value={form.commissionAmount}
+                onChange={(event) => setForm((f) => ({ ...f, commissionAmount: event.target.value }))}
+              />
+            </div>
+            <span className="mt-1 block text-xs text-muted-foreground">
+              Overrides the global commission for this seller. Changes are recorded in the seller&apos;s rate history.
+            </span>
+          </div>
 
           <label className="text-sm text-foreground">
             Email
