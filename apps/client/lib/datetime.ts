@@ -15,6 +15,11 @@ export function formatDateTime(iso: string | null | undefined): string {
   return iso ? new Date(iso).toLocaleString() : '—';
 }
 
+/** A date without the time, in the viewer's locale: "21 Nov 2026". */
+export function formatDate(iso: string | null | undefined): string {
+  return iso ? new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+}
+
 export type ScheduleState = 'live' | 'scheduled' | 'expired';
 
 export function scheduleState(startsAt: string | null, endsAt: string | null): ScheduleState {
