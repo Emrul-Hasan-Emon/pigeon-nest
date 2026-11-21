@@ -70,6 +70,7 @@ def restore():
 def cleanup():
     sql("update cart set \"orderId\"=null where \"orderId\" in (select id from \"order\" where \"recipientName\" like 'T Order %')")
     sql("delete from payment where \"orderId\" in (select id from \"order\" where \"recipientName\" like 'T Order %')")
+    sql("delete from system_commission_history where \"orderId\" in (select id from \"order\" where \"recipientName\" like 'T Order %')")
     sql("delete from \"order\" where \"recipientName\" like 'T Order %'")
     sql(f"delete from cart where \"sessionId\" like 'torder{RUN}%' or \"userId\" in (select id from \"user\" where email like 't-order-{RUN}-%')")
     sql(f"delete from \"user\" where email like 't-order-{RUN}-%'")
