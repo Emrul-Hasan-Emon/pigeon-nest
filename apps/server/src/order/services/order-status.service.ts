@@ -7,6 +7,8 @@ import { OrderStatusHistory } from '../../database/entities/order/order-status-h
 import { SellerProductSku } from '../../database/entities/product/seller-product-sku.entity';
 import { AuthUserType } from '../../database/enums/auth-user-type.enum';
 import { OrderStatus } from '../../database/enums/order-status.enum';
+import { CommissionService } from '../../commission/services/commission.service';
+import { PaymentStatus } from '../../database/enums/payment-status.enum';
 import { transitionDenied } from '../utils/order-status-rules';
 
 /** Who is changing the status. A guest customer has no id. */
@@ -36,7 +38,10 @@ export interface StatusChange {
  */
 @Injectable()
 export class OrderStatusService {
-  constructor(private readonly db: DatabaseService) {}
+  constructor(
+    private readonly db: DatabaseService,
+    private readonly commission: CommissionService,
+  ) {}
 
   async change(
     orderId: number,
@@ -72,6 +77,14 @@ export class OrderStatusService {
         updaterType: actor.type,
         updaterName: actor.name,
       });
+      // A cancelled order earns no commission; reopening a paid one earns it again.
+      if (order.paymentStatus === PaymentStatus.PAID) {
+        if (to === OrderStatus.CANCELLED) {
+          await this.commission.revokeFromOrder(manager, order, 'Order cancelled', actor);
+        } else if (from === OrderStatus.CANCELLED) {
+          await this.commission.earnFromOrder(manager, order, actor);
+        }
+      }
       await manager.save(OrderStatusHistory, {
         orderId: order.id,
         fromStatus: from,
