@@ -3,9 +3,10 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ShoppingBag } from 'lucide-react';
+import { Heart, ShoppingBag } from 'lucide-react';
 import { getCategoryTree } from '@/lib/api/storefront';
 import { useCart } from '@/lib/cart/cart-context';
+import { useWishlist } from '@/lib/wishlist/wishlist-context';
 import { getUserToken } from '@/lib/auth/user-token';
 import type { CategoryNode } from '@/types/storefront';
 
@@ -77,6 +78,7 @@ function CategoryBar() {
 export function StoreHeader() {
   const [signedIn, setSignedIn] = useState(false);
   const { summary } = useCart();
+  const wishlist = useWishlist();
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -93,6 +95,18 @@ export function StoreHeader() {
           <SearchBox />
         </div>
         <nav className="flex items-center gap-1 text-sm">
+          <Link
+            href="/wishlist"
+            aria-label={`Your wishlist, ${wishlist.count} ${wishlist.count === 1 ? 'product' : 'products'}`}
+            className="relative flex h-9 w-9 items-center justify-center rounded-full text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+          >
+            <Heart className="h-5 w-5" aria-hidden />
+            {wishlist.count > 0 && (
+              <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-semibold text-white">
+                {wishlist.count > 99 ? '99+' : wishlist.count}
+              </span>
+            )}
+          </Link>
           <Link
             href="/cart"
             aria-label={`Your carts, ${summary.itemCount} ${summary.itemCount === 1 ? 'item' : 'items'}`}
@@ -146,6 +160,7 @@ export function StoreFooter() {
           <li><Link href="/products" className="hover:text-white">All products</Link></li>
           <li><Link href="/sellers" className="hover:text-white">Sellers</Link></li>
           <li><Link href="/orders" className="hover:text-white">Your orders</Link></li>
+          <li><Link href="/wishlist" className="hover:text-white">Your wishlist</Link></li>
           <li><Link href="/addresses" className="hover:text-white">Your addresses</Link></li>
           <li><Link href="/orders/track" className="hover:text-white">Track an order</Link></li>
           <li><Link href="/user/login" className="hover:text-white">Sign in</Link></li>
