@@ -105,6 +105,8 @@ export class StorefrontProductDetailService {
       description: product.description ?? null,
       thumbnailUrl: product.thumbnailUrl ?? null,
       isFeatured: product.isFeatured,
+      ratingAverage: product.ratingAverage,
+      ratingCount: product.ratingCount,
       seoTitle: product.seoTitle ?? null,
       seoDescription: product.seoDescription ?? null,
       category: product.category
