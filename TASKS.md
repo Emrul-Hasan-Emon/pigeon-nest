@@ -473,3 +473,20 @@ paged and sellers only see their own rows. Docs: `apps/server/docs/commission-gu
 - [x] Frontend
 - [x] Tests
 - [ ] QA
+
+## Wishlist
+
+Customers save products with a heart (cap 200, product-level, never touches the cart, only the customer removes).
+Table `wishlist` (customer + product, `priceWhenSaved`, all tracker fields; hard delete) and
+`seller_product.wishlistCount` kept in step in the same transaction (check >= 0). Customer: save / remove /
+ids / list with live details, price-change and availability (`out_of_stock`, `unavailable`, `removed` stay listed,
+greyed), filters and cursor paging; guests are sent to sign in and back (`?next=`). Seller: counts only (product
+list column + `sort=mostSaved`, product page, dashboard insights, `GET /seller/wishlist/insights`). Admin: read
+only lists with user, seller and product (`/admin/wishlist`, per-user list, most-saved report), count column and
+sort on products. Migration `Wishlist1796300000000` (reshapes the empty first table). Docs:
+`apps/server/docs/wishlist-guide.md` plus `user|seller|admin/wishlist-flow.md`. Tests: `wishlist_test.py` (201).
+
+- [x] Backend
+- [x] Frontend
+- [x] Tests
+- [ ] QA
