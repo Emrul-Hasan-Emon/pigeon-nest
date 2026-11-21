@@ -14,6 +14,12 @@ import { ProductActiveStatus } from '../../../database/enums/product-active-stat
 import { MAX_INT32 } from '../../../shared/constants/limits';
 import { parseBoolean } from '../../../shared/utils/transform.util';
 
+export enum ProductListSort {
+  NEWEST = 'newest',
+  // Most wishlisted first. `cursor` then counts rows already seen (an offset), not an id.
+  MOST_SAVED = 'mostSaved',
+}
+
 export class ListProductQueryDto {
   @IsOptional()
   @IsString()
@@ -62,6 +68,11 @@ export class ListProductQueryDto {
 
   // Read directly by @CursorPaginationParams(), not used here — declared so
   // the whitelist validator doesn't reject them as unknown properties.
+  // newest (default) or mostSaved. With mostSaved the cursor is an offset.
+  @IsOptional()
+  @IsEnum(ProductListSort)
+  sort?: ProductListSort;
+
   @IsOptional()
   cursor?: string;
 
