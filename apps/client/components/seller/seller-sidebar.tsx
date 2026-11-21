@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { CreditCard, LayoutDashboard, LayoutGrid, LogOut, Package, ReceiptText, UserRound } from 'lucide-react';
+import { Coins, CreditCard, LayoutDashboard, LayoutGrid, LogOut, Package, ReceiptText, UserRound } from 'lucide-react';
 import { clearSellerToken } from '@/lib/auth/seller-token';
 
 const ITEMS = [
@@ -10,6 +10,7 @@ const ITEMS = [
   { key: 'products', href: '/seller/products', label: 'Products', icon: Package },
   { key: 'orders', href: '/seller/orders', label: 'Orders', icon: ReceiptText },
   { key: 'payments', href: '/seller/payments', label: 'Payments', icon: CreditCard },
+  { key: 'commission', href: '/seller/commission', label: 'Commission', icon: Coins },
   { key: 'profile', href: '/seller/profile', label: 'Profile', icon: UserRound },
 ] as const;
 
