@@ -15,7 +15,7 @@ import { useDebouncedValue } from '@/lib/hooks/use-debounced-value';
 import { deleteMyProduct, listMyProducts, updateMyProduct } from '@/lib/api/seller-products';
 import { ApiError, NotFoundApiError } from '@/lib/api/http';
 import { clearSellerToken, getSellerToken } from '@/lib/auth/seller-token';
-import type { Product, ProductActiveStatus, ProductStatus } from '@/types/product';
+import type { Product, ProductActiveStatus, ProductListSort, ProductStatus } from '@/types/product';
 
 const PAGE_SIZE = 20;
 
@@ -30,6 +30,7 @@ export default function SellerProductsPage() {
   const debouncedSearch = useDebouncedValue(search);
   const [status, setStatus] = useState<'all' | ProductStatus>('all');
   const [activeStatus, setActiveStatus] = useState<'all' | ProductActiveStatus>('all');
+  const [sort, setSort] = useState<ProductListSort>('newest');
 
   const [products, setProducts] = useState<Product[]>([]);
   const [nextCursor, setNextCursor] = useState<number | null>(null);
@@ -43,9 +44,10 @@ export default function SellerProductsPage() {
       search: debouncedSearch || undefined,
       status: status === 'all' ? undefined : status,
       activeStatus: activeStatus === 'all' ? undefined : activeStatus,
+      sort: sort === 'newest' ? undefined : sort,
       limit: PAGE_SIZE,
     }),
-    [debouncedSearch, status, activeStatus],
+    [debouncedSearch, status, activeStatus, sort],
   );
 
   const handleError = useCallback(
@@ -195,6 +197,15 @@ export default function SellerProductsPage() {
                 <option value="inactive">Inactive</option>
                 <option value="suspended">Suspended</option>
               </select>
+              <select
+                value={sort}
+                onChange={(event) => setSort(event.target.value as ProductListSort)}
+                className={selectClass}
+                aria-label="Sort"
+              >
+                <option value="newest">Newest first</option>
+                <option value="mostSaved">Most saved first</option>
+              </select>
             </div>
 
             {loading ? (
@@ -209,13 +220,14 @@ export default function SellerProductsPage() {
                       <th className="px-4 py-3 text-left font-medium text-muted-foreground">Category</th>
                       <th className="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
                       <th className="px-4 py-3 text-left font-medium text-muted-foreground">Activity</th>
+                      <th className="px-4 py-3 text-right font-medium text-muted-foreground" title="Customers who saved this product to their wishlist">Saved by</th>
                       <th className="px-4 py-3 text-right font-medium text-muted-foreground">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
                     {products.length === 0 && (
                       <tr>
-                        <td colSpan={6} className="px-4 py-6 text-center text-muted-foreground">
+                        <td colSpan={7} className="px-4 py-6 text-center text-muted-foreground">
                           No products found.
                         </td>
                       </tr>
@@ -272,6 +284,7 @@ export default function SellerProductsPage() {
                               </select>
                             )}
                           </td>
+                          <td className="px-4 py-3 text-right tabular-nums text-muted-foreground">{product.wishlistCount ?? 0}</td>
                           <td className="px-4 py-3 text-right">
                             <div className="flex justify-end gap-3">
                               <Link
