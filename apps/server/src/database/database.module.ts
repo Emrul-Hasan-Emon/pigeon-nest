@@ -40,6 +40,12 @@ import { CartItem } from './entities/cart/cart-item.entity';
 import { Coupon } from './entities/coupon/coupon.entity';
 import { CouponHistoryLog } from './entities/coupon/coupon-history-log.entity';
 import { Review } from './entities/review/review.entity';
+import { ReviewAttachment } from './entities/review/review-attachment.entity';
+import { ReviewEditHistory } from './entities/review/review-edit-history.entity';
+import { ReviewHelpfulVote } from './entities/review/review-helpful-vote.entity';
+import { ReviewReply } from './entities/review/review-reply.entity';
+import { ReviewReport } from './entities/review/review-report.entity';
+import { ReviewStatusHistory } from './entities/review/review-status-history.entity';
 import { Wishlist } from './entities/wishlist/wishlist.entity';
 import { Payment } from './entities/payment/payment.entity';
 import { PaymentAttachment } from './entities/payment/payment-attachment.entity';
@@ -96,6 +102,12 @@ export const DATABASE_ENTITIES = [
   Coupon,
   CouponHistoryLog,
   Review,
+  ReviewAttachment,
+  ReviewEditHistory,
+  ReviewHelpfulVote,
+  ReviewReply,
+  ReviewReport,
+  ReviewStatusHistory,
   Wishlist,
   Payment,
   PaymentGateway,
