@@ -13,6 +13,7 @@ import { MAX_INT32 } from '../../../shared/constants/limits';
 import { parseBoolean } from '../../../shared/utils/transform.util';
 import { ProductStatus } from '../../../database/enums/product-status.enum';
 import { ProductActiveStatus } from '../../../database/enums/product-active-status.enum';
+import { ProductListSort } from './list-product-query.dto';
 
 // A seller always sees only their own products, so no seller filters here.
 export class ListSellerProductQueryDto {
@@ -47,6 +48,11 @@ export class ListSellerProductQueryDto {
   @Transform(parseBoolean)
   @IsBoolean()
   isFeatured?: boolean;
+
+  // newest (default) or mostSaved. With mostSaved the cursor is an offset.
+  @IsOptional()
+  @IsEnum(ProductListSort)
+  sort?: ProductListSort;
 
   @IsOptional()
   cursor?: string;
