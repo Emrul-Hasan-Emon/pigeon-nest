@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useCart } from '@/lib/cart/cart-context';
 import { ApiError } from '@/lib/api/http';
 import { SellerCartPanel } from './seller-cart-panel';
+import { WishlistButton } from './wishlist-button';
 import { money } from './product-card';
 import { ProductCard } from './product-card';
 import { Breadcrumb, Container } from './page-parts';
@@ -247,6 +248,7 @@ export function ProductDetailView({ product }: { product: ProductDetail }) {
             >
               {adding ? 'Adding…' : canBuy ? 'Add to cart' : 'Unavailable'}
             </button>
+            <WishlistButton productId={product.id} name={product.name} variant="inline" />
           </div>
           {addMessage && (
             <p role={addMessage.ok ? 'status' : 'alert'} className={`mt-2 text-sm ${addMessage.ok ? 'text-st-teal' : 'text-destructive'}`}>{addMessage.text}</p>
