@@ -61,7 +61,7 @@ export function formatBytes(n: number) {
 }
 
 /** Proof files as image thumbnails or file links. */
-export function AttachmentList({ items }: { items: Attachment[] }) {
+export function AttachmentList({ items }: { items: Pick<Attachment, 'id' | 'kind' | 'fileName' | 'url' | 'size'>[] }) {
   if (items.length === 0) return null;
   return (
     <ul className="mt-2 flex flex-wrap gap-2">
@@ -131,7 +131,7 @@ export function FilePicker({
 }
 
 /** Seller portal chrome (sidebar + sign-in check). The admin layout already provides its own. */
-export function SellerShell({ active, children }: { active: 'orders' | 'payments'; children: React.ReactNode }) {
+export function SellerShell({ active, children }: { active: 'orders' | 'payments' | 'commission'; children: React.ReactNode }) {
   const router = useRouter();
   const [ready, setReady] = useState(false);
   useEffect(() => {
