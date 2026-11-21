@@ -48,12 +48,6 @@ export class Seller extends BaseEntity {
   @Column({ type: 'varchar', default: SellerStatus.PENDING })
   status: SellerStatus;
 
-  @Column({
-    type: 'double precision',
-    default: 0,
-  })
-  commissionRate: number;
-
   @Column({ type: 'jsonb', nullable: true })
   payoutAccountInfo: Record<string, unknown> | null;
 
