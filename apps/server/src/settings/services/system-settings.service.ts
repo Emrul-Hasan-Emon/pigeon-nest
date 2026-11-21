@@ -4,7 +4,7 @@ import { SystemSetting } from '../../database/entities/setting/system-setting.en
 import { MAX_DECIMAL_12_2 } from '../../shared/constants/limits';
 import { Actor } from '../../shared/types/actor.type';
 
-type SettingType = 'decimal' | 'int' | 'boolean';
+type SettingType = 'decimal' | 'int' | 'boolean' | 'enum';
 
 export interface SettingDefinition {
   key: string;
@@ -14,7 +14,9 @@ export interface SettingDefinition {
   type: SettingType;
   min?: number;
   max?: number;
-  default: number | boolean;
+  // For type 'enum': the values that may be stored.
+  options?: string[];
+  default: number | boolean | string;
 }
 
 // The settings the platform understands. Only these keys can be stored, so a
@@ -48,6 +50,26 @@ export const SETTING_DEFINITIONS: SettingDefinition[] = [
     type: 'boolean',
     default: true,
   },
+  {
+    key: 'commission.type',
+    label: 'Commission type',
+    description: 'How the platform commission is worked out for sellers with no commission of their own.',
+    group: 'commission',
+    type: 'enum',
+    options: ['percentage', 'fixed'],
+    default: 'percentage',
+  },
+  {
+    key: 'commission.amount',
+    label: 'Commission amount',
+    description:
+      'A percentage (0 to 100) of the order subtotal, or a fixed amount per order, depending on the type.',
+    group: 'commission',
+    type: 'decimal',
+    min: 0,
+    max: MAX_DECIMAL_12_2,
+    default: 0,
+  },
 ];
 
 const byKey = new Map(SETTING_DEFINITIONS.map((d) => [d.key, d]));
@@ -80,6 +102,8 @@ export class SystemSettingsService {
       return { def, value: this.validate(def, value) };
     });
 
+    await this.assertCommissionPair(cleaned);
+
     await this.db.systemSetting.manager.transaction(async (manager) => {
       const repo = manager.getRepository(SystemSetting);
       const tracker = { updatedBy: actor.id, updaterType: actor.type, updaterName: actor.name };
@@ -104,9 +128,27 @@ export class SystemSettingsService {
     return this.list();
   }
 
+  /** A percentage cannot be over 100, whichever of the two settings is being changed. */
+  private async assertCommissionPair(cleaned: { def: SettingDefinition; value: number | boolean | string }[]) {
+    if (!cleaned.some((c) => c.def.group === 'commission')) return;
+    const given = new Map(cleaned.map((c) => [c.def.key, c.value]));
+    const type = (given.get('commission.type') ?? (await this.getString('commission.type'))) as string;
+    const amount = (given.get('commission.amount') ?? (await this.getNumber('commission.amount'))) as number;
+    if (type === 'percentage' && amount > 100) {
+      throw new BadRequestException('A percentage commission cannot be more than 100');
+    }
+  }
+
+  async getString(key: string): Promise<string> {
+    const def = byKey.get(key);
+    if (!def || def.type !== 'enum') throw new Error(`"${key}" is not a text setting`);
+    const row = await this.db.systemSetting.findOne({ where: { key } });
+    return row?.value != null ? row.value : (def.default as string);
+  }
+
   async getNumber(key: string): Promise<number> {
     const def = byKey.get(key);
-    if (!def || def.type === 'boolean') throw new Error(`"${key}" is not a numeric setting`);
+    if (!def || def.type === 'boolean' || def.type === 'enum') throw new Error(`"${key}" is not a numeric setting`);
     const row = await this.db.systemSetting.findOne({ where: { key } });
     return row?.value != null ? (this.parse(def, row.value) as number) : (def.default as number);
   }
@@ -118,12 +160,19 @@ export class SystemSettingsService {
     return row?.value != null ? (this.parse(def, row.value) as boolean) : (def.default as boolean);
   }
 
-  private parse(def: SettingDefinition, raw: string): number | boolean {
+  private parse(def: SettingDefinition, raw: string): number | boolean | string {
     if (def.type === 'boolean') return raw === 'true';
+    if (def.type === 'enum') return raw;
     return Number(raw);
   }
 
-  private validate(def: SettingDefinition, value: unknown): number | boolean {
+  private validate(def: SettingDefinition, value: unknown): number | boolean | string {
+    if (def.type === 'enum') {
+      if (typeof value !== 'string' || !def.options?.includes(value)) {
+        throw new BadRequestException(`${def.key} must be one of: ${def.options?.join(', ')}`);
+      }
+      return value;
+    }
     if (def.type === 'boolean') {
       if (typeof value !== 'boolean') throw new BadRequestException(`${def.key} must be true or false`);
       return value;
