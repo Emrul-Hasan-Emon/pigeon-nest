@@ -71,6 +71,9 @@ export default function SellerProductPage() {
                   <span className="text-xs text-muted-foreground">
                     {isProductVisible(product) ? 'Visible on the storefront' : 'Hidden from the storefront'}
                   </span>
+                  <span className="text-xs text-muted-foreground" title="Customers who saved this product to their wishlist">
+                    · Saved by {product.wishlistCount ?? 0} {product.wishlistCount === 1 ? 'customer' : 'customers'}
+                  </span>
                 </div>
               </div>
               <Link href="/seller/products" className="text-sm text-muted-foreground hover:text-foreground">
