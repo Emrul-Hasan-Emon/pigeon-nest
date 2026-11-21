@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Banknote, Coins, ClipboardCheck, ReceiptText, Wallet, ShoppingCart, ShoppingBag, CreditCard, Globe2, Settings2, History, Image as ImageIcon, LayoutGrid, LayoutTemplate, Layers, Rows3, Package, SlidersHorizontal, Store, Tags, Users } from 'lucide-react';
+import { Banknote, Coins, Heart, ClipboardCheck, ReceiptText, Wallet, ShoppingCart, ShoppingBag, CreditCard, Globe2, Settings2, History, Image as ImageIcon, LayoutGrid, LayoutTemplate, Layers, Rows3, Package, SlidersHorizontal, Store, Tags, Users } from 'lucide-react';
 
 const NAV_GROUPS = [
   {
@@ -30,6 +30,7 @@ const NAV_GROUPS = [
       { href: '/admin/payments', label: 'Payments', icon: Wallet },
       { href: '/admin/carts/active', label: 'Active carts', icon: ShoppingCart },
       { href: '/admin/carts/inactive', label: 'Inactive carts', icon: ShoppingBag },
+      { href: '/admin/wishlist', label: 'Wishlists', icon: Heart },
     ],
   },
   {
