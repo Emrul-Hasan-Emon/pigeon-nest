@@ -98,12 +98,14 @@ export const ENDPOINTS = {
     },
 
     carts: resource('/carts'),
+    wishlist: { list: '/wishlist', mostSaved: '/wishlist/most-saved' },
     ...staffOrders,
 
     users: {
       ...resource('/users'),
       addresses: (userId: Id) => `/users/${userId}/addresses`,
       address: (userId: Id, id: Id) => `/users/${userId}/addresses/${id}`,
+      wishlist: (userId: Id) => `/users/${userId}/wishlist`,
     },
     userStatusHistory: { list: '/user-status-history' },
   },
@@ -123,6 +125,7 @@ export const ENDPOINTS = {
       mediaFiles: (productId: Id) => `/products/${productId}/media-files`,
     },
     dashboard: '/dashboard',
+    wishlist: { insights: '/wishlist/insights' },
     commission: {
       balance: '/commission/balance',
       history: '/commission/history',
@@ -172,6 +175,11 @@ export const ENDPOINTS = {
       track: '/orders/track',
       detail: (id: Id) => `/orders/${id}`,
       cancel: (id: Id) => `/orders/${id}/cancel`,
+    },
+    wishlist: {
+      list: '/wishlist',
+      ids: '/wishlist/ids',
+      item: (productId: Id) => `/wishlist/${productId}`,
     },
     carts: {
       list: '/carts',
