@@ -175,6 +175,7 @@ bad_reg = [
     ("status injection", dict(status="approved")),
     ("activeStatus injection", dict(activeStatus="active")),
     ("commissionRate injection", dict(commissionRate="50")),
+    ("commission injection", dict(commissionType="fixed", commissionAmount="1")),
     ("rejectionReason injection", dict(rejectionReason="x")),
     ("isActive (removed field)", dict(isActive="true")),
     ("passwordHash injection", dict(passwordHash="x")),
@@ -203,7 +204,7 @@ p1 = phone()
 c, r1 = register(phone=p1, name="  T-minimal  ")
 check("A minimal registration -> 201", (c, r1), 201, pred=lambda d: d["accessToken"] and d["seller"]["id"])
 check("A new seller is pending + inactive", (c, r1), 201, pred=lambda d: d["seller"]["status"] == "pending" and d["seller"]["activeStatus"] == "inactive")
-check("A commission starts at 0, payout info empty", (c, r1), 201, pred=lambda d: d["seller"]["commissionRate"] == 0 and d["seller"]["payoutAccountInfo"] is None)
+check("A no own commission (the global rate applies), payout info empty", (c, r1), 201, pred=lambda d: "commissionRate" not in d["seller"] and d["seller"]["payoutAccountInfo"] is None)
 check("A name trimmed, phone stored as E.164", (c, r1), 201, pred=lambda d: d["seller"]["name"] == "T-minimal" and d["seller"]["phone"] == p1)
 check("A response hides passwordHash", (c, r1), 201, pred=lambda d: "passwordHash" not in json.dumps(d))
 check("A response includes access flags", (c, r1), 201, pred=lambda d: d["seller"]["access"]["canEditProfile"] is True and d["seller"]["access"]["canManage"] is False and d["seller"]["access"]["code"] == "SELLER_PENDING")

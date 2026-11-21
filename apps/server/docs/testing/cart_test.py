@@ -75,6 +75,11 @@ def restore():
 
 
 def cleanup():
+    sql("delete from system_commission_history where \"sellerId\" in (select id from seller where name like 'T Cart %')")
+    sql("delete from system_commission_disburse_attachments where \"disburseId\" in (select id from system_commission_disburse where \"sellerId\" in (select id from seller where name like 'T Cart %'))")
+    sql("delete from system_commission_disburse where \"sellerId\" in (select id from seller where name like 'T Cart %')")
+    sql("delete from system_commission where \"sellerId\" in (select id from seller where name like 'T Cart %')")
+    sql("delete from system_commission_history where \"orderId\" in (select id from \"order\" where \"orderNumber\" like 'T-CART-%')")
     sql("delete from \"order\" where \"orderNumber\" like 'T-CART-%'")
     sql(f"delete from cart where \"sessionId\" like 'tcart{RUN}%' or \"userId\" in (select id from \"user\" where email like 't-cart-{RUN}-%')")
     sql(f"delete from \"user\" where email like 't-cart-{RUN}-%'")
