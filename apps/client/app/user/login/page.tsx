@@ -8,9 +8,11 @@ import { userLogin } from '@/lib/api/user-portal';
 import { ApiError } from '@/lib/api/http';
 import { setUserToken } from '@/lib/auth/user-token';
 import { mergeGuestCarts } from '@/lib/api/cart';
+import { safeNextPath, useNextQuery } from '@/lib/auth/next-path';
 
 export default function UserLoginPage() {
   const router = useRouter();
+  const nextQuery = useNextQuery();
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -28,7 +30,7 @@ export default function UserLoginPage() {
       const response = await userLogin(phone, password);
       setUserToken(response.accessToken);
       await mergeGuestCarts();
-      router.replace('/user/profile');
+      router.replace(safeNextPath(new URLSearchParams(window.location.search).get('next'), '/user/profile'));
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Login failed.');
     } finally {
@@ -80,7 +82,7 @@ export default function UserLoginPage() {
 
         <p className="mt-4 text-center text-sm text-muted-foreground">
           New here?{' '}
-          <Link href="/user/register" className="font-medium text-primary hover:opacity-70">
+          <Link href={`/user/register${nextQuery}`} className="font-medium text-primary hover:opacity-70">
             Register
           </Link>
         </p>
