@@ -99,6 +99,19 @@ export const ENDPOINTS = {
 
     carts: resource('/carts'),
     wishlist: { list: '/wishlist', mostSaved: '/wishlist/most-saved' },
+    reviews: {
+      list: '/reviews',
+      detail: (id: Id) => `/reviews/${id}`,
+      hide: (id: Id) => `/reviews/${id}/hide`,
+      restore: (id: Id) => `/reviews/${id}/restore`,
+      replies: (id: Id) => `/reviews/${id}/replies`,
+    },
+    reviewReplies: {
+      one: (id: Id) => `/review-replies/${id}`,
+      hide: (id: Id) => `/review-replies/${id}/hide`,
+      restore: (id: Id) => `/review-replies/${id}/restore`,
+    },
+    reviewReports: { list: '/review-reports', resolve: (id: Id) => `/review-reports/${id}/resolve` },
     ...staffOrders,
 
     users: {
@@ -106,6 +119,7 @@ export const ENDPOINTS = {
       addresses: (userId: Id) => `/users/${userId}/addresses`,
       address: (userId: Id, id: Id) => `/users/${userId}/addresses/${id}`,
       wishlist: (userId: Id) => `/users/${userId}/wishlist`,
+      reviews: (userId: Id) => `/users/${userId}/reviews`,
     },
     userStatusHistory: { list: '/user-status-history' },
   },
@@ -126,6 +140,13 @@ export const ENDPOINTS = {
     },
     dashboard: '/dashboard',
     wishlist: { insights: '/wishlist/insights' },
+    reviews: {
+      list: '/reviews',
+      summary: '/reviews/summary',
+      replies: (id: Id) => `/reviews/${id}/replies`,
+      report: (id: Id) => `/reviews/${id}/report`,
+    },
+    reviewReplies: { one: (id: Id) => `/review-replies/${id}`, report: (id: Id) => `/review-replies/${id}/report` },
     commission: {
       balance: '/commission/balance',
       history: '/commission/history',
@@ -176,6 +197,19 @@ export const ENDPOINTS = {
       detail: (id: Id) => `/orders/${id}`,
       cancel: (id: Id) => `/orders/${id}/cancel`,
     },
+    reviews: {
+      productSummary: (productId: Id) => `/products/${productId}/reviews/summary`,
+      productList: (productId: Id) => `/products/${productId}/reviews`,
+      thread: (id: Id) => `/reviews/${id}/replies`,
+      list: '/reviews',
+      pending: '/reviews/pending',
+      votes: '/reviews/votes',
+      one: (id: Id) => `/reviews/${id}`,
+      helpful: (id: Id) => `/reviews/${id}/helpful`,
+      report: (id: Id) => `/reviews/${id}/report`,
+      reply: (id: Id) => `/reviews/${id}/replies`,
+    },
+    reviewReplies: { one: (id: Id) => `/review-replies/${id}`, report: (id: Id) => `/review-replies/${id}/report` },
     wishlist: {
       list: '/wishlist',
       ids: '/wishlist/ids',
