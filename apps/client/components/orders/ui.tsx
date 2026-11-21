@@ -131,7 +131,7 @@ export function FilePicker({
 }
 
 /** Seller portal chrome (sidebar + sign-in check). The admin layout already provides its own. */
-export function SellerShell({ active, children }: { active: 'orders' | 'payments' | 'commission'; children: React.ReactNode }) {
+export function SellerShell({ active, children }: { active: 'orders' | 'payments' | 'commission' | 'wishlist' | 'reviews'; children: React.ReactNode }) {
   const router = useRouter();
   const [ready, setReady] = useState(false);
   useEffect(() => {
