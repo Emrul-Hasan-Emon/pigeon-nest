@@ -16,6 +16,7 @@ import { PaymentModule } from './payment/payment.module';
 import { SettingsModule } from './settings/settings.module';
 import { CartModule } from './cart/cart.module';
 import { OrderModule } from './order/order.module';
+import { WishlistModule } from './wishlist/wishlist.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { OrderModule } from './order/order.module';
     SettingsModule,
     CartModule,
     OrderModule,
+    WishlistModule,
   ],
   controllers: [AppController],
   providers: [AppService],
