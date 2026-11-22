@@ -16,10 +16,6 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { AuthGuard } from '../../../auth/guards/auth.guard';
-import { RolesGuard } from '../../../auth/guards/roles.guard';
-import { Roles } from '../../../auth/decorators/roles.decorator';
-import { AuthUserType } from '../../../database/enums/auth-user-type.enum';
 import {
   CursorPaginationParams,
   CursorPagination,
@@ -28,9 +24,9 @@ import { AdminCollectionService } from '../services/admin-collection.service';
 import { CreateCollectionDto } from '../dtos/create-collection.dto';
 import { UpdateCollectionDto } from '../dtos/update-collection.dto';
 import { ListCollectionQueryDto } from '../dtos/list-collection-query.dto';
+import { AdminAuthGuard } from '../../../auth/guards/admin-auth.guard';
 
-@UseGuards(AuthGuard, RolesGuard)
-@Roles(AuthUserType.ADMIN)
+@UseGuards(AdminAuthGuard)
 @Controller({ path: 'api/admin/collections', version: '1' })
 export class AdminCollectionController {
   constructor(

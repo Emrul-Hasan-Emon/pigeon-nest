@@ -16,10 +16,6 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { AuthGuard } from '../../../auth/guards/auth.guard';
-import { RolesGuard } from '../../../auth/guards/roles.guard';
-import { Roles } from '../../../auth/decorators/roles.decorator';
-import { AuthUserType } from '../../../database/enums/auth-user-type.enum';
 import {
   CursorPaginationParams,
   CursorPagination,
@@ -30,9 +26,9 @@ import { UpdateCategoryDto } from '../dtos/update-category.dto';
 import { ListCategoryQueryDto } from '../dtos/list-category-query.dto';
 import { CategoryParentChainQueryDto } from '../dtos/category-parent-chain-query.dto';
 import { CategoryTreeQueryDto } from '../dtos/category-tree-query.dto';
+import { AdminAuthGuard } from '../../../auth/guards/admin-auth.guard';
 
-@UseGuards(AuthGuard, RolesGuard)
-@Roles(AuthUserType.ADMIN)
+@UseGuards(AdminAuthGuard)
 @Controller({ path: 'api/admin/categories', version: '1' })
 export class AdminCategoryController {
   constructor(private readonly adminCategoryService: AdminCategoryService) {}
