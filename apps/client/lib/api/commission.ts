@@ -1,5 +1,6 @@
 import { http, sellerHttp } from './http';
 import { ENDPOINTS } from '../endpoints';
+import type { CommissionChangeRow } from '@/types/returns';
 import type {
   BalanceDetail,
   BalanceRow,
@@ -22,6 +23,7 @@ export function commissionApi(role: CommissionRole) {
   const s = ENDPOINTS.seller.commission;
   return {
     ledger: (params: Params) => client.get<Page<LedgerRow>>(role === 'admin' ? a.history : s.history, { ...params }),
+    changes: (params: Params) => client.get<Page<CommissionChangeRow>>(role === 'admin' ? a.changes : s.changes, { ...params }),
     disbursements: (params: Params) =>
       client.get<Page<DisburseRow>>(role === 'admin' ? a.disbursements.list : s.disbursements.list, { ...params }),
     disbursement: (id: number) =>
