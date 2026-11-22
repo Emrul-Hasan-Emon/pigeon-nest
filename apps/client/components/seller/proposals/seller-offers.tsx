@@ -10,6 +10,7 @@ import { useCursorList } from '@/lib/hooks/use-cursor-list';
 import { useDebouncedValue } from '@/lib/hooks/use-debounced-value';
 import type { Proposal, ProposalListParams, SellerProposalSummary } from '@/types/proposal';
 import type { Params } from '@/types/review';
+import { LoadingBlock } from '@/components/ui/skeleton';
 
 type Tab = 'needs' | 'waiting' | 'accepted' | 'used' | 'closed' | 'all';
 
@@ -119,7 +120,7 @@ export function SellerOffers() {
 
       {list.error && <p role="alert" className="mb-3 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">{list.error}</p>}
       {list.loading ? (
-        <p className="py-10 text-center text-muted-foreground">Loading…</p>
+        <LoadingBlock />
       ) : list.rows.length === 0 ? (
         <p className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
           {dirty ? 'No offers match this search.' : 'Nothing here. Offers appear when customers propose a price on a SKU that accepts proposals.'}
