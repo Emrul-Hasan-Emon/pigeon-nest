@@ -50,19 +50,3 @@ export function listSellerCollections() {
 export function listSellerAttributes() {
   return sellerHttp.get<AttributeListResponse>(ENDPOINTS.seller.catalog.attributes, { limit: 100 });
 }
-
-export interface SellerDashboardSummary {
-  totalProducts: number;
-  status: { approved: number; pending: number; rejected: number };
-  activeStatus: { active: number; inactive: number; suspended: number };
-  /** Approved AND active: shown on the storefront. */
-  visibleProducts: number;
-  /** Rejected or suspended: frozen for the seller. */
-  lockedProducts: number;
-  totalSkus: number;
-  outOfStockSkus: number;
-}
-
-export function getSellerDashboard() {
-  return sellerHttp.get<SellerDashboardSummary>(ENDPOINTS.seller.dashboard);
-}
