@@ -45,7 +45,12 @@ function Line({
     }
   }
 
-  const stepper = (
+  const offered = !!line.proposal;
+  const stepper = offered ? (
+    <span className="inline-flex h-7 items-center rounded-full border border-st-line bg-st-dove px-3 text-sm tabular-nums text-st-ink" title="The quantity is fixed by your offer">
+      Qty {line.quantity}
+    </span>
+  ) : (
     <div className="inline-flex items-center rounded-full border border-st-line bg-white">
       <button
         type="button"
@@ -90,12 +95,20 @@ function Line({
             )}
             {line.sku?.label && <p className="text-xs text-st-slate">{line.sku.label}</p>}
           </div>
-          <p className="shrink-0 text-sm font-semibold text-st-ink">{blocked ? '—' : money(line.linePayable)}</p>
+          <div className="shrink-0 text-right">
+            <p className="text-sm font-semibold text-st-ink">{blocked ? '—' : money(line.linePayable)}</p>
+            {!blocked && line.proposal?.applied && (
+              <s className="block text-xs text-st-slate">{money(line.skuUnitPayable * line.quantity)}</s>
+            )}
+          </div>
         </div>
 
         <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
           {stepper}
           {!blocked && <span className="text-xs text-st-slate">{money(line.unitPayable)} each</span>}
+          {line.proposal?.applied && (
+            <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">Your offer</span>
+          )}
           <button
             type="button"
             disabled={busy}
@@ -115,6 +128,17 @@ function Line({
                 Set to {line.availableQuantity}
               </button>
             )}
+          </p>
+        )}
+        {line.proposal && !blocked && (
+          <p className="mt-1 text-xs text-st-slate">
+            Bought at your accepted offer. To change the quantity, remove it and make a new offer.{' '}
+            <Link href={`/proposals/${line.proposal.id}`} className="underline">See offer</Link>
+          </p>
+        )}
+        {line.proposalNotice && (
+          <p role="status" className={`mt-1 text-xs ${line.proposal ? 'text-amber-700' : 'text-st-slate'}`}>
+            {line.proposalNotice}
           </p>
         )}
         {!blocked && line.priceChanged && (

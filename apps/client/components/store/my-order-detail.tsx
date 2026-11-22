@@ -118,6 +118,12 @@ export function MyOrderDetail({ id, placed, initial }: { id: number; placed?: bo
                 <p className="line-clamp-2 text-sm font-medium text-st-ink">{i.productName}</p>
                 {i.sku.label && <p className="text-xs text-st-slate">{i.sku.label}</p>}
                 <p className="text-xs text-st-slate">{money(i.unitPayable)} × {i.quantity}</p>
+                {i.proposal && (
+                  <p className="text-xs text-st-slate">
+                    Item price then {money(i.skuUnitPrice)} · your offer {money(i.proposal.unitPrice)}{' '}
+                    <Link href={`/proposals/${i.proposal.id}`} className="underline">See offer</Link>
+                  </p>
+                )}
               </div>
               <div className="shrink-0 text-right">
                 <p className="text-sm font-semibold text-st-ink">{money(i.lineTotal)}</p>

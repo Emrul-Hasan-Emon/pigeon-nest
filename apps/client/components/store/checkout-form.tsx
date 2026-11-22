@@ -51,6 +51,7 @@ export function CheckoutForm({ cartId }: { cartId: number }) {
   const [error, setError] = useState<string | null>(null);
   const [issues, setIssues] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const [saved, setSaved] = useState<AddressView[]>([]);
   const [savedId, setSavedId] = useState<number | null>(null);
 
@@ -66,7 +67,7 @@ export function CheckoutForm({ cartId }: { cartId: number }) {
     return () => {
       cancelled = true;
     };
-  }, [cartId, countryCode]);
+  }, [cartId, countryCode, reloadKey]);
 
   // A signed-in customer starts with their own details filled in.
   useEffect(() => {
@@ -157,6 +158,7 @@ export function CheckoutForm({ cartId }: { cartId: number }) {
         paymentGatewayId: gateway.id,
         ...(note.trim() ? { note: note.trim() } : {}),
         ...(Object.keys(filled).length ? { paymentProof: filled } : {}),
+        expectedItemsTotal: subtotal,
       });
       changed();
       router.replace(`/orders/${order.id}?placed=1`);
@@ -164,6 +166,8 @@ export function CheckoutForm({ cartId }: { cartId: number }) {
       if (err instanceof ApiError) {
         setError(err.message);
         setIssues(err.issues);
+        // A 409 means the cart changed under us: show the new prices.
+        if (err.status === 409) setReloadKey((k) => k + 1);
       } else {
         setError('We could not place your order. Try again.');
       }
@@ -329,7 +333,7 @@ export function CheckoutForm({ cartId }: { cartId: number }) {
             <li key={l.id} className="flex justify-between gap-3 py-2">
               <span className="min-w-0">
                 <span className="line-clamp-2 text-st-ink">{l.product?.name ?? 'Removed product'}</span>
-                <span className="text-xs text-st-slate">{l.sku?.label ? `${l.sku.label} · ` : ''}Qty {l.quantity}</span>
+                <span className="text-xs text-st-slate">{l.sku?.label ? `${l.sku.label} · ` : ''}Qty {l.quantity}{l.proposal?.applied ? ' · your offer' : ''}</span>
                 {l.status !== 'ok' && <span className="block text-xs font-medium text-destructive">Not available</span>}
               </span>
               <span className="shrink-0 text-st-ink">{l.status === 'ok' ? money(l.linePayable) : '—'}</span>
