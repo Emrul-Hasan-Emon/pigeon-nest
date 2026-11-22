@@ -76,6 +76,7 @@ export const ENDPOINTS = {
       balance: (sellerId: Id) => `/commission/balances/${sellerId}`,
       disburse: (sellerId: Id) => `/commission/balances/${sellerId}/disbursements`,
       history: '/commission/history',
+      changes: '/commission/changes',
       disbursements: resource('/commission/disbursements'),
       rule: (sellerId: Id) => `/sellers/${sellerId}/commission-setting`,
       settingHistory: '/seller-settings/history',
@@ -99,6 +100,13 @@ export const ENDPOINTS = {
 
     carts: resource('/carts'),
     wishlist: { list: '/wishlist', mostSaved: '/wishlist/most-saved' },
+    returns: {
+      list: '/returns',
+      create: '/returns',
+      eligibility: (orderId: Id) => `/returns/eligibility/${orderId}`,
+      detail: (id: Id) => `/returns/${id}`,
+      status: (id: Id) => `/returns/${id}/status`,
+    },
     proposals: {
       list: '/proposals',
       detail: (id: Id) => `/proposals/${id}`,
@@ -146,6 +154,14 @@ export const ENDPOINTS = {
     },
     dashboard: '/dashboard',
     wishlist: { insights: '/wishlist/insights' },
+    returns: {
+      list: '/returns',
+      detail: (id: Id) => `/returns/${id}`,
+      accept: (id: Id) => `/returns/${id}/accept`,
+      reject: (id: Id) => `/returns/${id}/reject`,
+      processing: (id: Id) => `/returns/${id}/processing`,
+      returningMoney: (id: Id) => `/returns/${id}/returning-money`,
+    },
     proposals: {
       list: '/proposals',
       summary: '/proposals/summary',
@@ -164,6 +180,7 @@ export const ENDPOINTS = {
     commission: {
       balance: '/commission/balance',
       history: '/commission/history',
+      changes: '/commission/changes',
       disbursements: resource('/commission/disbursements'),
       rule: '/commission/setting',
       settingHistory: '/commission/setting/history',
@@ -210,6 +227,13 @@ export const ENDPOINTS = {
       track: '/orders/track',
       detail: (id: Id) => `/orders/${id}`,
       cancel: (id: Id) => `/orders/${id}/cancel`,
+    },
+    returns: {
+      list: '/returns',
+      create: '/returns',
+      eligibility: (orderId: Id) => `/returns/eligibility/${orderId}`,
+      detail: (id: Id) => `/returns/${id}`,
+      cancel: (id: Id) => `/returns/${id}/cancel`,
     },
     reviews: {
       productSummary: (productId: Id) => `/products/${productId}/reviews/summary`,
