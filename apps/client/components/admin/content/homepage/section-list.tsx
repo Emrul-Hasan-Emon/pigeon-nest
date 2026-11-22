@@ -17,6 +17,7 @@ import { ApiError, NotFoundApiError } from '@/lib/api/http';
 import { ScheduleBadge } from '../schedule-badge';
 import { ReorderModal } from './reorder-modal';
 import type { HomepageListParams, HomepageSection, SectionTypeDefinition } from '@/types/homepage';
+import { LoadingBlock } from '@/components/ui/skeleton';
 
 const PAGE_SIZE = 20;
 const selectClass =
@@ -178,7 +179,7 @@ export function SectionList({ mode }: { mode: 'section' | 'slot' }) {
       </div>
 
       {loading ? (
-        <p className="py-10 text-center text-muted-foreground">Loading…</p>
+        <LoadingBlock />
       ) : (
         <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
           <table className="min-w-full divide-y divide-border text-sm">
