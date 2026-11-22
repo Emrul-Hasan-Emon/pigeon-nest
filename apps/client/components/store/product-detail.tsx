@@ -6,6 +6,7 @@ import { useCart } from '@/lib/cart/cart-context';
 import { ApiError } from '@/lib/api/http';
 import { Stars } from '@/components/reviews/stars';
 import { ProductReviews } from './product-reviews';
+import { ProposalPanel } from './proposal-panel';
 import { SellerCartPanel } from './seller-cart-panel';
 import { WishlistButton } from './wishlist-button';
 import { money } from './product-card';
@@ -260,6 +261,12 @@ export function ProductDetailView({ product }: { product: ProductDetail }) {
           </div>
           {addMessage && (
             <p role={addMessage.ok ? 'status' : 'alert'} className={`mt-2 text-sm ${addMessage.ok ? 'text-st-teal' : 'text-destructive'}`}>{addMessage.text}</p>
+          )}
+
+          {sku && (
+            <div className="mt-5">
+              <ProposalPanel productPath={`/products/${product.id}-${product.slug}`} sku={sku} />
+            </div>
           )}
 
           <div className="mt-5">

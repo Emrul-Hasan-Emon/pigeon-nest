@@ -119,6 +119,9 @@ export function StoreHeader() {
               </span>
             )}
           </Link>
+          <Link href="/proposals" className="hidden rounded-full px-3 py-1.5 text-white/75 transition-colors hover:text-white md:block">
+            Offers
+          </Link>
           <Link href="/orders" className="hidden rounded-full px-3 py-1.5 text-white/75 transition-colors hover:text-white md:block">
             Orders
           </Link>
@@ -161,6 +164,7 @@ export function StoreFooter() {
           <li><Link href="/sellers" className="hover:text-white">Sellers</Link></li>
           <li><Link href="/orders" className="hover:text-white">Your orders</Link></li>
           <li><Link href="/wishlist" className="hover:text-white">Your wishlist</Link></li>
+          <li><Link href="/proposals" className="hover:text-white">Your offers</Link></li>
           <li><Link href="/reviews" className="hover:text-white">Your reviews</Link></li>
           <li><Link href="/addresses" className="hover:text-white">Your addresses</Link></li>
           <li><Link href="/orders/track" className="hover:text-white">Track an order</Link></li>
