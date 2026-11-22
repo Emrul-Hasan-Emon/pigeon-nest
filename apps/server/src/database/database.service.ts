@@ -30,6 +30,8 @@ import { OrderStatusHistory } from './entities/order/order-status-history.entity
 import { OrderReturn } from './entities/order-return/order-return.entity';
 import { OrderReturnItem } from './entities/order-return/order-return-item.entity';
 import { OrderReturnStatusHistory } from './entities/order-return/order-return-status-history.entity';
+import { OrderReturnAttachment } from './entities/order-return/order-return-attachment.entity';
+import { SystemCommissionChangeHistory } from './entities/commission/system-commission-change-history.entity';
 import { Cart } from './entities/cart/cart.entity';
 import { CartItem } from './entities/cart/cart-item.entity';
 import { Coupon } from './entities/coupon/coupon.entity';
@@ -80,6 +82,8 @@ export class DatabaseService implements OnApplicationBootstrap {
   orderReturn: Repository<OrderReturn>;
   orderReturnItem: Repository<OrderReturnItem>;
   orderReturnStatusHistory: Repository<OrderReturnStatusHistory>;
+  orderReturnAttachment: Repository<OrderReturnAttachment>;
+  systemCommissionChangeHistory: Repository<SystemCommissionChangeHistory>;
   cart: Repository<Cart>;
   cartItem: Repository<CartItem>;
   coupon: Repository<Coupon>;
@@ -151,6 +155,10 @@ export class DatabaseService implements OnApplicationBootstrap {
     private orderReturnItemRepository: Repository<OrderReturnItem>,
     @InjectRepository(OrderReturnStatusHistory)
     private orderReturnStatusHistoryRepository: Repository<OrderReturnStatusHistory>,
+    @InjectRepository(OrderReturnAttachment)
+    private orderReturnAttachmentRepository: Repository<OrderReturnAttachment>,
+    @InjectRepository(SystemCommissionChangeHistory)
+    private systemCommissionChangeHistoryRepository: Repository<SystemCommissionChangeHistory>,
     @InjectRepository(Cart) private cartRepository: Repository<Cart>,
     @InjectRepository(CartItem)
     private cartItemRepository: Repository<CartItem>,
@@ -215,6 +223,8 @@ export class DatabaseService implements OnApplicationBootstrap {
     this.orderReturn = this.orderReturnRepository;
     this.orderReturnItem = this.orderReturnItemRepository;
     this.orderReturnStatusHistory = this.orderReturnStatusHistoryRepository;
+    this.orderReturnAttachment = this.orderReturnAttachmentRepository;
+    this.systemCommissionChangeHistory = this.systemCommissionChangeHistoryRepository;
     this.cart = this.cartRepository;
     this.cartItem = this.cartItemRepository;
     this.coupon = this.couponRepository;

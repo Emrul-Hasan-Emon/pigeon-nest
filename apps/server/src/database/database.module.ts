@@ -35,6 +35,8 @@ import { OrderStatusHistory } from './entities/order/order-status-history.entity
 import { OrderReturn } from './entities/order-return/order-return.entity';
 import { OrderReturnItem } from './entities/order-return/order-return-item.entity';
 import { OrderReturnStatusHistory } from './entities/order-return/order-return-status-history.entity';
+import { OrderReturnAttachment } from './entities/order-return/order-return-attachment.entity';
+import { SystemCommissionChangeHistory } from './entities/commission/system-commission-change-history.entity';
 import { Cart } from './entities/cart/cart.entity';
 import { CartItem } from './entities/cart/cart-item.entity';
 import { Coupon } from './entities/coupon/coupon.entity';
@@ -99,6 +101,8 @@ export const DATABASE_ENTITIES = [
   OrderReturn,
   OrderReturnItem,
   OrderReturnStatusHistory,
+  OrderReturnAttachment,
+  SystemCommissionChangeHistory,
   Cart,
   CartItem,
   Coupon,
