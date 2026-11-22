@@ -13,6 +13,7 @@ import {
   MinLength,
 } from 'class-validator';
 import { CommissionHistoryType } from '../../database/enums/commission-history-type.enum';
+import { CommissionStatus } from '../../database/enums/commission-status.enum';
 import { CommissionType } from '../../database/enums/commission-type.enum';
 import { PaymentStatus } from '../../database/enums/payment-status.enum';
 import { SellerSettingType } from '../../database/enums/seller-setting-type.enum';
@@ -104,6 +105,11 @@ export class ListCommissionHistoryQueryDto extends Paged {
   @IsEnum(CommissionHistoryType)
   type?: CommissionHistoryType;
 
+  // for_system, order_returned_to_customer, ...
+  @IsOptional()
+  @IsEnum(CommissionStatus)
+  status?: CommissionStatus;
+
   // The order's payment status when the row was written.
   @IsOptional()
   @IsEnum(PaymentStatus)
@@ -121,6 +127,24 @@ export class ListCommissionHistoryQueryDto extends Paged {
   @IsOptional()
   @IsIn(['true', 'false'])
   voided?: string;
+}
+
+/** The change log of the balance: every move of total, due and paid. */
+export class ListCommissionChangesQueryDto extends Paged {
+  @applyAll(optionalId())
+  sellerId?: number;
+
+  @IsOptional()
+  @IsEnum(CommissionStatus)
+  status?: CommissionStatus;
+
+  @IsOptional()
+  @IsDateString()
+  from?: string;
+
+  @IsOptional()
+  @IsDateString()
+  to?: string;
 }
 
 export class ListDisburseQueryDto extends Paged {
