@@ -23,6 +23,7 @@ import {
 import { formatDateTime } from '@/lib/datetime';
 import { reviewStatusBadge } from './review-list';
 import type { AdminReviewDetails } from '@/types/review';
+import { LoadingBlock } from '@/components/ui/skeleton';
 
 const textarea = 'w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:border-foreground focus:outline-none';
 const section = 'rounded-xl border border-border bg-card p-4 shadow-sm';
@@ -108,7 +109,7 @@ export function AdminReviewDetail({ id }: { id: number }) {
 
   if (missing) return <p className="py-10 text-center text-muted-foreground">This review no longer exists. <Link href="/admin/reviews" className="text-primary underline">Back to reviews</Link></p>;
   if (error) return <p role="alert" className="py-10 text-center text-destructive">{error}</p>;
-  if (!review) return <p className="py-10 text-center text-muted-foreground">Loading…</p>;
+  if (!review) return <LoadingBlock />;
 
   const hidden = review.status === 'hidden';
   const openReports = review.reports.filter((r) => r.status === 'open').length;
