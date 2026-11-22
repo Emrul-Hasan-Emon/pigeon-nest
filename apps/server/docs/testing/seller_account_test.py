@@ -869,22 +869,22 @@ check("I deleted product keeps its history (admin view)", (200, phist(PD)), 200,
 vis = sql("select count(*) from seller_product where status='approved' and \"activeStatus\"='active' and \"deletedAt\" is null")
 check("I visible products (approved+active) are countable via the two fields", (200, vis), 200, pred=lambda v: int(v) >= 1)
 
-# --- seller dashboard numbers
+# --- seller dashboard numbers (the product counts are the "products" part of the one dashboard response)
 check("I dashboard: no token -> 401", call("GET", "/seller/dashboard"), 401)
 check("I dashboard: admin token -> 403", call("GET", "/seller/dashboard", ADMIN), 403)
 check("I dashboard: inactive seller -> 403", call("GET", "/seller/dashboard", new_seller("approved", "inactive")["token"]), 403)
 _cnt = lambda where: int(sql(f'select count(*) from seller_product where "sellerId"={PA["id"]} and "deletedAt" is null' + (f" and {where}" if where else "")))
-check("I dashboard: counts match the database", call("GET", "/seller/dashboard", PA_T), 200, pred=lambda d: (
+check("I dashboard: counts match the database", call("GET", "/seller/dashboard", PA_T), 200, pred=lambda r: (lambda d: (
     d["totalProducts"] == _cnt("") and d["status"]["approved"] == _cnt("status='approved'") and d["status"]["pending"] == _cnt("status='pending'")
     and d["status"]["rejected"] == _cnt("status='rejected'") and d["activeStatus"]["active"] == _cnt("\"activeStatus\"='active'")
     and d["activeStatus"]["inactive"] == _cnt("\"activeStatus\"='inactive'") and d["activeStatus"]["suspended"] == _cnt("\"activeStatus\"='suspended'")
     and d["visibleProducts"] == _cnt("status='approved' and \"activeStatus\"='active'")
-    and d["lockedProducts"] == _cnt("status='rejected' or \"activeStatus\"='suspended'")))
-check("I dashboard: sku totals", call("GET", "/seller/dashboard", PA_T), 200, pred=lambda d: d["totalSkus"] == int(sql(f'select count(*) from seller_product_sku s join seller_product p on p.id=s."sellerProductId" where p."sellerId"={PA["id"]} and p."deletedAt" is null and s."deletedAt" is null')) and d["outOfStockSkus"] <= d["totalSkus"])
-_before = call("GET", "/seller/dashboard", PB_T)[1]["totalProducts"]
+    and d["lockedProducts"] == _cnt("status='rejected' or \"activeStatus\"='suspended'")))(r["products"]))
+check("I dashboard: sku totals", call("GET", "/seller/dashboard", PA_T), 200, pred=lambda r: r["products"]["totalSkus"] == int(sql(f'select count(*) from seller_product_sku s join seller_product p on p.id=s."sellerProductId" where p."sellerId"={PA["id"]} and p."deletedAt" is null and s."deletedAt" is null')) and r["products"]["outOfStockSkus"] <= r["products"]["totalSkus"])
+_before = call("GET", "/seller/dashboard", PB_T)[1]["products"]["totalProducts"]
 call("POST", "/seller/products", PB_T, body=pbody("dash"))
-check("I dashboard: a new product raises only that seller's total and visible counts", call("GET", "/seller/dashboard", PB_T), 200, pred=lambda d: d["totalProducts"] == _before + 1)
-check("I dashboard: other sellers' products are not counted", call("GET", "/seller/dashboard", PA_T), 200, pred=lambda d: d["totalProducts"] == _cnt(""))
+check("I dashboard: a new product raises only that seller's total and visible counts", call("GET", "/seller/dashboard", PB_T), 200, pred=lambda d: d["products"]["totalProducts"] == _before + 1)
+check("I dashboard: other sellers' products are not counted", call("GET", "/seller/dashboard", PA_T), 200, pred=lambda d: d["products"]["totalProducts"] == _cnt(""))
 
 # --- catalog lookups for the seller product form
 for path_ in ("/seller/catalog/categories/tree", "/seller/catalog/collections", "/seller/catalog/attributes"):
