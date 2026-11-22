@@ -570,3 +570,4 @@ returned return cannot be cancelled and their payment cannot be reversed. Tables
 - [x] Frontend: `/admin/dashboard` (admin login now lands there, new sidebar item), seller dashboard gets "Your sales" above the product counts
 - [x] Tests: `dashboard_test.py` (82). Docs: `dashboard-guide.md`
 - [ ] QA: look at both screens in a browser (not done: no browser was available); decide if sales should be counted on the payment date rather than the order date
+- [x] Dashboard guide pages: `/admin/dashboard/guide` and `/seller/dashboard/guide` explain every figure (content in `components/dashboard/guide-content.ts`, keep it in step with the dashboards), sidebar items and "What do these figures mean?" links
