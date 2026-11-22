@@ -1,5 +1,6 @@
 import { sellerHttp } from './http';
 import { ENDPOINTS } from '../endpoints';
+import { setSellerToken } from '../auth/seller-token';
 import type { SellerLoginResponse, SellerView } from '@/types/seller';
 
 export function sellerLogin(phone: string, password: string) {
@@ -52,9 +53,12 @@ export function updateMyProfile(payload: MyProfilePayload) {
   return sellerHttp.patch<SellerView>(ENDPOINTS.seller.profile.detail, form);
 }
 
-export function changeMyPassword(currentPassword: string, newPassword: string) {
-  return sellerHttp.patch<{ updated: true }>(ENDPOINTS.seller.profile.password, {
+// The old token stops working with the old password, so keep the fresh one the server returns.
+export async function changeMyPassword(currentPassword: string, newPassword: string) {
+  const result = await sellerHttp.patch<{ updated: true; accessToken: string }>(ENDPOINTS.seller.profile.password, {
     currentPassword,
     newPassword,
   });
+  setSellerToken(result.accessToken);
+  return result;
 }

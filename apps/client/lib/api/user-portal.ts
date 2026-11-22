@@ -1,5 +1,6 @@
 import { userHttp } from './http';
 import { ENDPOINTS } from '../endpoints';
+import { setUserToken } from '../auth/user-token';
 import type { UserLoginResponse, UserView } from '@/types/user';
 
 export function userLogin(phone: string, password: string) {
@@ -37,9 +38,12 @@ export function updateMyUserProfile(payload: MyUserProfilePayload) {
   return userHttp.patch<UserView>(ENDPOINTS.user.profile.detail, form);
 }
 
-export function changeMyUserPassword(currentPassword: string, newPassword: string) {
-  return userHttp.patch<{ updated: true }>(ENDPOINTS.user.profile.password, {
+// The old token stops working with the old password, so keep the fresh one the server returns.
+export async function changeMyUserPassword(currentPassword: string, newPassword: string) {
+  const result = await userHttp.patch<{ updated: true; accessToken: string }>(ENDPOINTS.user.profile.password, {
     currentPassword,
     newPassword,
   });
+  setUserToken(result.accessToken);
+  return result;
 }
