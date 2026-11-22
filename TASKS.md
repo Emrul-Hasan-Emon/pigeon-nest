@@ -571,3 +571,10 @@ returned return cannot be cancelled and their payment cannot be reversed. Tables
 - [x] Tests: `dashboard_test.py` (82). Docs: `dashboard-guide.md`
 - [ ] QA: look at both screens in a browser (not done: no browser was available); decide if sales should be counted on the payment date rather than the order date
 - [x] Dashboard guide pages: `/admin/dashboard/guide` and `/seller/dashboard/guide` explain every figure (content in `components/dashboard/guide-content.ts`, keep it in step with the dashboards), sidebar items and "What do these figures mean?" links
+
+## Admin console polish
+
+- [x] Backend: `GET /admin/auth/me` (name and role for the top bar), `GET /admin/dashboard/attention` (cheap counts for the alert bell); tests in `dashboard_test.py` (88) and `guards_test.py` (275)
+- [x] Frontend: brass accent tokens, display face for admin page titles, redesigned sidebar (brand mark, brass active marker), breadcrumb top bar with alert bell and profile menu, dashboard lead card with trend line and brass chart, skeleton loaders in place of "Loading…" (50 places), wider content area, login brand mark
+- [x] Whole-console pass (checked with headless-Chrome screenshots): global admin table, card, field, button and focus styling in `globals.css` (scoped to `.admin-main`), stacked form labels, custom select chevrons, brass links, initials avatars, empty-table and missing-image placeholders, `FilterPanel` (primary filters plus "More filters") on the orders list, seller sidebar matches the admin one
+- [ ] QA: the Next dev server does not pick up `globals.css` edits; restart it with `.next/dev/cache` removed after changing that file
