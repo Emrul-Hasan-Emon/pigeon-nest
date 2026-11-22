@@ -9,6 +9,7 @@ import { useDebouncedValue } from '@/lib/hooks/use-debounced-value';
 import { deleteAttribute, listAttributes, updateAttribute } from '@/lib/api/attributes';
 import { ApiError, ConflictApiError, NotFoundApiError } from '@/lib/api/http';
 import type { Attribute } from '@/types/attribute';
+import { LoadingBlock } from '@/components/ui/skeleton';
 
 const PAGE_SIZE = 20;
 
@@ -163,7 +164,7 @@ export default function AdminAttributesPage() {
       </div>
 
       {loading ? (
-        <p className="py-10 text-center text-muted-foreground">Loading…</p>
+        <LoadingBlock />
       ) : (
         <AttributeTable
           attributes={attributes}

@@ -6,6 +6,7 @@ import { AttributeForm } from '@/components/admin/catalog/attributes/attribute-f
 import { listAttributes } from '@/lib/api/attributes';
 import { useToast } from '@/components/ui/toast';
 import type { Attribute } from '@/types/attribute';
+import { LoadingBlock } from '@/components/ui/skeleton';
 
 export default function EditAttributePage() {
   const params = useParams<{ id: string }>();
@@ -45,7 +46,7 @@ export default function EditAttributePage() {
   }, [params.id, router, showToast]);
 
   if (loading) {
-    return <p className="py-10 text-center text-muted-foreground">Loading…</p>;
+    return <LoadingBlock />;
   }
   if (!attribute) return null;
 
