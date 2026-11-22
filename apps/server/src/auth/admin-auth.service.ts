@@ -1,16 +1,15 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { DatabaseService } from '../database/database.service';
 import { AuthUserType } from '../database/enums/auth-user-type.enum';
 import { AdminLoginDto } from './dtos/admin-login.dto';
-import { JwtPayload } from './interfaces/jwt-payload.interface';
+import { TokenService } from './services/token.service';
 
 @Injectable()
 export class AdminAuthService {
   constructor(
     private readonly databaseService: DatabaseService,
-    private readonly jwtService: JwtService,
+    private readonly tokens: TokenService,
   ) {}
 
   async login(dto: AdminLoginDto) {
@@ -30,10 +29,8 @@ export class AdminAuthService {
       throw new UnauthorizedException('Invalid email or password.');
     }
 
-    const payload: JwtPayload = { sub: admin.id, type: AuthUserType.ADMIN };
-
     return {
-      accessToken: await this.jwtService.signAsync(payload),
+      accessToken: await this.tokens.sign(AuthUserType.ADMIN, admin),
       admin: {
         id: admin.id,
         name: admin.name,
