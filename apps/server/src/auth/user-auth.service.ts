@@ -1,5 +1,4 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { InjectDataSource } from '@nestjs/typeorm';
 import * as bcrypt from 'bcryptjs';
 import { DataSource } from 'typeorm';
@@ -10,7 +9,7 @@ import { UserStatus } from '../database/enums/user-status.enum';
 import { CommonUserService } from '../user/services/common-user.service';
 import { UserLoginDto } from './dtos/user-login.dto';
 import { UserRegisterDto } from './dtos/user-register.dto';
-import { JwtPayload } from './interfaces/jwt-payload.interface';
+import { TokenService } from './services/token.service';
 
 // Compared against when the phone is unknown, so response time does not
 // reveal which phone numbers are registered.
@@ -21,7 +20,7 @@ const TIMING_EQUALISER_HASH =
 export class UserAuthService {
   constructor(
     private readonly databaseService: DatabaseService,
-    private readonly jwtService: JwtService,
+    private readonly tokens: TokenService,
     private readonly commonUserService: CommonUserService,
     @InjectDataSource() private readonly dataSource: DataSource,
   ) {}
@@ -77,9 +76,8 @@ export class UserAuthService {
   }
 
   private async issueSession(user: User) {
-    const payload: JwtPayload = { sub: user.id, type: AuthUserType.USER };
     return {
-      accessToken: await this.jwtService.signAsync(payload),
+      accessToken: await this.tokens.sign(AuthUserType.USER, user),
       user: this.commonUserService.toUserView(user),
     };
   }
