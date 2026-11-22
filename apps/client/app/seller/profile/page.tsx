@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { PhoneInput } from '@/components/phone-input';
-import { SellerSidebar } from '@/components/seller/seller-sidebar';
+import { SellerFrame } from '@/components/seller/seller-frame';
 import { StatusBanner } from '@/components/seller/status-banner';
 import { useToast } from '@/components/ui/toast';
 import { changeMyPassword, getMyProfile, updateMyProfile } from '@/lib/api/seller-portal';
@@ -133,10 +133,7 @@ export default function SellerProfilePage() {
     'mt-1 w-full rounded-md border border-input px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none disabled:opacity-60';
 
   return (
-    <div className="min-h-screen bg-background pl-56">
-      <SellerSidebar active="profile" />
-
-      <main className="mx-auto max-w-3xl px-6 py-6">
+    <SellerFrame active="profile" width="max-w-3xl">
         <h1 className="mb-4 text-2xl font-bold text-foreground">My profile</h1>
         <StatusBanner seller={seller} />
 
@@ -226,7 +223,6 @@ export default function SellerProfilePage() {
             {changingPassword ? 'Updating…' : 'Update password'}
           </button>
         </form>
-      </main>
-    </div>
+    </SellerFrame>
   );
 }
