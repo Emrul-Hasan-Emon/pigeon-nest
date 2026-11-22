@@ -19,6 +19,9 @@ export interface SkuDraft {
   lowStockThreshold: string;
   isDefault: boolean;
   isActive: boolean;
+  acceptProposals: boolean;
+  /** Blank means no floor. Hidden from buyers. */
+  minProposalPrice: string;
   // New rows pick variants; existing rows only display them (immutable).
   variants: VariantPairDraft[];
   variantLabel?: string;
@@ -38,6 +41,8 @@ export function emptySkuDraft(isDefault = false): SkuDraft {
     lowStockThreshold: '5',
     isDefault,
     isActive: true,
+    acceptProposals: false,
+    minProposalPrice: '',
     variants: [{ attributeId: '', attributeValueId: '' }],
   };
 }
@@ -53,6 +58,8 @@ export function skuToDraft(sku: Sku): SkuDraft {
     lowStockThreshold: String(sku.lowStockThreshold),
     isDefault: sku.isDefault,
     isActive: sku.isActive,
+    acceptProposals: sku.acceptProposals ?? false,
+    minProposalPrice: sku.minProposalPrice ? String(sku.minProposalPrice) : '',
     variants: [],
     variantLabel:
       sku.variants.map((v) => `${v.attribute.name}: ${v.attributeValue.name}`).join(', ') || '—',
@@ -80,6 +87,9 @@ export function validateSkuDrafts(drafts: SkuDraft[]): string | null {
     if (draft.discountedPrice !== '' && Number(draft.discountedPrice) > price) {
       return 'A discounted price cannot exceed the price.';
     }
+    if (draft.minProposalPrice !== '' && (Number.isNaN(Number(draft.minProposalPrice)) || Number(draft.minProposalPrice) < 0)) {
+      return 'The lowest price for proposals must be 0 or more.';
+    }
     if (draft.id === undefined && validPairs(draft).length === 0) {
       return 'Every new SKU needs at least one attribute and value.';
     }
@@ -87,7 +97,16 @@ export function validateSkuDrafts(drafts: SkuDraft[]): string | null {
   return null;
 }
 
-export function buildCreateSkus(drafts: SkuDraft[]): CreateSkuPayload[] {
+// The payload types in lib/api/products.ts do not list the proposal fields yet, so they are added here.
+interface ProposalSkuFields {
+  acceptProposals: boolean;
+  minProposalPrice?: number;
+}
+
+// A blank floor is left out on create and sent as 0 on update (the API cannot clear it with null).
+const floorOf = (draft: SkuDraft) => (draft.minProposalPrice !== '' ? Number(draft.minProposalPrice) || 0 : 0);
+
+export function buildCreateSkus(drafts: SkuDraft[]): (CreateSkuPayload & ProposalSkuFields)[] {
   return drafts
     .filter((draft) => !draft.removed)
     .map((draft) => ({
@@ -98,12 +117,14 @@ export function buildCreateSkus(drafts: SkuDraft[]): CreateSkuPayload[] {
       lowStockThreshold: Number(draft.lowStockThreshold) || 0,
       isDefault: draft.isDefault,
       isActive: draft.isActive,
+      acceptProposals: draft.acceptProposals,
+      ...(floorOf(draft) > 0 ? { minProposalPrice: floorOf(draft) } : {}),
       variants: validPairs(draft),
     }));
 }
 
 export function buildSkuChanges(drafts: SkuDraft[]): {
-  skus: UpdateSkuPayload[];
+  skus: (UpdateSkuPayload & ProposalSkuFields)[];
   removeSkuIds: number[];
 } {
   const removeSkuIds = drafts
@@ -112,13 +133,15 @@ export function buildSkuChanges(drafts: SkuDraft[]): {
 
   const skus = drafts
     .filter((draft) => !draft.removed)
-    .map((draft): UpdateSkuPayload => {
+    .map((draft): UpdateSkuPayload & ProposalSkuFields => {
       const common = {
         price: Number(draft.price),
         discountedPrice: draft.discountedPrice !== '' ? Number(draft.discountedPrice) : undefined,
         quantity: Number(draft.quantity) || 0,
         lowStockThreshold: Number(draft.lowStockThreshold) || 0,
         isActive: draft.isActive,
+        acceptProposals: draft.acceptProposals,
+        minProposalPrice: floorOf(draft),
       };
       if (draft.id !== undefined) {
         return { id: draft.id, ...common, ...(draft.isDefault ? { isDefault: true } : {}) };
@@ -272,6 +295,33 @@ export function ProductSkuEditor({
                   />
                   Active
                 </label>
+              </div>
+
+              <div className="mt-2 flex flex-wrap items-start gap-x-6 gap-y-2 rounded-md bg-muted/50 px-3 py-2">
+                <label className="flex items-center gap-2 text-sm text-foreground">
+                  <input
+                    type="checkbox"
+                    checked={draft.acceptProposals}
+                    onChange={(event) => patch(draft.key, { acceptProposals: event.target.checked })}
+                  />
+                  Accept price proposals
+                </label>
+                {draft.acceptProposals && (
+                  <div className="min-w-56 flex-1">
+                    <input
+                      className={`${inputClass} max-w-48`}
+                      type="number"
+                      min={0}
+                      aria-label="Lowest price I will consider"
+                      placeholder="Lowest price I will consider"
+                      value={draft.minProposalPrice}
+                      onChange={(event) => patch(draft.key, { minProposalPrice: event.target.value })}
+                    />
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Hidden from buyers. Buyers offering less are turned down automatically. Leave empty or 0 for no floor.
+                    </p>
+                  </div>
+                )}
               </div>
 
               {draft.id === undefined && (

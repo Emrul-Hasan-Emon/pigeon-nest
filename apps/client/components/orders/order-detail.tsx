@@ -131,7 +131,18 @@ export function OrderDetailView({ role, id }: { role: StaffRole; id: number }) {
                 </td>
                 <td className="px-4 py-3 text-muted-foreground">{i.sku.label || i.sku.code}<span className="block text-xs">{i.sku.code}</span></td>
                 <td className="px-4 py-3 text-muted-foreground">{i.quantity}</td>
-                <td className="px-4 py-3 text-muted-foreground">{money(i.unitPayable)}{i.unitPrice !== i.unitPayable && <s className="ml-1 text-xs">{money(i.unitPrice)}</s>}</td>
+                <td className="px-4 py-3 text-muted-foreground">
+                  {money(i.unitPayable)}
+                  {i.proposal ? (
+                    <span className="block text-xs">
+                      Item price then {money(i.skuUnitPrice)}
+                      <br />
+                      Proposal price {money(i.proposal.unitPrice)}
+                    </span>
+                  ) : (
+                    i.unitPrice !== i.unitPayable && <s className="ml-1 text-xs">{money(i.unitPrice)}</s>
+                  )}
+                </td>
                 <td className="px-4 py-3 font-medium text-foreground">{money(i.lineTotal)}</td>
               </tr>
             ))}
