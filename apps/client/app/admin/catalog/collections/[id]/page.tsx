@@ -6,6 +6,7 @@ import { CollectionForm } from '@/components/admin/catalog/collections/collectio
 import { listCollections } from '@/lib/api/collections';
 import { useToast } from '@/components/ui/toast';
 import type { Collection } from '@/types/collection';
+import { LoadingBlock } from '@/components/ui/skeleton';
 
 export default function EditCollectionPage() {
   const params = useParams<{ id: string }>();
@@ -45,7 +46,7 @@ export default function EditCollectionPage() {
   }, [params.id, router, showToast]);
 
   if (loading) {
-    return <p className="py-10 text-center text-muted-foreground">Loading…</p>;
+    return <LoadingBlock />;
   }
   if (!collection) return null;
 

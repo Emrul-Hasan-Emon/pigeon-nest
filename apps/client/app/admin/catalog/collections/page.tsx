@@ -13,6 +13,7 @@ import {
 } from '@/lib/api/collections';
 import { ApiError, ConflictApiError, NotFoundApiError } from '@/lib/api/http';
 import type { Collection } from '@/types/collection';
+import { LoadingBlock } from '@/components/ui/skeleton';
 
 const PAGE_SIZE = 20;
 
@@ -167,7 +168,7 @@ export default function AdminCollectionsPage() {
       </div>
 
       {loading ? (
-        <p className="py-10 text-center text-muted-foreground">Loading…</p>
+        <LoadingBlock />
       ) : (
         <CollectionTable
           collections={collections}
