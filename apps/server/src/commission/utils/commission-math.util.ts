@@ -14,14 +14,13 @@ export interface CommissionResult {
 }
 
 /**
- * The commission on one order: a share of the item subtotal, or a fixed amount.
- * It never goes above what the customer pays, so the seller's amount is never
- * negative (a big discount could otherwise cause that).
+ * The commission on one order line: a share of what the line is payable at, or
+ * a fixed amount per line. It never goes above the line's payable amount, so a
+ * seller's share is never negative. The order's commission is the sum of its lines.
  */
-export function commissionFor(rule: CommissionRule, subtotal: number, payable: number): CommissionResult {
-  const raw = rule.type === CommissionType.PERCENTAGE ? (subtotal * rule.value) / 100 : rule.value;
-  const commission = Math.min(tidy(Math.max(0, raw)), tidy(payable));
-  return { commission, sellerAmount: tidy(payable - commission) };
+export function lineCommission(rule: CommissionRule, linePayable: number): number {
+  const raw = rule.type === CommissionType.PERCENTAGE ? (linePayable * rule.value) / 100 : rule.value;
+  return Math.min(tidy(Math.max(0, raw)), tidy(linePayable));
 }
 
 /** Throws a 400 when a rule cannot be stored. */
