@@ -8,6 +8,7 @@ import { useDebouncedValue } from '@/lib/hooks/use-debounced-value';
 import { approveSellerRequest, listSellerRequests, rejectSellerRequest } from '@/lib/api/sellers';
 import { ApiError } from '@/lib/api/http';
 import type { Seller } from '@/types/seller';
+import { LoadingBlock } from '@/components/ui/skeleton';
 
 const PAGE_SIZE = 20;
 
@@ -132,7 +133,7 @@ export default function SellerRequestsPage() {
       />
 
       {loading ? (
-        <p className="py-10 text-center text-muted-foreground">Loading…</p>
+        <LoadingBlock />
       ) : requests.length === 0 ? (
         <p className="rounded-xl border border-border bg-card py-10 text-center text-muted-foreground">
           No pending requests.
