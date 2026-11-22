@@ -12,6 +12,7 @@ import { DisburseList } from './disburse-list';
 import { ChangeLog } from './change-log';
 import { LedgerList } from './ledger-list';
 import { SettingHistory } from './setting-history';
+import { LoadingBlock } from '@/components/ui/skeleton';
 
 type Tab = 'ledger' | 'changes' | 'payments' | 'rule';
 
@@ -94,7 +95,7 @@ export function SellerCommissionAdmin({ sellerId }: { sellerId: number }) {
   }
 
   if (error) return <p role="alert" className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p>;
-  if (!b) return <p className="py-10 text-center text-muted-foreground">Loading…</p>;
+  if (!b) return <LoadingBlock />;
   const tabs: [Tab, string][] = [['ledger', 'Ledger'], ['changes', 'Balance changes'], ['payments', 'Payments received'], ['rule', 'Rate history']];
 
   return (

@@ -9,6 +9,7 @@ import { ChangeLog } from './change-log';
 import { DisburseList } from './disburse-list';
 import { LedgerList } from './ledger-list';
 import { SettingHistory } from './setting-history';
+import { LoadingBlock } from '@/components/ui/skeleton';
 
 type Tab = 'ledger' | 'changes' | 'payments' | 'rule';
 
@@ -23,7 +24,7 @@ export function SellerCommissionSelf() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   if (error) return <p role="alert" className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p>;
-  if (!b) return <p className="py-10 text-center text-muted-foreground">Loading…</p>;
+  if (!b) return <LoadingBlock />;
   const tabs: [Tab, string][] = [['ledger', 'Commission records'], ['changes', 'Balance changes'], ['payments', 'My payments'], ['rule', 'Rate history']];
   return (
     <div>
