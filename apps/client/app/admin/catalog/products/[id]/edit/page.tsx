@@ -9,6 +9,7 @@ import { getProduct } from '@/lib/api/products';
 import { NotFoundApiError } from '@/lib/api/http';
 import { useToast } from '@/components/ui/toast';
 import type { Product } from '@/types/product';
+import { LoadingBlock } from '@/components/ui/skeleton';
 
 export default function EditProductPage() {
   const params = useParams<{ id: string }>();
@@ -32,7 +33,7 @@ export default function EditProductPage() {
   }, [params.id, router, showToast]);
 
   if (loading) {
-    return <p className="py-10 text-center text-muted-foreground">Loading…</p>;
+    return <LoadingBlock />;
   }
   if (!product) return null;
 
