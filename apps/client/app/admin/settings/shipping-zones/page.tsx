@@ -9,6 +9,7 @@ import { useDebouncedValue } from '@/lib/hooks/use-debounced-value';
 import { deleteZone, listCountries, listZones, updateZone } from '@/lib/api/shipping';
 import { ApiError, ConflictApiError, NotFoundApiError } from '@/lib/api/http';
 import { DELIVERY_TYPES, type Country, type ShippingZone, type ZoneListParams } from '@/types/shipping';
+import { LoadingBlock } from '@/components/ui/skeleton';
 
 const PAGE_SIZE = 20;
 const selectClass =
@@ -139,7 +140,7 @@ export default function ShippingZonesPage() {
       </div>
 
       {loading ? (
-        <p className="py-10 text-center text-muted-foreground">Loading…</p>
+        <LoadingBlock />
       ) : (
         <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
           <table className="min-w-full divide-y divide-border text-sm">

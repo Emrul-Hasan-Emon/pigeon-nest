@@ -6,6 +6,7 @@ import { ZoneForm } from '@/components/admin/settings/shipping/zone-form';
 import { getZone } from '@/lib/api/shipping';
 import { useToast } from '@/components/ui/toast';
 import type { ShippingZone } from '@/types/shipping';
+import { LoadingBlock } from '@/components/ui/skeleton';
 
 export default function EditZonePage() {
   const params = useParams<{ id: string }>();
@@ -22,6 +23,6 @@ export default function EditZonePage() {
       });
   }, [params.id, router, showToast]);
 
-  if (!zone) return <p className="py-10 text-center text-muted-foreground">Loading…</p>;
+  if (!zone) return <LoadingBlock />;
   return <ZoneForm zone={zone} />;
 }
