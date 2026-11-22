@@ -213,7 +213,13 @@ export class OrderPlacementService {
     const subtotal = round2(p.lines.reduce((n, l) => n + l.unitPayable * l.quantity, 0));
     const payable = round2(subtotal + p.quote.charge);
     // Same rule for every way an order is placed: customer, guest, seller or admin.
-    const earned = await this.commission.forNewOrder(manager, p.sellerId, subtotal, payable);
+    // Each line has its own commission; the order's is their sum.
+    const earned = await this.commission.forNewOrder(
+      manager,
+      p.sellerId,
+      p.lines.map((l) => round2(l.unitPayable * l.quantity)),
+      payable,
+    );
     const stamp = {
       createdBy: p.placedBy.id,
       creatorType: p.placedBy.type,
@@ -264,7 +270,7 @@ export class OrderPlacementService {
 
     await manager.save(
       OrderItem,
-      p.lines.map((l) => ({
+      p.lines.map((l, index) => ({
         ...stamp,
         orderId: order.id,
         sellerProductId: l.productId,
@@ -286,6 +292,8 @@ export class OrderPlacementService {
         proposalId: l.proposal?.id ?? null,
         unitProposalPrice: l.proposal ? l.proposal.unitPrice : null,
         totalProposalPrice: l.proposal ? round2(l.proposal.unitPrice * l.quantity) : null,
+        systemCommission: earned.lines[index].commission,
+        sellerAmount: earned.lines[index].sellerAmount,
       })),
     );
     await this.useProposals(manager, p, order.id);
