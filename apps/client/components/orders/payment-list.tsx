@@ -8,6 +8,7 @@ import { formatDateTime } from '@/lib/datetime';
 import { useDebouncedValue } from '@/lib/hooks/use-debounced-value';
 import { PAYMENT_STATUSES, type GatewayOption, type PaymentListParams, type PaymentRow, type StaffRole } from '@/types/order';
 import { base, field, money, outlineButton, PAYMENT_STATUS_LABEL, PaymentStatusBadge, useApiError } from './ui';
+import { LoadingBlock } from '@/components/ui/skeleton';
 
 const PAGE_SIZE = 20;
 
@@ -156,7 +157,7 @@ export function PaymentList({ role }: { role: StaffRole }) {
       {error && <p role="alert" className="mb-3 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p>}
 
       {loading ? (
-        <p className="py-10 text-center text-muted-foreground">Loading…</p>
+        <LoadingBlock />
       ) : (
         <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
           <table className="min-w-full divide-y divide-border text-sm">

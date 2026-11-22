@@ -15,6 +15,7 @@ import {
   PAYMENT_STATUS_LABEL,
   PaymentStatusBadge,
 } from './ui';
+import { LoadingBlock } from '@/components/ui/skeleton';
 
 const card = 'rounded-xl border border-border bg-card p-5 shadow-sm';
 
@@ -38,7 +39,7 @@ export function PaymentDetailView({ role, id }: { role: StaffRole; id: number })
     };
   }, [api, id]);
 
-  if (state === 'loading') return <p className="py-10 text-center text-muted-foreground">Loading…</p>;
+  if (state === 'loading') return <LoadingBlock />;
   if (state !== 'ready' || !payment) {
     return (
       <div className="py-10 text-center">
