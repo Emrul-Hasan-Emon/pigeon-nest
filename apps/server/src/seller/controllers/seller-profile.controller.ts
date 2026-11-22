@@ -8,17 +8,14 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
-import { AuthGuard } from '../../auth/guards/auth.guard';
-import { RolesGuard } from '../../auth/guards/roles.guard';
 import { SellerAccessGuard } from '../../auth/guards/seller-access.guard';
-import { Roles } from '../../auth/decorators/roles.decorator';
 import { RequireSellerAccess } from '../../auth/decorators/require-seller-access.decorator';
 import { CurrentSeller } from '../../auth/decorators/current-seller.decorator';
-import { AuthUserType } from '../../database/enums/auth-user-type.enum';
 import { Seller } from '../../database/entities/seller/seller.entity';
 import { SellerProfileService } from '../services/seller-profile.service';
 import { UpdateSellerProfileDto } from '../dtos/update-seller-profile.dto';
 import { ChangeSellerPasswordDto } from '../dtos/change-seller-password.dto';
+import { SellerAuthGuard } from '../../auth/guards/seller-auth.guard';
 
 const PROFILE_FILES = FileFieldsInterceptor(
   [
@@ -35,8 +32,7 @@ interface ProfileFiles {
   nidBackImage?: Express.Multer.File[];
 }
 
-@UseGuards(AuthGuard, RolesGuard, SellerAccessGuard)
-@Roles(AuthUserType.SELLER)
+@UseGuards(SellerAuthGuard, SellerAccessGuard)
 @Controller({ path: 'api/seller/profile', version: '1' })
 export class SellerProfileController {
   constructor(private readonly sellerProfileService: SellerProfileService) {}
