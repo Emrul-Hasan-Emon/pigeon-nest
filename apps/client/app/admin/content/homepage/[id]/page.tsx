@@ -6,6 +6,7 @@ import { SectionForm } from '@/components/admin/content/homepage/section-form';
 import { getHomepageSection } from '@/lib/api/homepage';
 import { useToast } from '@/components/ui/toast';
 import type { HomepageSectionDetail } from '@/types/homepage';
+import { LoadingBlock } from '@/components/ui/skeleton';
 
 export default function EditHomepageSectionPage() {
   const params = useParams<{ id: string }>();
@@ -22,6 +23,6 @@ export default function EditHomepageSectionPage() {
       });
   }, [params.id, router, showToast]);
 
-  if (!section) return <p className="py-10 text-center text-muted-foreground">Loading…</p>;
+  if (!section) return <LoadingBlock />;
   return <SectionForm mode="section" section={section} />;
 }
