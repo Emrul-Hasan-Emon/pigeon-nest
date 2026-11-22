@@ -94,6 +94,17 @@ export class UpdateProductSkuDto {
   @IsBoolean()
   isActive?: boolean;
 
+  @IsDefinedWhenPresent()
+  @IsBoolean()
+  acceptProposals?: boolean;
+
+  // Hidden from buyers. A proposal under it is turned down at once.
+  @IsDefinedWhenPresent()
+  @IsNumber(MONEY)
+  @Min(0)
+  @Max(MAX_DECIMAL_12_2)
+  minProposalPrice?: number;
+
   // Only valid when creating (no id).
   @IsDefinedWhenPresent()
   @IsArray()

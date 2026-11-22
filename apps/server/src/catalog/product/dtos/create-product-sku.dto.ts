@@ -83,6 +83,17 @@ export class CreateProductSkuDto {
   @IsBoolean()
   isActive?: boolean;
 
+  @IsOptional()
+  @IsBoolean()
+  acceptProposals?: boolean;
+
+  // Hidden from buyers. A proposal under it is turned down at once.
+  @IsOptional()
+  @IsNumber(MONEY)
+  @Min(0)
+  @Max(MAX_DECIMAL_12_2)
+  minProposalPrice?: number;
+
   @IsArray()
   @ArrayMinSize(1)
   @ArrayMaxSize(20)

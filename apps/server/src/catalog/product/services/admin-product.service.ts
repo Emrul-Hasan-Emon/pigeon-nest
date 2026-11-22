@@ -672,6 +672,8 @@ export class AdminProductService {
         patch.discountedPriceEndDate = new Date(dto.discountedPriceEndDate);
       }
       if (dto.isActive !== undefined) patch.isActive = dto.isActive;
+      if (dto.acceptProposals !== undefined) patch.acceptProposals = dto.acceptProposals;
+      if (dto.minProposalPrice !== undefined) patch.minProposalPrice = dto.minProposalPrice;
       if (dto.isDefault !== undefined) patch.isDefault = dto.isDefault;
       if (Object.keys(patch).length > 0) {
         await manager.update(SellerProductSku, existing.id, patch);
