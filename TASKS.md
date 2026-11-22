@@ -512,3 +512,23 @@ table). Docs: `apps/server/docs/review-guide.md` plus `user|seller|admin/review-
 - [x] Frontend
 - [x] Tests
 - [ ] QA
+
+## Price Proposals
+
+A buyer proposes their own price for one SKU; only that buyer, the seller and admin see it. One open (pending or
+accepted) proposal per buyer and SKU (partial unique index). Statuses `pending`, `accepted`, `rejected`, `cancelled`,
+`used`. Seller or buyer answers on their turn (accept, reject, counter, no round limit); the buyer can cancel while
+pending; once accepted only an admin can reject or cancel. A seller can set per SKU `acceptProposals` (default off)
+and a hidden `minProposalPrice` (below it is turned down at once). Every step is kept in
+`sku_price_proposal_history` (actor, price, quantity, SKU price then). Tables `sku_price_proposal`,
+`sku_price_proposal_history`, proposal columns on `cart_item` and `order_item`. Cart: add with `proposalId`, quantity
+fixed to the proposal's, line shows the proposal price; if the SKU gets cheaper the buyer pays the lower price and is
+warned; if an admin closes the proposal the line goes back to the SKU price with a message. Checkout: the order
+`subtotal` and commission use the proposal total, the proposal becomes `used` with the order; order details (buyer,
+seller, admin) show the SKU price then and the proposal price. Migration `SkuPriceProposals1796500000000`. Tests:
+`proposal_test.py` (113), `proposal_order_test.py` (67). Checkout refuses with 409 `PRICE_CHANGED` when the total the buyer saw (`expectedItemsTotal`) no longer matches; the form refreshes and shows the new total. Docs: `apps/server/docs/user|seller|admin/proposals-flow.md`.
+
+- [x] Backend (proposals, cart, checkout, order views)
+- [x] Frontend (buyer: offer box, /proposals, cart, order; seller: Offers menu and SKU settings; admin: Price proposals)
+- [x] Tests
+- [ ] QA
