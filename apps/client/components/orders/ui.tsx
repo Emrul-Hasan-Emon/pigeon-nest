@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { SellerSidebar } from '@/components/seller/seller-sidebar';
+import { SellerFrame } from '@/components/seller/seller-frame';
 import { ApiError } from '@/lib/api/http';
 import { clearSellerToken, getSellerToken } from '@/lib/auth/seller-token';
 import type { Actor, Attachment, OrderStatus, PaymentStatus, StaffRole } from '@/types/order';
@@ -131,7 +131,7 @@ export function FilePicker({
 }
 
 /** Seller portal chrome (sidebar + sign-in check). The admin layout already provides its own. */
-export function SellerShell({ active, children }: { active: 'orders' | 'payments' | 'returns' | 'commission' | 'wishlist' | 'reviews' | 'offers'; children: React.ReactNode }) {
+export function SellerShell({ active, children }: { active: 'dashboard-guide' | 'orders' | 'payments' | 'returns' | 'commission' | 'wishlist' | 'reviews' | 'offers'; children: React.ReactNode }) {
   const router = useRouter();
   const [ready, setReady] = useState(false);
   useEffect(() => {
@@ -141,10 +141,7 @@ export function SellerShell({ active, children }: { active: 'orders' | 'payments
   }, [router]);
   if (!ready) return null;
   return (
-    <div className="min-h-screen bg-background pl-56">
-      <SellerSidebar active={active} />
-      <main className="mx-auto max-w-6xl px-6 py-6">{children}</main>
-    </div>
+    <SellerFrame active={active}>{children}</SellerFrame>
   );
 }
 
