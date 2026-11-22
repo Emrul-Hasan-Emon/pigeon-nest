@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import type { Seller, SellerActiveStatus } from '@/types/seller';
+import { Avatar } from '../initials-avatar';
 
 const STATUS_STYLES: Record<Seller['status'], string> = {
   approved: 'bg-emerald-100 text-emerald-700',
@@ -48,18 +49,7 @@ export function SellerTable({
           {sellers.map((seller) => (
             <tr key={seller.id} className="border-t border-border">
               <td className="px-4 py-3">
-                {seller.avatarUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={seller.avatarUrl}
-                    alt=""
-                    className="h-10 w-10 rounded-full border border-border object-cover"
-                  />
-                ) : (
-                  <span className="flex h-10 w-10 items-center justify-center rounded-full border border-dashed border-border text-xs text-muted-foreground">
-                    —
-                  </span>
-                )}
+                <Avatar name={seller.name} url={seller.avatarUrl} />
               </td>
               <td className="px-4 py-3 font-medium text-foreground">{seller.name}</td>
               <td className="px-4 py-3 text-muted-foreground">{seller.email ?? '—'}</td>
