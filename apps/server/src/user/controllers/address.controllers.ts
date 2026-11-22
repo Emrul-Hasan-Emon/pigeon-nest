@@ -12,9 +12,6 @@ import {
 } from '@nestjs/common';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { CurrentUserAccount } from '../../auth/decorators/current-user-account.decorator';
-import { Roles } from '../../auth/decorators/roles.decorator';
-import { AuthGuard } from '../../auth/guards/auth.guard';
-import { RolesGuard } from '../../auth/guards/roles.guard';
 import { UserAccessGuard } from '../../auth/guards/user-access.guard';
 import { JwtPayload } from '../../auth/interfaces/jwt-payload.interface';
 import { User } from '../../database/entities/person/user.entity';
@@ -23,10 +20,11 @@ import { ParseIdPipe } from '../../shared/pipes/parse-id.pipe';
 import { ActorResolverService } from '../../shared/services/actor-resolver.service';
 import { CreateAddressDto, UpdateAddressDto } from '../dtos/address.dtos';
 import { AddressService } from '../services/address.service';
+import { AdminAuthGuard } from '../../auth/guards/admin-auth.guard';
+import { UserAuthGuard } from '../../auth/guards/user-auth.guard';
 
 // A customer's own address book.
-@UseGuards(AuthGuard, RolesGuard, UserAccessGuard)
-@Roles(AuthUserType.USER)
+@UseGuards(UserAuthGuard, UserAccessGuard)
 @Controller({ path: 'api/user/addresses', version: '1' })
 export class UserAddressController {
   constructor(private readonly addresses: AddressService) {}
@@ -63,8 +61,7 @@ export class UserAddressController {
 }
 
 // The same address book, managed by an admin for a customer.
-@UseGuards(AuthGuard, RolesGuard)
-@Roles(AuthUserType.ADMIN)
+@UseGuards(AdminAuthGuard)
 @Controller({ path: 'api/admin/users/:userId/addresses', version: '1' })
 export class AdminUserAddressController {
   constructor(
