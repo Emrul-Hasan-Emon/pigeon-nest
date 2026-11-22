@@ -13,6 +13,7 @@ import { CommissionService } from '../../commission/services/commission.service'
 import { OrderFileService } from './order-file.service';
 import { OrderScope, StatusActor } from './order-status.service';
 import { moneyGreater, tidy } from '../../shared/utils/money.util';
+import { assertNoLiveReturns } from '../../returns/utils/return-guard.util';
 
 const round2 = tidy;
 const FOLDER = 'order-payments';
@@ -181,6 +182,10 @@ export class OrderPaymentService {
       const paidTotal = Math.max(0, round2(order.amountPaid - received));
       const status =
         paidTotal <= 0 ? PaymentStatus.DUE : paidTotal >= order.payableAmount ? PaymentStatus.PAID : PaymentStatus.PARTIALLY_PAID;
+      // Refunds and commission rest on a paid order, so it cannot stop being paid while a return is open or done.
+      if (order.paymentStatus === PaymentStatus.PAID && status !== PaymentStatus.PAID) {
+        await assertNoLiveReturns(manager, order.id, 'Reversing this payment');
+      }
 
       await manager.update(Payment, payment.id, {
         status: PaymentStatus.DUE,
