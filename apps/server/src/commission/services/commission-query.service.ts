@@ -7,11 +7,13 @@ import { Seller } from '../../database/entities/seller/seller.entity';
 import { SystemCommission } from '../../database/entities/commission/system-commission.entity';
 import { SystemCommissionDisburse } from '../../database/entities/commission/system-commission-disburse.entity';
 import { SystemCommissionDisburseAttachment } from '../../database/entities/commission/system-commission-disburse-attachment.entity';
+import { SystemCommissionChangeHistory } from '../../database/entities/commission/system-commission-change-history.entity';
 import { SystemCommissionHistory } from '../../database/entities/commission/system-commission-history.entity';
 import { CursorPagination } from '../../shared/decorators/cursor-pagination-params.decorator';
 import { getCursorPaginateData } from '../../shared/utils/cursor-paginate.util';
 import { likeContains } from '../../shared/utils/like.util';
 import {
+  ListCommissionChangesQueryDto,
   ListBalanceQueryDto,
   ListCommissionHistoryQueryDto,
   ListDisburseQueryDto,
@@ -28,6 +30,7 @@ export class CommissionQueryService {
     @InjectRepository(SystemCommissionDisburse) private readonly disburses: Repository<SystemCommissionDisburse>,
     @InjectRepository(SystemCommissionDisburseAttachment)
     private readonly attachments: Repository<SystemCommissionDisburseAttachment>,
+    @InjectRepository(SystemCommissionChangeHistory) private readonly changes: Repository<SystemCommissionChangeHistory>,
     @InjectRepository(Seller) private readonly sellers: Repository<Seller>,
     private readonly sellerSettings: SellerSettingService,
   ) {}
@@ -89,6 +92,9 @@ export class CommissionQueryService {
         'h."orderId" AS "orderId"',
         'o."orderNumber" AS "orderNumber"',
         'h."disburseId" AS "disburseId"',
+        'h."orderItemId" AS "orderItemId"',
+        'h."orderReturnId" AS "orderReturnId"',
+        'h.status AS status',
         'h.type AS type',
         'h."totalAmount" AS "totalAmount"',
         'h."orderSubtotal" AS "orderSubtotal"',
@@ -114,11 +120,51 @@ export class CommissionQueryService {
     if (sid !== undefined) qb.andWhere('h."sellerId" = :sid', { sid });
     if (q.orderId !== undefined) qb.andWhere('h."orderId" = :oid', { oid: q.orderId });
     if (q.type) qb.andWhere('h.type = :type', { type: q.type });
+    if (q.status) qb.andWhere('h.status = :status', { status: q.status });
     if (q.paymentStatus) qb.andWhere('h."paymentStatus" = :ps', { ps: q.paymentStatus });
     if (q.from) qb.andWhere('h."createdAt" >= :from', { from: new Date(q.from) });
     if (q.to) qb.andWhere('h."createdAt" <= :to', { to: new Date(q.to) });
     if (q.voided === 'true') qb.andWhere('h."deletedAt" IS NOT NULL');
     if (q.voided === 'false') qb.andWhere('h."deletedAt" IS NULL');
+  }
+
+  /** Every change to a seller's balance, newest first: what it was, what it became, and why. */
+  async listChanges(query: ListCommissionChangesQueryDto, pagination: CursorPagination, sellerId?: number) {
+    const qb = this.changes
+      .createQueryBuilder('c')
+      .leftJoin(Seller, 's', 's.id = c."sellerId"')
+      .leftJoin(SystemCommissionHistory, 'h', 'h.id = c."historyId"')
+      .withDeleted()
+      .select([
+        'c.id AS id',
+        'c."systemCommissionId" AS "systemCommissionId"',
+        'c."sellerId" AS "sellerId"',
+        's.name AS "sellerName"',
+        'c."historyId" AS "historyId"',
+        'h."orderId" AS "orderId"',
+        'h."orderItemId" AS "orderItemId"',
+        'h."orderReturnId" AS "orderReturnId"',
+        'c."commissionStatus" AS "commissionStatus"',
+        'c."currentTotalCommission" AS "currentTotalCommission"',
+        'c."currentDueCommission" AS "currentDueCommission"',
+        'c."currentPaidCommission" AS "currentPaidCommission"',
+        'c."newTotalCommission" AS "newTotalCommission"',
+        'c."newDueCommission" AS "newDueCommission"',
+        'c."newPaidCommission" AS "newPaidCommission"',
+        'c.note AS note',
+        'c."creatorName" AS "creatorName"',
+        'c."creatorType" AS "creatorType"',
+        'c."createdAt" AS "createdAt"',
+      ])
+      .orderBy('c.id', 'DESC')
+      .limit(pagination.limit);
+    const sid = sellerId ?? query.sellerId;
+    if (sid !== undefined) qb.andWhere('c."sellerId" = :sid', { sid });
+    if (query.status) qb.andWhere('c."commissionStatus" = :status', { status: query.status });
+    if (query.from) qb.andWhere('c."createdAt" >= :from', { from: new Date(query.from) });
+    if (query.to) qb.andWhere('c."createdAt" <= :to', { to: new Date(query.to) });
+    if (pagination.cursor > 0) qb.andWhere('c.id < :cursor', { cursor: pagination.cursor });
+    return getCursorPaginateData(await qb.getRawMany<{ id: number }>(), pagination.limit);
   }
 
   async listDisburses(query: ListDisburseQueryDto, pagination: CursorPagination, sellerId?: number) {
