@@ -1,8 +1,10 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Coins, CreditCard, Heart, LayoutDashboard, LayoutGrid, LogOut, Package, ReceiptText, Star, UserRound } from 'lucide-react';
+import { Coins, CreditCard, HandCoins, Heart, LayoutDashboard, LayoutGrid, LogOut, Package, ReceiptText, Star, UserRound } from 'lucide-react';
+import { getSellerProposalSummary } from '@/lib/api/proposals';
 import { clearSellerToken } from '@/lib/auth/seller-token';
 
 const ITEMS = [
@@ -10,6 +12,7 @@ const ITEMS = [
   { key: 'products', href: '/seller/products', label: 'Products', icon: Package },
   { key: 'orders', href: '/seller/orders', label: 'Orders', icon: ReceiptText },
   { key: 'payments', href: '/seller/payments', label: 'Payments', icon: CreditCard },
+  { key: 'offers', href: '/seller/offers', label: 'Offers', icon: HandCoins },
   { key: 'wishlist', href: '/seller/wishlist', label: 'Wishlist', icon: Heart },
   { key: 'reviews', href: '/seller/reviews', label: 'Reviews', icon: Star },
   { key: 'commission', href: '/seller/commission', label: 'Commission', icon: Coins },
@@ -22,6 +25,18 @@ const ITEMS = [
  */
 export function SellerSidebar({ active }: { active: (typeof ITEMS)[number]['key'] }) {
   const router = useRouter();
+  const [awaiting, setAwaiting] = useState(0);
+  useEffect(() => {
+    let live = true;
+    const load = () => getSellerProposalSummary().then((s) => live && setAwaiting(s.awaitingYou)).catch(() => undefined);
+    load();
+    // the offers page fires this after an answer so the badge does not wait for a reload
+    window.addEventListener('seller-offers-changed', load);
+    return () => {
+      live = false;
+      window.removeEventListener('seller-offers-changed', load);
+    };
+  }, []);
 
   function logout() {
     clearSellerToken();
@@ -52,6 +67,9 @@ export function SellerSidebar({ active }: { active: (typeof ITEMS)[number]['key'
             >
               <Icon className="h-4 w-4" />
               {item.label}
+              {item.key === 'offers' && awaiting > 0 && (
+                <span className="ml-auto rounded-full bg-amber-500 px-1.5 text-xs font-semibold text-white">{awaiting}</span>
+              )}
             </Link>
           );
         })}
