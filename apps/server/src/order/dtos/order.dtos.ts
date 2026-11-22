@@ -4,6 +4,7 @@ import {
   IsEnum,
   IsIn,
   IsInt,
+  IsNumber,
   IsObject,
   IsOptional,
   IsString,
@@ -96,6 +97,13 @@ export class PlaceOrderDto {
   @IsOptional()
   @IsObject()
   paymentProof?: Record<string, unknown>;
+
+  // The items total the customer saw. If the cart's live total is different now
+  // (a price or an accepted offer changed), the order is refused with 409.
+  @IsOptional()
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @Min(0)
+  expectedItemsTotal?: number;
 }
 
 export class UserOrderQueryDto extends PageQueryDto {

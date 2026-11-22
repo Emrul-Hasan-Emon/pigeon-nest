@@ -6,6 +6,7 @@ import { Cart } from '../../database/entities/cart/cart.entity';
 import { AuthUserType } from '../../database/enums/auth-user-type.enum';
 import { ShippingZoneService } from '../../settings/services/shipping-zone.service';
 import { countryName } from '../../settings/utils/countries';
+import { tidy } from '../../shared/utils/money.util';
 import { PlaceOrderDto } from '../dtos/order.dtos';
 import { OrderPlacementService } from './order-placement.service';
 import { OrderViewService } from './order-view.service';
@@ -74,6 +75,17 @@ export class CheckoutService {
         });
       }
 
+      if (dto.expectedItemsTotal != null && tidy(dto.expectedItemsTotal) !== tidy(view.totals.payableTotal)) {
+        throw new ConflictException({
+          statusCode: 409,
+          error: 'Conflict',
+          code: 'PRICE_CHANGED',
+          message: `The price of this cart changed from ${tidy(dto.expectedItemsTotal)} to ${tidy(view.totals.payableTotal)}. Check the new total and place the order again.`,
+          currentTotal: view.totals.payableTotal,
+          notices: view.notices,
+        });
+      }
+
       const id = await this.placement.insert(manager, {
         userId: owner.userId,
         guestSessionId: owner.userId ? null : owner.sessionId,
@@ -91,6 +103,10 @@ export class CheckoutService {
           quantity: l.quantity,
           unitPrice: l.unitPrice,
           unitPayable: l.unitPayable,
+          proposal:
+            l.proposal?.applied
+              ? { id: l.proposal.id, unitPrice: l.proposal.unitPrice, skuUnitPayable: l.skuUnitPayable }
+              : null,
         })),
         gateway,
         proof,
