@@ -14,13 +14,9 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { CurrentSeller } from '../../auth/decorators/current-seller.decorator';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { RequireSellerAccess } from '../../auth/decorators/require-seller-access.decorator';
-import { Roles } from '../../auth/decorators/roles.decorator';
-import { AuthGuard } from '../../auth/guards/auth.guard';
-import { RolesGuard } from '../../auth/guards/roles.guard';
 import { SellerAccessGuard } from '../../auth/guards/seller-access.guard';
 import { JwtPayload } from '../../auth/interfaces/jwt-payload.interface';
 import { Seller } from '../../database/entities/seller/seller.entity';
-import { AuthUserType } from '../../database/enums/auth-user-type.enum';
 import { MAX_ATTACHMENTS } from '../../order/services/order-file.service';
 import {
   CursorPagination,
@@ -31,6 +27,7 @@ import { ActorResolverService } from '../../shared/services/actor-resolver.servi
 import {
   DisburseCommissionDto,
   ListBalanceQueryDto,
+  ListCommissionChangesQueryDto,
   ListCommissionHistoryQueryDto,
   ListDisburseQueryDto,
   ListSettingHistoryQueryDto,
@@ -39,14 +36,15 @@ import {
 import { CommissionDisburseService } from '../services/commission-disburse.service';
 import { CommissionQueryService } from '../services/commission-query.service';
 import { SellerSettingService } from '../services/seller-setting.service';
+import { AdminAuthGuard } from '../../auth/guards/admin-auth.guard';
+import { SellerAuthGuard } from '../../auth/guards/seller-auth.guard';
 
 const ATTACHMENTS = FilesInterceptor('files', MAX_ATTACHMENTS, {
   limits: { fileSize: 10 * 1024 * 1024, files: MAX_ATTACHMENTS },
 });
 
 // Everything about commission, for admins: balances, ledger and payments from sellers.
-@UseGuards(AuthGuard, RolesGuard)
-@Roles(AuthUserType.ADMIN)
+@UseGuards(AdminAuthGuard)
 @Controller({ path: 'api/admin/commission', version: '1' })
 export class AdminCommissionController {
   constructor(
@@ -82,6 +80,12 @@ export class AdminCommissionController {
     return this.queries.listHistory(query, pagination);
   }
 
+  // Every move of every seller's balance (before and after).
+  @Get('changes')
+  changes(@Query() query: ListCommissionChangesQueryDto, @CursorPaginationParams() pagination: CursorPagination) {
+    return this.queries.listChanges(query, pagination);
+  }
+
   @Get('disbursements')
   disbursements(@Query() query: ListDisburseQueryDto, @CursorPaginationParams() pagination: CursorPagination) {
     return this.queries.listDisburses(query, pagination);
@@ -94,8 +98,7 @@ export class AdminCommissionController {
 }
 
 // A seller's own commission rule, and the history of changes to every seller setting. Admin only.
-@UseGuards(AuthGuard, RolesGuard)
-@Roles(AuthUserType.ADMIN)
+@UseGuards(AdminAuthGuard)
 @Controller({ path: 'api/admin', version: '1' })
 export class AdminSellerSettingController {
   constructor(
@@ -133,8 +136,7 @@ export class AdminSellerSettingController {
 }
 
 // What a seller may see about their own commission. Read only; even a suspended seller can look.
-@UseGuards(AuthGuard, RolesGuard, SellerAccessGuard)
-@Roles(AuthUserType.SELLER)
+@UseGuards(SellerAuthGuard, SellerAccessGuard)
 @RequireSellerAccess('any')
 @Controller({ path: 'api/seller/commission', version: '1' })
 export class SellerCommissionController {
@@ -169,6 +171,15 @@ export class SellerCommissionController {
     @CursorPaginationParams() pagination: CursorPagination,
   ) {
     return this.queries.listHistory(query, pagination, seller.id);
+  }
+
+  @Get('changes')
+  changes(
+    @CurrentSeller() seller: Seller,
+    @Query() query: ListCommissionChangesQueryDto,
+    @CursorPaginationParams() pagination: CursorPagination,
+  ) {
+    return this.queries.listChanges(query, pagination, seller.id);
   }
 
   @Get('disbursements')
