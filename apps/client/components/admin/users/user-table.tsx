@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import type { User, UserStatus } from '@/types/user';
+import { Avatar } from '../initials-avatar';
 
 export const USER_STATUS_STYLES: Record<UserStatus, string> = {
   active: 'bg-emerald-100 text-emerald-700',
@@ -33,14 +34,7 @@ export function UserTable({ users }: { users: User[] }) {
           {users.map((user) => (
             <tr key={user.id} className="border-t border-border">
               <td className="px-4 py-3">
-                {user.avatarUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={user.avatarUrl} alt="" className="h-10 w-10 rounded-full border border-border object-cover" />
-                ) : (
-                  <span className="flex h-10 w-10 items-center justify-center rounded-full border border-dashed border-border text-xs text-muted-foreground">
-                    —
-                  </span>
-                )}
+                <Avatar name={user.name} url={user.avatarUrl} />
               </td>
               <td className="px-4 py-3 font-medium text-foreground">{user.name}</td>
               <td className="px-4 py-3 text-muted-foreground">{user.email ?? '—'}</td>
