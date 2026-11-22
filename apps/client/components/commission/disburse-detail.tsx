@@ -6,6 +6,7 @@ import { AttachmentList, money, useApiError } from '@/components/orders/ui';
 import { formatDateTime } from '@/lib/datetime';
 import { commissionApi } from '@/lib/api/commission';
 import type { CommissionRole, DisburseDetail } from '@/types/commission';
+import { LoadingBlock } from '@/components/ui/skeleton';
 
 export function DisburseDetailView({ role, id }: { role: CommissionRole; id: number }) {
   const api = useMemo(() => commissionApi(role), [role]);
@@ -17,7 +18,7 @@ export function DisburseDetailView({ role, id }: { role: CommissionRole; id: num
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [api, id]);
   if (error) return <p role="alert" className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p>;
-  if (!d) return <p className="py-10 text-center text-muted-foreground">Loading…</p>;
+  if (!d) return <LoadingBlock />;
   const rows: [string, string][] = [
     ['Amount received', money(d.amount)],
     ['Total commission at that time', money(d.totalAmount)],

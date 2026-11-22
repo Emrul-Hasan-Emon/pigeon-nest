@@ -5,6 +5,7 @@ import { useToast } from '@/components/ui/toast';
 import { useDebouncedValue } from '@/lib/hooks/use-debounced-value';
 import { money, outlineButton, useApiError } from '@/components/orders/ui';
 import type { CommissionRole, CommissionRule, Page } from '@/types/commission';
+import { LoadingBlock } from '@/components/ui/skeleton';
 
 export const th = 'px-4 py-3 text-left font-medium text-muted-foreground';
 export const td = 'px-4 py-3';
@@ -131,7 +132,7 @@ export function ListFrame({
     <>
       {error && <p role="alert" className="mb-3 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p>}
       {loading ? (
-        <p className="py-10 text-center text-muted-foreground">Loading…</p>
+        <LoadingBlock />
       ) : (
         <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-sm">{children}</div>
       )}
