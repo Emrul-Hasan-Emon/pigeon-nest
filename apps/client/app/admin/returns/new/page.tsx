@@ -3,6 +3,7 @@
 import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { AdminCreateReturn } from '@/components/returns/create-return';
+import { LoadingBlock } from '@/components/ui/skeleton';
 
 function Content() {
   const q = useSearchParams();
@@ -12,7 +13,7 @@ function Content() {
 
 export default function AdminNewReturnPage() {
   return (
-    <Suspense fallback={<p className="py-10 text-center text-muted-foreground">Loading…</p>}>
+    <Suspense fallback={<LoadingBlock />}>
       <Content />
     </Suspense>
   );
