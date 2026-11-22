@@ -13,6 +13,7 @@ import {
   ProductStatusBadge,
 } from '@/components/products/status-badges';
 import type { Product } from '@/types/product';
+import { LoadingBlock } from '@/components/ui/skeleton';
 
 export default function ProductDetailsPage() {
   const params = useParams<{ id: string }>();
@@ -36,7 +37,7 @@ export default function ProductDetailsPage() {
   }, [params.id, router, showToast]);
 
   if (loading) {
-    return <p className="py-10 text-center text-muted-foreground">Loading…</p>;
+    return <LoadingBlock />;
   }
   if (!product) return null;
 
