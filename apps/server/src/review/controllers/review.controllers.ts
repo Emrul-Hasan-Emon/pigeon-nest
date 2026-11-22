@@ -17,15 +17,11 @@ import { CurrentUserAccount } from '../../auth/decorators/current-user-account.d
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { RequireSellerAccess } from '../../auth/decorators/require-seller-access.decorator';
 import { RequireUserAccess } from '../../auth/decorators/require-user-access.decorator';
-import { Roles } from '../../auth/decorators/roles.decorator';
-import { AuthGuard } from '../../auth/guards/auth.guard';
-import { RolesGuard } from '../../auth/guards/roles.guard';
 import { SellerAccessGuard } from '../../auth/guards/seller-access.guard';
 import { UserAccessGuard } from '../../auth/guards/user-access.guard';
 import { JwtPayload } from '../../auth/interfaces/jwt-payload.interface';
 import { User } from '../../database/entities/person/user.entity';
 import { Seller } from '../../database/entities/seller/seller.entity';
-import { AuthUserType } from '../../database/enums/auth-user-type.enum';
 import { CursorPagination, CursorPaginationParams } from '../../shared/decorators/cursor-pagination-params.decorator';
 import { ParseIdPipe } from '../../shared/pipes/parse-id.pipe';
 import { ActorResolverService } from '../../shared/services/actor-resolver.service';
@@ -55,6 +51,9 @@ import { ReviewPublicService } from '../services/review-public.service';
 import { ReviewReplyService } from '../services/review-reply.service';
 import { ReviewSellerService } from '../services/review-seller.service';
 import { ReviewService } from '../services/review.service';
+import { AdminAuthGuard } from '../../auth/guards/admin-auth.guard';
+import { SellerAuthGuard } from '../../auth/guards/seller-auth.guard';
+import { UserAuthGuard } from '../../auth/guards/user-auth.guard';
 
 const IMAGES = FilesInterceptor('images', MAX_REVIEW_IMAGES, {
   limits: { fileSize: MAX_IMAGE_BYTES, files: MAX_REVIEW_IMAGES },
@@ -97,8 +96,7 @@ export class PublicReviewController {
 
 // ---------------------------------------------------------------- customer
 
-@UseGuards(AuthGuard, RolesGuard, UserAccessGuard)
-@Roles(AuthUserType.USER)
+@UseGuards(UserAuthGuard, UserAccessGuard)
 @Controller({ path: 'api/user/reviews', version: '1' })
 export class UserReviewController {
   constructor(
@@ -178,8 +176,7 @@ export class UserReviewController {
   }
 }
 
-@UseGuards(AuthGuard, RolesGuard, UserAccessGuard)
-@Roles(AuthUserType.USER)
+@UseGuards(UserAuthGuard, UserAccessGuard)
 @Controller({ path: 'api/user/review-replies', version: '1' })
 export class UserReviewReplyController {
   constructor(
@@ -206,8 +203,7 @@ export class UserReviewReplyController {
 // ---------------------------------------------------------------- seller
 
 // Reading works for a suspended seller too; writing needs an active one.
-@UseGuards(AuthGuard, RolesGuard, SellerAccessGuard)
-@Roles(AuthUserType.SELLER)
+@UseGuards(SellerAuthGuard, SellerAccessGuard)
 @Controller({ path: 'api/seller/reviews', version: '1' })
 export class SellerReviewController {
   constructor(
@@ -241,8 +237,7 @@ export class SellerReviewController {
   }
 }
 
-@UseGuards(AuthGuard, RolesGuard, SellerAccessGuard)
-@Roles(AuthUserType.SELLER)
+@UseGuards(SellerAuthGuard, SellerAccessGuard)
 @RequireSellerAccess('full')
 @Controller({ path: 'api/seller/review-replies', version: '1' })
 export class SellerReviewReplyController {
@@ -269,8 +264,7 @@ export class SellerReviewReplyController {
 
 // ---------------------------------------------------------------- admin
 
-@UseGuards(AuthGuard, RolesGuard)
-@Roles(AuthUserType.ADMIN)
+@UseGuards(AdminAuthGuard)
 @Controller({ path: 'api/admin/reviews', version: '1' })
 export class AdminReviewController {
   constructor(
@@ -316,8 +310,7 @@ export class AdminReviewController {
   }
 }
 
-@UseGuards(AuthGuard, RolesGuard)
-@Roles(AuthUserType.ADMIN)
+@UseGuards(AdminAuthGuard)
 @Controller({ path: 'api/admin/review-replies', version: '1' })
 export class AdminReviewReplyController {
   constructor(
@@ -348,8 +341,7 @@ export class AdminReviewReplyController {
   }
 }
 
-@UseGuards(AuthGuard, RolesGuard)
-@Roles(AuthUserType.ADMIN)
+@UseGuards(AdminAuthGuard)
 @Controller({ path: 'api/admin/review-reports', version: '1' })
 export class AdminReviewReportController {
   constructor(
@@ -370,8 +362,7 @@ export class AdminReviewReportController {
 }
 
 // What one customer has written, for support.
-@UseGuards(AuthGuard, RolesGuard)
-@Roles(AuthUserType.ADMIN)
+@UseGuards(AdminAuthGuard)
 @Controller({ path: 'api/admin/users/:userId/reviews', version: '1' })
 export class AdminUserReviewController {
   constructor(private readonly reviews: ReviewAdminService) {}
