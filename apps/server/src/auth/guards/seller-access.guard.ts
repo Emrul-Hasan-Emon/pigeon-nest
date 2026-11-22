@@ -7,7 +7,6 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
-import { DatabaseService } from '../../database/database.service';
 import { Seller } from '../../database/entities/seller/seller.entity';
 import { AuthUserType } from '../../database/enums/auth-user-type.enum';
 import { SELLER_ACCESS_KEY } from '../decorators/require-seller-access.decorator';
@@ -17,32 +16,19 @@ import {
   SellerAccessLevel,
 } from '../policies/seller-access.policy';
 
-// Run after AuthGuard + RolesGuard on seller routes. Re-reads the seller on
-// every request so an admin approving, rejecting or suspending takes effect
-// immediately, even for tokens issued earlier.
+// Runs after SellerAuthGuard, which has verified the token and loaded the seller. Decides what a
+// seller in the current status may do. The seller is re-read on every request, so an admin
+// approving, rejecting or suspending takes effect immediately, even for tokens issued earlier.
 @Injectable()
 export class SellerAccessGuard implements CanActivate {
-  constructor(
-    private readonly reflector: Reflector,
-    private readonly databaseService: DatabaseService,
-  ) {}
+  constructor(private readonly reflector: Reflector) {}
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest<
-      Request & { user?: JwtPayload; seller?: Seller }
-    >();
-    const user = request.user;
-    if (!user || user.type !== AuthUserType.SELLER) {
+  canActivate(context: ExecutionContext): boolean {
+    const request = context.switchToHttp().getRequest<Request & { user?: JwtPayload; seller?: Seller }>();
+    const seller = request.seller;
+    if (!seller || request.user?.type !== AuthUserType.SELLER || request.user.sub !== seller.id) {
       throw new UnauthorizedException();
     }
-
-    const seller = await this.databaseService.seller.findOne({
-      where: { id: user.sub },
-    });
-    if (!seller) {
-      throw new UnauthorizedException('Seller account no longer exists');
-    }
-    request.seller = seller;
 
     const level =
       this.reflector.getAllAndOverride<SellerAccessLevel>(SELLER_ACCESS_KEY, [
