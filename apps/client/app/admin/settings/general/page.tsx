@@ -95,7 +95,7 @@ export default function GeneralSettingsPage() {
       <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
         <h2 className="mb-1 font-semibold text-foreground">Seller commission</h2>
         <p className="mb-4 text-xs text-muted-foreground">
-          The platform&apos;s cut of each order, taken from the item subtotal and counted once the order is fully paid.
+          The platform&apos;s cut, worked out for each item and added up for the order. It counts once the order is fully paid and comes back off when an item is returned.
           A seller with their own rate (set on the seller&apos;s page) uses that instead. Changes affect new orders only.
         </p>
         <div className="space-y-4">
@@ -104,14 +104,37 @@ export default function GeneralSettingsPage() {
               <label key={s.key} className="block text-sm text-foreground">
                 {s.label}
                 <select className={fieldClass} value={draft[s.key] as string} onChange={(e) => setDraft((d) => ({ ...d, [s.key]: e.target.value }))}>
-                  {s.options?.map((o) => <option key={o} value={o}>{o === 'percentage' ? 'Percentage of the subtotal' : 'Fixed amount per order'}</option>)}
+                  {s.options?.map((o) => <option key={o} value={o}>{o === 'percentage' ? 'Percentage of each item' : 'Fixed amount per item'}</option>)}
                 </select>
               </label>
             ) : (
               <label key={s.key} className="block text-sm text-foreground">
-                {draft['commission.type'] === 'percentage' ? 'Commission percentage' : 'Commission amount per order'}
+                {draft['commission.type'] === 'percentage' ? 'Commission percentage' : 'Commission amount per item'}
                 <input className={fieldClass} inputMode="decimal" value={draft[s.key] as string} onChange={(e) => setDraft((d) => ({ ...d, [s.key]: e.target.value }))} />
                 <span className="mt-1 block text-xs text-muted-foreground">{draft['commission.type'] === 'percentage' ? 'From 0 to 100, at most 2 decimals.' : 'At most 2 decimals.'}</span>
+              </label>
+            ),
+          )}
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+        <h2 className="mb-1 font-semibold text-foreground">Returns and refunds</h2>
+        <p className="mb-4 text-xs text-muted-foreground">
+          Customers can ask to return a delivered, fully paid order, or some of its items. A customer gets one request per order or item. Admins can open more.
+        </p>
+        <div className="space-y-4">
+          {items.filter((s) => s.group === 'returns').map((s) =>
+            s.type === 'boolean' ? (
+              <label key={s.key} className="flex items-start gap-2 text-sm text-foreground">
+                <input type="checkbox" className="mt-1" checked={draft[s.key] as boolean} onChange={(e) => setDraft((d) => ({ ...d, [s.key]: e.target.checked }))} />
+                <span>{s.label}<span className="block text-xs text-muted-foreground">{s.description}</span></span>
+              </label>
+            ) : (
+              <label key={s.key} className="block text-sm text-foreground">
+                {s.label}
+                <input className={fieldClass} inputMode="numeric" value={draft[s.key] as string} onChange={(e) => setDraft((d) => ({ ...d, [s.key]: e.target.value }))} />
+                <span className="mt-1 block text-xs text-muted-foreground">{s.description}</span>
               </label>
             ),
           )}
