@@ -165,6 +165,7 @@ export function StoreFooter() {
           <li><Link href="/orders" className="hover:text-white">Your orders</Link></li>
           <li><Link href="/wishlist" className="hover:text-white">Your wishlist</Link></li>
           <li><Link href="/proposals" className="hover:text-white">Your offers</Link></li>
+          <li><Link href="/returns" className="hover:text-white">Your returns</Link></li>
           <li><Link href="/reviews" className="hover:text-white">Your reviews</Link></li>
           <li><Link href="/addresses" className="hover:text-white">Your addresses</Link></li>
           <li><Link href="/orders/track" className="hover:text-white">Track an order</Link></li>

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { cancelMyOrder, getMyOrder, type MyOrder } from '@/lib/api/customer-orders';
 import { ApiError, NotFoundApiError } from '@/lib/api/http';
 import { formatDateTime } from '@/lib/datetime';
+import { ReturnRequest } from './return-request';
 import { Files, money, OrderBadge, ORDER_TEXT, actorText, PAYMENT_TEXT, PaymentBadge, Progress } from './order-parts';
 
 const card = 'rounded-xl border border-st-line bg-white p-4 sm:p-5';
@@ -76,6 +77,7 @@ export function MyOrderDetail({ id, placed, initial }: { id: number; placed?: bo
         <h1 className="font-display text-2xl font-semibold text-st-ink sm:text-3xl">{order.orderNumber}</h1>
         <OrderBadge status={order.status} />
         <PaymentBadge status={order.paymentStatus} />
+        {order.isReturned && <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-700">Returned</span>}
       </div>
       <p className="-mt-2 text-sm text-st-slate">Placed {formatDateTime(order.createdAt)} · sold by <Link className="underline" href={`/sellers/${order.seller.id}`}>{order.seller.name}</Link></p>
 
@@ -117,7 +119,7 @@ export function MyOrderDetail({ id, placed, initial }: { id: number; placed?: bo
               <div className="min-w-0 flex-1">
                 <p className="line-clamp-2 text-sm font-medium text-st-ink">{i.productName}</p>
                 {i.sku.label && <p className="text-xs text-st-slate">{i.sku.label}</p>}
-                <p className="text-xs text-st-slate">{money(i.unitPayable)} × {i.quantity}</p>
+                <p className="text-xs text-st-slate">{money(i.unitPayable)} × {i.quantity}{i.isReturned && <span className="ml-2 rounded-full bg-emerald-100 px-2 py-0.5 text-emerald-700">Returned</span>}</p>
                 {i.proposal && (
                   <p className="text-xs text-st-slate">
                     Item price then {money(i.skuUnitPrice)} · your offer {money(i.proposal.unitPrice)}{' '}
@@ -143,6 +145,8 @@ export function MyOrderDetail({ id, placed, initial }: { id: number; placed?: bo
           {order.totals.balanceDue > 0 && order.status !== 'cancelled' && <div className="flex justify-between font-medium text-st-ink"><dt>Still to pay</dt><dd>{money(order.totals.balanceDue)}</dd></div>}
         </dl>
       </section>
+
+      {!initial && <ReturnRequest order={order} />}
 
       <div className="grid gap-4 md:grid-cols-2">
         <section className={card}>
