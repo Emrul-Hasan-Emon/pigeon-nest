@@ -43,7 +43,7 @@ export interface ProductCard {
 }
 
 // What the customer pays for one SKU right now (live discount, else list price).
-const effective = (k: string) =>
+export const effective = (k: string) =>
   `CASE WHEN ${k}."discountedPrice" IS NOT NULL
         AND (${k}."discountedPriceStartDate" IS NULL OR ${k}."discountedPriceStartDate" <= now())
         AND (${k}."discountedPriceEndDate" IS NULL OR ${k}."discountedPriceEndDate" > now())

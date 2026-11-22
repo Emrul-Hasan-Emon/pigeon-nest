@@ -62,6 +62,7 @@ export class StorefrontProductDetailService {
       inStock: k.quantity > 0,
       lowStock: k.quantity > 0 && k.quantity <= k.lowStockThreshold,
       isDefault: k.isDefault,
+      acceptProposals: k.acceptProposals,
       variants: (k.variants ?? []).map((v) => ({
         attributeId: v.attributeId,
         valueId: v.attributeValueId,
