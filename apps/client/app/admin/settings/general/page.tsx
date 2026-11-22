@@ -5,6 +5,7 @@ import { listSettings, updateSettings } from '@/lib/api/shipping';
 import { ApiError } from '@/lib/api/http';
 import { useToast } from '@/components/ui/toast';
 import type { SettingItem } from '@/types/shipping';
+import { LoadingBlock } from '@/components/ui/skeleton';
 
 const fieldClass =
   'mt-1 w-full max-w-xs rounded-md border border-input px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none';
@@ -64,7 +65,7 @@ export default function GeneralSettingsPage() {
     }
   }
 
-  if (!items) return <p className="py-10 text-center text-muted-foreground">Loading…</p>;
+  if (!items) return <LoadingBlock />;
 
   return (
     <form onSubmit={handleSubmit} className="max-w-3xl space-y-5">
