@@ -1,12 +1,8 @@
 import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { CurrentSeller } from '../../auth/decorators/current-seller.decorator';
 import { RequireSellerAccess } from '../../auth/decorators/require-seller-access.decorator';
-import { Roles } from '../../auth/decorators/roles.decorator';
-import { AuthGuard } from '../../auth/guards/auth.guard';
-import { RolesGuard } from '../../auth/guards/roles.guard';
 import { SellerAccessGuard } from '../../auth/guards/seller-access.guard';
 import { Seller } from '../../database/entities/seller/seller.entity';
-import { AuthUserType } from '../../database/enums/auth-user-type.enum';
 import {
   CursorPagination,
   CursorPaginationParams,
@@ -14,10 +10,11 @@ import {
 import { ParseIdPipe } from '../../shared/pipes/parse-id.pipe';
 import { ListPaymentQueryDto } from '../dtos/order-staff.dtos';
 import { PaymentQueryService } from '../services/payment-query.service';
+import { AdminAuthGuard } from '../../auth/guards/admin-auth.guard';
+import { SellerAuthGuard } from '../../auth/guards/seller-auth.guard';
 
 // Every payment on every order.
-@UseGuards(AuthGuard, RolesGuard)
-@Roles(AuthUserType.ADMIN)
+@UseGuards(AdminAuthGuard)
 @Controller({ path: 'api/admin/payments', version: '1' })
 export class AdminPaymentController {
   constructor(private readonly payments: PaymentQueryService) {}
@@ -34,8 +31,7 @@ export class AdminPaymentController {
 }
 
 // Payments on the seller's own orders only.
-@UseGuards(AuthGuard, RolesGuard, SellerAccessGuard)
-@Roles(AuthUserType.SELLER)
+@UseGuards(SellerAuthGuard, SellerAccessGuard)
 @RequireSellerAccess('full')
 @Controller({ path: 'api/seller/payments', version: '1' })
 export class SellerPaymentController {
