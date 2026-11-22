@@ -12,10 +12,6 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { AuthGuard } from '../../../auth/guards/auth.guard';
-import { RolesGuard } from '../../../auth/guards/roles.guard';
-import { Roles } from '../../../auth/decorators/roles.decorator';
-import { AuthUserType } from '../../../database/enums/auth-user-type.enum';
 import {
   CursorPaginationParams,
   CursorPagination,
@@ -25,9 +21,9 @@ import { CreateAttributeDto } from '../dtos/create-attribute.dto';
 import { UpdateAttributeDto } from '../dtos/update-attribute.dto';
 import { ListAttributeQueryDto } from '../dtos/list-attribute-query.dto';
 import { CreateAttributeValueDto } from '../dtos/create-attribute-value.dto';
+import { AdminAuthGuard } from '../../../auth/guards/admin-auth.guard';
 
-@UseGuards(AuthGuard, RolesGuard)
-@Roles(AuthUserType.ADMIN)
+@UseGuards(AdminAuthGuard)
 @Controller({ path: 'api/admin/attributes', version: '1' })
 export class AdminAttributeController {
   constructor(private readonly adminAttributeService: AdminAttributeService) {}

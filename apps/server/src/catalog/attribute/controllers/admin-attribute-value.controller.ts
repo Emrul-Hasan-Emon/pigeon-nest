@@ -9,15 +9,11 @@ import {
   Patch,
   UseGuards,
 } from '@nestjs/common';
-import { AuthGuard } from '../../../auth/guards/auth.guard';
-import { RolesGuard } from '../../../auth/guards/roles.guard';
-import { Roles } from '../../../auth/decorators/roles.decorator';
-import { AuthUserType } from '../../../database/enums/auth-user-type.enum';
 import { AdminAttributeService } from '../services/admin-attribute.service';
 import { UpdateAttributeValueDto } from '../dtos/update-attribute-value.dto';
+import { AdminAuthGuard } from '../../../auth/guards/admin-auth.guard';
 
-@UseGuards(AuthGuard, RolesGuard)
-@Roles(AuthUserType.ADMIN)
+@UseGuards(AdminAuthGuard)
 @Controller({ path: 'api/admin/attribute-values', version: '1' })
 export class AdminAttributeValueController {
   constructor(private readonly adminAttributeService: AdminAttributeService) {}
