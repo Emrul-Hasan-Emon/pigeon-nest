@@ -103,6 +103,31 @@ body {
   .skeleton { animation: none; }
 }
 
+/* Tables: a quiet header, a warm hover, figures that line up. */
+:is(.admin-main, .seller-main) table { border-collapse: separate; border-spacing: 0; }
+:is(.admin-main, .seller-main) thead { background: hsl(var(--secondary) / 0.6); }
+:is(.admin-main, .seller-main) thead th {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: hsl(var(--muted-foreground));
+  white-space: nowrap;
+}
+:is(.admin-main, .seller-main) tbody tr { transition: background-color 0.12s ease; }
+:is(.admin-main, .seller-main) tbody tr:hover { background: hsl(var(--brass-soft) / 0.5); }
+:is(.admin-main, .seller-main) tbody td { font-variant-numeric: tabular-nums; }
+:is(.admin-main, .seller-main) tbody td:first-child, :is(.admin-main, .seller-main) tbody th:first-child { color: hsl(var(--foreground)); }
+
+/* Row and text links: brass-ink instead of plain black, so they read as links without shouting. */
+:is(.admin-main, .seller-main) a.text-primary { color: hsl(var(--brass-ink)); font-weight: 500; text-underline-offset: 3px; }
+:is(.admin-main, .seller-main) a.text-primary:hover { text-decoration-color: hsl(var(--brass)); }
+
+/* Cards: a hairline and a soft lift. */
+:is(.admin-main, .seller-main) .rounded-xl.border {
+  border-radius: 0.875rem;
+  box-shadow: 0 1px 2px rgb(30 20 5 / 0.04), 0 10px 28px -14px rgb(30 20 5 / 0.12);
+}
+
 /* ---------- Storefront ---------- */
 .store {
   --s-ink: #11151b;
