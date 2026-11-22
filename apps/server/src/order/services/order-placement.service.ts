@@ -34,7 +34,10 @@ export interface PlacementLine {
   skuImageUrl: string | null;
   quantity: number;
   unitPrice: number;
+  /** What the customer pays per unit: the proposal price when one applies. */
   unitPayable: number;
+  /** An accepted price proposal this line is bought at (customers only). skuUnitPayable is the SKU's own price now. */
+  proposal?: { id: number; unitPrice: number; skuUnitPayable: number } | null;
 }
 
 export interface Placement {
@@ -142,6 +145,49 @@ export class OrderPlacementService {
     return Object.keys(proof).length > 0 ? proof : null;
   }
 
+  /**
+   * Marks each proposal the order was placed with as used. The update only
+   * matches a proposal still accepted and the buyer's own, so one an admin
+   * closed a moment ago fails the order cleanly instead of selling at its price.
+   */
+  private async useProposals(manager: EntityManager, p: Placement, orderId: number) {
+    for (const line of p.lines) {
+      if (!line.proposal) continue;
+      const [gone]: [{ id: number }[], number] = await manager.query(
+        `UPDATE sku_price_proposal
+            SET status = 'used', "usedAt" = now(), "orderId" = $2, "updatedAt" = now(),
+                "updatedBy" = $4, "updaterType" = $5, "updaterName" = $6
+          WHERE id = $1 AND status = 'accepted' AND "userId" = $3 AND "deletedAt" IS NULL
+          RETURNING id`,
+        [line.proposal.id, orderId, p.userId, p.placedBy.id, p.placedBy.type, p.placedBy.name],
+      );
+      if (gone.length === 0) {
+        throw new ConflictException({
+          statusCode: 409,
+          error: 'Conflict',
+          message: 'A price proposal in this cart changed while the order was being placed. Check the cart and try again.',
+          issues: [`The price proposal for ${line.productName} is no longer available.`],
+        });
+      }
+      await manager.query(
+        `INSERT INTO sku_price_proposal_history
+           ("proposalId", action, "actorType", "actorId", "actorName", price, quantity, "skuPriceAtTime", note,
+            "createdBy", "creatorType", "creatorName", "updatedBy", "updaterType", "updaterName")
+         VALUES ($1, 'used', $2, $3, $4, $5, $6, $7, $8, $3, $2, $4, $3, $2, $4)`,
+        [
+          line.proposal.id,
+          p.placedBy.type,
+          p.placedBy.id,
+          p.placedBy.name,
+          line.proposal.unitPrice,
+          line.quantity,
+          line.proposal.skuUnitPayable,
+          'Order placed',
+        ],
+      );
+    }
+  }
+
   /** Takes the stock, then writes the order with its lines, payment and first history rows. */
   async insert(manager: EntityManager, p: Placement): Promise<number> {
     // The condition makes a lost race for the last unit a clean failure.
@@ -233,11 +279,16 @@ export class OrderPlacementService {
         },
         quantity: l.quantity,
         unitPrice: l.unitPrice,
-        unitDiscountedPrice: l.unitPayable,
+        // the SKU's price at order time; a proposal line is payable at the proposal price
+        unitDiscountedPrice: l.proposal ? l.proposal.skuUnitPayable : l.unitPayable,
         totalPrice: round2(l.unitPrice * l.quantity),
-        totalDiscountedPrice: round2(l.unitPayable * l.quantity),
+        totalDiscountedPrice: round2((l.proposal ? l.proposal.skuUnitPayable : l.unitPayable) * l.quantity),
+        proposalId: l.proposal?.id ?? null,
+        unitProposalPrice: l.proposal ? l.proposal.unitPrice : null,
+        totalProposalPrice: l.proposal ? round2(l.proposal.unitPrice * l.quantity) : null,
       })),
     );
+    await this.useProposals(manager, p, order.id);
 
     const payment = await manager.save(Payment, {
       ...stamp,

@@ -240,8 +240,16 @@ export class OrderViewService {
       imageUrl: this.image(item),
       quantity: item.quantity,
       unitPrice: item.unitPrice,
-      unitPayable: item.unitDiscountedPrice ?? item.unitPrice,
-      lineTotal: item.totalDiscountedPrice ?? item.totalPrice,
+      // What the SKU cost when the order was placed.
+      skuUnitPrice: item.unitDiscountedPrice ?? item.unitPrice,
+      // The accepted proposal this line was bought at, if any.
+      proposal:
+        item.proposalId && item.unitProposalPrice != null
+          ? { id: item.proposalId, unitPrice: item.unitProposalPrice, lineTotal: item.totalProposalPrice }
+          : null,
+      // What was charged.
+      unitPayable: item.unitProposalPrice ?? item.unitDiscountedPrice ?? item.unitPrice,
+      lineTotal: item.totalProposalPrice ?? item.totalDiscountedPrice ?? item.totalPrice,
     };
   }
 }
