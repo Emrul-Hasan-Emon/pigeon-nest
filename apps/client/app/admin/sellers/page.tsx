@@ -9,6 +9,7 @@ import { useDebouncedValue } from '@/lib/hooks/use-debounced-value';
 import { listSellers, updateSeller } from '@/lib/api/sellers';
 import { ApiError, NotFoundApiError } from '@/lib/api/http';
 import type { Seller, SellerActiveStatus, SellerStatus } from '@/types/seller';
+import { LoadingBlock } from '@/components/ui/skeleton';
 
 const PAGE_SIZE = 20;
 
@@ -161,7 +162,7 @@ export default function AdminSellersPage() {
       </div>
 
       {loading ? (
-        <p className="py-10 text-center text-muted-foreground">Loading…</p>
+        <LoadingBlock />
       ) : (
         <SellerTable sellers={sellers} onChangeActive={handleChangeActive} />
       )}
