@@ -11,12 +11,8 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { AuthGuard } from '../../auth/guards/auth.guard';
-import { RolesGuard } from '../../auth/guards/roles.guard';
-import { Roles } from '../../auth/decorators/roles.decorator';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { JwtPayload } from '../../auth/interfaces/jwt-payload.interface';
-import { AuthUserType } from '../../database/enums/auth-user-type.enum';
 import {
   CursorPaginationParams,
   CursorPagination,
@@ -26,13 +22,13 @@ import { AdminUserService } from '../services/admin-user.service';
 import { CreateUserDto } from '../dtos/create-user.dto';
 import { UpdateUserDto } from '../dtos/update-user.dto';
 import { ListUserQueryDto } from '../dtos/list-user-query.dto';
+import { AdminAuthGuard } from '../../auth/guards/admin-auth.guard';
 
 const AVATAR_FILE = FileInterceptor('avatar', {
   limits: { fileSize: 10 * 1024 * 1024, files: 1 },
 });
 
-@UseGuards(AuthGuard, RolesGuard)
-@Roles(AuthUserType.ADMIN)
+@UseGuards(AdminAuthGuard)
 @Controller({ path: 'api/admin/users', version: '1' })
 export class AdminUserController {
   constructor(private readonly adminUserService: AdminUserService) {}
