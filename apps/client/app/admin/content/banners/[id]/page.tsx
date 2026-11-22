@@ -6,6 +6,7 @@ import { BannerForm } from '@/components/admin/content/banners/banner-form';
 import { getBanner } from '@/lib/api/banners';
 import { useToast } from '@/components/ui/toast';
 import type { Banner } from '@/types/banner';
+import { LoadingBlock } from '@/components/ui/skeleton';
 
 export default function EditBannerPage() {
   const params = useParams<{ id: string }>();
@@ -22,6 +23,6 @@ export default function EditBannerPage() {
       });
   }, [params.id, router, showToast]);
 
-  if (!banner) return <p className="py-10 text-center text-muted-foreground">Loading…</p>;
+  if (!banner) return <LoadingBlock />;
   return <BannerForm banner={banner} />;
 }

@@ -9,6 +9,7 @@ import { useDebouncedValue } from '@/lib/hooks/use-debounced-value';
 import { deleteBanner, listBanners, updateBanner } from '@/lib/api/banners';
 import { ApiError, ConflictApiError, NotFoundApiError } from '@/lib/api/http';
 import { BANNER_POSITIONS, type Banner, type BannerListParams } from '@/types/banner';
+import { LoadingBlock } from '@/components/ui/skeleton';
 
 const PAGE_SIZE = 20;
 const selectClass =
@@ -146,7 +147,7 @@ export default function AdminBannersPage() {
       </div>
 
       {loading ? (
-        <p className="py-10 text-center text-muted-foreground">Loading…</p>
+        <LoadingBlock />
       ) : (
         <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
           <table className="min-w-full divide-y divide-border text-sm">
