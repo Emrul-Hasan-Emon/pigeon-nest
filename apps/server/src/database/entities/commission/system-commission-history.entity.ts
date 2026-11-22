@@ -2,6 +2,9 @@ import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 import { BaseEntity } from '../base.entity';
 import { Seller } from '../seller/seller.entity';
 import { Order } from '../order/order.entity';
+import { OrderItem } from '../order/order-item.entity';
+import { OrderReturn } from '../order-return/order-return.entity';
+import { CommissionStatus } from '../../enums/commission-status.enum';
 import { CommissionHistoryType } from '../../enums/commission-history-type.enum';
 import { CommissionType } from '../../enums/commission-type.enum';
 import { SystemCommissionDisburse } from './system-commission-disburse.entity';
@@ -57,6 +60,28 @@ export class SystemCommissionHistory extends BaseEntity {
 
   @Column({ type: 'double precision', nullable: true })
   commissionValue: number | null;
+
+  // Return rows: the item the commission was taken back for (empty for a whole-order return).
+  @Index('IDX_system_commission_history_orderItemId')
+  @Column({ type: 'int', nullable: true })
+  orderItemId: number | null;
+
+  @ManyToOne(() => OrderItem, { onDelete: 'RESTRICT', nullable: true })
+  @JoinColumn({ name: 'orderItemId', foreignKeyConstraintName: 'FK_system_commission_history_orderItemId' })
+  orderItem: OrderItem | null;
+
+  @Index('IDX_system_commission_history_orderReturnId')
+  @Column({ type: 'int', nullable: true })
+  orderReturnId: number | null;
+
+  @ManyToOne(() => OrderReturn, { onDelete: 'RESTRICT', nullable: true })
+  @JoinColumn({ name: 'orderReturnId', foreignKeyConstraintName: 'FK_system_commission_history_orderReturnId' })
+  orderReturn: OrderReturn | null;
+
+  // for_system: earned by the system. order_returned_to_customer: taken back on a return.
+  @Index('IDX_system_commission_history_status')
+  @Column({ type: 'varchar', length: 40, default: CommissionStatus.FOR_SYSTEM })
+  status: CommissionStatus;
 
   // The order's payment status when the row was written ('paid' for payments).
   @Index('IDX_system_commission_history_paymentStatus')
