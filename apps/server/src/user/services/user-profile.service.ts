@@ -1,3 +1,5 @@
+import { AuthUserType } from '../../database/enums/auth-user-type.enum';
+import { TokenService } from '../../auth/services/token.service';
 import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import { DatabaseService } from '../../database/database.service';
@@ -11,6 +13,7 @@ export class UserProfileService {
   constructor(
     private readonly databaseService: DatabaseService,
     private readonly commonUserService: CommonUserService,
+    private readonly tokens: TokenService,
   ) {}
 
   getProfile(user: User) {
@@ -56,9 +59,9 @@ export class UserProfileService {
         'New password must be different from the current one',
       );
     }
-    await this.databaseService.user.update(user.id, {
-      passwordHash: await bcrypt.hash(dto.newPassword, 10),
-    });
-    return { updated: true };
+    const passwordHash = await bcrypt.hash(dto.newPassword, 10);
+    await this.databaseService.user.update(user.id, { passwordHash });
+    // Every older token stops working with the old password. This one keeps the caller signed in.
+    return { updated: true, accessToken: await this.tokens.sign(AuthUserType.USER, { id: user.id, passwordHash }) };
   }
 }
