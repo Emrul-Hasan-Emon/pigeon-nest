@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { DatabaseService } from '../../database/database.service';
 import { Order } from '../../database/entities/order/order.entity';
 import { OrderItem } from '../../database/entities/order/order-item.entity';
+import { OrderReturn } from '../../database/entities/order-return/order-return.entity';
 import { OrderUpdate } from '../../database/entities/order/order-update.entity';
 import { PaymentAttachment } from '../../database/entities/payment/payment-attachment.entity';
 import { PaymentStatusHistory } from '../../database/entities/payment/payment-status-history.entity';
@@ -39,7 +40,7 @@ export class OrderViewService {
 
   /** The order with everything around it: payments and their files, histories, updates. */
   async full(order: Order, viewer: AuthUserType) {
-    const [payments, attachments, paymentHistory, updates] = await Promise.all([
+    const [payments, attachments, paymentHistory, updates, returns] = await Promise.all([
       this.db.payment.find({ where: { orderId: order.id }, order: { id: 'ASC' } }),
       this.db.paymentAttachment.find({ where: { orderId: order.id }, order: { id: 'ASC' } }),
       this.db.paymentStatusHistory.find({ where: { orderId: order.id }, order: { id: 'ASC' } }),
@@ -48,8 +49,9 @@ export class OrderViewService {
         relations: { attachments: true },
         order: { id: 'ASC', attachments: { id: 'ASC' } },
       }),
+      this.db.orderReturn.find({ where: { orderId: order.id }, relations: { items: true }, order: { id: 'DESC' } }),
     ]);
-    return this.detail(order, { payments, attachments, paymentHistory, updates }, viewer);
+    return this.detail(order, { payments, attachments, paymentHistory, updates, returns }, viewer);
   }
 
   attachment(a: {
@@ -103,14 +105,25 @@ export class OrderViewService {
       attachments: PaymentAttachment[];
       paymentHistory: PaymentStatusHistory[];
       updates: OrderUpdate[];
+      returns?: OrderReturn[];
     },
     viewer: AuthUserType,
   ) {
-    const { payments, attachments, paymentHistory, updates } = extras;
+    const { payments, attachments, paymentHistory, updates, returns = [] } = extras;
     return {
       ...this.summary(order, viewer),
       cartId: order.cartId,
-      items: (order.items ?? []).map((i) => this.item(i)),
+      items: (order.items ?? []).map((i) => this.item(i, viewer)),
+      // Returns on this order, newest first. A line is returned once one reaches `returned`.
+      returns: returns.map((r) => ({
+        id: r.id,
+        returnNumber: r.returnNumber,
+        status: r.status,
+        scope: r.scope,
+        refundAmount: r.refundAmount,
+        orderItemIds: (r.items ?? []).map((i) => i.orderItemId),
+        createdAt: r.createdAt,
+      })),
       totals: this.totals(order),
       // The platform's cut is for staff only; customers never see it.
       ...(viewer === AuthUserType.USER ? {} : { commission: this.commission(order) }),
@@ -186,6 +199,7 @@ export class OrderViewService {
       amountPaid: order.amountPaid,
       gateway: { id: order.paymentGatewayId, name: order.paymentGatewayName, slug: order.paymentGatewaySlug },
       createdAt: order.createdAt,
+      isReturned: order.isReturned,
       canCancel: allowedTargets(viewer, order.status).includes(OrderStatus.CANCELLED),
       // What this viewer may move the order to right now.
       allowedStatuses: allowedTargets(viewer, order.status),
@@ -229,7 +243,7 @@ export class OrderViewService {
     return sku?.imageUrl ?? sku?.thumbnailUrl ?? null;
   }
 
-  private item(item: OrderItem) {
+  private item(item: OrderItem, viewer: AuthUserType) {
     const sku = (item.skuData ?? {}) as SkuSnapshot;
     return {
       id: item.id,
@@ -250,6 +264,9 @@ export class OrderViewService {
       // What was charged.
       unitPayable: item.unitProposalPrice ?? item.unitDiscountedPrice ?? item.unitPrice,
       lineTotal: item.totalProposalPrice ?? item.totalDiscountedPrice ?? item.totalPrice,
+      isReturned: item.isReturned,
+      // The platform's cut of this line is for staff only.
+      ...(viewer === AuthUserType.USER ? {} : { systemCommission: item.systemCommission, sellerAmount: item.sellerAmount }),
     };
   }
 }
