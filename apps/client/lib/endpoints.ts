@@ -31,8 +31,11 @@ const staffOrders = {
 
 export const ENDPOINTS = {
   admin: {
+    dashboard: '/dashboard',
+    dashboardAttention: '/dashboard/attention',
     auth: {
       login: '/auth/login',
+      me: '/auth/me',
     },
 
     categories: {
@@ -153,6 +156,7 @@ export const ENDPOINTS = {
       mediaFiles: (productId: Id) => `/products/${productId}/media-files`,
     },
     dashboard: '/dashboard',
+    dashboardAttention: '/dashboard/attention',
     wishlist: { insights: '/wishlist/insights' },
     returns: {
       list: '/returns',
