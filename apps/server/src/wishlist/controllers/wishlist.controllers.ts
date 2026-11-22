@@ -3,14 +3,10 @@ import { CurrentSeller } from '../../auth/decorators/current-seller.decorator';
 import { CurrentUserAccount } from '../../auth/decorators/current-user-account.decorator';
 import { RequireSellerAccess } from '../../auth/decorators/require-seller-access.decorator';
 import { RequireUserAccess } from '../../auth/decorators/require-user-access.decorator';
-import { Roles } from '../../auth/decorators/roles.decorator';
-import { AuthGuard } from '../../auth/guards/auth.guard';
-import { RolesGuard } from '../../auth/guards/roles.guard';
 import { SellerAccessGuard } from '../../auth/guards/seller-access.guard';
 import { UserAccessGuard } from '../../auth/guards/user-access.guard';
 import { Seller } from '../../database/entities/seller/seller.entity';
 import { User } from '../../database/entities/person/user.entity';
-import { AuthUserType } from '../../database/enums/auth-user-type.enum';
 import { CursorPagination, CursorPaginationParams } from '../../shared/decorators/cursor-pagination-params.decorator';
 import { ParseIdPipe } from '../../shared/pipes/parse-id.pipe';
 import {
@@ -21,10 +17,12 @@ import {
 } from '../dtos/wishlist.dtos';
 import { WishlistInsightsService } from '../services/wishlist-insights.service';
 import { WishlistService } from '../services/wishlist.service';
+import { AdminAuthGuard } from '../../auth/guards/admin-auth.guard';
+import { SellerAuthGuard } from '../../auth/guards/seller-auth.guard';
+import { UserAuthGuard } from '../../auth/guards/user-auth.guard';
 
 // A signed-in customer's own wishlist. Suspended customers can still read it.
-@UseGuards(AuthGuard, RolesGuard, UserAccessGuard)
-@Roles(AuthUserType.USER)
+@UseGuards(UserAuthGuard, UserAccessGuard)
 @Controller({ path: 'api/user/wishlist', version: '1' })
 export class UserWishlistController {
   constructor(private readonly wishlist: WishlistService) {}
@@ -58,8 +56,7 @@ export class UserWishlistController {
 
 // How often the seller's own products are saved. Counts only, never customers.
 // Suspended sellers can still read it.
-@UseGuards(AuthGuard, RolesGuard, SellerAccessGuard)
-@Roles(AuthUserType.SELLER)
+@UseGuards(SellerAuthGuard, SellerAccessGuard)
 @RequireSellerAccess('any')
 @Controller({ path: 'api/seller/wishlist', version: '1' })
 export class SellerWishlistController {
@@ -72,8 +69,7 @@ export class SellerWishlistController {
 }
 
 // Admins read only: they cannot add to or remove from a customer's wishlist.
-@UseGuards(AuthGuard, RolesGuard)
-@Roles(AuthUserType.ADMIN)
+@UseGuards(AdminAuthGuard)
 @Controller({ path: 'api/admin/wishlist', version: '1' })
 export class AdminWishlistController {
   constructor(private readonly insights: WishlistInsightsService) {}
@@ -89,8 +85,7 @@ export class AdminWishlistController {
   }
 }
 
-@UseGuards(AuthGuard, RolesGuard)
-@Roles(AuthUserType.ADMIN)
+@UseGuards(AdminAuthGuard)
 @Controller({ path: 'api/admin/users/:userId/wishlist', version: '1' })
 export class AdminUserWishlistController {
   constructor(private readonly insights: WishlistInsightsService) {}
