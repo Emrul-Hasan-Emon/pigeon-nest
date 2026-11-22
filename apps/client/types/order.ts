@@ -34,6 +34,8 @@ export interface OrderSummary {
   createdAt: string;
   canCancel: boolean;
   allowedStatuses: OrderStatus[];
+  /** Every item came back (a return reached `returned`). */
+  isReturned: boolean;
   customer: OrderCustomer;
   deliveryType: DeliveryType;
   countryCode: string;
@@ -67,6 +69,10 @@ export interface OrderItemView {
   /** What was charged per unit and for the line. */
   unitPayable: number;
   lineTotal: number;
+  isReturned: boolean;
+  /** Staff only: the platform's cut of this line, and what the seller keeps. */
+  systemCommission?: number;
+  sellerAmount?: number;
 }
 
 export interface OrderPayment {
@@ -105,6 +111,8 @@ export interface PaymentHistoryEntry {
 export interface OrderDetail extends OrderSummary {
   cartId: number | null;
   items: OrderItemView[];
+  /** Returns on this order, newest first. */
+  returns: import('./returns').OrderReturnRef[];
   /** Staff only: the platform's cut, fixed when the order was placed. */
   commission?: { type: 'percentage' | 'fixed' | null; value: number | null; systemCommission: number; sellerAmount: number };
   totals: {

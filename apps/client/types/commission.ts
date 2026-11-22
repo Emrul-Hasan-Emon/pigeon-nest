@@ -47,7 +47,10 @@ export interface LedgerRow {
   orderId: number | null;
   orderNumber: string | null;
   disburseId: number | null;
-  type: 'order_commission' | 'commission_payment';
+  type: 'order_commission' | 'commission_payment' | 'order_return';
+  status: string;
+  orderItemId: number | null;
+  orderReturnId: number | null;
   totalAmount: number;
   orderSubtotal: number | null;
   commissionType: CommissionType | null;
