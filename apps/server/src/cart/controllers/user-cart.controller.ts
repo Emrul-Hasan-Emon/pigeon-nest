@@ -11,20 +11,17 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
-import { Roles } from '../../auth/decorators/roles.decorator';
-import { AuthGuard } from '../../auth/guards/auth.guard';
 import {
   CartOwner,
   CurrentCartOwner,
   OptionalCustomerGuard,
 } from '../../auth/guards/optional-customer.guard';
-import { RolesGuard } from '../../auth/guards/roles.guard';
 import { UserAccessGuard } from '../../auth/guards/user-access.guard';
 import { JwtPayload } from '../../auth/interfaces/jwt-payload.interface';
-import { AuthUserType } from '../../database/enums/auth-user-type.enum';
 import { ParseIdPipe } from '../../shared/pipes/parse-id.pipe';
 import { AddCartItemDto, MergeCartDto, UpdateCartItemDto } from '../dtos/cart.dtos';
 import { UserCartService } from '../services/user-cart.service';
+import { UserAuthGuard } from '../../auth/guards/user-auth.guard';
 
 // Customer carts, one per seller. Open to guests: a guest sends x-cart-session,
 // a signed-in customer sends the bearer token instead.
@@ -93,8 +90,7 @@ export class UserCartController {
 
   // Right after login: fold the guest session's carts into mine.
   @Post('merge')
-  @UseGuards(AuthGuard, RolesGuard, UserAccessGuard)
-  @Roles(AuthUserType.USER)
+  @UseGuards(UserAuthGuard, UserAccessGuard)
   merge(@CurrentUser() user: JwtPayload, @Body() dto: MergeCartDto) {
     return this.carts.merge(user.sub, dto.sessionId);
   }

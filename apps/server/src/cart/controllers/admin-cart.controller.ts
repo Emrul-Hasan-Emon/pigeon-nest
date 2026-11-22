@@ -1,8 +1,4 @@
 import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
-import { Roles } from '../../auth/decorators/roles.decorator';
-import { AuthGuard } from '../../auth/guards/auth.guard';
-import { RolesGuard } from '../../auth/guards/roles.guard';
-import { AuthUserType } from '../../database/enums/auth-user-type.enum';
 import {
   CursorPagination,
   CursorPaginationParams,
@@ -10,10 +6,10 @@ import {
 import { ParseIdPipe } from '../../shared/pipes/parse-id.pipe';
 import { ListCartQueryDto } from '../dtos/admin-cart-query.dto';
 import { AdminCartService } from '../services/admin-cart.service';
+import { AdminAuthGuard } from '../../auth/guards/admin-auth.guard';
 
 // Admin only: sellers never see carts.
-@UseGuards(AuthGuard, RolesGuard)
-@Roles(AuthUserType.ADMIN)
+@UseGuards(AdminAuthGuard)
 @Controller({ path: 'api/admin/carts', version: '1' })
 export class AdminCartController {
   constructor(private readonly carts: AdminCartService) {}
