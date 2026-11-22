@@ -12,10 +12,6 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { AuthGuard } from '../../../auth/guards/auth.guard';
-import { RolesGuard } from '../../../auth/guards/roles.guard';
-import { Roles } from '../../../auth/decorators/roles.decorator';
-import { AuthUserType } from '../../../database/enums/auth-user-type.enum';
 import { HomepagePage } from '../../../database/enums/homepage-page.enum';
 import {
   CursorPagination,
@@ -32,9 +28,9 @@ import {
   UpdateHomepageSlotDto,
 } from '../dtos/homepage-section.dtos';
 import { HomepageService } from '../services/homepage.service';
+import { AdminAuthGuard } from '../../../auth/guards/admin-auth.guard';
 
-@UseGuards(AuthGuard, RolesGuard)
-@Roles(AuthUserType.ADMIN)
+@UseGuards(AdminAuthGuard)
 @Controller({ path: 'api/admin/homepage-sections', version: '1' })
 export class AdminHomepageSectionController {
   constructor(private readonly homepage: HomepageService) {}
@@ -96,8 +92,7 @@ export class AdminHomepageSectionController {
   }
 }
 
-@UseGuards(AuthGuard, RolesGuard)
-@Roles(AuthUserType.ADMIN)
+@UseGuards(AdminAuthGuard)
 @Controller({ path: 'api/admin/homepage-slots', version: '1' })
 export class AdminHomepageSlotController {
   constructor(private readonly homepage: HomepageService) {}

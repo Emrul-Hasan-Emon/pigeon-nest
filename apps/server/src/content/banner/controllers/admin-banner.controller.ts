@@ -14,10 +14,6 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
-import { AuthGuard } from '../../../auth/guards/auth.guard';
-import { RolesGuard } from '../../../auth/guards/roles.guard';
-import { Roles } from '../../../auth/decorators/roles.decorator';
-import { AuthUserType } from '../../../database/enums/auth-user-type.enum';
 import {
   CursorPagination,
   CursorPaginationParams,
@@ -27,6 +23,7 @@ import { AdminBannerService } from '../services/admin-banner.service';
 import { CreateBannerDto } from '../dtos/create-banner.dto';
 import { UpdateBannerDto } from '../dtos/update-banner.dto';
 import { ListBannerQueryDto } from '../dtos/list-banner-query.dto';
+import { AdminAuthGuard } from '../../../auth/guards/admin-auth.guard';
 
 // multer: 10MB per file (413 when exceeded), at most the two named files.
 const BANNER_FILE_FIELDS = FileFieldsInterceptor(
@@ -42,8 +39,7 @@ interface BannerUploadedFiles {
   mobileImage?: Express.Multer.File[];
 }
 
-@UseGuards(AuthGuard, RolesGuard)
-@Roles(AuthUserType.ADMIN)
+@UseGuards(AdminAuthGuard)
 @Controller({ path: 'api/admin/banners', version: '1' })
 export class AdminBannerController {
   constructor(private readonly adminBannerService: AdminBannerService) {}
