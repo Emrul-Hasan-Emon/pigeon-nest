@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { ReturnBadge } from '@/components/returns/parts';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Modal } from '@/components/ui/modal';
 import { useToast } from '@/components/ui/toast';
@@ -69,6 +70,7 @@ export function OrderDetailView({ role, id }: { role: StaffRole; id: number }) {
           <h1 className="text-2xl font-bold text-foreground">{order.orderNumber}</h1>
           <OrderStatusBadge status={order.status} />
           <PaymentStatusBadge status={order.paymentStatus} />
+          {order.isReturned && <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-700">Fully returned</span>}
         </div>
         <p className="text-sm text-muted-foreground">Placed {formatDateTime(order.createdAt)}</p>
       </div>
@@ -115,7 +117,7 @@ export function OrderDetailView({ role, id }: { role: StaffRole; id: number }) {
       <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
         <table className="min-w-full divide-y divide-border text-sm">
           <thead className="bg-muted">
-            <tr>{['Product', 'Variant', 'Qty', 'Unit price', 'Line total'].map((h) => <th key={h} className="px-4 py-3 text-left font-medium text-muted-foreground">{h}</th>)}</tr>
+            <tr>{['Product', 'Variant', 'Qty', 'Unit price', 'Line total', ...(order.commission ? ['Commission'] : [])].map((h) => <th key={h} className="px-4 py-3 text-left font-medium text-muted-foreground">{h}</th>)}</tr>
           </thead>
           <tbody className="divide-y divide-border">
             {order.items.map((i) => (
@@ -127,6 +129,7 @@ export function OrderDetailView({ role, id }: { role: StaffRole; id: number }) {
                       <img src={i.imageUrl} alt="" className="h-10 w-10 rounded object-cover" />
                     )}
                     <span className="font-medium text-foreground">{i.productName}</span>
+                    {i.isReturned && <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs text-emerald-700">Returned</span>}
                   </div>
                 </td>
                 <td className="px-4 py-3 text-muted-foreground">{i.sku.label || i.sku.code}<span className="block text-xs">{i.sku.code}</span></td>
@@ -144,6 +147,7 @@ export function OrderDetailView({ role, id }: { role: StaffRole; id: number }) {
                   )}
                 </td>
                 <td className="px-4 py-3 font-medium text-foreground">{money(i.lineTotal)}</td>
+                {order.commission && <td className="px-4 py-3 text-muted-foreground">{money(i.systemCommission ?? 0)}<span className="block text-xs">seller keeps {money(i.sellerAmount ?? 0)}</span></td>}
               </tr>
             ))}
           </tbody>
@@ -158,11 +162,13 @@ export function OrderDetailView({ role, id }: { role: StaffRole; id: number }) {
         <div className="flex justify-between font-medium text-foreground"><dt>Balance due</dt><dd>{money(order.totals.balanceDue)}</dd></div>
         {order.commission && (
           <>
-            <div className="flex justify-between border-t border-border pt-1 text-muted-foreground"><dt>Platform commission{order.commission.type && ` (${order.commission.type === 'percentage' ? `${order.commission.value}% of items` : 'fixed'})`}</dt><dd>{money(order.commission.systemCommission)}</dd></div>
+            <div className="flex justify-between border-t border-border pt-1 text-muted-foreground"><dt>Platform commission{order.commission.type && ` (${order.commission.type === 'percentage' ? `${order.commission.value}% of items` : 'fixed per item'})`}</dt><dd>{money(order.commission.systemCommission)}</dd></div>
             <div className="flex justify-between text-muted-foreground"><dt>Seller amount</dt><dd>{money(order.commission.sellerAmount)}</dd></div>
           </>
         )}
       </dl>
+
+      <ReturnsPanel role={role} order={order} />
 
       <PaymentPanel role={role} order={order} onChanged={() => { showToast('Payment recorded.', 'success'); load(); }} onError={fail} />
 
@@ -200,6 +206,33 @@ export function OrderDetailView({ role, id }: { role: StaffRole; id: number }) {
       </div>
 
       <UpdatesPanel role={role} order={order} onPosted={() => { showToast('Update posted.', 'success'); load(); }} onError={fail} />
+    </div>
+  );
+}
+
+/** Returns on this order, with a way for an admin to open one. */
+function ReturnsPanel({ role, order }: { role: StaffRole; order: OrderDetail }) {
+  const canOpen = role === 'admin' && order.status === 'delivered' && order.paymentStatus === 'paid' && !order.isReturned;
+  if (order.returns.length === 0 && !canOpen) return null;
+  return (
+    <div className={card}>
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <h2 className="text-sm font-semibold text-foreground">Returns</h2>
+        {canOpen && <Link href={`/admin/returns/new?orderId=${order.id}`} className="text-sm text-primary hover:underline">Open a return</Link>}
+      </div>
+      {order.returns.length === 0 ? (
+        <p className="text-sm text-muted-foreground">No returns on this order.</p>
+      ) : (
+        <ul className="divide-y divide-border text-sm">
+          {order.returns.map((r) => (
+            <li key={r.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
+              <Link className="font-medium text-primary hover:underline" href={`${base(role)}/returns/${r.id}`}>{r.returnNumber}</Link>
+              <span className="text-muted-foreground">{r.scope === 'full_order' ? 'Whole order' : `${r.orderItemIds.length} item${r.orderItemIds.length === 1 ? '' : 's'}`} · refund {money(r.refundAmount)}</span>
+              <ReturnBadge status={r.status} />
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
