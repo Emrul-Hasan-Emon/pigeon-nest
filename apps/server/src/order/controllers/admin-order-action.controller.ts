@@ -9,25 +9,21 @@ import {
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
-import { Roles } from '../../auth/decorators/roles.decorator';
-import { AuthGuard } from '../../auth/guards/auth.guard';
-import { RolesGuard } from '../../auth/guards/roles.guard';
 import { JwtPayload } from '../../auth/interfaces/jwt-payload.interface';
-import { AuthUserType } from '../../database/enums/auth-user-type.enum';
 import { ParseIdPipe } from '../../shared/pipes/parse-id.pipe';
 import { ActorResolverService } from '../../shared/services/actor-resolver.service';
 import { PostOrderUpdateDto, RecordPaymentDto, ReversePaymentDto } from '../dtos/order-staff.dtos';
 import { MAX_ATTACHMENTS } from '../services/order-file.service';
 import { OrderPaymentService } from '../services/order-payment.service';
 import { OrderUpdateService } from '../services/order-update.service';
+import { AdminAuthGuard } from '../../auth/guards/admin-auth.guard';
 
 export const ATTACHMENTS = FilesInterceptor('files', MAX_ATTACHMENTS, {
   limits: { fileSize: 10 * 1024 * 1024, files: MAX_ATTACHMENTS },
 });
 
 // Admin actions on any order. (Order lists, details and status changes are in AdminOrderController.)
-@UseGuards(AuthGuard, RolesGuard)
-@Roles(AuthUserType.ADMIN)
+@UseGuards(AdminAuthGuard)
 @Controller({ path: 'api/admin/orders', version: '1' })
 export class AdminOrderActionController {
   constructor(

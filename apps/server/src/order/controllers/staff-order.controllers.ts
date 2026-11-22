@@ -2,9 +2,6 @@ import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@ne
 import { CurrentSeller } from '../../auth/decorators/current-seller.decorator';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { RequireSellerAccess } from '../../auth/decorators/require-seller-access.decorator';
-import { Roles } from '../../auth/decorators/roles.decorator';
-import { AuthGuard } from '../../auth/guards/auth.guard';
-import { RolesGuard } from '../../auth/guards/roles.guard';
 import { SellerAccessGuard } from '../../auth/guards/seller-access.guard';
 import { JwtPayload } from '../../auth/interfaces/jwt-payload.interface';
 import { Seller } from '../../database/entities/seller/seller.entity';
@@ -26,12 +23,13 @@ import {
 import { StaffOrderService } from '../services/staff-order.service';
 import { CreateAddressDto } from '../../user/dtos/address.dtos';
 import { AddressService } from '../../user/services/address.service';
+import { AdminAuthGuard } from '../../auth/guards/admin-auth.guard';
+import { SellerAuthGuard } from '../../auth/guards/seller-auth.guard';
 
 const { ADMIN, SELLER } = AuthUserType;
 
 // All orders, for the admin. Static paths stay above ':id'.
-@UseGuards(AuthGuard, RolesGuard)
-@Roles(ADMIN)
+@UseGuards(AdminAuthGuard)
 @Controller({ path: 'api/admin/orders', version: '1' })
 export class AdminOrderController {
   constructor(
@@ -83,8 +81,7 @@ export class AdminOrderController {
 }
 
 // A seller's own orders. Another seller's order is "not found".
-@UseGuards(AuthGuard, RolesGuard, SellerAccessGuard)
-@Roles(SELLER)
+@UseGuards(SellerAuthGuard, SellerAccessGuard)
 @RequireSellerAccess('full')
 @Controller({ path: 'api/seller/orders', version: '1' })
 export class SellerOrderController {
