@@ -7,6 +7,7 @@ import { td, th } from '@/components/commission/parts';
 import { listMostSaved } from '@/lib/api/wishlist';
 import { ApiError } from '@/lib/api/http';
 import type { MostSavedProduct } from '@/types/wishlist';
+import { LoadingBlock } from '@/components/ui/skeleton';
 
 /** Products saved by the most customers, across all sellers. */
 export function MostSavedReport() {
@@ -43,7 +44,7 @@ export function MostSavedReport() {
       </div>
       {error && <p role="alert" className="mb-3 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p>}
       {rows === null ? (
-        <p className="py-10 text-center text-muted-foreground">Loading…</p>
+        <LoadingBlock />
       ) : (
         <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
           <table className="min-w-full divide-y divide-border text-sm">
