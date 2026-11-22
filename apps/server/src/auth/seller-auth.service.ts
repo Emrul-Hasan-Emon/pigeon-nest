@@ -1,5 +1,4 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { DatabaseService } from '../database/database.service';
 import { Seller } from '../database/entities/seller/seller.entity';
@@ -14,7 +13,7 @@ import {
 import { SellerStatusHistoryService } from '../seller/services/seller-status-history.service';
 import { SellerLoginDto } from './dtos/seller-login.dto';
 import { SellerRegisterDto } from './dtos/seller-register.dto';
-import { JwtPayload } from './interfaces/jwt-payload.interface';
+import { TokenService } from './services/token.service';
 
 // Compared against when the phone is unknown, so response time does not
 // reveal which phone numbers are registered.
@@ -25,7 +24,7 @@ const TIMING_EQUALISER_HASH =
 export class SellerAuthService {
   constructor(
     private readonly databaseService: DatabaseService,
-    private readonly jwtService: JwtService,
+    private readonly tokens: TokenService,
     private readonly commonSellerService: CommonSellerService,
     private readonly sellerStatusHistoryService: SellerStatusHistoryService,
   ) {}
@@ -77,9 +76,8 @@ export class SellerAuthService {
   }
 
   private async issueSession(seller: Seller) {
-    const payload: JwtPayload = { sub: seller.id, type: AuthUserType.SELLER };
     return {
-      accessToken: await this.jwtService.signAsync(payload),
+      accessToken: await this.tokens.sign(AuthUserType.SELLER, seller),
       seller: this.commonSellerService.toSellerView(seller),
     };
   }
