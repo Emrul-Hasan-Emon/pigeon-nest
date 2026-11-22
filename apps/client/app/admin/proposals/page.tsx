@@ -3,6 +3,7 @@
 import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { AdminProposalList } from '@/components/admin/proposals/proposal-list';
+import { LoadingBlock } from '@/components/ui/skeleton';
 
 function toId(v: string | null) {
   const n = Number(v);
@@ -24,7 +25,7 @@ export default function AdminProposalsPage() {
         <h1 className="text-2xl font-bold text-foreground">Price proposals</h1>
         <p className="text-sm text-muted-foreground">Prices buyers offered for a SKU and how the seller answered. You can reject or cancel an open or accepted proposal.</p>
       </div>
-      <Suspense fallback={<p className="py-10 text-center text-muted-foreground">Loading…</p>}>
+      <Suspense fallback={<LoadingBlock />}>
         <Content />
       </Suspense>
     </div>
