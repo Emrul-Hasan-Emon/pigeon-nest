@@ -7,6 +7,7 @@ import { getCategoryTree } from '@/lib/api/categories';
 import { findCategoryNode } from '@/lib/category-tree';
 import { useToast } from '@/components/ui/toast';
 import type { Category } from '@/types/category';
+import { LoadingBlock } from '@/components/ui/skeleton';
 
 export default function EditCategoryPage() {
   const params = useParams<{ id: string }>();
@@ -34,7 +35,7 @@ export default function EditCategoryPage() {
   }, [params.id, router, showToast]);
 
   if (loading) {
-    return <p className="py-10 text-center text-muted-foreground">Loading…</p>;
+    return <LoadingBlock />;
   }
   if (!category) return null;
 

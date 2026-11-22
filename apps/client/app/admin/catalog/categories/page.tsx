@@ -9,6 +9,7 @@ import { flattenCategoryTree } from '@/lib/category-tree';
 import { getCategoryTree, listCategories, updateCategory } from '@/lib/api/categories';
 import { ApiError, NotFoundApiError } from '@/lib/api/http';
 import type { Category, CategoryTreeNode } from '@/types/category';
+import { LoadingBlock } from '@/components/ui/skeleton';
 
 const PAGE_SIZE = 20;
 
@@ -169,7 +170,7 @@ export default function AdminCategoriesPage() {
       </div>
 
       {loading ? (
-        <p className="py-10 text-center text-muted-foreground">Loading…</p>
+        <LoadingBlock />
       ) : (
         <CategoryTable
           categories={visibleCategories}
