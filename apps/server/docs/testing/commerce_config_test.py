@@ -185,7 +185,7 @@ check("D deleted gateway's icon file is gone", (200, os.path.exists(os.path.join
 S = "/admin/settings"
 check("E settings need a token", call("GET", S), 401)
 c, st = call("GET", S, A)
-check("E settings list the shipping and commission keys with defaults", (c, st), 200, pred=lambda v: {s["key"] for s in v} == {"shipping.defaultCharge", "shipping.defaultEstimatedDays", "shipping.defaultSupportsLiveAnimal", "commission.type", "commission.amount"} and all(s["label"] and s["type"] for s in v))
+check("E settings list the shipping and commission keys with defaults", (c, st), 200, pred=lambda v: {s["key"] for s in v} == {"shipping.defaultCharge", "shipping.defaultEstimatedDays", "shipping.defaultSupportsLiveAnimal", "commission.type", "commission.amount", "returns.windowDays", "returns.refundDeliveryCharge"} and all(s["label"] and s["type"] for s in v))
 check("E typed values", (c, st), 200, pred=lambda v: next(s for s in v if s["key"] == "shipping.defaultEstimatedDays")["value"] == 7 and next(s for s in v if s["key"] == "shipping.defaultSupportsLiveAnimal")["value"] is True)
 check("E update", call("PATCH", S, A, body={"settings": {"shipping.defaultCharge": 12.5, "shipping.defaultEstimatedDays": 5, "shipping.defaultSupportsLiveAnimal": False}}), 200, pred=lambda v: next(s for s in v if s["key"] == "shipping.defaultCharge")["value"] == 12.5 and next(s for s in v if s["key"] == "shipping.defaultSupportsLiveAnimal")["value"] is False)
 check("E update persists", call("GET", S, A), 200, pred=lambda v: next(s for s in v if s["key"] == "shipping.defaultEstimatedDays")["value"] == 5)
