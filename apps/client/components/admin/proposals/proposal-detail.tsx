@@ -10,6 +10,7 @@ import { adminCancelProposal, adminRejectProposal, getAdminProposal } from '@/li
 import { formatDateTime } from '@/lib/datetime';
 import type { ProposalDetail, ProposalHistoryAction, ProposalHistoryEntry } from '@/types/proposal';
 import { ProposalStatusBadge } from './proposal-list';
+import { LoadingBlock } from '@/components/ui/skeleton';
 
 const section = 'rounded-xl border border-border bg-card p-4 shadow-sm';
 const textarea = 'w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:border-foreground focus:outline-none';
@@ -129,7 +130,7 @@ export function AdminProposalDetail({ id }: { id: number }) {
 
   if (missing) return <p className="py-10 text-center text-muted-foreground">This proposal no longer exists. <Link href="/admin/proposals" className="text-primary underline">Back to proposals</Link></p>;
   if (error) return <p role="alert" className="py-10 text-center text-destructive">{error}</p>;
-  if (!p) return <p className="py-10 text-center text-muted-foreground">Loading…</p>;
+  if (!p) return <LoadingBlock />;
 
   const skuLabel = p.sku.label ?? p.sku.sku;
   const closer = p.closedByType ? WHO[p.closedByType] : null;
