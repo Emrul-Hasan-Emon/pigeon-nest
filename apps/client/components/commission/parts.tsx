@@ -9,10 +9,10 @@ import type { CommissionRole, CommissionRule, Page } from '@/types/commission';
 export const th = 'px-4 py-3 text-left font-medium text-muted-foreground';
 export const td = 'px-4 py-3';
 
-/** "10%" or "50 per order". */
+/** "10%" or "50 per item". */
 export function ruleLabel(rule: { type: string | null; value: number | null }) {
   if (rule.type === null || rule.value === null) return '—';
-  return rule.type === 'percentage' ? `${rule.value}%` : `${money(rule.value)} per order`;
+  return rule.type === 'percentage' ? `${rule.value}%` : `${money(rule.value)} per item`;
 }
 
 export function ruleText(rule: CommissionRule & { source?: string }) {

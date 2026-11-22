@@ -38,6 +38,7 @@ export function LedgerList({ role, sellerId }: { role: CommissionRole; sellerId?
           <option value="">Any type</option>
           <option value="order_commission">Commission from an order</option>
           <option value="commission_payment">Payment to the platform</option>
+          <option value="order_return">Taken back on a return</option>
         </select>
         <select className={field} value={f.paymentStatus} onChange={set('paymentStatus')} aria-label="Payment status">
           <option value="">Any payment status</option>
@@ -74,14 +75,14 @@ export function LedgerList({ role, sellerId }: { role: CommissionRole; sellerId?
                 <td className={`${td} text-muted-foreground`}>{formatDateTime(r.createdAt)}</td>
                 {showSeller && <td className={td}>{r.sellerName}</td>}
                 <td className={td}>
-                  {r.type === 'order_commission' ? 'Commission earned' : 'Paid to the platform'}
+                  {r.type === 'order_commission' ? 'Commission earned' : r.type === 'order_return' ? (r.orderItemId ? `Taken back: item #${r.orderItemId} returned` : 'Taken back: whole order returned') : 'Paid to the platform'}
                   {r.type === 'order_commission' && r.commissionType && <span className="block text-xs text-muted-foreground">{ruleLabel({ type: r.commissionType, value: r.commissionValue })} of {money(r.orderSubtotal ?? 0)}</span>}
                 </td>
                 <td className={td}>
                   {r.orderId ? <Link className="text-primary hover:underline" href={`${orderBase}/orders/${r.orderId}`}>{r.orderNumber}</Link>
                     : r.disburseId ? <Link className="text-primary hover:underline" href={`${orderBase}/commission/disbursements/${r.disburseId}`}>Payment #{r.disburseId}</Link> : '—'}
                 </td>
-                <td className={`${td} font-medium ${r.type === 'commission_payment' ? 'text-emerald-700' : 'text-foreground'}`}>{r.type === 'commission_payment' ? '−' : ''}{money(r.totalAmount)}</td>
+                <td className={`${td} font-medium ${r.type === 'commission_payment' ? 'text-emerald-700' : r.type === 'order_return' ? 'text-destructive' : 'text-foreground'}`}>{r.type === 'commission_payment' || r.type === 'order_return' ? '−' : ''}{money(r.totalAmount)}</td>
                 <td className={`${td} text-muted-foreground`}>{PAYMENT_STATUS_LABEL[r.paymentStatus as keyof typeof PAYMENT_STATUS_LABEL] ?? r.paymentStatus}</td>
                 <td className={`${td} text-muted-foreground`}>{money(r.dueAfter)}</td>
                 <td className={`${td} text-muted-foreground`}>{money(r.paidAfter)}</td>
