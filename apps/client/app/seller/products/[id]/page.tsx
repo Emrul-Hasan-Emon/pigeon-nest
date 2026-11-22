@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { SellerSidebar } from '@/components/seller/seller-sidebar';
+import { SellerFrame } from '@/components/seller/seller-frame';
 import { ProductLockBanner } from '@/components/seller/product-lock-banner';
 import { ProductEditForm } from '@/components/admin/catalog/products/product-edit-form';
 import { ProductMediaManager } from '@/components/admin/catalog/products/product-media-manager';
@@ -17,6 +17,7 @@ import { sellerProductPortal } from '@/lib/products/portal';
 import { ApiError, NotFoundApiError } from '@/lib/api/http';
 import { clearSellerToken, getSellerToken } from '@/lib/auth/seller-token';
 import type { Product } from '@/types/product';
+import { LoadingBlock } from '@/components/ui/skeleton';
 
 export default function SellerProductPage() {
   const params = useParams<{ id: string }>();
@@ -55,11 +56,9 @@ export default function SellerProductPage() {
   const locked = product ? product.status === 'rejected' || product.activeStatus === 'suspended' : false;
 
   return (
-    <div className="min-h-screen bg-background pl-56">
-      <SellerSidebar active="products" />
-      <main className="mx-auto max-w-5xl px-6 py-6">
+    <SellerFrame active="products" width="max-w-5xl">
         {loading || !product ? (
-          <p className="py-10 text-center text-muted-foreground">Loading…</p>
+          <LoadingBlock />
         ) : (
           <div className="space-y-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
@@ -95,7 +94,6 @@ export default function SellerProductPage() {
             </fieldset>
           </div>
         )}
-      </main>
-    </div>
+    </SellerFrame>
   );
 }
