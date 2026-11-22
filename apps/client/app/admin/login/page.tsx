@@ -20,7 +20,7 @@ export default function AdminLoginPage() {
     try {
       const response = await adminLogin(email, password);
       setAdminToken(response.accessToken);
-      router.replace('/admin/catalog/categories');
+      router.replace('/admin/dashboard');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Login failed.');
     } finally {
@@ -31,11 +31,12 @@ export default function AdminLoginPage() {
   return (
     <div className="flex min-h-screen bg-background">
       <div className="hidden w-1/2 flex-col justify-between bg-topbar p-10 text-topbar-foreground md:flex">
-        <span className="text-sm font-semibold tracking-wide uppercase opacity-80">
-          Pigeon Nest
+        <span className="flex items-center gap-3">
+          <span className="grid h-9 w-9 place-items-center rounded-lg bg-brass font-[family-name:var(--font-display)] text-lg font-bold text-topbar">P</span>
+          <span className="font-[family-name:var(--font-display)] text-base font-semibold tracking-tight">Pigeon Nest</span>
         </span>
         <div>
-          <h2 className="text-3xl font-semibold">Admin Console</h2>
+          <h2 className="font-[family-name:var(--font-display)] text-4xl font-semibold tracking-tight">Admin Console</h2>
           <p className="mt-2 max-w-sm text-sm opacity-70">
             Manage categories, sellers and orders across the marketplace.
           </p>
