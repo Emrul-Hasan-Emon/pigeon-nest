@@ -6,6 +6,7 @@ import { GatewayForm } from '@/components/admin/settings/gateways/gateway-form';
 import { getGateway } from '@/lib/api/payment-gateways';
 import { useToast } from '@/components/ui/toast';
 import type { PaymentGateway } from '@/types/payment-gateway';
+import { LoadingBlock } from '@/components/ui/skeleton';
 
 export default function EditGatewayPage() {
   const params = useParams<{ id: string }>();
@@ -22,6 +23,6 @@ export default function EditGatewayPage() {
       });
   }, [params.id, router, showToast]);
 
-  if (!gateway) return <p className="py-10 text-center text-muted-foreground">Loading…</p>;
+  if (!gateway) return <LoadingBlock />;
   return <GatewayForm gateway={gateway} />;
 }
