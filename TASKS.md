@@ -532,3 +532,34 @@ seller, admin) show the SKU price then and the proposal price. Migration `SkuPri
 - [x] Frontend (buyer: offer box, /proposals, cart, order; seller: Offers menu and SKU settings; admin: Price proposals)
 - [x] Tests
 - [ ] QA
+
+## Returns and Refunds
+
+A customer asks to return a whole order or some items of a delivered, fully paid order (window set by
+`returns.windowDays`, default 7). One request per order or item for a customer for life; an admin can open more while
+the goods are not returned and not in an open return. Flow `return_requested -> accepted | rejected -> processing ->
+returning_money -> returned` (+ `cancelled`); seller accepts or rejects (note required to reject), moves it to
+processing and returning money (description, optional proof files); an admin confirms `returned` and can move a return
+to any status with a note. Refund = lines' payable amount; a full-order return can add delivery (setting
+`returns.refundDeliveryCharge`, seller decides at accept, admin any time); item returns never include delivery. No
+restock. Commission is now per item (`order_item.systemCommission`, `sellerAmount`; the order is the sum; fixed is per
+item line); old orders were shared over their items by amount. `order.isReturned` and `order_item.isReturned`. On
+`returned` the items' commission comes off the balance with ledger rows (`system_commission_history.status` =
+`for_system` | `order_returned_to_customer`, `orderItemId`, `orderReturnId`) and a new append-only
+`system_commission_change_history` (before and after of total, due, paid, with the reason). Orders with an open or
+returned return cannot be cancelled and their payment cannot be reversed. Tables `order_return`, `order_return_item`,
+`order_return_status_history`, `order_return_attachments`. Migration `ReturnsRefunds1796600000000`. Tests:
+`returns_test.py` (266); `returns_money_test.py` (94, independent money audit); `commission_test.py` expectation for a fixed rule changed to per item (232). Docs:
+`apps/server/docs/returns-guide.md`, `user|seller|admin/returns-flow.md`, `commission-guide.md` section 12.
+
+- [x] Backend
+- [x] Frontend (customer: order Returns box, /returns; seller: Returns menu; admin: Returns, Open a return, Balance changes)
+- [x] Tests
+- [ ] QA
+
+## Role guards
+
+- [x] Backend: `AdminAuthGuard`, `SellerAuthGuard`, `UserAuthGuard` (one signing key, audience and guard per role), `TokenService` (HS256 only, issuer, audience, `jti`, password stamp), admin account checked on every request, password change ends old tokens and returns a fresh one, access guards reuse the loaded account, old `AuthGuard`/`RolesGuard`/`@Roles` removed
+- [x] Frontend: password-change helpers keep the fresh token
+- [x] Tests: `guards_test.py` (259); `seller_account_test.py` and `commerce_config_test.py` expectations updated. Docs: `auth-guards.md`
+- [ ] QA: set `JWT_ACCESS_SECRET` to 32+ characters before production. Everyone signs in again once after deploy
