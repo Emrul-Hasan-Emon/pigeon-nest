@@ -7,13 +7,12 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { DatabaseService } from '../../database/database.service';
 import { User } from '../../database/entities/person/user.entity';
 import { AuthUserType } from '../../database/enums/auth-user-type.enum';
 import { JwtPayload } from '../interfaces/jwt-payload.interface';
+import { TokenService } from '../services/token.service';
 import { getUserAccess } from '../policies/user-access.policy';
 
 /** Header carrying a guest's cart session id. */
@@ -32,8 +31,7 @@ export interface CartOwner {
 @Injectable()
 export class OptionalCustomerGuard implements CanActivate {
   constructor(
-    private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
+    private readonly tokens: TokenService,
     private readonly db: DatabaseService,
   ) {}
 
@@ -44,19 +42,11 @@ export class OptionalCustomerGuard implements CanActivate {
 
     const [scheme, token] = request.headers.authorization?.split(' ') ?? [];
     if (scheme === 'Bearer' && token) {
-      let payload: JwtPayload;
-      try {
-        payload = await this.jwtService.verifyAsync<JwtPayload>(token, {
-          secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
-        });
-      } catch {
+      const payload = await this.tokens.verify(AuthUserType.USER, token);
+      const user = await this.db.user.findOne({ where: { id: payload.sub } });
+      if (!user || !this.tokens.matchesPassword(AuthUserType.USER, payload, user.passwordHash)) {
         throw new UnauthorizedException('Invalid or expired token');
       }
-      if (payload.type !== AuthUserType.USER) {
-        throw new ForbiddenException('Only customer accounts can use a cart');
-      }
-      const user = await this.db.user.findOne({ where: { id: payload.sub } });
-      if (!user) throw new UnauthorizedException('User account no longer exists');
       const access = getUserAccess(user);
       if (!access.canUse) {
         throw new ForbiddenException({
@@ -66,7 +56,7 @@ export class OptionalCustomerGuard implements CanActivate {
           code: access.code,
         });
       }
-      request.user = payload;
+      request.user = { sub: user.id, type: AuthUserType.USER };
       request.userAccount = user;
       request.cartOwner = { userId: user.id, sessionId: null };
       return true;
