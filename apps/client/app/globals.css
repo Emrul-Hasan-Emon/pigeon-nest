@@ -79,6 +79,30 @@ body {
   font-family: var(--font-sans);
 }
 
+/* ---------- Admin console and seller portal ---------- */
+/* Page titles use the display face, so every admin and seller screen gets the same voice without touching each page. */
+:is(.admin-main, .seller-main) h1 {
+  font-family: var(--font-display), var(--font-sans);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.skeleton {
+  border-radius: 0.5rem;
+  background: linear-gradient(90deg, hsl(var(--muted)) 0%, hsl(var(--secondary)) 50%, hsl(var(--muted)) 100%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s linear infinite;
+}
+
+@keyframes skeleton-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton { animation: none; }
+}
+
 /* ---------- Storefront ---------- */
 .store {
   --s-ink: #11151b;
