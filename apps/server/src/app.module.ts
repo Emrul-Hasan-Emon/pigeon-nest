@@ -19,6 +19,7 @@ import { OrderModule } from './order/order.module';
 import { ProposalModule } from './proposal/proposal.module';
 import { WishlistModule } from './wishlist/wishlist.module';
 import { ReturnsModule } from './returns/returns.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 import { ReviewModule } from './review/review.module';
 
 @Module({
@@ -43,6 +44,7 @@ import { ReviewModule } from './review/review.module';
     WishlistModule,
     ProposalModule,
     ReturnsModule,
+    DashboardModule,
     ReviewModule,
   ],
   controllers: [AppController],
