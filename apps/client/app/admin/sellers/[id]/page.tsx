@@ -8,6 +8,7 @@ import { getSeller } from '@/lib/api/sellers';
 import { NotFoundApiError } from '@/lib/api/http';
 import { useToast } from '@/components/ui/toast';
 import type { Seller } from '@/types/seller';
+import { LoadingBlock } from '@/components/ui/skeleton';
 
 export default function EditSellerPage() {
   const params = useParams<{ id: string }>();
@@ -31,7 +32,7 @@ export default function EditSellerPage() {
   }, [params.id, router, showToast]);
 
   if (loading) {
-    return <p className="py-10 text-center text-muted-foreground">Loading…</p>;
+    return <LoadingBlock />;
   }
   if (!seller) return null;
 
