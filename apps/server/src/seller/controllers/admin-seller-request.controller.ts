@@ -9,10 +9,6 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { AuthGuard } from '../../auth/guards/auth.guard';
-import { RolesGuard } from '../../auth/guards/roles.guard';
-import { Roles } from '../../auth/decorators/roles.decorator';
-import { AuthUserType } from '../../database/enums/auth-user-type.enum';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { JwtPayload } from '../../auth/interfaces/jwt-payload.interface';
 import {
@@ -23,9 +19,9 @@ import { ParseIdPipe } from '../../shared/pipes/parse-id.pipe';
 import { AdminSellerRequestService } from '../services/admin-seller-request.service';
 import { ListSellerRequestQueryDto } from '../dtos/list-seller-request-query.dto';
 import { RejectSellerDto } from '../dtos/reject-seller.dto';
+import { AdminAuthGuard } from '../../auth/guards/admin-auth.guard';
 
-@UseGuards(AuthGuard, RolesGuard)
-@Roles(AuthUserType.ADMIN)
+@UseGuards(AdminAuthGuard)
 @Controller({ path: 'api/admin/seller-requests', version: '1' })
 export class AdminSellerRequestController {
   constructor(

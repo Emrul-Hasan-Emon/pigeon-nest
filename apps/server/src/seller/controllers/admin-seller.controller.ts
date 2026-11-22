@@ -12,10 +12,6 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
-import { AuthGuard } from '../../auth/guards/auth.guard';
-import { RolesGuard } from '../../auth/guards/roles.guard';
-import { Roles } from '../../auth/decorators/roles.decorator';
-import { AuthUserType } from '../../database/enums/auth-user-type.enum';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { JwtPayload } from '../../auth/interfaces/jwt-payload.interface';
 import {
@@ -26,6 +22,7 @@ import { AdminSellerService } from '../services/admin-seller.service';
 import { CreateSellerDto } from '../dtos/create-seller.dto';
 import { UpdateSellerDto } from '../dtos/update-seller.dto';
 import { ListSellerQueryDto } from '../dtos/list-seller-query.dto';
+import { AdminAuthGuard } from '../../auth/guards/admin-auth.guard';
 
 const SELLER_FILE_FIELDS = FileFieldsInterceptor([
   { name: 'avatar', maxCount: 1 },
@@ -39,8 +36,7 @@ interface SellerFiles {
   nidBackImage?: Express.Multer.File[];
 }
 
-@UseGuards(AuthGuard, RolesGuard)
-@Roles(AuthUserType.ADMIN)
+@UseGuards(AdminAuthGuard)
 @Controller({ path: 'api/admin/sellers', version: '1' })
 export class AdminSellerController {
   constructor(private readonly adminSellerService: AdminSellerService) {}
