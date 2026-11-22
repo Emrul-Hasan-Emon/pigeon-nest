@@ -281,7 +281,7 @@ for m, pth in [("GET", "/seller/profile"), ("PATCH", "/seller/profile"), ("PATCH
     check(f"C {m} {pth} expired token -> 401", call(m, pth, expired), 401)
     check(f"C {m} {pth} wrong-secret token -> 401", call(m, pth, wrong), 401)
 forged_admin_as_seller = forge({"sub": 1, "type": "admin", "iat": now, "exp": now + 3600})
-check("C forged admin-typed token on seller profile -> 403", call("GET", "/seller/profile", forged_admin_as_seller), 403)
+check("C forged admin-typed token on seller profile -> 401 (it does not verify under the seller key)", call("GET", "/seller/profile", forged_admin_as_seller), 401)
 ghost = forge({"sub": 99999999, "type": "seller", "iat": now, "exp": now + 3600})
 check("C valid token for a non-existent seller -> 401", call("GET", "/seller/profile", ghost), 401)
 
@@ -313,8 +313,9 @@ for label, s in states.items():
         check(f"D [{label}] ...and nothing changed", (200, dbrow(s["id"])["name"]), 200, pred=lambda n, label=label: n != f"T-edit-{label}")
     c, d = call("PATCH", "/seller/profile/password", s["token"], body={"currentPassword": PW, "newPassword": "NewPassw0rd!"})
     check(f"D [{label}] password change {'allowed' if ep else 'blocked -> 403'}", (c, d), 200 if ep else 403)
-    if ep:
-        call("PATCH", "/seller/profile/password", s["token"], body={"currentPassword": "NewPassw0rd!", "newPassword": PW})
+    if ep:  # a password change ends the old token; keep using the fresh one
+        c, d = call("PATCH", "/seller/profile/password", d_tok if (d_tok := d["accessToken"]) else s["token"], body={"currentPassword": "NewPassw0rd!", "newPassword": PW})
+        s["token"] = d["accessToken"]
 
 # status effects of editing
 check("D editing keeps pending as pending", (200, dbrow(states["pending"]["id"])), 200, pred=lambda r: r["status"] == "pending" and r["active"] == "inactive")
@@ -330,7 +331,8 @@ c, d = patch_profile(R["token"], name=me(R["token"])[1]["name"])
 check("D rejected + no actual change -> stays rejected", (c, d), 200, pred=lambda d: d["status"] == "rejected" and d["rejectionReason"] == "Blurry NID")
 c, d = call("PATCH", "/seller/profile/password", R["token"], body={"currentPassword": PW, "newPassword": "Another1Pass!"})
 check("D rejected + password change only -> stays rejected", (200, dbrow(R["id"])), 200, pred=lambda r: r["status"] == "rejected" and r["reason"] == "Blurry NID")
-call("PATCH", "/seller/profile/password", R["token"], body={"currentPassword": "Another1Pass!", "newPassword": PW})
+R["token"] = d["accessToken"]
+R["token"] = call("PATCH", "/seller/profile/password", R["token"], body={"currentPassword": "Another1Pass!", "newPassword": PW})[1]["accessToken"]
 c, d = patch_profile(R["token"], email=f"t-rej-{int(time.time())}@example.com")
 check("D rejected + email change -> pending, reason cleared", (c, d), 200, pred=lambda d: d["status"] == "pending" and d["rejectionReason"] is None and d["activeStatus"] == "inactive")
 R2 = new_seller("rejected", "inactive", reason="x")
@@ -387,7 +389,11 @@ check("D password: too short -> 400", call("PATCH", "/seller/profile/password", 
 check("D password: 73 chars -> 400", call("PATCH", "/seller/profile/password", PC["token"], body={"currentPassword": PW, "newPassword": "a" * 73}), 400)
 check("D password: missing fields -> 400", call("PATCH", "/seller/profile/password", PC["token"], body={}), 400)
 check("D password: unknown field -> 400", call("PATCH", "/seller/profile/password", PC["token"], body={"currentPassword": PW, "newPassword": "Brand-new-1", "x": 1}), 400)
-check("D password change succeeds", call("PATCH", "/seller/profile/password", PC["token"], body={"currentPassword": PW, "newPassword": "Brand-new-1"}), 200, pred=lambda d: d == {"updated": True})
+c_, d_ = call("PATCH", "/seller/profile/password", PC["token"], body={"currentPassword": PW, "newPassword": "Brand-new-1"})
+check("D password change succeeds and returns a fresh token", (c_, d_), 200, pred=lambda d: d["updated"] is True and d["accessToken"])
+check("D the old token stops working after a password change", call("GET", "/seller/profile", PC["token"]), 401)
+PC["token"] = d_["accessToken"]
+check("D the fresh token works", call("GET", "/seller/profile", PC["token"]), 200)
 check("D old password stops working", login(PC["phone"], PW), 401)
 check("D new password works", login(PC["phone"], "Brand-new-1"), 200)
 check("D 72-char password accepted at the limit", call("PATCH", "/seller/profile/password", PC["token"], body={"currentPassword": "Brand-new-1", "newPassword": "a" * 72}), 200)
@@ -584,8 +590,8 @@ check("H ...the seller sees the same reason", me(RJ["token"]), 200, pred=lambda 
 
 # H5 resubmission by the seller
 n = hist_count(RJ["id"])
-call("PATCH", "/seller/profile/password", RJ["token"], body={"currentPassword": PW, "newPassword": "Other-Pass1"})
-call("PATCH", "/seller/profile/password", RJ["token"], body={"currentPassword": "Other-Pass1", "newPassword": PW})
+RJ["token"] = call("PATCH", "/seller/profile/password", RJ["token"], body={"currentPassword": PW, "newPassword": "Other-Pass1"})[1]["accessToken"]
+RJ["token"] = call("PATCH", "/seller/profile/password", RJ["token"], body={"currentPassword": "Other-Pass1", "newPassword": PW})[1]["accessToken"]
 patch_profile(RJ["token"], name=me(RJ["token"])[1]["name"])
 check("H password change and no-op save write no history", (200, hist_count(RJ["id"])), 200, pred=lambda v: v == n)
 patch_profile(RJ["token"], name="T-hist-resubmit")
