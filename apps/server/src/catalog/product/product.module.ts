@@ -2,8 +2,6 @@ import { Module } from '@nestjs/common';
 import { CategoryModule } from '../category/category.module';
 import { CollectionModule } from '../collection/collection.module';
 import { AttributeModule } from '../attribute/attribute.module';
-import { SellerDashboardController } from './controllers/seller-dashboard.controller';
-import { SellerDashboardService } from './services/seller-dashboard.service';
 import { SellerCatalogController } from './controllers/seller-catalog.controller';
 import { AdminProductController } from './controllers/admin-product.controller';
 import { AdminProductStatusHistoryController } from './controllers/admin-product-status-history.controller';
@@ -16,7 +14,6 @@ import { ProductStatusHistoryService } from './services/product-status-history.s
   imports: [CategoryModule, CollectionModule, AttributeModule],
   controllers: [
     SellerCatalogController,
-    SellerDashboardController,
     AdminProductController,
     AdminProductStatusHistoryController,
     SellerProductController,
@@ -24,7 +21,6 @@ import { ProductStatusHistoryService } from './services/product-status-history.s
   providers: [
     AdminProductService,
     SellerProductService,
-    SellerDashboardService,
     ProductStatusHistoryService,
   ],
 })
