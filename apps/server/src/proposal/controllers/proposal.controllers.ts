@@ -4,9 +4,6 @@ import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { CurrentUserAccount } from '../../auth/decorators/current-user-account.decorator';
 import { RequireSellerAccess } from '../../auth/decorators/require-seller-access.decorator';
 import { RequireUserAccess } from '../../auth/decorators/require-user-access.decorator';
-import { Roles } from '../../auth/decorators/roles.decorator';
-import { AuthGuard } from '../../auth/guards/auth.guard';
-import { RolesGuard } from '../../auth/guards/roles.guard';
 import { SellerAccessGuard } from '../../auth/guards/seller-access.guard';
 import { UserAccessGuard } from '../../auth/guards/user-access.guard';
 import { JwtPayload } from '../../auth/interfaces/jwt-payload.interface';
@@ -26,10 +23,12 @@ import {
   ProposalNoteDto,
 } from '../dtos/proposal.dtos';
 import { SkuPriceProposalService } from '../services/sku-price-proposal.service';
+import { AdminAuthGuard } from '../../auth/guards/admin-auth.guard';
+import { SellerAuthGuard } from '../../auth/guards/seller-auth.guard';
+import { UserAuthGuard } from '../../auth/guards/user-auth.guard';
 
 // A customer's own price proposals. Suspended customers can still read them.
-@UseGuards(AuthGuard, RolesGuard, UserAccessGuard)
-@Roles(AuthUserType.USER)
+@UseGuards(UserAuthGuard, UserAccessGuard)
 @Controller({ path: 'api/user/proposals', version: '1' })
 export class UserProposalController {
   constructor(private readonly proposals: SkuPriceProposalService) {}
@@ -88,8 +87,7 @@ export class UserProposalController {
 }
 
 // Proposals on the seller's own SKUs. Suspended sellers can still read them.
-@UseGuards(AuthGuard, RolesGuard, SellerAccessGuard)
-@Roles(AuthUserType.SELLER)
+@UseGuards(SellerAuthGuard, SellerAccessGuard)
 @Controller({ path: 'api/seller/proposals', version: '1' })
 export class SellerProposalController {
   constructor(private readonly proposals: SkuPriceProposalService) {}
@@ -137,8 +135,7 @@ export class SellerProposalController {
 }
 
 // Every proposal. An admin can reject or cancel a pending or accepted one.
-@UseGuards(AuthGuard, RolesGuard)
-@Roles(AuthUserType.ADMIN)
+@UseGuards(AdminAuthGuard)
 @Controller({ path: 'api/admin/proposals', version: '1' })
 export class AdminProposalController {
   constructor(
