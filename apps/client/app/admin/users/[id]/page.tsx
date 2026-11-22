@@ -11,6 +11,7 @@ import { getUser } from '@/lib/api/users';
 import { NotFoundApiError } from '@/lib/api/http';
 import { useToast } from '@/components/ui/toast';
 import type { User } from '@/types/user';
+import { LoadingBlock } from '@/components/ui/skeleton';
 
 export default function UserDetailsPage() {
   const params = useParams<{ id: string }>();
@@ -34,7 +35,7 @@ export default function UserDetailsPage() {
   }, [params.id, router, showToast]);
 
   if (loading) {
-    return <p className="py-10 text-center text-muted-foreground">Loading…</p>;
+    return <LoadingBlock />;
   }
   if (!user) return null;
 

@@ -7,6 +7,7 @@ import { useToast } from '@/components/ui/toast';
 import { useDebouncedValue } from '@/lib/hooks/use-debounced-value';
 import { listUsers } from '@/lib/api/users';
 import type { User, UserStatus } from '@/types/user';
+import { LoadingBlock } from '@/components/ui/skeleton';
 
 const PAGE_SIZE = 20;
 
@@ -96,7 +97,7 @@ export default function AdminUsersPage() {
       </div>
 
       {loading ? (
-        <p className="py-10 text-center text-muted-foreground">Loading…</p>
+        <LoadingBlock />
       ) : (
         <UserTable users={users} />
       )}
