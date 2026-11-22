@@ -16,6 +16,7 @@ import { PaymentModule } from './payment/payment.module';
 import { SettingsModule } from './settings/settings.module';
 import { CartModule } from './cart/cart.module';
 import { OrderModule } from './order/order.module';
+import { ProposalModule } from './proposal/proposal.module';
 import { WishlistModule } from './wishlist/wishlist.module';
 import { ReviewModule } from './review/review.module';
 
@@ -39,6 +40,7 @@ import { ReviewModule } from './review/review.module';
     CartModule,
     OrderModule,
     WishlistModule,
+    ProposalModule,
     ReviewModule,
   ],
   controllers: [AppController],
