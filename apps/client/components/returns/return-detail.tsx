@@ -17,6 +17,7 @@ import { formatDateTime } from '@/lib/datetime';
 import { NotFoundApiError } from '@/lib/api/http';
 import type { ReturnDetail, ReturnStatus } from '@/types/returns';
 import { OrderLink, RETURN_LABEL, ReturnBadge, ReturnItemsTable, ReturnTimeline, SCOPE_LABEL } from './parts';
+import { LoadingBlock } from '@/components/ui/skeleton';
 
 const card = 'rounded-xl border border-border bg-card p-5 shadow-sm';
 
@@ -187,7 +188,7 @@ export function ReturnDetailView({ role, id }: { role: 'admin' | 'seller'; id: n
 
   if (missing) return <p className="py-10 text-center text-muted-foreground">Return not found. <Link className="text-primary hover:underline" href={`/${role}/returns`}>Back to returns</Link></p>;
   if (error) return <p role="alert" className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p>;
-  if (!r) return <p className="py-10 text-center text-muted-foreground">Loading…</p>;
+  if (!r) return <LoadingBlock />;
 
   return (
     <div className="space-y-5">

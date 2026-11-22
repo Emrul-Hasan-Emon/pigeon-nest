@@ -8,6 +8,7 @@ import { formatDateTime } from '@/lib/datetime';
 import { useDebouncedValue } from '@/lib/hooks/use-debounced-value';
 import { RETURN_STATUSES, type ReturnPage, type ReturnScope, type ReturnStatus } from '@/types/returns';
 import { OrderLink, ReturnBadge, RETURN_LABEL, SCOPE_LABEL } from './parts';
+import { LoadingBlock } from '@/components/ui/skeleton';
 
 const PAGE_SIZE = 20;
 const EMPTY = { status: '', scope: '', search: '', sellerId: '', orderId: '' };
@@ -70,7 +71,7 @@ export function ReturnList({ role }: { role: 'admin' | 'seller' }) {
 
       {error && <p role="alert" className="mb-3 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p>}
       {data === null && !error ? (
-        <p className="py-10 text-center text-muted-foreground">Loading…</p>
+        <LoadingBlock />
       ) : data && (
         <>
           <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
