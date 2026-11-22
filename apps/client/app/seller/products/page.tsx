@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { SellerSidebar } from '@/components/seller/seller-sidebar';
+import { SellerFrame } from '@/components/seller/seller-frame';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useToast } from '@/components/ui/toast';
 import {
@@ -16,6 +16,7 @@ import { deleteMyProduct, listMyProducts, updateMyProduct } from '@/lib/api/sell
 import { ApiError, NotFoundApiError } from '@/lib/api/http';
 import { clearSellerToken, getSellerToken } from '@/lib/auth/seller-token';
 import type { Product, ProductActiveStatus, ProductListSort, ProductStatus } from '@/types/product';
+import { LoadingBlock } from '@/components/ui/skeleton';
 
 const PAGE_SIZE = 20;
 
@@ -140,9 +141,7 @@ export default function SellerProductsPage() {
     product.status === 'rejected' || product.activeStatus === 'suspended';
 
   return (
-    <div className="min-h-screen bg-background pl-56">
-      <SellerSidebar active="products" />
-      <main className="mx-auto max-w-6xl px-6 py-6">
+    <SellerFrame active="products" width="max-w-6xl">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-foreground">My products</h1>
           {!blocked && (
@@ -209,7 +208,7 @@ export default function SellerProductsPage() {
             </div>
 
             {loading ? (
-              <p className="py-10 text-center text-muted-foreground">Loading…</p>
+              <LoadingBlock />
             ) : (
               <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
                 <table className="min-w-full divide-y divide-border text-sm">
@@ -338,7 +337,6 @@ export default function SellerProductsPage() {
             onClose={() => setPendingDelete(null)}
           />
         )}
-      </main>
-    </div>
+    </SellerFrame>
   );
 }
