@@ -1,10 +1,6 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
-import { Roles } from '../../auth/decorators/roles.decorator';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
-import { AuthGuard } from '../../auth/guards/auth.guard';
-import { RolesGuard } from '../../auth/guards/roles.guard';
 import { JwtPayload } from '../../auth/interfaces/jwt-payload.interface';
-import { AuthUserType } from '../../database/enums/auth-user-type.enum';
 import {
   CursorPagination,
   CursorPaginationParams,
@@ -21,9 +17,9 @@ import {
 import { ShippingZoneService } from '../services/shipping-zone.service';
 import { SystemSettingsService } from '../services/system-settings.service';
 import { listCountries } from '../utils/countries';
+import { AdminAuthGuard } from '../../auth/guards/admin-auth.guard';
 
-@UseGuards(AuthGuard, RolesGuard)
-@Roles(AuthUserType.ADMIN)
+@UseGuards(AdminAuthGuard)
 @Controller({ path: 'api/admin/settings', version: '1' })
 export class AdminSettingsController {
   constructor(
@@ -42,8 +38,7 @@ export class AdminSettingsController {
   }
 }
 
-@UseGuards(AuthGuard, RolesGuard)
-@Roles(AuthUserType.ADMIN)
+@UseGuards(AdminAuthGuard)
 @Controller({ path: 'api/admin/countries', version: '1' })
 export class AdminCountryController {
   @Get()
@@ -52,8 +47,7 @@ export class AdminCountryController {
   }
 }
 
-@UseGuards(AuthGuard, RolesGuard)
-@Roles(AuthUserType.ADMIN)
+@UseGuards(AdminAuthGuard)
 @Controller({ path: 'api/admin/shipping-zones', version: '1' })
 export class AdminShippingZoneController {
   constructor(private readonly zones: ShippingZoneService) {}

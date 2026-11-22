@@ -14,10 +14,6 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { AuthGuard } from '../../auth/guards/auth.guard';
-import { RolesGuard } from '../../auth/guards/roles.guard';
-import { Roles } from '../../auth/decorators/roles.decorator';
-import { AuthUserType } from '../../database/enums/auth-user-type.enum';
 import {
   CursorPagination,
   CursorPaginationParams,
@@ -30,11 +26,11 @@ import {
   UpdatePaymentGatewayDto,
 } from '../dtos/payment-gateway.dtos';
 import { AdminPaymentGatewayService } from '../services/admin-payment-gateway.service';
+import { AdminAuthGuard } from '../../auth/guards/admin-auth.guard';
 
 const ICON = FileInterceptor('icon', { limits: { fileSize: 2 * 1024 * 1024, files: 1 } });
 
-@UseGuards(AuthGuard, RolesGuard)
-@Roles(AuthUserType.ADMIN)
+@UseGuards(AdminAuthGuard)
 @Controller({ path: 'api/admin/payment-gateways', version: '1' })
 export class AdminPaymentGatewayController {
   constructor(private readonly service: AdminPaymentGatewayService) {}
