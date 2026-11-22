@@ -22,6 +22,7 @@ import { listMyProducts } from '@/lib/api/seller-products';
 import { formatDateTime } from '@/lib/datetime';
 import { useCursorList } from '@/lib/hooks/use-cursor-list';
 import type { SellerReview, SellerReviewSummary } from '@/types/review';
+import { LoadingBlock } from '@/components/ui/skeleton';
 
 function ReviewCard({ review, onChanged }: { review: SellerReview; onChanged: () => void }) {
   const { showToast } = useToast();
@@ -137,7 +138,7 @@ export function SellerReviews() {
 
       {list.error && <p role="alert" className="mb-3 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">{list.error}</p>}
       {list.loading ? (
-        <p className="py-10 text-center text-muted-foreground">Loading…</p>
+        <LoadingBlock />
       ) : list.rows.length === 0 ? (
         <p className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
           {dirty ? 'No reviews match these filters.' : 'No reviews yet. They appear here after customers review delivered orders.'}
