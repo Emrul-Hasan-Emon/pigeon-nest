@@ -128,6 +128,40 @@ body {
   box-shadow: 0 1px 2px rgb(30 20 5 / 0.04), 0 10px 28px -14px rgb(30 20 5 / 0.12);
 }
 
+/* Fields: one look, brass on focus. Pill-shaped status selects keep their own colours. */
+:is(.admin-main, .seller-main) :is(input:not([type='checkbox'], [type='radio'], [type='file'], [type='range'], [type='color']), select:not(.rounded-full), textarea) {
+  background-color: #fff;
+  border-color: hsl(var(--input));
+  border-radius: 0.6rem;
+  transition: border-color 0.12s ease, box-shadow 0.12s ease;
+}
+:is(.admin-main, .seller-main) :is(input, select, textarea):hover:not(:disabled, :focus) { border-color: hsl(var(--brass) / 0.55); }
+:is(.admin-main, .seller-main) :is(input:not([type='checkbox'], [type='radio']), select, textarea):focus {
+  outline: none;
+  border-color: hsl(var(--brass));
+  box-shadow: 0 0 0 3px hsl(var(--brass) / 0.22);
+}
+:is(.admin-main, .seller-main) select:not(.rounded-full) {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%2359524a' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 8 5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.7rem center;
+  background-size: 1rem;
+  padding-right: 2.2rem;
+}
+/* A field inside a label sits on its own line under the label text. */
+:is(.admin-main, .seller-main) label > :is(input:not([type='checkbox'], [type='radio']), select, textarea) { display: block; }
+:is(.admin-main, .seller-main) input[type='checkbox'], :is(.admin-main, .seller-main) input[type='radio'] { accent-color: hsl(var(--brass-ink)); }
+
+/* Buttons: the dark primary gets a soft highlight and a press; every control gets a brass keyboard focus ring. */
+:is(.admin-main, .seller-main) :is(button, a).bg-primary {
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.1), 0 1px 2px rgb(20 12 0 / 0.25);
+  transition: background-color 0.12s ease, transform 0.06s ease;
+}
+:is(.admin-main, .seller-main) :is(button, a).bg-primary:hover:not(:disabled) { opacity: 1; background-color: hsl(30 12% 18%); }
+:is(.admin-main, .seller-main) :is(button, a).bg-primary:active:not(:disabled) { transform: translateY(0.5px); }
+:is(.admin-main, .seller-main) :is(a, button, summary, [role='tab']):focus-visible { outline: 2px solid hsl(var(--brass)); outline-offset: 2px; }
+
 /* ---------- Storefront ---------- */
 .store {
   --s-ink: #11151b;
