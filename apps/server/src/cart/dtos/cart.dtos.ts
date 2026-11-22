@@ -22,6 +22,14 @@ export class AddCartItemDto {
   @Min(1)
   @Max(MAX_LINE_QUANTITY)
   quantity?: number;
+
+  // Buy at an accepted price proposal. The SKU and quantity then come from the
+  // proposal: leave quantity out, or send the proposal's own.
+  @IsDefinedWhenPresent()
+  @IsInt()
+  @Min(1)
+  @Max(MAX_INT32)
+  proposalId?: number;
 }
 
 export class UpdateCartItemDto {

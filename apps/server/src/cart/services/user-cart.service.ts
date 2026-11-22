@@ -11,10 +11,12 @@ import { Cart } from '../../database/entities/cart/cart.entity';
 import { CartItem } from '../../database/entities/cart/cart-item.entity';
 import { SellerProduct } from '../../database/entities/product/seller-product.entity';
 import { SellerProductSku } from '../../database/entities/product/seller-product-sku.entity';
+import { SkuPriceProposal } from '../../database/entities/proposal/sku-price-proposal.entity';
 import { ProductActiveStatus } from '../../database/enums/product-active-status.enum';
 import { ProductStatus } from '../../database/enums/product-status.enum';
 import { SellerActiveStatus } from '../../database/enums/seller-active-status.enum';
 import { SellerStatus } from '../../database/enums/seller-status.enum';
+import { SkuPriceProposalStatus } from '../../database/enums/sku-price-proposal.enums';
 import { effectivePrice } from '../../storefront/storefront-product.service';
 import { AddCartItemDto, MAX_LINE_QUANTITY } from '../dtos/cart.dtos';
 import { CartView, CartViewService } from './cart-view.service';
@@ -95,6 +97,8 @@ export class UserCartService {
     });
     if (!product || !this.buyable(product)) throw new NotFoundException('Product not found');
 
+    if (dto.proposalId !== undefined) return this.addWithProposal(owner, dto, product);
+
     const sku = this.pickSku(product, dto.sellerProductSkuId);
     if (sku.quantity <= 0) throw new BadRequestException('This item is out of stock');
 
@@ -106,6 +110,7 @@ export class UserCartService {
       const existing = await manager.findOne(CartItem, {
         where: { cartId: cart.id, sellerProductSkuId: sku.id },
       });
+      this.assertNotProposalLine(existing);
       const requested = (existing?.quantity ?? 0) + wanted;
       const quantity = Math.min(requested, MAX_LINE_QUANTITY, sku.quantity);
       await this.saveLine(manager, cart.id, product.id, sku, quantity, existing);
@@ -113,6 +118,62 @@ export class UserCartService {
       return this.clampNotice(requested, quantity, sku.quantity);
     });
     return { cart: await this.views.build(cart.id), notice };
+  }
+
+  /**
+   * Put an accepted proposal in the cart. The SKU and quantity are the
+   * proposal's; a line already holding that SKU becomes the proposal line.
+   */
+  private async addWithProposal(owner: CartOwner, dto: AddCartItemDto, product: SellerProduct): Promise<CartResult> {
+    if (!owner.userId) throw new BadRequestException('Sign in to buy at a price proposal');
+    const proposal = await this.db.cart.manager.findOne(SkuPriceProposal, {
+      where: { id: dto.proposalId as number, userId: owner.userId },
+    });
+    if (!proposal) throw new NotFoundException('Proposal not found');
+    if (proposal.status !== SkuPriceProposalStatus.ACCEPTED) {
+      throw new BadRequestException(`This proposal is ${proposal.status}, so its price cannot be used`);
+    }
+    if (proposal.sellerProductId !== product.id) throw new BadRequestException('That proposal is for a different product');
+    if (dto.sellerProductSkuId !== undefined && dto.sellerProductSkuId !== proposal.sellerProductSkuId) {
+      throw new BadRequestException('That proposal is for a different variant');
+    }
+    if (dto.quantity !== undefined && dto.quantity !== proposal.quantity) {
+      throw new BadRequestException(`The quantity is fixed at ${proposal.quantity} by the proposal`);
+    }
+    const sku = (product.skus ?? []).find((s) => s.id === proposal.sellerProductSkuId && s.isActive);
+    if (!sku) throw new BadRequestException('That variant is not available for this product');
+    if (sku.quantity <= 0) throw new BadRequestException('This item is out of stock');
+    if (proposal.quantity > sku.quantity) {
+      throw new BadRequestException(`Only ${sku.quantity} in stock, but the proposal is for ${proposal.quantity}`);
+    }
+
+    const cart = await this.ensureCart(owner, product.sellerId);
+    await this.db.cart.manager.transaction(async (manager) => {
+      await this.lock(manager, cart.id);
+      // Cart first, proposal second (as checkout does): the proposal may have been closed meanwhile.
+      const [now]: { status: string }[] = await manager.query(
+        `SELECT status FROM sku_price_proposal WHERE id = $1 FOR SHARE`,
+        [proposal.id],
+      );
+      if (now?.status !== SkuPriceProposalStatus.ACCEPTED) {
+        throw new BadRequestException('This proposal is no longer accepted, so its price cannot be used');
+      }
+      const existing = await manager.findOne(CartItem, {
+        where: { cartId: cart.id, sellerProductSkuId: sku.id },
+      });
+      await this.saveLine(manager, cart.id, product.id, sku, proposal.quantity, existing, proposal);
+      await this.recalc(manager, cart.id);
+    });
+    return { cart: await this.views.build(cart.id), notice: null };
+  }
+
+  /** A line bought at a proposal price keeps its quantity: remove it to buy a different amount. */
+  private assertNotProposalLine(item: CartItem | null) {
+    if (item?.proposalId && item.unitProposalPrice != null) {
+      throw new BadRequestException(
+        'This item is in your cart at your proposal price, so its quantity is fixed. Remove it to change the quantity.',
+      );
+    }
   }
 
   async updateQuantity(
@@ -132,6 +193,7 @@ export class UserCartService {
       throw new BadRequestException('This item is no longer available. Remove it from your cart.');
     }
     if (item.sku.quantity <= 0) throw new BadRequestException('This item is out of stock');
+    this.assertNotProposalLine(item);
 
     const sku = item.sku;
     const quantity = Math.min(requested, MAX_LINE_QUANTITY, sku.quantity);
@@ -196,6 +258,7 @@ export class UserCartService {
           const existing = await manager.findOne(CartItem, {
             where: { cartId: mine.id, sellerProductSkuId: sku.id },
           });
+          if (existing?.proposalId && existing.unitProposalPrice != null) continue;
           const quantity = Math.min(
             (existing?.quantity ?? 0) + line.quantity,
             MAX_LINE_QUANTITY,
@@ -308,16 +371,20 @@ export class UserCartService {
     sku: SellerProductSku,
     quantity: number,
     existing: CartItem | null,
+    proposal: SkuPriceProposal | null = null,
   ) {
     const unitPrice = Number(sku.price);
     const payable = effectivePrice(sku);
     const values = {
       quantity,
       unitPrice,
-      // always the price the customer pays, so line and cart sums need no special case
+      // the SKU's own price; a proposal line is payable at the proposal price below
       unitDiscountedPrice: payable,
       totalPrice: round2(unitPrice * quantity),
       totalDiscountedPrice: round2(payable * quantity),
+      proposalId: proposal?.id ?? null,
+      unitProposalPrice: proposal ? Number(proposal.price) : null,
+      totalProposalPrice: proposal ? round2(Number(proposal.price) * quantity) : null,
     };
     if (existing) await manager.update(CartItem, { id: existing.id }, values);
     else {
@@ -335,7 +402,7 @@ export class UserCartService {
     const row = await manager
       .createQueryBuilder(CartItem, 'i')
       .select('COALESCE(SUM(i.totalPrice), 0)', 'list')
-      .addSelect('COALESCE(SUM(i.totalDiscountedPrice), 0)', 'payable')
+      .addSelect('COALESCE(SUM(COALESCE(i.totalProposalPrice, i.totalDiscountedPrice)), 0)', 'payable')
       .where('i.cartId = :cartId', { cartId })
       .getRawOne<{ list: string; payable: string }>();
     await manager.update(Cart, { id: cartId }, {

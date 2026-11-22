@@ -118,8 +118,13 @@ export class AdminCartService {
             sku: item.sku ? { id: item.sku.id, code: item.sku.sku, imageUrl: item.sku.imageUrl ?? null } : null,
             quantity: item.quantity,
             unitPrice: Number(item.unitPrice),
-            unitPayable: Number(item.unitDiscountedPrice ?? item.unitPrice),
-            linePayable: Number(item.totalDiscountedPrice ?? item.totalPrice),
+            unitPayable: Number(item.unitProposalPrice ?? item.unitDiscountedPrice ?? item.unitPrice),
+            linePayable: Number(item.totalProposalPrice ?? item.totalDiscountedPrice ?? item.totalPrice),
+            skuUnitPayable: Number(item.unitDiscountedPrice ?? item.unitPrice),
+            proposal:
+              item.proposalId && item.unitProposalPrice != null
+                ? { id: item.proposalId, unitPrice: Number(item.unitProposalPrice), applied: true }
+                : null,
           })),
       totals: cart.isActive
         ? live.totals
