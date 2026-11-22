@@ -563,3 +563,10 @@ returned return cannot be cancelled and their payment cannot be reversed. Tables
 - [x] Frontend: password-change helpers keep the fresh token
 - [x] Tests: `guards_test.py` (259); `seller_account_test.py` and `commerce_config_test.py` expectations updated. Docs: `auth-guards.md`
 - [ ] QA: set `JWT_ACCESS_SECRET` to 32+ characters before production. Everyone signs in again once after deploy
+
+## Admin and seller dashboards
+
+- [x] Backend: `dashboard` module (shared metrics queries; separate admin and seller controllers and services), `GET /admin/dashboard` and `GET /seller/dashboard` (one call each, same shape; the seller response also carries product counts and wishlist demand, the old product-count endpoint is retired) with ranges 7d/30d/90d/12m, comparison with the period before, daily or monthly series, orders by status, top products and sellers, to-do counts, commission balances, reviews
+- [x] Frontend: `/admin/dashboard` (admin login now lands there, new sidebar item), seller dashboard gets "Your sales" above the product counts
+- [x] Tests: `dashboard_test.py` (82). Docs: `dashboard-guide.md`
+- [ ] QA: look at both screens in a browser (not done: no browser was available); decide if sales should be counted on the payment date rather than the order date
