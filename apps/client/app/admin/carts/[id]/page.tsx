@@ -7,6 +7,7 @@ import { getAdminCart } from '@/lib/api/cart';
 import { NotFoundApiError } from '@/lib/api/http';
 import { formatDateTime } from '@/lib/datetime';
 import type { AdminCartDetail } from '@/types/cart';
+import { LoadingBlock } from '@/components/ui/skeleton';
 
 const STATUS: Record<string, string> = {
   ok: 'Available',
@@ -34,7 +35,7 @@ export default function AdminCartDetailPage() {
     };
   }, [params.id]);
 
-  if (state === 'loading') return <p className="py-10 text-center text-muted-foreground">Loading…</p>;
+  if (state === 'loading') return <LoadingBlock />;
   if (state !== 'ready' || !cart) {
     return (
       <div className="py-10 text-center">

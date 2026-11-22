@@ -7,6 +7,7 @@ import { useDebouncedValue } from '@/lib/hooks/use-debounced-value';
 import { listAdminCarts } from '@/lib/api/cart';
 import { formatDateTime } from '@/lib/datetime';
 import type { AdminCartListParams, AdminCartRow } from '@/types/cart';
+import { LoadingBlock } from '@/components/ui/skeleton';
 
 const PAGE_SIZE = 20;
 const field =
@@ -147,7 +148,7 @@ export function AdminCartList({ state }: { state: 'active' | 'inactive' }) {
       {error && <p role="alert" className="mb-3 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p>}
 
       {loading ? (
-        <p className="py-10 text-center text-muted-foreground">Loading…</p>
+        <LoadingBlock />
       ) : (
         <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
           <table className="min-w-full divide-y divide-border text-sm">
