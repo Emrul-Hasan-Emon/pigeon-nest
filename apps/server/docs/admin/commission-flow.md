@@ -44,7 +44,7 @@ own numbers and nothing else.
 
 Settings > General settings > Seller commission.
 
-- **Commission type**: "Percentage of the subtotal" or "Fixed amount per order".
+- **Commission type**: "Percentage of each item" or "Fixed amount per item".
 - **Commission amount**: for a percentage, 0 to 100. For a fixed amount, any
   amount up to 9,999,999,999.99. At most 2 decimals either way.
 - Press Save settings. A message says "Settings saved."

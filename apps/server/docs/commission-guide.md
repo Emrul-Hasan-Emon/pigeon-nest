@@ -21,20 +21,24 @@ columns, filters, error cases, worked examples and API per role.
 - The admin sets one global commission (a percentage or a fixed amount) in
   Settings > General settings.
 - The admin can give a seller their own commission. It beats the global one.
-- When an order is placed, the commission is worked out from the item subtotal
-  and saved on the order. Nothing changes for the customer.
+- When an order is placed, the commission is worked out for each item on its own
+  and the order's commission is the sum. It is saved on the order and on every
+  item. Nothing changes for the customer.
 - The commission only counts once the order is fully paid. Then it is added to
   the seller's commission balance.
 - The seller hands the money over to the platform. The admin records each
   payment. The amount moves from "due" to "paid".
 - If the payment is reversed or the order is cancelled, the commission is taken
   back out. Nothing is deleted: the ledger row is marked voided.
+- If a customer returns an item (or the whole order) and an admin confirms it as
+  returned, that item's commission is taken back off the balance. See
+  `returns-guide.md`.
 
 
 ## 2. Setting the commission
 
 Global: Admin > Settings > General settings > Seller commission.
-  - Type: percentage of the subtotal, or fixed amount per order.
+  - Type: percentage of each item, or a fixed amount per item.
   - Amount: 0 to 100 for a percentage; any amount for a fixed one.
   - At most 2 decimals. A percentage cannot be over 100.
 
@@ -56,15 +60,22 @@ placed with.
 
 When an order is placed (customer, guest, seller or admin entering it):
 
-  commission    = subtotal x percentage / 100       (percentage)
-                = the fixed amount                  (fixed)
-  commission    = never more than the payable amount
-  sellerAmount  = payable - commission
+  for each item:
+    commission    = item amount x percentage / 100   (percentage)
+                  = the fixed amount                 (fixed, per item line)
+    commission    = never more than the item amount
+    item seller amount = item amount - commission
+  order commission    = the sum of the items' commissions
+  order sellerAmount  = payable (items + delivery) - order commission
 
-"subtotal" is the sum of the item prices after item discounts. Delivery charge
-and order-level discount are not part of it. The result is rounded to 2
-decimals and saved on the order as `systemCommission` and `sellerAmount`, with
-the rule used (`commissionType`, `commissionValue`).
+The "item amount" is what the customer pays for that line (after item
+discounts, or the accepted proposal price). Delivery charge and order-level
+discount are not part of it. Each item's commission is rounded to 2 decimals
+before adding up, so the order always equals the sum of its items. Each item
+saves `systemCommission` and `sellerAmount`; the order saves `systemCommission`
+and `sellerAmount`, with the rule used (`commissionType`, `commissionValue`).
+Orders placed before this change keep their old total; it was shared over their
+items by amount so a return can take back the right part.
 
 Admins and sellers see these on the order. Customers never do.
 
@@ -151,7 +162,7 @@ Lists use `cursor` and `limit` (1 to 100).
 
 ## 9. Questions
 
-Why is commission taken from the subtotal and not the payable amount?
+Why is commission taken from the items and not the payable amount?
   Delivery is not the seller's income and a discount should not shrink the
   platform's cut, so the item subtotal is the fair base.
 
@@ -175,3 +186,22 @@ Orders that existed before this feature?
   ledger rows.
 
 Tests: apps/server/docs/testing/commission_test.py
+
+
+12. Return take-back and the change log
+---------------------------------------
+- `system_commission_history` (the ledger) has `status`: `for_system` for
+  commission earned by the system, `order_returned_to_customer` for commission
+  taken back on a return. A return row has type `order_return`, the order id, the
+  return id and, for an item return, the item id.
+- `system_commission_change_history` records every move of a balance: what total,
+  due and paid were (`current*`), what they became (`new*`), the reason
+  (`commissionStatus`: `for_system`, `order_returned_to_customer`,
+  `commission_payment`, `commission_voided`, `return_undone`), the ledger row it
+  belongs to and who did it. It is append only. Each row starts where the last one
+  for that seller ended.
+- Read it: admin `GET /admin/commission/changes` (filter `sellerId`, `status`,
+  `from`, `to`), seller `GET /seller/commission/changes`. Screens: Commission >
+  Balance changes (admin), the Balance changes tab (admin seller page and seller
+  Commission).
+- It starts when this was added. Earlier moves exist only in the ledger.

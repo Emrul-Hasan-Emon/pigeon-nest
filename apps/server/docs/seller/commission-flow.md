@@ -43,16 +43,19 @@ Your rate is one of:
 - **Your own rate**, if the admin gave you one: a percentage or a fixed amount.
 - Otherwise the **global rate** set by the platform.
 
-The Commission page tells you which: "The platform takes 10% of the item subtotal
-on each order." (or "50 per order" for a fixed rate).
+The Commission page tells you which: "The platform takes 10% of each item on an
+order." (or "50 per item" for a fixed rate).
 
 How it is worked out for each order:
-- Percentage: the percentage of the **item subtotal** (items after their discounts;
+- Percentage: the percentage of **each item** (the item's price after its discount;
   delivery and order discounts are not included).
-- Fixed: the same amount on every order.
-- It is never more than what the customer pays for the order.
-- Your share of the order (**Seller amount**) is the payable amount minus the
-  commission.
+- Fixed: the same amount on every item line.
+- Each item's commission is never more than what the customer pays for that item.
+  The order's commission is the total of its items, and the order page shows the
+  commission and your share per item.
+- Your share of the order (**Seller amount**) is the payable amount (items plus
+  delivery) minus the commission.
+- If an item is returned and refunded, its commission comes back off your balance.
 
 Rounded to 2 decimals.
 
