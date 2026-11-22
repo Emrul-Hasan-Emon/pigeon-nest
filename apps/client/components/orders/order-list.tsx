@@ -27,6 +27,8 @@ import {
   primaryButton,
   useApiError,
 } from './ui';
+import { LoadingBlock } from '@/components/ui/skeleton';
+import { FilterField, FilterPanel } from '@/components/ui/filter-panel';
 
 const PAGE_SIZE = 20;
 
@@ -144,7 +146,43 @@ export function OrderList({ role }: { role: StaffRole }) {
         <Link href={`${root}/orders/new`} className={primaryButton}>Create order</Link>
       </div>
 
-      <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+      <FilterPanel
+        activeCount={Object.values(filters).filter(Boolean).length}
+        onClear={() => setFilters(EMPTY)}
+        moreActive={Boolean(filters.gatewayId || filters.deliveryType || filters.countryCode || filters.minTotal || filters.maxTotal || filters.createdFrom || filters.createdTo)}
+        more={
+          <>
+            <FilterField label="Payment method">
+              <select className={`${field} w-full`} value={filters.gatewayId} onChange={set('gatewayId')}>
+                <option value="">Any payment method</option>
+                {gateways.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
+              </select>
+            </FilterField>
+            <FilterField label="Delivery type">
+              <select className={`${field} w-full`} value={filters.deliveryType} onChange={set('deliveryType')}>
+                <option value="">Any delivery type</option>
+                {DELIVERY_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+              </select>
+            </FilterField>
+            <FilterField label="Country code">
+              <input className={`${field} w-full`} placeholder="BD" maxLength={2} value={filters.countryCode} onChange={set('countryCode')} />
+            </FilterField>
+            <span className="hidden md:block" />
+            <FilterField label="Payable from">
+              <input className={`${field} w-full`} inputMode="decimal" placeholder="0" value={filters.minTotal} onChange={set('minTotal')} />
+            </FilterField>
+            <FilterField label="Payable up to">
+              <input className={`${field} w-full`} inputMode="decimal" placeholder="No limit" value={filters.maxTotal} onChange={set('maxTotal')} />
+            </FilterField>
+            <FilterField label="Placed from">
+              <input type="date" className={`${field} w-full`} value={filters.createdFrom} onChange={set('createdFrom')} />
+            </FilterField>
+            <FilterField label="Placed to">
+              <input type="date" className={`${field} w-full`} value={filters.createdTo} onChange={set('createdTo')} />
+            </FilterField>
+          </>
+        }
+      >
         <input className={field} placeholder="Order number" value={filters.orderNumber} onChange={set('orderNumber')} />
         <input className={field} placeholder="Customer name, email or phone" value={filters.customerSearch} onChange={set('customerSearch')} />
         {role === 'admin' && <input className={field} placeholder="Seller name" value={filters.sellerSearch} onChange={set('sellerSearch')} />}
@@ -161,28 +199,12 @@ export function OrderList({ role }: { role: StaffRole }) {
           <option value="customer">Accounts only</option>
           <option value="guest">Guests and walk-ins</option>
         </select>
-        <select className={field} value={filters.gatewayId} onChange={set('gatewayId')} aria-label="Payment method">
-          <option value="">Any payment method</option>
-          {gateways.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
-        </select>
-        <select className={field} value={filters.deliveryType} onChange={set('deliveryType')} aria-label="Delivery type">
-          <option value="">Any delivery type</option>
-          {DELIVERY_TYPES.map((d) => <option key={d} value={d} className="capitalize">{d}</option>)}
-        </select>
-        <input className={field} placeholder="Country code (BD)" maxLength={2} value={filters.countryCode} onChange={set('countryCode')} />
-        <input className={field} inputMode="decimal" placeholder="Payable from" value={filters.minTotal} onChange={set('minTotal')} />
-        <input className={field} inputMode="decimal" placeholder="Payable up to" value={filters.maxTotal} onChange={set('maxTotal')} />
-        <label className="text-xs text-muted-foreground">Placed from<input type="date" className={`${field} mt-0.5 w-full`} value={filters.createdFrom} onChange={set('createdFrom')} /></label>
-        <label className="text-xs text-muted-foreground">Placed to<input type="date" className={`${field} mt-0.5 w-full`} value={filters.createdTo} onChange={set('createdTo')} /></label>
-        {dirty && (
-          <button type="button" onClick={() => setFilters(EMPTY)} className={`${outlineButton} self-end`}>Clear filters</button>
-        )}
-      </div>
+      </FilterPanel>
 
       {error && <p role="alert" className="mb-3 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p>}
 
       {loading ? (
-        <p className="py-10 text-center text-muted-foreground">Loading…</p>
+        <LoadingBlock />
       ) : (
         <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
           <table className="min-w-full divide-y divide-border text-sm">
@@ -200,7 +222,7 @@ export function OrderList({ role }: { role: StaffRole }) {
               )}
               {rows.map((o) => (
                 <tr key={o.id}>
-                  <td className="px-4 py-3 font-medium text-foreground">
+                  <td className="whitespace-nowrap px-4 py-3 font-medium text-foreground">
                     {o.orderNumber}
                     <span className="block text-xs font-normal text-muted-foreground">{o.gateway.name} · {o.deliveryType}</span>
                   </td>
@@ -217,7 +239,7 @@ export function OrderList({ role }: { role: StaffRole }) {
                   </td>
                   <td className="px-4 py-3"><OrderStatusBadge status={o.status} /></td>
                   <td className="px-4 py-3"><PaymentStatusBadge status={o.paymentStatus} /></td>
-                  <td className="px-4 py-3 text-muted-foreground">{formatDateTime(o.createdAt)}</td>
+                  <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{formatDateTime(o.createdAt)}</td>
                   <td className="px-4 py-3 text-right">
                     <Link href={`${root}/orders/${o.id}`} className="text-primary hover:underline">View</Link>
                   </td>
