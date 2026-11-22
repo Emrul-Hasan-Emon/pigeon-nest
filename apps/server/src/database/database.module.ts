@@ -47,6 +47,8 @@ import { ReviewReply } from './entities/review/review-reply.entity';
 import { ReviewReport } from './entities/review/review-report.entity';
 import { ReviewStatusHistory } from './entities/review/review-status-history.entity';
 import { Wishlist } from './entities/wishlist/wishlist.entity';
+import { SkuPriceProposal } from './entities/proposal/sku-price-proposal.entity';
+import { SkuPriceProposalHistory } from './entities/proposal/sku-price-proposal-history.entity';
 import { Payment } from './entities/payment/payment.entity';
 import { PaymentAttachment } from './entities/payment/payment-attachment.entity';
 import { PaymentStatusHistory } from './entities/payment/payment-status-history.entity';
@@ -109,6 +111,8 @@ export const DATABASE_ENTITIES = [
   ReviewReport,
   ReviewStatusHistory,
   Wishlist,
+  SkuPriceProposal,
+  SkuPriceProposalHistory,
   Payment,
   PaymentGateway,
   PaymentAttachment,
