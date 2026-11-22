@@ -1,8 +1,9 @@
 import { Global, Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
-import { AuthGuard } from './guards/auth.guard';
-import { RolesGuard } from './guards/roles.guard';
+import { JwtModule } from '@nestjs/jwt';
+import { AdminAuthGuard } from './guards/admin-auth.guard';
+import { SellerAuthGuard } from './guards/seller-auth.guard';
+import { UserAuthGuard } from './guards/user-auth.guard';
+import { TokenService } from './services/token.service';
 import { AdminAuthController } from './admin-auth.controller';
 import { AdminAuthService } from './admin-auth.service';
 import { SellerAuthController } from './seller-auth.controller';
@@ -20,23 +21,15 @@ import { OptionalCustomerGuard } from './guards/optional-customer.guard';
   imports: [
     SellerModule,
     UserModule,
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService): JwtModuleOptions => ({
-        secret: configService.get<string>('JWT_ACCESS_SECRET'),
-        signOptions: {
-          expiresIn: Number(
-            configService.get<string>('JWT_ACCESS_EXPIRES_IN', '900'),
-          ),
-        },
-      }),
-    }),
+    // No default secret: every sign and verify names its own role's key (see TokenService).
+    JwtModule.register({}),
   ],
   controllers: [AdminAuthController, SellerAuthController, UserAuthController],
   providers: [
-    AuthGuard,
-    RolesGuard,
+    TokenService,
+    AdminAuthGuard,
+    SellerAuthGuard,
+    UserAuthGuard,
     SellerAccessGuard,
     UserAccessGuard,
     OptionalCustomerGuard,
@@ -45,9 +38,10 @@ import { OptionalCustomerGuard } from './guards/optional-customer.guard';
     UserAuthService,
   ],
   exports: [
-    JwtModule,
-    AuthGuard,
-    RolesGuard,
+    TokenService,
+    AdminAuthGuard,
+    SellerAuthGuard,
+    UserAuthGuard,
     SellerAccessGuard,
     UserAccessGuard,
     OptionalCustomerGuard,
