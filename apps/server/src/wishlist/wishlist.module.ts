@@ -13,5 +13,6 @@ import { WishlistService } from './services/wishlist.service';
   imports: [StorefrontModule],
   controllers: [UserWishlistController, SellerWishlistController, AdminWishlistController, AdminUserWishlistController],
   providers: [WishlistService, WishlistInsightsService],
+  exports: [WishlistInsightsService],
 })
 export class WishlistModule {}
