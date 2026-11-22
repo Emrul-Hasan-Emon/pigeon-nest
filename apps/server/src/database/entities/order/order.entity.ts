@@ -101,8 +101,8 @@ export class Order extends BaseEntity {
   })
   payableAmount: number; // subtotal + deliveryCharge - discountAmount
 
-  // The platform's cut, worked out from `subtotal` when the order was placed
-  // with the seller's rate (or the global one). Fixed at placement, so a later
+  // The platform's cut: the sum of each line's commission, worked out when the
+  // order was placed with the seller's rate (or the global one). Fixed at placement, so a later
   // rate change never touches an old order.
   @Column({ type: 'double precision', default: 0 })
   systemCommission: number;
@@ -117,6 +117,11 @@ export class Order extends BaseEntity {
   // The percentage or fixed amount that was applied.
   @Column({ type: 'double precision', nullable: true })
   commissionValue: number | null;
+
+  // The whole order was returned: every item came back. Set when the last item does.
+  @Index('IDX_order_isReturned')
+  @Column({ type: 'boolean', default: false })
+  isReturned: boolean;
 
   @Index()
   @Column()

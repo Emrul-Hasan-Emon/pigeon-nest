@@ -74,4 +74,18 @@ export class OrderItem extends BaseEntity {
 
   @Column({ type: 'double precision', nullable: true })
   totalProposalPrice: number | null; // unitProposalPrice * quantity
+
+  // The platform's cut of this line, worked out when the order was placed. The
+  // order's systemCommission is the sum of its lines.
+  @Column({ type: 'double precision', default: 0 })
+  systemCommission: number;
+
+  // What the line pays out to the seller: its payable amount minus systemCommission.
+  @Column({ type: 'double precision', default: 0 })
+  sellerAmount: number;
+
+  // The line was sent back and refunded (a return reached `returned`).
+  @Index('IDX_order_item_isReturned')
+  @Column({ type: 'boolean', default: false })
+  isReturned: boolean;
 }
