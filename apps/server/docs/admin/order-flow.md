@@ -130,7 +130,7 @@ Admin only. Sellers and customers use their own cart endpoints.
 |---|---|---|
 | `GET` | `/carts?state=active` | Carts still being filled |
 | `GET` | `/carts?state=inactive` | Carts that became an order |
-| `GET` | `/carts/{id}` | Details |
+| `GET` | `/carts/{id}` | Details (a line bought at a price proposal carries `proposal` and the proposal price) |
 
 Filters (all optional, combine freely): `customerSearch` (name, email or phone), `userId`,
 `sellerId`, `sellerSearch`, `owner` (`customer` or `guest`), `orderNumber` (inactive),
@@ -166,7 +166,7 @@ A list row:
   "createdAt": "..." }
 ```
 
-Details add: `cartId`, `items` (price paid, variant label, image), `totals` (`subtotal`,
+Details add: `cartId`, `items` (price paid, variant label, image; for an item bought at a price proposal also `skuUnitPrice`, the SKU price at that time, and `proposal` with `id`, `unitPrice`, `lineTotal`. The order `subtotal` and the commission use the proposal total), `totals` (`subtotal`,
 `deliveryCharge`, `payable`, `amountPaid`, `balanceDue`, `savings`), `delivery`, `address`,
 `payments` (each with `attachments`, `reversal`, `recordedBy`), `paymentHistory`, `statusHistory`,
 `updates`, `note`, and `account` (the customer's user record, if they have one).

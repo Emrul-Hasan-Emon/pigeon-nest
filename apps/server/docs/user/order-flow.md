@@ -82,6 +82,10 @@ used. `quantity` defaults to 1 and is at most 99. The reply is `{ "cart": {...},
 If you asked for more than there is, the quantity is lowered and `notice` says so. Another seller's
 product goes into a **different cart** automatically.
 
+To buy at an accepted price proposal, send its id instead of a quantity (see `proposals-flow.md`):
+`{ "sellerProductId": 94, "proposalId": 31 }`. The SKU and quantity come from the proposal. A different
+`quantity` is `400`, a proposal that is not yours or not accepted is `404`/`400`, and guests cannot use one.
+
 A cart (always live):
 
 ```json
@@ -91,9 +95,10 @@ A cart (always live):
       "product": { "id": 94, "name": "Blue Bar Racing Homer", "slug": "blue-bar-racing-homer", "thumbnailUrl": "..." },
       "sku": { "id": 119, "code": "HOM-BB-M", "label": "Gender: Male / Color: Blue Bar", "imageUrl": null },
       "quantity": 2, "unitPrice": 3500, "unitPayable": 3200, "linePayable": 6400,
-      "availableQuantity": 6, "status": "ok", "priceChanged": false, "previousUnitPayable": 3200 } ],
+      "availableQuantity": 6, "status": "ok", "priceChanged": false, "previousUnitPayable": 3200,
+      "skuUnitPayable": 3200, "proposal": null, "proposalNotice": null } ],
   "totals": { "itemCount": 2, "listTotal": 7000, "payableTotal": 6400, "savings": 600 },
-  "canCheckout": true, "issues": [], "updatedAt": "..." }
+  "canCheckout": true, "issues": [], "notices": [], "updatedAt": "..." }
 ```
 
 Line `status`: `ok`, `unavailable` (product, variant or seller switched off), `out_of_stock`,
@@ -101,6 +106,13 @@ Line `status`: `ok`, `unavailable` (product, variant or seller switched off), `o
 lines are in `totals`. `canCheckout` is true only when every line is `ok`; `issues` lists plain
 sentences to show ("Only 1 of X left."). `priceChanged` is true when today's price differs from the
 price when you added it.
+
+Proposal lines: `proposal` is `{ id, unitPrice, applied }` and `unitPayable` is the proposal price while
+`applied` is true. The quantity of such a line cannot be changed (`400`, "fixed"), and the same SKU cannot be
+added plainly next to it. `skuUnitPayable` is the live SKU price. If the SKU is now cheaper than the proposal,
+`applied` is false, the line pays the SKU price and `proposalNotice` says so. If the proposal was closed (an
+admin rejected or cancelled it), the line is back at the SKU price and `proposalNotice` says why. Every
+`proposalNotice` is also listed in the cart's `notices` (messages that do not block checkout).
 
 Other rules: a parallel double-add never creates two carts or two lines; an admin or seller token on
 a cart route is `403`; a guest with no `x-cart-session` gets `400` on writes.
@@ -176,6 +188,7 @@ POST /checkout/{cartId}/place
 | `paymentGatewayId` | yes | an active gateway from the options |
 | `paymentProof` | per gateway | an object with **only** that gateway's `proofFields`; required ones must be filled (for example `transactionId` for mobile banking). A field the gateway does not take is `400` |
 | `note` | no | up to 1000 |
+| `expectedItemsTotal` | no | the items total the customer saw (2 decimals). If the cart's live total is different now (a price changed, or an accepted offer was closed), nothing is ordered and the reply is `409` with `code: PRICE_CHANGED`, `currentTotal` and `notices`. The shop sends it; leave it out to order at whatever the live total is |
 
 **Never send prices, totals or the delivery charge** (any such field is rejected). The server uses live
 prices, live stock and the delivery price for your country.
@@ -228,7 +241,7 @@ GET /orders/{id}
 ```
 
 Someone else's order is `404`. The reply holds: `status`, `paymentStatus`, `canCancel`, `seller`,
-`items` (price paid, variant, picture), `totals` (`subtotal`, `deliveryCharge`, `payable`,
+`items` (price paid, variant, picture; for a proposal line also `skuUnitPrice`, the SKU price at that time, and `proposal` with `id`, `unitPrice`, `lineTotal`), `totals` (`subtotal`, `deliveryCharge`, `payable`,
 `amountPaid`, `balanceDue`, `savings`), `delivery` (type, expected days), `address`, `payments` (each
 with its proof files and, if staff undid it, a `reversal` with the reason), `paymentHistory` (every
 payment change with the money, who and when; a reversal shows as a negative amount),
@@ -365,7 +378,7 @@ All under `/v1/api/user`.
 | `401` | Invalid or expired bearer token |
 | `403` | Admin or seller token on a customer route, suspended customer, or a cancel that is not allowed |
 | `404` | Cart, order or address not found or not yours; no order for a number and phone |
-| `409` | Cart already ordered or empty; items cannot be bought now (`issues` explains); address limit reached |
+| `409` | Cart already ordered or empty; items cannot be bought now (`issues` explains); the total changed since the customer saw it (`PRICE_CHANGED`, with `currentTotal`); a proposal was closed during checkout; address limit reached |
 
 Paging: `pageSize` is 1 to 50 and `page` starts at 1 (`0` or a larger page size is `400`).
 

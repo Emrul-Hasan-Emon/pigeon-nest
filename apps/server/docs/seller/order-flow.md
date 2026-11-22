@@ -99,7 +99,7 @@ A list row:
 **`allowedStatuses` tells you exactly which moves you may make right now.** Build your buttons
 from it.
 
-Details add: `items` (with the price paid and the variant), `totals` (`subtotal`, `deliveryCharge`,
+Details add: `items` (with the price paid and the variant; for an item bought at a price proposal also `skuUnitPrice`, the SKU price at that time, and `proposal` with `id`, `unitPrice`, `lineTotal`. The order `subtotal` and your commission use the proposal total), `totals` (`subtotal`, `deliveryCharge`,
 `payable`, `amountPaid`, `balanceDue`), `delivery` (type, expected days), `address` (recipient,
 phone, full address, country), `payments` (each with proof `attachments`, the customer's typed
 `proof` such as the transaction ID, `recordedBy`, and `reversal`), `paymentHistory`,
