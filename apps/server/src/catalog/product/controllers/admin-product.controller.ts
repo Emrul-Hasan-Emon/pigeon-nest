@@ -12,10 +12,6 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
-import { AuthGuard } from '../../../auth/guards/auth.guard';
-import { RolesGuard } from '../../../auth/guards/roles.guard';
-import { Roles } from '../../../auth/decorators/roles.decorator';
-import { AuthUserType } from '../../../database/enums/auth-user-type.enum';
 import {
   CursorPaginationParams,
   CursorPagination,
@@ -29,6 +25,7 @@ import { CreateProductDto } from '../dtos/create-product.dto';
 import { UpdateProductDto } from '../dtos/update-product.dto';
 import { ListProductQueryDto } from '../dtos/list-product-query.dto';
 import { UpdateProductMediaFilesDto } from '../dtos/update-product-media-files.dto';
+import { AdminAuthGuard } from '../../../auth/guards/admin-auth.guard';
 
 // Per-file cap enforced by multer (413 when exceeded); at most 21 files.
 const MEDIA_FILE_FIELDS = FileFieldsInterceptor(
@@ -44,8 +41,7 @@ interface ProductUploadedFiles {
   mediaFiles?: Express.Multer.File[];
 }
 
-@UseGuards(AuthGuard, RolesGuard)
-@Roles(AuthUserType.ADMIN)
+@UseGuards(AdminAuthGuard)
 @Controller({ path: 'api/admin/products', version: '1' })
 export class AdminProductController {
   constructor(
