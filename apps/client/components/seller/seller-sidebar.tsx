@@ -3,8 +3,9 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Coins, CreditCard, HandCoins, Heart, LayoutDashboard, LayoutGrid, LogOut, Package, ReceiptText, Star, UserRound } from 'lucide-react';
+import { Coins, CreditCard, HandCoins, Heart, LayoutDashboard, LayoutGrid, LogOut, Package, ReceiptText, RotateCcw, Star, UserRound } from 'lucide-react';
 import { getSellerProposalSummary } from '@/lib/api/proposals';
+import { listSellerReturns } from '@/lib/api/returns';
 import { clearSellerToken } from '@/lib/auth/seller-token';
 
 const ITEMS = [
@@ -12,6 +13,7 @@ const ITEMS = [
   { key: 'products', href: '/seller/products', label: 'Products', icon: Package },
   { key: 'orders', href: '/seller/orders', label: 'Orders', icon: ReceiptText },
   { key: 'payments', href: '/seller/payments', label: 'Payments', icon: CreditCard },
+  { key: 'returns', href: '/seller/returns', label: 'Returns', icon: RotateCcw },
   { key: 'offers', href: '/seller/offers', label: 'Offers', icon: HandCoins },
   { key: 'wishlist', href: '/seller/wishlist', label: 'Wishlist', icon: Heart },
   { key: 'reviews', href: '/seller/reviews', label: 'Reviews', icon: Star },
@@ -26,6 +28,7 @@ const ITEMS = [
 export function SellerSidebar({ active }: { active: (typeof ITEMS)[number]['key'] }) {
   const router = useRouter();
   const [awaiting, setAwaiting] = useState(0);
+  const [returnsWaiting, setReturnsWaiting] = useState(0);
   useEffect(() => {
     let live = true;
     const load = () => getSellerProposalSummary().then((s) => live && setAwaiting(s.awaitingYou)).catch(() => undefined);
@@ -35,6 +38,21 @@ export function SellerSidebar({ active }: { active: (typeof ITEMS)[number]['key'
     return () => {
       live = false;
       window.removeEventListener('seller-offers-changed', load);
+    };
+  }, []);
+
+  useEffect(() => {
+    let live = true;
+    const load = () =>
+      listSellerReturns({ status: 'return_requested', pageSize: 1 })
+        .then((r) => live && setReturnsWaiting(r.total))
+        .catch(() => undefined);
+    load();
+    // the returns pages fire this after a decision so the badge does not wait for a reload
+    window.addEventListener('seller-returns-changed', load);
+    return () => {
+      live = false;
+      window.removeEventListener('seller-returns-changed', load);
     };
   }, []);
 
@@ -67,6 +85,9 @@ export function SellerSidebar({ active }: { active: (typeof ITEMS)[number]['key'
             >
               <Icon className="h-4 w-4" />
               {item.label}
+              {item.key === 'returns' && returnsWaiting > 0 && (
+                <span className="ml-auto rounded-full bg-amber-500 px-1.5 text-xs font-semibold text-white">{returnsWaiting}</span>
+              )}
               {item.key === 'offers' && awaiting > 0 && (
                 <span className="ml-auto rounded-full bg-amber-500 px-1.5 text-xs font-semibold text-white">{awaiting}</span>
               )}
