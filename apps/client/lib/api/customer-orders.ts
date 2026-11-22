@@ -37,6 +37,8 @@ export interface PlaceOrderInput {
   paymentGatewayId: number;
   note?: string;
   paymentProof?: Record<string, string>;
+  /** The items total shown on screen. The server refuses (409) if it changed. */
+  expectedItemsTotal?: number;
 }
 
 /** An order as a customer sees it: no seller-only fields, only their own moves. */

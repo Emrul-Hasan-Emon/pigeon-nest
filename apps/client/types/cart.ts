@@ -1,3 +1,5 @@
+import type { LineProposal } from './proposal';
+
 export type CartLineStatus = 'ok' | 'unavailable' | 'out_of_stock' | 'insufficient_stock';
 
 export interface CartLine {
@@ -12,6 +14,12 @@ export interface CartLine {
   status: CartLineStatus;
   priceChanged: boolean;
   previousUnitPayable: number;
+  /** The live SKU price, whatever the line pays. */
+  skuUnitPayable: number;
+  /** Bought at an accepted price proposal. applied is false when the SKU is now cheaper. */
+  proposal: LineProposal | null;
+  /** Why a proposal no longer applies, or that the SKU got cheaper than it. */
+  proposalNotice: string | null;
 }
 
 export interface Cart {
@@ -22,6 +30,8 @@ export interface Cart {
   totals: { itemCount: number; listTotal: number; payableTotal: number; savings: number };
   canCheckout: boolean;
   issues: string[];
+  /** Messages that do not block checkout (proposal changes). */
+  notices: string[];
   updatedAt: string;
 }
 
@@ -99,6 +109,8 @@ export interface AdminCartLine {
   status?: CartLineStatus;
   availableQuantity?: number;
   priceChanged?: boolean;
+  skuUnitPayable?: number;
+  proposal?: LineProposal | null;
 }
 
 export interface AdminCartDetail {

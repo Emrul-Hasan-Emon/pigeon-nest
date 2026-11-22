@@ -28,7 +28,7 @@ export function getCartSummary() {
 export function getSellerCart(sellerId: number) {
   return userHttp.get<SellerCartResponse>(U.forSeller(sellerId));
 }
-export function addToCart(input: { sellerProductId: number; sellerProductSkuId?: number; quantity?: number }) {
+export function addToCart(input: { sellerProductId: number; sellerProductSkuId?: number; quantity?: number; proposalId?: number }) {
   prepareWrite();
   return userHttp.post<CartResult>(U.items, input);
 }

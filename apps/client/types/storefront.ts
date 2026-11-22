@@ -133,6 +133,8 @@ export interface ProductSku {
   inStock: boolean;
   lowStock: boolean;
   isDefault: boolean;
+  /** Buyers may propose their own price for this SKU. */
+  acceptProposals: boolean;
   variants: { attributeId: number; valueId: number }[];
 }
 

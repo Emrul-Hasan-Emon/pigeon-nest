@@ -60,6 +60,11 @@ export interface OrderItemView {
   imageUrl: string | null;
   quantity: number;
   unitPrice: number;
+  /** What the SKU cost when the order was placed. */
+  skuUnitPrice: number;
+  /** The accepted price proposal this line was bought at, if any. */
+  proposal: { id: number; unitPrice: number; lineTotal: number | null } | null;
+  /** What was charged per unit and for the line. */
   unitPayable: number;
   lineTotal: number;
 }

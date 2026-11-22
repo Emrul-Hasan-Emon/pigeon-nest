@@ -99,6 +99,12 @@ export const ENDPOINTS = {
 
     carts: resource('/carts'),
     wishlist: { list: '/wishlist', mostSaved: '/wishlist/most-saved' },
+    proposals: {
+      list: '/proposals',
+      detail: (id: Id) => `/proposals/${id}`,
+      reject: (id: Id) => `/proposals/${id}/reject`,
+      cancel: (id: Id) => `/proposals/${id}/cancel`,
+    },
     reviews: {
       list: '/reviews',
       detail: (id: Id) => `/reviews/${id}`,
@@ -140,6 +146,14 @@ export const ENDPOINTS = {
     },
     dashboard: '/dashboard',
     wishlist: { insights: '/wishlist/insights' },
+    proposals: {
+      list: '/proposals',
+      summary: '/proposals/summary',
+      detail: (id: Id) => `/proposals/${id}`,
+      accept: (id: Id) => `/proposals/${id}/accept`,
+      counter: (id: Id) => `/proposals/${id}/counter`,
+      reject: (id: Id) => `/proposals/${id}/reject`,
+    },
     reviews: {
       list: '/reviews',
       summary: '/reviews/summary',
@@ -210,6 +224,16 @@ export const ENDPOINTS = {
       reply: (id: Id) => `/reviews/${id}/replies`,
     },
     reviewReplies: { one: (id: Id) => `/review-replies/${id}`, report: (id: Id) => `/review-replies/${id}/report` },
+    proposals: {
+      list: '/proposals',
+      create: '/proposals',
+      forSku: (skuId: Id) => `/proposals/sku/${skuId}`,
+      detail: (id: Id) => `/proposals/${id}`,
+      accept: (id: Id) => `/proposals/${id}/accept`,
+      counter: (id: Id) => `/proposals/${id}/counter`,
+      reject: (id: Id) => `/proposals/${id}/reject`,
+      cancel: (id: Id) => `/proposals/${id}/cancel`,
+    },
     wishlist: {
       list: '/wishlist',
       ids: '/wishlist/ids',

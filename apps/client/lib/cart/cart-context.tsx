@@ -8,7 +8,7 @@ interface CartContextValue {
   summary: CartSummary;
   /** Goes up whenever a cart changes, so panels know to reload. */
   version: number;
-  addItem: (input: { sellerProductId: number; sellerProductSkuId?: number; quantity?: number }) => Promise<CartResult>;
+  addItem: (input: { sellerProductId: number; sellerProductSkuId?: number; quantity?: number; proposalId?: number }) => Promise<CartResult>;
   /** Call after any cart change made elsewhere (quantity, remove, clear). */
   changed: () => void;
 }

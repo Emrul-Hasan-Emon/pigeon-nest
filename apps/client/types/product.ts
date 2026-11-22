@@ -64,6 +64,9 @@ export interface Sku {
   discountedPriceEndDate: string | null;
   isDefault: boolean;
   isActive: boolean;
+  acceptProposals: boolean;
+  /** Hidden from buyers. 0 or empty means no floor. */
+  minProposalPrice: number | null;
   variants: SkuVariant[];
 }
 
