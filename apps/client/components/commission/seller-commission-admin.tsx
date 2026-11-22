@@ -9,10 +9,11 @@ import { FilePicker, field, money, primaryButton } from '@/components/orders/ui'
 import type { BalanceDetail, CommissionType } from '@/types/commission';
 import { Cards, ruleText } from './parts';
 import { DisburseList } from './disburse-list';
+import { ChangeLog } from './change-log';
 import { LedgerList } from './ledger-list';
 import { SettingHistory } from './setting-history';
 
-type Tab = 'ledger' | 'payments' | 'rule';
+type Tab = 'ledger' | 'changes' | 'payments' | 'rule';
 
 /** Admin: one seller's commission: balance, their rate, record a payment, ledger and history. */
 export function SellerCommissionAdmin({ sellerId }: { sellerId: number }) {
@@ -94,7 +95,7 @@ export function SellerCommissionAdmin({ sellerId }: { sellerId: number }) {
 
   if (error) return <p role="alert" className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p>;
   if (!b) return <p className="py-10 text-center text-muted-foreground">Loading…</p>;
-  const tabs: [Tab, string][] = [['ledger', 'Ledger'], ['payments', 'Payments received'], ['rule', 'Rate history']];
+  const tabs: [Tab, string][] = [['ledger', 'Ledger'], ['changes', 'Balance changes'], ['payments', 'Payments received'], ['rule', 'Rate history']];
 
   return (
     <div>
@@ -126,15 +127,15 @@ export function SellerCommissionAdmin({ sellerId }: { sellerId: number }) {
         <form onSubmit={saveRule} className="rounded-xl border border-border bg-card p-5 shadow-sm">
           <h2 className="mb-1 font-semibold text-foreground">Commission rate</h2>
           <p className="mb-3 text-xs text-muted-foreground">
-            {b.commission.setting ? 'This seller has their own rate.' : `No own rate: the global rate applies (${ruleText(b.commission.global)}).`} A change affects new orders only. Percentages apply to the order subtotal.
+            {b.commission.setting ? 'This seller has their own rate.' : `No own rate: the global rate applies (${ruleText(b.commission.global)}).`} A change affects new orders only. It is worked out for each item and added up for the order.
           </p>
           {ruleError && <p role="alert" className="mb-3 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">{ruleError}</p>}
           <div className="space-y-3">
             <select className={`${field} w-full`} value={ruleType} onChange={(e) => setRuleType(e.target.value as CommissionType)} aria-label="Commission type">
-              <option value="percentage">Percentage of the subtotal</option>
-              <option value="fixed">Fixed amount per order</option>
+              <option value="percentage">Percentage of each item</option>
+              <option value="fixed">Fixed amount per item</option>
             </select>
-            <input className={`${field} w-full`} inputMode="decimal" placeholder={ruleType === 'percentage' ? 'Percentage (0 to 100)' : 'Amount per order'} value={ruleAmount} onChange={(e) => setRuleAmount(e.target.value)} />
+            <input className={`${field} w-full`} inputMode="decimal" placeholder={ruleType === 'percentage' ? 'Percentage (0 to 100)' : 'Amount per item'} value={ruleAmount} onChange={(e) => setRuleAmount(e.target.value)} />
             <input className={`${field} w-full`} maxLength={500} placeholder="Note for the history (optional)" value={ruleNote} onChange={(e) => setRuleNote(e.target.value)} />
             <button type="submit" disabled={savingRule} className={primaryButton}>{savingRule ? 'Saving…' : 'Save rate'}</button>
           </div>
@@ -148,6 +149,7 @@ export function SellerCommissionAdmin({ sellerId }: { sellerId: number }) {
       </div>
       <div key={`${tab}-${refresh}`}>
         {tab === 'ledger' && <LedgerList role="admin" sellerId={sellerId} />}
+        {tab === 'changes' && <ChangeLog role="admin" sellerId={sellerId} />}
         {tab === 'payments' && <DisburseList role="admin" sellerId={sellerId} />}
         {tab === 'rule' && <SettingHistory role="admin" sellerId={sellerId} />}
       </div>
