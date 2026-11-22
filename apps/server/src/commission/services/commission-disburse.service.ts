@@ -7,6 +7,7 @@ import { SystemCommission } from '../../database/entities/commission/system-comm
 import { SystemCommissionDisburse } from '../../database/entities/commission/system-commission-disburse.entity';
 import { SystemCommissionDisburseAttachment } from '../../database/entities/commission/system-commission-disburse-attachment.entity';
 import { SystemCommissionHistory } from '../../database/entities/commission/system-commission-history.entity';
+import { CommissionStatus } from '../../database/enums/commission-status.enum';
 import { CommissionHistoryType } from '../../database/enums/commission-history-type.enum';
 import { PaymentStatus } from '../../database/enums/payment-status.enum';
 import { OrderFileService } from '../../order/services/order-file.service';
@@ -44,13 +45,6 @@ export class CommissionDisburseService {
         const total = balance.totalCommission;
         const creator = { createdBy: actor.id, creatorType: actor.type, creatorName: actor.name };
 
-        await manager.update(SystemCommission, balance.id, {
-          dueCommission: due,
-          paidCommission: paid,
-          updatedBy: actor.id,
-          updaterType: actor.type,
-          updaterName: actor.name,
-        });
         const disburse = await manager.save(SystemCommissionDisburse, {
           ...creator,
           sellerId,
@@ -66,18 +60,22 @@ export class CommissionDisburseService {
             stored.map((s) => ({ ...s, ...creator, disburseId: disburse.id })),
           );
         }
-        await manager.save(SystemCommissionHistory, {
-          ...creator,
-          sellerId,
-          orderId: null,
-          disburseId: disburse.id,
-          type: CommissionHistoryType.COMMISSION_PAYMENT,
-          totalAmount: dto.amount,
-          paymentStatus: PaymentStatus.PAID,
-          totalAfter: total,
-          dueAfter: due,
-          paidAfter: paid,
-        });
+        await this.commission.post(
+          manager,
+          balance,
+          { due: -dto.amount, paid: dto.amount },
+          CommissionStatus.COMMISSION_PAYMENT,
+          actor,
+          {
+            ledger: {
+              orderId: null,
+              disburseId: disburse.id,
+              type: CommissionHistoryType.COMMISSION_PAYMENT,
+              totalAmount: dto.amount,
+              paymentStatus: PaymentStatus.PAID,
+            },
+          },
+        );
         return disburse.id;
       });
       return { disburseId, sellerId };
