@@ -63,12 +63,31 @@ export const SETTING_DEFINITIONS: SettingDefinition[] = [
     key: 'commission.amount',
     label: 'Commission amount',
     description:
-      'A percentage (0 to 100) of the order subtotal, or a fixed amount per order, depending on the type.',
+      'A percentage (0 to 100) of each item\'s price, or a fixed amount per item, depending on the type.',
     group: 'commission',
     type: 'decimal',
     min: 0,
     max: MAX_DECIMAL_12_2,
     default: 0,
+  },
+  {
+    key: 'returns.windowDays',
+    label: 'Return window (days)',
+    description: 'How many days after delivery a customer can ask to return an order. 0 means no limit.',
+    group: 'returns',
+    type: 'int',
+    min: 0,
+    max: 365,
+    default: 7,
+  },
+  {
+    key: 'returns.refundDeliveryCharge',
+    label: 'Refund delivery charge on full-order returns',
+    description:
+      'The starting choice for a full-order return. The seller (when accepting) or an admin can change it for that return. Item returns never include the delivery charge.',
+    group: 'returns',
+    type: 'boolean',
+    default: true,
   },
 ];
 
