@@ -82,7 +82,7 @@ export class Order extends BaseEntity {
   @Column({
     type: 'double precision',
   })
-  subtotal: number; // Summation of all order items totalDiscountedPrice
+  subtotal: number; // Summation of what each line is payable at: totalProposalPrice, else totalDiscountedPrice, else totalPrice
 
   @Column({
     type: 'double precision',

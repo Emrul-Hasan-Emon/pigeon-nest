@@ -3,6 +3,7 @@ import { BaseEntity } from '../base.entity';
 import { Order } from './order.entity';
 import { SellerProduct } from '../product/seller-product.entity';
 import { SellerProductSku } from '../product/seller-product-sku.entity';
+import { SkuPriceProposal } from '../proposal/sku-price-proposal.entity';
 
 @Entity()
 export class OrderItem extends BaseEntity {
@@ -58,4 +59,19 @@ export class OrderItem extends BaseEntity {
     nullable: true,
   })
   totalDiscountedPrice: number | null; // totalDiscountedPrice = unitDiscountedPrice * quantity
+
+  // Bought at a proposal price. unitPrice / unitDiscountedPrice stay the SKU
+  // price at order time; the line is payable at the proposal price.
+  @Column({ type: 'int', nullable: true })
+  proposalId: number | null;
+
+  @ManyToOne(() => SkuPriceProposal, { onDelete: 'SET NULL', nullable: true })
+  @JoinColumn({ name: 'proposalId' })
+  proposal: SkuPriceProposal | null;
+
+  @Column({ type: 'double precision', nullable: true })
+  unitProposalPrice: number | null;
+
+  @Column({ type: 'double precision', nullable: true })
+  totalProposalPrice: number | null; // unitProposalPrice * quantity
 }

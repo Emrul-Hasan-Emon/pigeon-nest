@@ -79,6 +79,14 @@ export class SellerProductSku extends BaseEntity {
   @Column({ default: true })
   isActive: boolean;
 
+  // Buyers may propose their own price for this SKU only when this is on.
+  @Column({ default: false })
+  acceptProposals: boolean;
+
+  // Hidden from buyers. A proposal below it is rejected on the spot.
+  @Column({ type: 'double precision', nullable: true })
+  minProposalPrice: number | null;
+
   @OneToMany(() => SellerProductSkuVariant, (variant) => variant.sku)
   variants: SellerProductSkuVariant[];
 }
