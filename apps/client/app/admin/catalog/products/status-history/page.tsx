@@ -12,6 +12,7 @@ import type {
   ProductStatusChangeAction,
   ProductStatusHistoryEntry,
 } from '@/types/product';
+import { LoadingBlock } from '@/components/ui/skeleton';
 
 const PAGE_SIZE = 20;
 
@@ -130,7 +131,7 @@ export default function ProductStatusHistoryPage() {
       </div>
 
       {loading ? (
-        <p className="py-10 text-center text-muted-foreground">Loading…</p>
+        <LoadingBlock />
       ) : (
         <ProductStatusHistoryTable entries={entries} showProduct />
       )}

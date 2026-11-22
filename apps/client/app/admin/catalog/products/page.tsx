@@ -10,6 +10,7 @@ import { useDebouncedValue } from '@/lib/hooks/use-debounced-value';
 import { deleteProduct, listProducts, updateProduct } from '@/lib/api/products';
 import { ApiError, ConflictApiError, NotFoundApiError } from '@/lib/api/http';
 import type { Product, ProductActiveStatus, ProductListSort, ProductStatus } from '@/types/product';
+import { LoadingBlock } from '@/components/ui/skeleton';
 
 const PAGE_SIZE = 20;
 
@@ -244,7 +245,7 @@ export default function AdminProductsPage() {
       </div>
 
       {loading ? (
-        <p className="py-10 text-center text-muted-foreground">Loading…</p>
+        <LoadingBlock />
       ) : (
         <ProductTable
           products={products}
