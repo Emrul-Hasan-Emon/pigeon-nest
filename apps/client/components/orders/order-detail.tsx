@@ -25,6 +25,7 @@ import {
   primaryButton,
   useApiError,
 } from './ui';
+import { LoadingBlock } from '@/components/ui/skeleton';
 
 const card = 'rounded-xl border border-border bg-card p-5 shadow-sm';
 
@@ -50,7 +51,7 @@ export function OrderDetailView({ role, id }: { role: StaffRole; id: number }) {
     load();
   }, [load]);
 
-  if (state === 'loading') return <p className="py-10 text-center text-muted-foreground">Loading…</p>;
+  if (state === 'loading') return <LoadingBlock />;
   if (state !== 'ready' || !order) {
     return (
       <div className="py-10 text-center">
