@@ -1,10 +1,6 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
-import { AuthGuard } from '../../../auth/guards/auth.guard';
-import { RolesGuard } from '../../../auth/guards/roles.guard';
 import { SellerAccessGuard } from '../../../auth/guards/seller-access.guard';
-import { Roles } from '../../../auth/decorators/roles.decorator';
 import { RequireSellerAccess } from '../../../auth/decorators/require-seller-access.decorator';
-import { AuthUserType } from '../../../database/enums/auth-user-type.enum';
 import {
   CursorPaginationParams,
   CursorPagination,
@@ -14,12 +10,12 @@ import { AdminCollectionService } from '../../collection/services/admin-collecti
 import { AdminAttributeService } from '../../attribute/services/admin-attribute.service';
 import { ListCollectionQueryDto } from '../../collection/dtos/list-collection-query.dto';
 import { ListAttributeQueryDto } from '../../attribute/dtos/list-attribute-query.dto';
+import { SellerAuthGuard } from '../../../auth/guards/seller-auth.guard';
 
 // Read-only lookups a seller needs to fill in a product form (categories,
 // collections, attributes). Only active collections and attributes are
 // offered; sellers cannot change any of them.
-@UseGuards(AuthGuard, RolesGuard, SellerAccessGuard)
-@Roles(AuthUserType.SELLER)
+@UseGuards(SellerAuthGuard, SellerAccessGuard)
 @RequireSellerAccess('full')
 @Controller({ path: 'api/seller/catalog', version: '1' })
 export class SellerCatalogController {
