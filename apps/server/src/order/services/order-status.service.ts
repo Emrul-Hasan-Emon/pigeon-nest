@@ -9,6 +9,7 @@ import { AuthUserType } from '../../database/enums/auth-user-type.enum';
 import { OrderStatus } from '../../database/enums/order-status.enum';
 import { CommissionService } from '../../commission/services/commission.service';
 import { PaymentStatus } from '../../database/enums/payment-status.enum';
+import { assertNoLiveReturns } from '../../returns/utils/return-guard.util';
 import { transitionDenied } from '../utils/order-status-rules';
 
 /** Who is changing the status. A guest customer has no id. */
@@ -67,6 +68,8 @@ export class OrderStatusService {
       const denied = transitionDenied(actor.type, from, to);
       if (denied) throw new ForbiddenException(denied);
 
+      // A return that is open or finished already depends on this order staying as it is.
+      if (to === OrderStatus.CANCELLED) await assertNoLiveReturns(manager, order.id, 'Cancelling the order');
       const items = await manager.find(OrderItem, { where: { orderId: order.id } });
       if (to === OrderStatus.CANCELLED) await this.giveBack(manager, items);
       else if (from === OrderStatus.CANCELLED) await this.takeAgain(manager, items);
