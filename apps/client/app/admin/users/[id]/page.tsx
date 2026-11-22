@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { AddressBook } from '@/components/addresses/address-book';
+import { AdminUserProposals } from '@/components/admin/proposals/proposal-list';
 import { AdminReviewList } from '@/components/admin/reviews/review-list';
 import { AdminWishlistList } from '@/components/admin/wishlist/wishlist-list';
 import { UserForm } from '@/components/admin/users/user-form';
@@ -49,6 +50,11 @@ export default function UserDetailsPage() {
         <h2 className="mb-1 text-lg font-semibold text-foreground">Wishlist</h2>
         <p className="mb-3 text-sm text-muted-foreground">Products this customer saved, with live price and stock. Read only.</p>
         <AdminWishlistList userId={user.id} />
+      </section>
+      <section aria-label="Price proposals" className="max-w-4xl">
+        <h2 className="mb-1 text-lg font-semibold text-foreground">Price proposals</h2>
+        <p className="mb-3 text-sm text-muted-foreground">The latest prices this customer offered. Open one to reject or cancel it.</p>
+        <AdminUserProposals userId={user.id} />
       </section>
       <section aria-label="Reviews" className="max-w-6xl">
         <h2 className="mb-1 text-lg font-semibold text-foreground">Reviews</h2>
