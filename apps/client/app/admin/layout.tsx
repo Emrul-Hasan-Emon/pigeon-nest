@@ -3,8 +3,10 @@ import { AdminAuthGuard } from '@/components/admin/auth-guard';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
-    <ToastProvider>
-      <AdminAuthGuard>{children}</AdminAuthGuard>
-    </ToastProvider>
+    <div className="admin-shell">
+      <ToastProvider>
+        <AdminAuthGuard>{children}</AdminAuthGuard>
+      </ToastProvider>
+    </div>
   );
 }
