@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { Bird, Coins, Feather, Package, ReceiptText } from 'lucide-react';
 import { PhoneInput } from '@/components/phone-input';
 import { sellerLogin } from '@/lib/api/seller-portal';
 import { ApiError } from '@/lib/api/http';
@@ -35,54 +36,75 @@ export default function SellerLoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-6">
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-md rounded-xl border border-border bg-card p-8 shadow-sm"
-      >
-        <h1 className="mb-1 text-lg font-semibold text-foreground">Seller login</h1>
-        <p className="mb-6 text-sm text-muted-foreground">
-          Sign in with your phone number and password.
-        </p>
-
-        {error && (
-          <p className="mb-4 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
-            {error}
-          </p>
-        )}
-
-        <div className="mb-4 text-sm text-foreground">
-          <span className="mb-1 block">Phone number</span>
-          <PhoneInput onChange={setPhone} required />
+    <div className="flex min-h-screen bg-background">
+      <div className="hero-kpi relative hidden w-1/2 flex-col justify-between overflow-hidden bg-topbar p-12 text-topbar-foreground md:flex">
+        <Feather aria-hidden="true" strokeWidth={0.5} className="pointer-events-none absolute -bottom-24 -right-16 h-[34rem] w-[34rem] -rotate-12 text-white/[0.06]" />
+        <span className="relative flex items-center gap-3">
+          <span aria-hidden="true" className="grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-sheen-a to-sheen-b text-white shadow-[0_6px_20px_-6px_rgb(122_91_208/0.8)]">
+            <Bird className="h-5 w-5" strokeWidth={2} />
+          </span>
+          <span className="font-[family-name:var(--font-serif)] text-xl font-semibold tracking-tight">Pigeon Nest</span>
+        </span>
+        <div className="relative">
+          <h2 className="font-[family-name:var(--font-serif)] text-5xl font-medium leading-[1.08] tracking-tight">
+            Sell your birds<br />with confidence.
+          </h2>
+          <ul className="mt-6 space-y-3 text-lg text-topbar-foreground/80">
+            <li className="flex items-center gap-3"><Package aria-hidden="true" className="h-5 w-5 text-signal" /> Add your birds and supplies</li>
+            <li className="flex items-center gap-3"><ReceiptText aria-hidden="true" className="h-5 w-5 text-signal" /> See and confirm every order</li>
+            <li className="flex items-center gap-3"><Coins aria-hidden="true" className="h-5 w-5 text-signal" /> Know exactly what you earn</li>
+          </ul>
         </div>
+        <span className="relative text-sm text-topbar-foreground/45">&copy; {new Date().getFullYear()} Pigeon Nest</span>
+      </div>
 
-        <label className="mb-6 block text-sm text-foreground">
-          Password
-          <input
-            type="password"
-            required
-            autoComplete="current-password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            className="mt-1 w-full rounded-md border border-input px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none"
-          />
-        </label>
+      <div className="flex w-full items-center justify-center p-8 md:w-1/2">
+        <form onSubmit={handleSubmit} className="w-full max-w-md">
+          <span aria-hidden="true" className="mb-6 grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-sheen-a to-sheen-b text-white md:hidden">
+            <Bird className="h-5 w-5" strokeWidth={2} />
+          </span>
+          <h1 className="font-[family-name:var(--font-serif)] text-4xl font-medium tracking-tight text-foreground">Welcome back</h1>
+          <p className="mb-8 mt-2 text-base text-muted-foreground">Sign in with your phone number and password.</p>
 
-        <button
-          type="submit"
-          disabled={submitting}
-          className="w-full rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-50"
-        >
-          {submitting ? 'Signing in…' : 'Sign in'}
-        </button>
+          {error && (
+            <p role="alert" className="mb-5 rounded-xl bg-destructive/10 px-4 py-3 text-base font-medium text-destructive">
+              {error}
+            </p>
+          )}
 
-        <p className="mt-4 text-center text-sm text-muted-foreground">
-          New seller?{' '}
-          <Link href="/seller/register" className="font-medium text-primary hover:opacity-70">
-            Register
-          </Link>
-        </p>
-      </form>
+          <div className="mb-5 text-base font-medium text-foreground">
+            <span className="mb-1.5 block">Phone number</span>
+            <PhoneInput onChange={setPhone} required />
+          </div>
+
+          <label className="mb-7 block text-base font-medium text-foreground">
+            Password
+            <input
+              type="password"
+              required
+              autoComplete="current-password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              className="mt-1.5 min-h-12 w-full rounded-xl border border-input bg-white px-4 py-2.5 text-base font-normal focus:border-ring focus:ring-4 focus:ring-ring/20 focus:outline-none"
+            />
+          </label>
+
+          <button
+            type="submit"
+            disabled={submitting}
+            className="min-h-12 w-full rounded-xl bg-primary px-4 py-3 text-base font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-[hsl(177_62%_22%)] disabled:opacity-50"
+          >
+            {submitting ? 'Signing in…' : 'Sign in'}
+          </button>
+
+          <p className="mt-6 text-center text-base text-muted-foreground">
+            New seller?{' '}
+            <Link href="/seller/register" className="font-semibold text-primary underline-offset-4 hover:underline">
+              Create an account
+            </Link>
+          </p>
+        </form>
+      </div>
     </div>
   );
 }
