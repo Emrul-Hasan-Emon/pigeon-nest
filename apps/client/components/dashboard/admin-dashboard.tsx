@@ -46,6 +46,7 @@ export function AdminDashboardView() {
               value={taka(t.netSales)}
               change={t.change.netSales}
               note="Nothing to compare with yet"
+              spark={data.series.map((p) => p.grossSales - p.refunds)}
               support={[
                 { label: 'Sales', value: taka(t.grossSales) },
                 { label: 'Refunds', value: `${taka(t.refunds.amount)} (${t.refunds.count})` },
