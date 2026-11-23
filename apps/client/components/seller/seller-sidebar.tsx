@@ -2,38 +2,36 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { CircleHelp, Coins, CreditCard, HandCoins, Heart, LayoutDashboard, Package, ReceiptText, RotateCcw, Star, UserRound } from 'lucide-react';
+import { Bird, CircleHelp, Coins, CreditCard, HandCoins, Heart, House, Package, ReceiptText, RotateCcw, Star, UserRound } from 'lucide-react';
 import { getSellerProposalSummary } from '@/lib/api/proposals';
 import { listSellerReturns } from '@/lib/api/returns';
 
-// Grouped like the admin navigation, each group under its own heading.
+// One flat list, always open: nothing to expand or hunt for. Each place has its own colour and icon so it is
+// recognised by sight, and a thin line separates the daily work from people, money and the account.
 const GROUPS = [
+  { items: [{ key: 'dashboard', href: '/seller/dashboard', label: 'Home', icon: House, tile: 'bg-emerald-400/20 text-emerald-300' }] },
   {
-    label: 'Overview',
     items: [
-      { key: 'dashboard', href: '/seller/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-      { key: 'dashboard-guide', href: '/seller/dashboard/guide', label: 'Dashboard guide', icon: CircleHelp },
-    ],
-  },
-  { label: 'Catalog', items: [{ key: 'products', href: '/seller/products', label: 'Products', icon: Package }] },
-  {
-    label: 'Commerce',
-    items: [
-      { key: 'orders', href: '/seller/orders', label: 'Orders', icon: ReceiptText },
-      { key: 'payments', href: '/seller/payments', label: 'Payments', icon: CreditCard },
-      { key: 'returns', href: '/seller/returns', label: 'Returns', icon: RotateCcw },
-      { key: 'offers', href: '/seller/offers', label: 'Offers', icon: HandCoins },
+      { key: 'orders', href: '/seller/orders', label: 'Orders', icon: ReceiptText, tile: 'bg-amber-400/20 text-amber-300' },
+      { key: 'products', href: '/seller/products', label: 'My products', icon: Package, tile: 'bg-sky-400/20 text-sky-300' },
+      { key: 'payments', href: '/seller/payments', label: 'Payments', icon: CreditCard, tile: 'bg-teal-400/20 text-teal-300' },
+      { key: 'returns', href: '/seller/returns', label: 'Returns', icon: RotateCcw, tile: 'bg-rose-400/20 text-rose-300' },
+      { key: 'offers', href: '/seller/offers', label: 'Price offers', icon: HandCoins, tile: 'bg-violet-400/25 text-violet-300' },
     ],
   },
   {
-    label: 'Customers',
     items: [
-      { key: 'wishlist', href: '/seller/wishlist', label: 'Wishlist', icon: Heart },
-      { key: 'reviews', href: '/seller/reviews', label: 'Reviews', icon: Star },
+      { key: 'reviews', href: '/seller/reviews', label: 'Reviews', icon: Star, tile: 'bg-amber-400/20 text-amber-300' },
+      { key: 'wishlist', href: '/seller/wishlist', label: 'Wishlist', icon: Heart, tile: 'bg-rose-400/20 text-rose-300' },
     ],
   },
-  { label: 'Commission', items: [{ key: 'commission', href: '/seller/commission', label: 'Commission', icon: Coins }] },
-  { label: 'Account', items: [{ key: 'profile', href: '/seller/profile', label: 'Profile', icon: UserRound }] },
+  { items: [{ key: 'commission', href: '/seller/commission', label: 'Commission', icon: Coins, tile: 'bg-yellow-400/20 text-yellow-300' }] },
+  {
+    items: [
+      { key: 'profile', href: '/seller/profile', label: 'My profile', icon: UserRound, tile: 'bg-slate-400/25 text-slate-200' },
+      { key: 'dashboard-guide', href: '/seller/dashboard/guide', label: 'Help', icon: CircleHelp, tile: 'bg-slate-400/25 text-slate-200' },
+    ],
+  },
 ] as const;
 
 type NavKey = (typeof GROUPS)[number]['items'][number]['key'];
@@ -74,40 +72,39 @@ export function SellerSidebar({ active }: { active: NavKey }) {
 
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-20 flex w-56 flex-col border-r border-white/5 bg-topbar text-topbar-foreground">
-      <div className="flex h-16 shrink-0 items-center gap-3 border-b border-white/5 px-5">
-        <span className="grid h-8 w-8 place-items-center rounded-lg bg-brass font-[family-name:var(--font-display)] text-base font-bold text-topbar">P</span>
+    <aside className="fixed inset-y-0 left-0 z-20 flex w-56 flex-col bg-topbar text-topbar-foreground">
+      <div className="flex h-16 shrink-0 items-center gap-3 px-5">
+        <span aria-hidden="true" className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-sheen-a to-sheen-b text-white shadow-[0_4px_14px_-4px_rgb(122_91_208/0.7)]">
+          <Bird className="h-5 w-5" strokeWidth={2} />
+        </span>
         <span className="leading-tight">
-          <span className="block font-[family-name:var(--font-display)] text-sm font-semibold tracking-tight">Pigeon Nest</span>
-          <span className="block text-[11px] text-topbar-foreground/50">Seller portal</span>
+          <span className="block font-[family-name:var(--font-serif)] text-lg font-semibold tracking-tight">Pigeon Nest</span>
+          <span className="block text-xs text-topbar-foreground/55">Seller portal</span>
         </span>
       </div>
-      <nav className="min-h-0 flex-1 space-y-5 overflow-y-auto px-3 py-5">
-        {GROUPS.map((group) => (
-          <div key={group.label}>
-            <p className="px-3 pb-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-topbar-foreground/40">{group.label}</p>
+      <nav aria-label="Seller" className="min-h-0 flex-1 overflow-y-auto px-3 pb-6 pt-3">
+        {GROUPS.map((group, gi) => (
+          <div key={gi} className={gi > 0 ? 'mt-3 border-t border-white/10 pt-3' : ''}>
             <div className="space-y-1">
               {group.items.map((item) => {
                 const Icon = item.icon;
+                const on = item.key === active;
+                const waiting = item.key === 'returns' ? returnsWaiting : item.key === 'offers' ? awaiting : 0;
                 return (
                   <Link
                     key={item.key}
                     href={item.href}
-                    aria-current={item.key === active ? 'page' : undefined}
-                    className={`relative flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${
-                      item.key === active
-                        ? 'bg-white/[0.08] font-medium text-white'
-                        : 'text-topbar-foreground/70 hover:bg-white/5 hover:text-topbar-foreground'
+                    aria-current={on ? 'page' : undefined}
+                    className={`flex items-center gap-3 rounded-xl px-2.5 py-2 text-base font-medium transition-colors ${
+                      on ? 'bg-white text-topbar shadow-sm' : 'text-topbar-foreground/85 hover:bg-white/[0.07] hover:text-white'
                     }`}
                   >
-                    {item.key === active && <span aria-hidden="true" className="absolute inset-y-1.5 left-0 w-0.5 rounded-full bg-brass" />}
-                    <Icon className={`h-4 w-4 ${item.key === active ? 'text-brass' : ''}`} />
+                    <span aria-hidden="true" className={`grid h-9 w-9 shrink-0 place-items-center rounded-lg ${on ? 'bg-topbar text-white' : item.tile}`}>
+                      <Icon className="h-[18px] w-[18px]" strokeWidth={2} />
+                    </span>
                     {item.label}
-                    {item.key === 'returns' && returnsWaiting > 0 && (
-                      <span className="ml-auto rounded-full bg-amber-500 px-1.5 text-xs font-semibold text-white">{returnsWaiting}</span>
-                    )}
-                    {item.key === 'offers' && awaiting > 0 && (
-                      <span className="ml-auto rounded-full bg-amber-500 px-1.5 text-xs font-semibold text-white">{awaiting}</span>
+                    {waiting > 0 && (
+                      <span aria-label={`${waiting} waiting`} className="ml-auto grid min-w-6 place-items-center rounded-full bg-amber-500 px-1.5 text-sm font-bold leading-6 text-white">{waiting}</span>
                     )}
                   </Link>
                 );
