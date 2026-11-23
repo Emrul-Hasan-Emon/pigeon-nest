@@ -8,7 +8,7 @@ import { WishlistInsightsView } from '@/components/wishlist/seller-wishlist-insi
 import type { DashboardRange, SellerOverview as Data } from '@/types/dashboard';
 import { sellerTodoItems } from './seller-todo';
 import { DashboardSkeleton } from './dashboard-skeleton';
-import { DashboardHeader, Definition, HeroKpi, Panel, Ranking, rangeLabel, SalesChart, StatStrip, StatusBars, taka, Todo } from './parts';
+import { ActionTiles, DashboardHeader, Definition, HeroKpi, Panel, Ranking, rangeLabel, SalesChart, StatStrip, StatusBars, taka } from './parts';
 
 /** The whole seller dashboard, from one API call: sales, earnings, to-do list, product counts and wishlist demand. */
 export function SellerOverviewView({ title = 'Dashboard' }: { title?: string }) {
@@ -41,13 +41,15 @@ export function SellerOverviewView({ title = 'Dashboard' }: { title?: string }) 
       {!data && !error && <DashboardSkeleton />}
 
       {data && t && (
-        <div className="space-y-5">
+        <div className="space-y-6">
+          <ActionTiles items={sellerTodoItems(data.attention)} />
           <div className="grid gap-5 lg:grid-cols-3">
             <HeroKpi
               label="You keep"
               value={taka(t.sellerEarnings)}
               change={t.change.sellerEarnings}
               note="After commission and refunds"
+              spark={data.series.map((p) => p.grossSales - p.refunds)}
               support={[
                 { label: 'Sales', value: taka(t.grossSales) },
                 { label: 'Commission', value: taka(t.commission.net) },
@@ -59,8 +61,8 @@ export function SellerOverviewView({ title = 'Dashboard' }: { title?: string }) 
             </Panel>
           </div>
 
-          <div className="grid gap-5 lg:grid-cols-3">
-            <div className="space-y-5 lg:col-span-2">
+          <div className="space-y-5">
+            <div className="space-y-5">
               <StatStrip
                 title="Orders"
                 stats={[
@@ -79,9 +81,6 @@ export function SellerOverviewView({ title = 'Dashboard' }: { title?: string }) 
                 ]}
               />
             </div>
-            <Panel title="To do" note="Right now, whatever the period.">
-              <Todo items={sellerTodoItems(data.attention)} />
-            </Panel>
           </div>
 
           <div className="grid gap-5 lg:grid-cols-3">
