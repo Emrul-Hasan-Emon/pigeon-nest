@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { Bird } from 'lucide-react';
 import { PhoneInput } from '@/components/phone-input';
 import { sellerRegister } from '@/lib/api/seller-portal';
 import { ApiError } from '@/lib/api/http';
@@ -78,7 +79,10 @@ export default function SellerRegisterPage() {
         onSubmit={handleSubmit}
         className="w-full max-w-lg rounded-xl border border-border bg-card p-8 shadow-sm"
       >
-        <h1 className="mb-1 text-lg font-semibold text-foreground">Register as a seller</h1>
+        <span aria-hidden="true" className="mb-5 grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-sheen-a to-sheen-b text-white">
+          <Bird className="h-5 w-5" strokeWidth={2} />
+        </span>
+        <h1 className="mb-1 font-[family-name:var(--font-serif)] text-3xl font-medium tracking-tight text-foreground">Register as a seller</h1>
         <p className="mb-6 text-sm text-muted-foreground">
           Your registration is reviewed by our team. You can sign in right away to track its status.
         </p>
