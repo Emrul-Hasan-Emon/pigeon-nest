@@ -27,7 +27,7 @@ export function FilterPanel({
       {(more || activeCount > 0) && (
         <div className="mt-3 flex items-center justify-between text-sm">
           {more ? (
-            <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} className="font-medium text-brass-ink hover:underline">
+            <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} className="font-medium text-primary hover:underline">
               {open ? 'Fewer filters' : 'More filters'}
             </button>
           ) : (
