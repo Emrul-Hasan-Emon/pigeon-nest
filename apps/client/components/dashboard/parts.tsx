@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { ArrowRight, CircleCheck, Feather } from 'lucide-react';
 import { money } from '@/components/orders/ui';
 import type { DashboardPoint, DashboardRange, DashboardStatusCount } from '@/types/dashboard';
 
@@ -52,8 +53,8 @@ export function DashboardHeader({ title, subtitle, guideHref, period, range, onR
   return (
     <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
       <div>
-        <h1 className="text-[1.75rem] leading-tight text-foreground">{title}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <h1 className="text-[2rem] leading-tight text-foreground">{title}</h1>
+        <p className="mt-1.5 text-sm text-muted-foreground">
           {subtitle} <Link href={guideHref} className="text-primary hover:underline">What do these figures mean?</Link>
         </p>
       </div>
@@ -67,10 +68,10 @@ export function DashboardHeader({ title, subtitle, guideHref, period, range, onR
 
 export function Panel({ title, note, children, className = '', action }: { title: string; note?: string; children: React.ReactNode; className?: string; action?: React.ReactNode }) {
   return (
-    <section className={`rounded-xl border border-border bg-card p-5 shadow-sm ${className}`}>
+    <section className={`rounded-xl border border-border bg-card p-6 shadow-sm ${className}`}>
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h2 className="font-semibold text-foreground">{title}</h2>
+          <h2 className="text-[15px] font-semibold text-foreground">{title}</h2>
           {note && <p className="mt-0.5 text-xs text-muted-foreground">{note}</p>}
         </div>
         {action}
@@ -120,7 +121,7 @@ export function StatStrip({ title, stats, className = '' }: { title?: string; st
         {stats.map((s) => (
           <div key={s.label} className="bg-card px-5 py-4">
             <p className="text-xs text-muted-foreground">{s.label}</p>
-            <p className={`mt-1 font-[family-name:var(--font-display)] text-2xl font-semibold tracking-tight ${s.tone ? STAT_TONE[s.tone] : 'text-foreground'}`}>{s.value}</p>
+            <p className={`mt-1.5 font-[family-name:var(--figure-font,var(--font-display))] text-[1.7rem] font-semibold tracking-tight ${s.tone ? STAT_TONE[s.tone] : 'text-foreground'}`}>{s.value}</p>
             <div className="mt-1 min-h-4 text-xs text-muted-foreground">{s.change !== undefined && s.change !== null ? <Change value={s.change} lowerIsBetter={s.lowerIsBetter} /> : s.hint}</div>
           </div>
         ))}
@@ -129,19 +130,18 @@ export function StatStrip({ title, stats, className = '' }: { title?: string; st
   );
 }
 
-/** The lead figure of a page: dark, large, with what it changed by and the figures it is made of. */
-export function HeroKpi({ label, value, change, support, note }: { label: string; value: string; change: number | null; support: { label: string; value: string }[]; note?: string }) {
+/** The lead figure of a page: dark, large, with what it changed by, a sparkline of the period and the figures it is made of. */
+export function HeroKpi({ label, value, change, support, note, spark }: { label: string; value: string; change: number | null; support: { label: string; value: string }[]; note?: string; spark?: number[] }) {
   return (
-    <div
-      className="relative flex flex-col justify-between overflow-hidden rounded-2xl bg-topbar p-6 text-topbar-foreground shadow-md"
-      style={{ backgroundImage: 'radial-gradient(120% 90% at 100% 0%, hsl(var(--brass) / 0.22), transparent 55%)' }}
-    >
-      <div>
+    <div className="hero-kpi relative flex flex-col justify-between overflow-hidden rounded-2xl bg-topbar p-7 text-topbar-foreground shadow-md">
+      <Feather aria-hidden="true" strokeWidth={0.6} className="hero-feather pointer-events-none absolute -bottom-10 -right-8 hidden h-64 w-64 -rotate-12 text-white/[0.07]" />
+      <div className="relative">
         <p className="text-sm text-topbar-foreground/60">{label}</p>
-        <p className="mt-3 font-[family-name:var(--font-display)] text-4xl font-semibold tracking-tight text-white xl:text-5xl">{value}</p>
-        <div className="mt-2 min-h-5">{change === null ? <span className="text-xs text-topbar-foreground/50">{note}</span> : <Change value={change} dark />}</div>
+        <p className={`mt-3 ${FIG_HERO} text-[2.6rem] font-medium leading-none tracking-tight text-white xl:text-[3.4rem]`}>{value}</p>
+        <div className="mt-3 min-h-5">{change === null ? <span className="text-xs text-topbar-foreground/50">{note}</span> : <Change value={change} dark />}</div>
       </div>
-      <dl className="mt-8 space-y-3 border-t border-white/10 pt-4">
+      {spark && spark.some((n) => n > 0) && <Sparkline values={spark} />}
+      <dl className="relative mt-6 space-y-3 border-t border-white/10 pt-4">
         {support.map((s) => (
           <div key={s.label} className="flex items-baseline justify-between gap-4">
             <dt className="text-sm text-topbar-foreground/60">{s.label}</dt>
@@ -150,6 +150,30 @@ export function HeroKpi({ label, value, change, support, note }: { label: string
         ))}
       </dl>
     </div>
+  );
+}
+
+const FIG_HERO = 'font-[family-name:var(--figure-font,var(--font-display))]';
+
+/** The shape of the period at a glance: a thin line with a soft fill, no axes. The chart beside it has the figures. */
+function Sparkline({ values }: { values: number[] }) {
+  const W = 240;
+  const H = 44;
+  const max = Math.max(...values, 1);
+  const step = values.length > 1 ? W / (values.length - 1) : W;
+  const pts = values.map((v, i) => [i * step, H - 3 - (v / max) * (H - 8)] as const);
+  const line = pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`).join(' ');
+  return (
+    <svg aria-hidden="true" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="relative mt-5 h-11 w-full">
+      <defs>
+        <linearGradient id="spark-fill" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0" stopColor="hsl(var(--signal))" stopOpacity="0.35" />
+          <stop offset="1" stopColor="hsl(var(--signal))" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <path d={`${line} L${W} ${H} L0 ${H} Z`} fill="url(#spark-fill)" />
+      <path d={line} fill="none" stroke="hsl(var(--signal))" strokeWidth="1.5" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+    </svg>
   );
 }
 
@@ -195,8 +219,8 @@ export function SalesChart({ series, bucket }: { series: DashboardPoint[]; bucke
           )}
         </div>
         <span className="flex shrink-0 items-center gap-3">
-          <span className="flex items-center gap-1"><i className="inline-block h-2 w-2 rounded-sm bg-brass" /> Sales</span>
-          <span className="flex items-center gap-1"><i className="inline-block h-2 w-2 rounded-sm bg-red-500" /> Refunds</span>
+          <span className="flex items-center gap-1"><i className="inline-block h-2 w-2 rounded-sm bg-gold" /> Sales</span>
+          <span className="flex items-center gap-1"><i className="inline-block h-2 w-2 rounded-sm bg-rose-400" /> Refunds</span>
         </span>
       </div>
 
@@ -221,15 +245,15 @@ export function SalesChart({ series, bucket }: { series: DashboardPoint[]; bucke
           {[0, 0.5, 1].map((g) => (
             <line key={g} x1="0" x2={W} y1={g * (H - 1) + 0.5} y2={g * (H - 1) + 0.5} className={g === 1 ? 'stroke-border' : 'stroke-border/70'} strokeDasharray={g === 1 ? undefined : '3 4'} vectorEffect="non-scaling-stroke" />
           ))}
-          {hover !== null && <rect x={hover * slot} y="0" width={slot} height={H} className="fill-brass-soft" opacity="0.7" />}
+          {hover !== null && <rect x={hover * slot} y="0" width={slot} height={H} className="fill-gold-soft" opacity="0.7" />}
           {series.map((p, i) => {
             const h = (p.grossSales / top) * (H - 4);
             const r = (p.refunds / top) * (H - 4);
             const x = i * slot + (slot - bar) / 2;
             return (
               <g key={p.date}>
-                {h > 0 && <rect x={x} y={H - h} width={bar} height={h} rx="1.5" className="fill-brass" />}
-                {r > 0 && <rect x={x + bar * 0.55} y={H - r} width={bar * 0.45} height={r} rx="1" className="fill-red-500" />}
+                {h > 0 && <rect x={x} y={H - h} width={bar} height={h} rx="1.5" className="fill-gold" />}
+                {r > 0 && <rect x={x + bar * 0.55} y={H - r} width={bar * 0.45} height={r} rx="1" className="fill-rose-400" />}
               </g>
             );
           })}
@@ -249,11 +273,11 @@ export function SalesChart({ series, bucket }: { series: DashboardPoint[]; bucke
 
 const STATUS_COLORS: Record<string, string> = {
   pending: 'bg-amber-500',
-  confirmed: 'bg-sky-500',
+  confirmed: 'bg-sky-600',
   packed: 'bg-indigo-500',
   shipped: 'bg-violet-500',
-  delivered: 'bg-emerald-500',
-  cancelled: 'bg-red-400',
+  delivered: 'bg-teal-600',
+  cancelled: 'bg-rose-400',
 };
 
 export function StatusBars({ items }: { items: DashboardStatusCount[] }) {
@@ -296,9 +320,9 @@ export function Todo({ items }: { items: TodoItem[] }) {
   const open = items.filter((i) => i.count > 0);
   if (open.length === 0) {
     return (
-      <div className="rounded-lg bg-emerald-50 px-4 py-5 text-center text-sm text-emerald-800">
+      <div className="rounded-lg bg-accent px-4 py-5 text-center text-sm text-accent-foreground">
         <p className="font-medium">All caught up</p>
-        <p className="mt-0.5 text-emerald-700/80">Nothing is waiting for you.</p>
+        <p className="mt-0.5 opacity-80">Nothing is waiting for you.</p>
       </div>
     );
   }
@@ -316,6 +340,40 @@ export function Todo({ items }: { items: TodoItem[] }) {
   );
 }
 
+/**
+ * "What to do now" as big, plain buttons: the number waiting, what it is, and one tap to go there. Meant for people who
+ * are not at ease with software, so it comes before any figure. Nothing waiting shows a calm "all done" instead.
+ */
+export function ActionTiles({ items }: { items: TodoItem[] }) {
+  const open = items.filter((i) => i.count > 0);
+  return (
+    <section aria-label="What to do now">
+      <h2 className="mb-3 font-[family-name:var(--font-serif)] text-2xl font-medium tracking-tight text-foreground">What to do now</h2>
+      {open.length === 0 ? (
+        <div className="flex items-center gap-4 rounded-2xl bg-accent px-6 py-5 text-accent-foreground">
+          <CircleCheck aria-hidden="true" className="h-9 w-9 shrink-0" strokeWidth={1.75} />
+          <div>
+            <p className="text-lg font-semibold">All done for now</p>
+            <p className="mt-0.5">Nothing is waiting for you.</p>
+          </div>
+        </div>
+      ) : (
+        <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {open.map((i) => (
+            <li key={i.label}>
+              <Link href={i.href} className="group flex items-center gap-4 rounded-2xl border border-border bg-card p-4 shadow-sm transition-[border-color,box-shadow] hover:border-ring/50 hover:shadow-md">
+                <span className={`grid h-14 min-w-14 shrink-0 place-items-center rounded-xl px-2 font-[family-name:var(--font-serif)] text-2xl font-semibold ${i.tone === 'bad' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-800'}`}>{i.count}</span>
+                <span className="flex-1 text-base font-medium leading-snug text-foreground">{i.label}</span>
+                <ArrowRight aria-hidden="true" className="h-5 w-5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
 /** A ranked list. The position is shown because the order is the point. */
 export function Ranking({ rows, empty }: { rows: { key: string | number; name: string; detail: string; amount: number; href?: string }[]; empty: string }) {
   if (rows.length === 0) return <p className="text-sm text-muted-foreground">{empty}</p>;
@@ -324,13 +382,13 @@ export function Ranking({ rows, empty }: { rows: { key: string | number; name: s
     <ol className="space-y-3.5">
       {rows.map((r, i) => (
         <li key={r.key} className="flex gap-3 text-sm">
-          <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-brass-soft text-[11px] font-semibold text-brass-ink">{i + 1}</span>
+          <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-gold-soft text-[11px] font-semibold text-gold-ink">{i + 1}</span>
           <div className="min-w-0 flex-1">
             <div className="flex items-baseline justify-between gap-3">
               {r.href ? <Link href={r.href} className="truncate font-medium text-foreground hover:text-primary">{r.name}</Link> : <span className="truncate font-medium text-foreground">{r.name}</span>}
               <span className="shrink-0 tabular-nums text-foreground">{taka(r.amount)}</span>
             </div>
-            <div className="mt-1.5 h-1.5 rounded-full bg-muted"><div className="h-1.5 rounded-full bg-brass" style={{ width: `${(r.amount / max) * 100}%` }} /></div>
+            <div className="mt-1.5 h-1.5 rounded-full bg-muted"><div className="h-1.5 rounded-full bg-gold" style={{ width: `${(r.amount / max) * 100}%` }} /></div>
             <p className="mt-1 text-xs text-muted-foreground">{r.detail}</p>
           </div>
         </li>
