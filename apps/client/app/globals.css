@@ -36,6 +36,11 @@
   --brass-soft: 42 50% 92%;
   --brass-ink: 34 45% 26%;
 
+  /* gold: money and premium markers (prices, sales, commission). Same values as brass today, so a screen can re-theme brass without recolouring money. */
+  --gold: 40 42% 52%;
+  --gold-soft: 42 50% 92%;
+  --gold-ink: 34 45% 26%;
+
   --radius: 0.5rem;
 }
 
@@ -60,6 +65,12 @@
   --color-brass: hsl(var(--brass));
   --color-brass-soft: hsl(var(--brass-soft));
   --color-brass-ink: hsl(var(--brass-ink));
+  --color-gold: hsl(var(--gold));
+  --color-gold-soft: hsl(var(--gold-soft));
+  --color-gold-ink: hsl(var(--gold-ink));
+  --color-signal: hsl(var(--signal, 172 52% 58%));
+  --color-sheen-a: #2aa6a0;
+  --color-sheen-b: #7a5bd0;
   --color-topbar: hsl(var(--topbar-bg));
   --color-topbar-foreground: hsl(var(--topbar-foreground));
   --color-st-ink: #11151b;
@@ -182,6 +193,158 @@ body {
 :is(.admin-main, .seller-main) ::selection { background: hsl(var(--brass) / 0.3); }
 aside nav { scrollbar-width: thin; scrollbar-color: rgb(255 255 255 / 0.16) transparent; }
 
+
+/* ---------- Admin console: "blue bar" palette ----------
+   Pigeon plumage as a system: slate ink, dove-grey canvas, a teal that borrows the neck sheen, gold only for money.
+   Shared by .admin-shell and .seller-shell; the storefront keeps its own look. */
+:is(.admin-shell, .seller-shell) {
+  --background: 200 9% 95%;
+  --foreground: 214 28% 11%;
+  --card: 0 0% 100%;
+  --card-foreground: 214 28% 11%;
+  --primary: 177 62% 27%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 205 14% 92%;
+  --secondary-foreground: 214 28% 11%;
+  --accent: 177 32% 92%;
+  --accent-foreground: 177 62% 19%;
+  --muted: 205 14% 94%;
+  --muted-foreground: 213 11% 38%;
+  --border: 208 12% 87%;
+  --input: 208 12% 83%;
+  --ring: 177 55% 36%;
+  --destructive: 357 65% 47%;
+  --topbar-bg: 214 30% 10%;
+  --topbar-foreground: 200 16% 94%;
+  --signal: 172 52% 58%;
+  --figure-font: var(--font-serif), Georgia, serif;
+  --hero-glow: radial-gradient(90% 75% at 100% 0%, rgb(42 166 160 / 0.3), transparent 58%), radial-gradient(70% 60% at 0% 100%, rgb(122 91 208 / 0.2), transparent 62%);
+  font-family: var(--font-sans);
+}
+
+/* The lead card on a dashboard. Brass glow by default; the admin re-points --hero-glow to the plumage sheen. */
+.hero-kpi { background-image: var(--hero-glow, radial-gradient(120% 90% at 100% 0%, hsl(var(--brass) / 0.22), transparent 55%)); }
+:is(.admin-shell, .seller-shell) .hero-feather { display: block; }
+
+/* Page titles: the serif carries the premium voice; everything that is data stays in Inter. */
+:is(.admin-shell, .seller-shell) :is(.admin-main, .seller-main) h1 {
+  font-family: var(--font-serif), Georgia, serif;
+  font-weight: 560;
+  letter-spacing: -0.015em;
+  font-variation-settings: "opsz" 48;
+}
+:is(.admin-shell, .seller-shell) :is(.admin-main, .seller-main) h2 { letter-spacing: -0.005em; }
+
+/* Focus, hover and links move from brass to the teal. */
+:is(.admin-shell, .seller-shell) :is(.admin-main, .seller-main) :is(input, select, textarea):hover:not(:disabled, :focus) { border-color: hsl(var(--ring) / 0.55); }
+:is(.admin-shell, .seller-shell) :is(.admin-main, .seller-main) :is(input:not([type='checkbox'], [type='radio']), select, textarea):focus {
+  border-color: hsl(var(--ring));
+  box-shadow: 0 0 0 3px hsl(var(--ring) / 0.18);
+}
+:is(.admin-shell, .seller-shell) :is(.admin-main, .seller-main) :is(a, button, summary, [role='tab']):focus-visible { outline-color: hsl(var(--ring)); }
+:is(.admin-shell, .seller-shell) :is(.admin-main, .seller-main) input[type='checkbox'], :is(.admin-shell, .seller-shell) :is(.admin-main, .seller-main) input[type='radio'] { accent-color: hsl(var(--primary)); }
+:is(.admin-shell, .seller-shell) :is(.admin-main, .seller-main) a.text-primary { color: hsl(var(--primary)); }
+:is(.admin-shell, .seller-shell) :is(.admin-main, .seller-main) a.text-primary:hover { text-decoration-color: hsl(var(--primary)); }
+:is(.admin-shell, .seller-shell) :is(.admin-main, .seller-main) ::selection { background: hsl(var(--ring) / 0.22); }
+
+/* Tables: a cool, quiet header and a slate hover. */
+:is(.admin-shell, .seller-shell) :is(.admin-main, .seller-main) thead { background: hsl(var(--secondary) / 0.55); }
+:is(.admin-shell, .seller-shell) :is(.admin-main, .seller-main) tbody tr:hover { background: hsl(var(--secondary) / 0.7); }
+:is(.admin-shell, .seller-shell) :is(.admin-main, .seller-main) select:not(.rounded-full) {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%2359636f' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 8 5 5 5-5'/%3E%3C/svg%3E");
+}
+
+/* Cards: a hairline, and a cool shadow instead of the warm one. */
+:is(.admin-shell, .seller-shell) :is(.admin-main, .seller-main) .rounded-xl.border {
+  box-shadow: 0 1px 2px rgb(15 25 40 / 0.04), 0 12px 30px -16px rgb(15 25 40 / 0.14);
+}
+
+/* Primary buttons: the teal, with the same soft highlight and press. */
+:is(.admin-shell, .seller-shell) :is(.admin-main, .seller-main) :is(button, a).bg-primary {
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.14), 0 1px 2px rgb(8 40 38 / 0.3);
+}
+:is(.admin-shell, .seller-shell) :is(.admin-main, .seller-main) :is(button, a).bg-primary:hover:not(:disabled) { background-color: hsl(177 62% 22%); }
+
+/* Placeholder cells in empty tables and missing images use slate, not brown. */
+:is(.admin-shell, .seller-shell) :is(.admin-main, .seller-main) td[colspan].text-center::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2359636f' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 12h-6l-2 3h-4l-2-3H2'/%3E%3Cpath d='M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z'/%3E%3C/svg%3E");
+}
+:is(.admin-shell, .seller-shell) :is(.admin-main, .seller-main) span.border-dashed:is(.h-10.w-10, .h-12.w-12) {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2359636f' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='18' height='18' rx='2'/%3E%3Ccircle cx='9' cy='9' r='2'/%3E%3Cpath d='m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21'/%3E%3C/svg%3E");
+}
+
+/* Status colours: the stock Tailwind greens, ambers and reds are loud next to the slate and teal, so the admin
+   re-points those palette steps (used for status chips, alerts and bars across every page) to quieter plumage tones. */
+:is(.admin-shell, .seller-shell) {
+  /* success: teal sage */
+  --color-emerald-50: #eef6f4; --color-emerald-100: #d8ece8; --color-emerald-400: #4fb3a6; --color-emerald-500: #2a9488;
+  --color-emerald-600: #1d7a73; --color-emerald-700: #17615c; --color-emerald-800: #134e4a;
+  --color-teal-600: #1d7a73;
+  /* waiting and warning: gold */
+  --color-amber-50: #fbf6e9; --color-amber-100: #f5e9c8; --color-amber-300: #e3c36c; --color-amber-400: #d4a93e; --color-amber-500: #c2932f;
+  --color-amber-600: #9a7020; --color-amber-700: #7f5a17; --color-amber-800: #6a4a14; --color-amber-900: #55390f;
+  /* problems: garnet */
+  --color-red-50: #fbefef; --color-red-100: #f6dcdc; --color-red-200: #ecbcbc; --color-red-400: #de7878; --color-red-500: #cf4f4f;
+  --color-red-600: #b3362f; --color-red-700: #962b2b; --color-red-800: #7d2424;
+  --color-rose-400: #e07a8a;
+  /* in progress: slate blue, violet and indigo */
+  --color-sky-50: #edf4fa; --color-sky-100: #dbe8f3; --color-sky-600: #2b6aa0; --color-sky-700: #235786; --color-sky-800: #1e4a72;
+  --color-violet-100: #e7e1f6; --color-violet-500: #7a5bd0; --color-violet-800: #4b3492;
+  --color-indigo-100: #e0e5f5; --color-indigo-500: #4f5fc2; --color-indigo-800: #343f8c;
+}
+
+/* File pickers: the native grey button becomes a quiet outlined one that matches the other controls. */
+:is(.admin-shell, .seller-shell) :is(.admin-main, .seller-main) input[type='file'] { font-size: 0.8125rem; color: hsl(var(--muted-foreground)); max-width: 100%; }
+:is(.admin-shell, .seller-shell) :is(.admin-main, .seller-main) input[type='file']::file-selector-button {
+  margin-right: 0.75rem;
+  padding: 0.4rem 0.85rem;
+  border: 1px solid hsl(var(--input));
+  border-radius: 0.5rem;
+  background: #fff;
+  color: hsl(var(--foreground));
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.12s ease, border-color 0.12s ease;
+}
+:is(.admin-shell, .seller-shell) :is(.admin-main, .seller-main) input[type='file']::file-selector-button:hover { background: hsl(var(--secondary)); border-color: hsl(var(--ring) / 0.5); }
+
+/* Rhythm: a subtitle sits a little further under its title, and table rows are a touch tighter so more fits on screen. */
+:is(.admin-shell, .seller-shell) :is(.admin-main, .seller-main) h1 + p { margin-top: 0.4rem; line-height: 1.5; }
+:is(.admin-shell, .seller-shell) :is(.admin-main, .seller-main) tbody td, :is(.admin-shell, .seller-shell) :is(.admin-main, .seller-main) tbody th { padding-top: 0.65rem; padding-bottom: 0.65rem; }
+:is(.admin-shell, .seller-shell) :is(.admin-main, .seller-main) tbody td[colspan] { padding-top: 2.75rem; padding-bottom: 2.75rem; }
+
+:is(.admin-shell, .seller-shell) aside nav { scrollbar-color: rgb(255 255 255 / 0.14) transparent; }
+
+
+/* ---------- Seller portal: the same palette, built for people who are not at ease with software ----------
+   Bigger type, bigger controls and more room: the scale tokens below grow every text size and every
+   spacing step inside .seller-shell, so no page needs its own sizes. Plain words and clear icons do the rest. */
+.seller-shell {
+  --spacing: 0.28rem;
+  --text-xs: 0.9375rem;
+  --text-sm: 1.0625rem;
+  --text-base: 1.125rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.4rem;
+  --text-2xl: 1.7rem;
+  --text-3xl: 2.05rem;
+  --text-4xl: 2.5rem;
+}
+.seller-shell .seller-main thead th { font-size: 0.9375rem; }
+.seller-shell .seller-main :is(td, th) { padding-left: 0.8rem; padding-right: 0.8rem; }
+/* A table wider than the screen scrolls sideways inside its card instead of being cut off. */
+.seller-shell .seller-main div:has(> table) { overflow-x: auto; }
+.seller-shell .seller-main tbody td, .seller-shell .seller-main tbody th { padding-top: 0.95rem; padding-bottom: 0.95rem; }
+.seller-shell .seller-main tbody td[colspan] { padding-top: 3rem; padding-bottom: 3rem; }
+.seller-shell :is(input:not([type='checkbox'], [type='radio'], [type='file'], [type='range'], [type='color']), select:not(.rounded-full)) { min-height: 3rem; font-size: 1rem; background-color: #fff; border-radius: 0.75rem; }
+.seller-shell .seller-main textarea { font-size: 1rem; }
+.seller-shell .seller-main :is(button, a).bg-primary { min-height: 3rem; font-size: 1.0625rem; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; }
+.seller-shell .seller-main input[type='checkbox'], .seller-shell .seller-main input[type='radio'] { width: 1.25rem; height: 1.25rem; }
+.seller-shell .seller-main :is(a, button, summary, [role='tab']):focus-visible { outline-width: 3px; }
+.seller-shell .seller-main button:not(.bg-primary):not([role='tab']) { min-height: 2.5rem; }
+.seller-shell .seller-main h1 { font-size: 2.1rem; line-height: 1.15; }
+
 /* ---------- Storefront ---------- */
 .store {
   --s-ink: #11151b;
@@ -235,4 +398,3 @@ aside nav { scrollbar-width: thin; scrollbar-color: rgb(255 255 255 / 0.16) tran
     transition-duration: 0.01ms !important;
   }
 }
-
