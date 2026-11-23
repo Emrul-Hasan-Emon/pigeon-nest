@@ -35,7 +35,7 @@ export function AdminAuthGuard({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-background">
       <AdminSidebar />
       <AdminTopbar />
-      <main className="admin-main ml-56 min-h-screen pt-16">
+      <main className="admin-main ml-60 min-h-screen pt-16">
         <div className="mx-auto max-w-7xl px-8 py-8">{children}</div>
       </main>
     </div>
