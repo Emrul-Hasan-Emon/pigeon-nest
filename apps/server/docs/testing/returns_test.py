@@ -257,14 +257,14 @@ truth("C line seller amounts are payable minus commission", sql(f"select string_
 truth("C order seller amount = payable (with delivery) minus commission", sql(f"select \"sellerAmount\" from \"order\" where id={o1['id']}") == "12250")
 check("C seller's order view shows line commission", call("GET", f"{SL}/{o1['id']}", S1), 200, pred=lambda v: [i["systemCommission"] for i in v["items"]] == [320, 380, 650] and all(i["isReturned"] is False for i in v["items"]))
 check("C customer's order view hides line commission", call("GET", f"/user/orders/{o1['id']}", USER), 200, pred=lambda v: all("systemCommission" not in i and "sellerAmount" not in i for i in v["items"]) and v["returns"] == [])
-call("PUT", f"/admin/sellers/{SID1}/commission-setting", ADMIN, {"commissionType": "fixed", "commissionAmount": 50})
+call("PUT", f"/admin/commission/sellers/{SID1}/setting", ADMIN, {"commissionType": "fixed", "commissionAmount": 50})
 of = make_order(((119, 1), (120, 1)))
 truth("C a fixed amount applies per line (2 lines -> 100)", sql(f"select \"systemCommission\" from \"order\" where id={of['id']}") == "100")
-call("PUT", f"/admin/sellers/{SID1}/commission-setting", ADMIN, {"commissionType": "fixed", "commissionAmount": 99999})
+call("PUT", f"/admin/commission/sellers/{SID1}/setting", ADMIN, {"commissionType": "fixed", "commissionAmount": 99999})
 oc = make_order(((119, 1), (120, 1)))
 truth("C a fixed amount never exceeds the line (commission = lines total, delivery stays with the seller)", sql(f"select \"systemCommission\"||'|'||\"sellerAmount\" from \"order\" where id={oc['id']}") == "7000|100")
 truth("C no line seller amount below zero", sql(f"select count(*) from order_item where \"orderId\"={oc['id']} and \"sellerAmount\" < 0") == "0")
-call("PUT", f"/admin/sellers/{SID1}/commission-setting", ADMIN, {"commissionType": "percentage", "commissionAmount": 10})
+call("PUT", f"/admin/commission/sellers/{SID1}/setting", ADMIN, {"commissionType": "percentage", "commissionAmount": 10})
 truth("C earlier orders were not touched by the rule change", sql(f"select \"systemCommission\" from \"order\" where id={o1['id']}") == "1350")
 
 # ============================================================ L  ledger and change log on earning

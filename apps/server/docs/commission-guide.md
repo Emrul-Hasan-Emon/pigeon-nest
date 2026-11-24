@@ -50,7 +50,7 @@ System commission rate box on the seller's page under System commission > Balanc
 
 Every change is saved in the rate history (what changed, from what, to what,
 who, when, optional note). Admin: seller page > Rate history, or the API
-`GET /v1/api/admin/seller-settings/history`. Seller: System commission > Rate history.
+`GET /v1/api/admin/commission/settings/history`. Seller: System commission > Rate history.
 
 A rate change affects new orders only. Old orders keep the rate they were
 placed with.
@@ -149,9 +149,9 @@ Admin (`/v1/api/admin`):
   GET   /commission/history             ?sellerId &orderId &type &paymentStatus &voided &from &to
   GET   /commission/disbursements       ?sellerId &from &to &minAmount &maxAmount
   GET   /commission/disbursements/{id}
-  GET   /sellers/{sellerId}/commission-setting
-  PUT   /sellers/{sellerId}/commission-setting          {commissionType, commissionAmount, note?}
-  GET   /seller-settings/history        ?sellerId &settingType &from &to
+  GET   /commission/sellers/{sellerId}/setting
+  PUT   /commission/sellers/{sellerId}/setting          {commissionType, commissionAmount, note?}
+  GET   /commission/settings/history        ?sellerId &settingType &from &to
   PATCH /settings                       {"settings": {"commission.type": ..., "commission.amount": ...}}
 
 Seller (`/v1/api/seller/commission`), read only:

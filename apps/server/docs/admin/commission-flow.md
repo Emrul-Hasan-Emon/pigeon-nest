@@ -94,7 +94,7 @@ commissionAmount together").
 - The Rate history tab on that page lists every change: when, the setting
   (System commission), the value before ("Not set (global rate)" the first time), the
   value after, who changed it, and the note.
-- `GET /admin/seller-settings/history` shows the changes of all sellers, with
+- `GET /admin/commission/settings/history` shows the changes of all sellers, with
   filters (see section 13). It is built for more seller settings later, so each
   row names the setting type.
 
@@ -265,9 +265,9 @@ All under `/v1/api/admin`. Sign in as admin. Lists use `cursor` and `limit` (1 t
 | GET    | /commission/history                            | Ledger. `sellerId`, `orderId`, `type`, `paymentStatus`, `voided`, `from`, `to` |
 | GET    | /commission/disbursements                      | Payments. `sellerId`, `from`, `to`, `minAmount`, `maxAmount` |
 | GET    | /commission/disbursements/{id}                 | One payment with its attachments                          |
-| GET    | /sellers/{sellerId}/commission-setting         | The seller's own rule, the global rule, the effective one |
-| PUT    | /sellers/{sellerId}/commission-setting         | `{ commissionType, commissionAmount, note? }`             |
-| GET    | /seller-settings/history                       | Rate changes. `sellerId`, `settingType`, `from`, `to`     |
+| GET    | /commission/sellers/{sellerId}/setting         | The seller's own rule, the global rule, the effective one |
+| PUT    | /commission/sellers/{sellerId}/setting         | `{ commissionType, commissionAmount, note? }`             |
+| GET    | /commission/settings/history                       | Rate changes. `sellerId`, `settingType`, `from`, `to`     |
 | GET    | /settings                                      | Includes `commission.type` and `commission.amount`        |
 | PATCH  | /settings                                      | `{ "settings": { "commission.type": "fixed", "commission.amount": 50 } }` |
 | POST   | /sellers                                       | multipart; optional `commissionType` + `commissionAmount` |

@@ -95,7 +95,7 @@ def set_global(kind, amount):
 
 
 def set_seller_rule(sid, kind, amount):
-    return call("PUT", f"/admin/sellers/{sid}/commission-setting", ADMIN, {"commissionType": kind, "commissionAmount": amount})
+    return call("PUT", f"/admin/commission/sellers/{sid}/setting", ADMIN, {"commissionType": kind, "commissionAmount": amount})
 
 
 # ---------------------------------------------------------------- prices used throughout

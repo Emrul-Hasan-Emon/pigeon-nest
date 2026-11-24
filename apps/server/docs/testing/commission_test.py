@@ -201,7 +201,7 @@ def voided(oid):
 
 
 def put_rule(sid, t, v, tok=None):
-    return call("PUT", f"/admin/sellers/{sid}/commission-setting", tok or ADMIN, {"commissionType": t, "commissionAmount": v})
+    return call("PUT", f"/admin/commission/sellers/{sid}/setting", tok or ADMIN, {"commissionType": t, "commissionAmount": v})
 
 
 def set_global(t, v):
@@ -229,13 +229,13 @@ check("G 2 decimals are fine", set_global("percentage", 7.25), 200)
 set_global("percentage", 5)
 
 # ============================================================ R  seller rule: validation, history, access
-V = f"/admin/sellers/{SID1}/commission-setting"
+V = f"/admin/commission/sellers/{SID1}/setting"
 check("R view with no own rule shows the global one", call("GET", V, ADMIN), 200, pred=lambda v: v["setting"] is None and v["effective"]["source"] == "global" and v["effective"]["value"] == 5)
 check("R no token -> 401", call("GET", V), 401)
 check("R customer -> 403", call("GET", V, USER), 403)
 check("R seller on the admin route -> 403", call("GET", V, S1), 403)
-check("R unknown seller -> 404", call("GET", "/admin/sellers/99999999/commission-setting", ADMIN), 404)
-check("R bad id -> 400", call("GET", "/admin/sellers/abc/commission-setting", ADMIN), 400)
+check("R unknown seller -> 404", call("GET", "/admin/commission/sellers/99999999/setting", ADMIN), 404)
+check("R bad id -> 400", call("GET", "/admin/commission/sellers/abc/setting", ADMIN), 400)
 check("R PUT unknown seller -> 404", put_rule(99999999, "percentage", 5), 404)
 check("R PUT seller token -> 403", put_rule(SID1, "percentage", 5, S1), 403)
 for bad in [("percentage", 101), ("percentage", -1), ("percentage", 5.555), ("fixed", -5), ("fixed", 99999999999), ("flat", 5), ("percentage", "x"), (None, 5), ("percentage", None)]:
@@ -248,19 +248,19 @@ check("R the same value again adds no history", put_rule(SID1, "percentage", 10)
 truth("R one history row so far", sql(f"select count(*) from seller_setting_history where \"sellerId\"={SID1}") == "1")
 check("R PUT fixed 50 changes it", put_rule(SID1, "fixed", 50), 200, pred=lambda v: v["effective"]["type"] == "fixed" and v["effective"]["value"] == 50)
 put_rule(SID1, "percentage", 10)
-c, h = call("GET", f"/admin/seller-settings/history?sellerId={SID1}", ADMIN)
+c, h = call("GET", f"/admin/commission/settings/history?sellerId={SID1}", ADMIN)
 check("R history: created, updated, updated (newest first)", (c, h), 200, pred=lambda v: [r["action"] for r in v["results"]] == ["updated", "updated", "created"])
 check("R history keeps before and after", (c, h), 200, pred=lambda v: v["results"][1]["fromValue"] == {"commissionType": "percentage", "commissionAmount": 10} and v["results"][1]["toValue"] == {"commissionType": "fixed", "commissionAmount": 50} and v["results"][0]["fromValue"]["commissionType"] == "fixed")
 check("R history says who and when", (c, h), 200, pred=lambda v: v["results"][0]["changedByType"] == "admin" and v["results"][0]["changedByName"] and v["results"][0]["changedAt"] and v["results"][0]["sellerName"].startswith(TAG))
 check("R history: created has no before", (c, h), 200, pred=lambda v: v["results"][2]["fromValue"] is None)
-c, h1 = call("GET", f"/admin/seller-settings/history?sellerId={SID1}&limit=2", ADMIN)
+c, h1 = call("GET", f"/admin/commission/settings/history?sellerId={SID1}&limit=2", ADMIN)
 check("R history cursor page 1", (c, h1), 200, pred=lambda v: len(v["results"]) == 2 and v["nextCursor"])
-check("R history cursor page 2", call("GET", f"/admin/seller-settings/history?sellerId={SID1}&limit=2&cursor={h1['nextCursor']}", ADMIN), 200, pred=lambda v: len(v["results"]) == 1 and v["nextCursor"] is None)
-check("R history filter by setting type", call("GET", f"/admin/seller-settings/history?sellerId={SID1}&settingType=commission", ADMIN), 200, pred=lambda v: len(v["results"]) == 3)
-check("R history bad setting type -> 400", call("GET", "/admin/seller-settings/history?settingType=x", ADMIN), 400)
-check("R history future date range is empty", call("GET", f"/admin/seller-settings/history?sellerId={SID1}&from=2999-01-01", ADMIN), 200, pred=lambda v: v["results"] == [])
-check("R history bad cursor limit -> 400", call("GET", "/admin/seller-settings/history?limit=101", ADMIN), 400)
-check("R history seller token -> 403", call("GET", "/admin/seller-settings/history", S1), 403)
+check("R history cursor page 2", call("GET", f"/admin/commission/settings/history?sellerId={SID1}&limit=2&cursor={h1['nextCursor']}", ADMIN), 200, pred=lambda v: len(v["results"]) == 1 and v["nextCursor"] is None)
+check("R history filter by setting type", call("GET", f"/admin/commission/settings/history?sellerId={SID1}&settingType=commission", ADMIN), 200, pred=lambda v: len(v["results"]) == 3)
+check("R history bad setting type -> 400", call("GET", "/admin/commission/settings/history?settingType=x", ADMIN), 400)
+check("R history future date range is empty", call("GET", f"/admin/commission/settings/history?sellerId={SID1}&from=2999-01-01", ADMIN), 200, pred=lambda v: v["results"] == [])
+check("R history bad cursor limit -> 400", call("GET", "/admin/commission/settings/history?limit=101", ADMIN), 400)
+check("R history seller token -> 403", call("GET", "/admin/commission/settings/history", S1), 403)
 
 # seller can read their own, never change
 check("R seller sees own rule", call("GET", f"{CS}/setting", S1), 200, pred=lambda v: v["sellerId"] == SID1 and v["setting"]["commissionAmount"] == 10)
@@ -283,15 +283,15 @@ truth("R none of those created a seller", sql(f"select count(*) from seller wher
 c, ns = multi("POST", "/admin/sellers", ADMIN, {**SELF, "commissionType": "percentage", "commissionAmount": "12.5"})
 check("R create seller with a commission", (c, ns), 201, pred=lambda v: "commissionRate" not in v)
 SID3 = int(sql(f"select id from seller where name='{TAG} Seller 333'"))
-check("R the new seller has that rule", call("GET", f"/admin/sellers/{SID3}/commission-setting", ADMIN), 200, pred=lambda v: v["effective"] == {"type": "percentage", "value": 12.5, "source": "seller"})
+check("R the new seller has that rule", call("GET", f"/admin/commission/sellers/{SID3}/setting", ADMIN), 200, pred=lambda v: v["effective"] == {"type": "percentage", "value": 12.5, "source": "seller"})
 truth("R and a 'created' history row", sql(f"select action from seller_setting_history where \"sellerId\"={SID3}") == "created")
 check("R seller details show the effective rule", call("GET", f"/admin/sellers/{SID3}", ADMIN), 200, pred=lambda v: v["commission"]["value"] == 12.5 and "commissionRate" not in v)
 check("R seller list shows each rule", call("GET", f"/admin/sellers?search=T%20Com", ADMIN), 200, pred=lambda v: {r["id"]: r["commission"]["source"] for r in v["results"]}.get(SID3) == "seller" and {r["id"]: r["commission"]["source"] for r in v["results"]}.get(SID2) == "global")
 check("R update seller commission", multi("PATCH", f"/admin/sellers/{SID3}", ADMIN, {"commissionType": "fixed", "commissionAmount": "20"}), 200)
-check("R update changes the rule and logs it", call("GET", f"/admin/seller-settings/history?sellerId={SID3}", ADMIN), 200, pred=lambda v: [r["action"] for r in v["results"]] == ["updated", "created"] and v["results"][0]["toValue"]["commissionAmount"] == 20)
+check("R update changes the rule and logs it", call("GET", f"/admin/commission/settings/history?sellerId={SID3}", ADMIN), 200, pred=lambda v: [r["action"] for r in v["results"]] == ["updated", "created"] and v["results"][0]["toValue"]["commissionAmount"] == 20)
 check("R update with one field -> 400", multi("PATCH", f"/admin/sellers/{SID3}", ADMIN, {"commissionAmount": "30"}), 400)
 check("R update without commission leaves it", multi("PATCH", f"/admin/sellers/{SID3}", ADMIN, {"name": f"{TAG} Seller 333b"}), 200)
-check("R still the same rule, no extra history", call("GET", f"/admin/seller-settings/history?sellerId={SID3}", ADMIN), 200, pred=lambda v: len(v["results"]) == 2)
+check("R still the same rule, no extra history", call("GET", f"/admin/commission/settings/history?sellerId={SID3}", ADMIN), 200, pred=lambda v: len(v["results"]) == 2)
 check("R old commissionRate field is refused", multi("PATCH", f"/admin/sellers/{SID3}", ADMIN, {"commissionRate": "5"}), 400)
 
 # ============================================================ O  commission on every order flow
