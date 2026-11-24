@@ -412,3 +412,61 @@ aside nav { scrollbar-width: thin; scrollbar-color: rgb(255 255 255 / 0.16) tran
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ---------- Names stand out from values (seller portal and admin panel) ----------
+   Table column names, form labels and the names on detail pages are bold and dark; the values under or beside them
+   stay regular, so it is always clear which is the name and which is the value. */
+:is(.admin-shell, .seller-shell) :is(.admin-main, .seller-main) thead th {
+  font-weight: 700;
+  color: hsl(var(--foreground));
+}
+:is(.admin-shell, .seller-shell) :is(.admin-main, .seller-main) :is(label, dt) {
+  font-weight: 600;
+  color: hsl(var(--foreground));
+}
+:is(.admin-shell, .seller-shell) :is(.admin-main, .seller-main) :is(label :is(input, select, textarea), dd) { font-weight: 400; }
+/* Help text and Optional tags inside a label stay light so only the name is bold. */
+:is(.admin-shell, .seller-shell) :is(.admin-main, .seller-main) label .text-muted-foreground:not(.font-medium, .font-semibold) { font-weight: 400; }
+
+
+/* ---------- Row actions as buttons (seller portal and admin panel) ----------
+   View, Edit, Quick edit, Copy, Delete and similar links in the last column of a list are drawn as small buttons.
+   Anything that already has its own background or border (a real button style) is left alone. */
+:is(.admin-shell, .seller-shell) :is(.admin-main, .seller-main) tbody td:last-child :is(a, button):is(.text-primary, .text-destructive, .text-foreground, .text-muted-foreground):not([class*='bg-'], [class*='border'], :disabled, .rounded-full) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.15rem;
+  padding: 0.3rem 0.8rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.5rem;
+  background: hsl(var(--card));
+  color: hsl(var(--foreground));
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background-color 0.12s ease, border-color 0.12s ease;
+}
+:is(.admin-shell, .seller-shell) :is(.admin-main, .seller-main) tbody td:last-child :is(a, button).text-primary:not([class*='bg-'], [class*='border'], :disabled, .rounded-full) {
+  color: hsl(var(--primary));
+  border-color: hsl(var(--primary) / 0.35);
+}
+:is(.admin-shell, .seller-shell) :is(.admin-main, .seller-main) tbody td:last-child :is(a, button).text-destructive:not([class*='bg-'], [class*='border'], :disabled, .rounded-full) {
+  color: hsl(var(--destructive));
+  border-color: hsl(var(--destructive) / 0.35);
+}
+:is(.admin-shell, .seller-shell) :is(.admin-main, .seller-main) tbody td:last-child :is(a, button):is(.text-primary, .text-foreground, .text-muted-foreground):not([class*='bg-'], [class*='border'], :disabled, .rounded-full):hover {
+  background: hsl(var(--secondary));
+  border-color: hsl(var(--foreground) / 0.3);
+}
+:is(.admin-shell, .seller-shell) :is(.admin-main, .seller-main) tbody td:last-child :is(a, button).text-destructive:not([class*='bg-'], [class*='border'], :disabled, .rounded-full):hover {
+  background: hsl(var(--destructive) / 0.08);
+  border-color: hsl(var(--destructive) / 0.6);
+}
+.seller-shell .seller-main tbody td:last-child :is(a, button):is(.text-primary, .text-destructive, .text-foreground, .text-muted-foreground):not([class*='bg-'], [class*='border'], :disabled, .rounded-full) {
+  min-height: 2.4rem;
+  padding: 0.3rem 0.85rem;
+}
+
+
