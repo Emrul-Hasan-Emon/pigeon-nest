@@ -30,7 +30,7 @@ Sire and dam (multipart)
   `removeImage` (true or false) and a file `image` (a picture, up to 10MB).
   Adding one that exists changes it. A new parent needs at least a name, a ring
   number or a photo.
-- `DELETE /:id/skus/:skuId/parents/sire` or `.../dam` removes the parent and the photo.
+- `DELETE /:id/skus/:skuId/parents/sire` or `.../dam` removes the parent and the photo. **Switched off for now** (404): save a new name, ring or photo over the old one.
 - Both answer with the whole product, so the screen can reload from it.
 - `skuId` must belong to the product (404 otherwise). Another seller's product is 404.
 
