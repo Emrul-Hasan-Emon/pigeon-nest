@@ -63,6 +63,7 @@ export const ENDPOINTS = {
     products: {
       ...resource('/products'),
       mediaFiles: (productId: Id) => `/products/${productId}/media-files`,
+      parent: (productId: Id, skuId: Id, role: string) => `/products/${productId}/skus/${skuId}/parents/${role}`,
     },
 
     productStatusHistory: { list: '/product-status-history' },
@@ -154,6 +155,7 @@ export const ENDPOINTS = {
     products: {
       ...resource('/products'),
       mediaFiles: (productId: Id) => `/products/${productId}/media-files`,
+      parent: (productId: Id, skuId: Id, role: string) => `/products/${productId}/skus/${skuId}/parents/${role}`,
     },
     dashboard: '/dashboard',
     dashboardAttention: '/dashboard/attention',
@@ -242,6 +244,7 @@ export const ENDPOINTS = {
     reviews: {
       productSummary: (productId: Id) => `/products/${productId}/reviews/summary`,
       productList: (productId: Id) => `/products/${productId}/reviews`,
+      sellerList: (sellerId: Id) => `/sellers/${sellerId}/reviews`,
       thread: (id: Id) => `/reviews/${id}/replies`,
       list: '/reviews',
       pending: '/reviews/pending',
