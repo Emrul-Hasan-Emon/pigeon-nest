@@ -1,8 +1,7 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { DatabaseService } from '../../database/database.service';
 import { PaymentClaimStatus } from '../../database/enums/payment-claim.enum';
-import { OrderPaymentService } from '../../order/services/order-payment.service';
-import { StatusActor } from '../../order/services/order-status.service';
+import { CommonOrderService, StatusActor } from '../../order/services/common-order.service';
 import { PageRequest, pageResult } from '../../shared/utils/page-paginate.util';
 import { ConfirmPaymentClaimDto, ListPaymentClaimsQueryDto } from '../dtos/payment-claim.dtos';
 import { CommonPaymentClaimService } from './common-payment-claim.service';
@@ -18,7 +17,7 @@ export class StaffPaymentClaimService {
   constructor(
     private readonly db: DatabaseService,
     private readonly common: CommonPaymentClaimService,
-    private readonly payments: OrderPaymentService,
+    private readonly payments: CommonOrderService,
   ) {}
 
   async list(query: ListPaymentClaimsQueryDto, page: PageRequest, scope: ClaimScope) {
