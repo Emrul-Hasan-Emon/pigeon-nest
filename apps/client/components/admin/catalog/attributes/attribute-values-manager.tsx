@@ -10,6 +10,7 @@ import { ApiError, ConflictApiError, NotFoundApiError } from '@/lib/api/http';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useToast } from '@/components/ui/toast';
 import type { AttributeValue } from '@/types/attribute';
+import { DELETE_ENABLED } from '@/lib/features';
 
 interface DraftValue {
   name: string;
@@ -144,13 +145,15 @@ export function AttributeValuesManager({
                 >
                   {value.isActive ? 'Active' : 'Inactive'}
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setPendingDelete(value)}
-                  className="font-medium text-destructive hover:opacity-70"
-                >
-                  Delete
-                </button>
+                {DELETE_ENABLED && (
+                  <button
+                    type="button"
+                    onClick={() => setPendingDelete(value)}
+                    className="font-medium text-destructive hover:opacity-70"
+                  >
+                    Delete
+                  </button>
+                )}
               </div>
             </div>
           ))}

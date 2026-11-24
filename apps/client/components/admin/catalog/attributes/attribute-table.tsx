@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import type { Attribute } from '@/types/attribute';
+import { DELETE_ENABLED } from '@/lib/features';
 
 export function AttributeTable({
   attributes,
@@ -78,13 +79,15 @@ export function AttributeTable({
                   >
                     Edit
                   </Link>
-                  <button
-                    type="button"
-                    onClick={() => onDelete(attribute)}
-                    className="font-medium text-destructive hover:opacity-70"
-                  >
-                    Delete
-                  </button>
+                  {DELETE_ENABLED && (
+                    <button
+                      type="button"
+                      onClick={() => onDelete(attribute)}
+                      className="font-medium text-destructive hover:opacity-70"
+                    >
+                      Delete
+                    </button>
+                  )}
                 </div>
               </td>
             </tr>
