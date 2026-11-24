@@ -21,6 +21,21 @@ export class Seller extends BaseEntity {
   @Column()
   passwordHash: string;
 
+  // Selling switch. On (the default): the seller and their products are shown. Off: hidden from buyers everywhere.
+  @Column({ default: true })
+  isEnabledForSell: boolean;
+
+  // A planned break: hidden from the first day to the last day, both included. Set both or neither.
+  @Column({ type: 'date', nullable: true })
+  breakStartsOn: string | null;
+
+  @Column({ type: 'date', nullable: true })
+  breakEndsOn: string | null;
+
+  // A short message for the seller's own records (shown to the seller, not to buyers).
+  @Column({ type: 'varchar', length: 300, nullable: true })
+  breakNote: string | null;
+
   // Short "about us" text, shown on the public seller page.
   @Column({ type: 'text', nullable: true })
   description: string | null;
