@@ -123,7 +123,7 @@ ADMIN_HASH = sql(f"select \"passwordHash\" from admin_user where id={ADMIN_ID}")
 SELLER_HASH = sql(f"select \"passwordHash\" from seller where id={SID}")
 USER_HASH = sql(f"select \"passwordHash\" from \"user\" where id={UID}")
 
-ROUTES = {"admin": "/admin/orders", "seller": "/seller/orders", "user": "/user/returns"}
+ROUTES = {"admin": "/admin/order", "seller": "/seller/order", "user": "/user/returns"}
 TOKENS = {"admin": ADMIN, "seller": SELLER, "user": USER}
 
 print("--- the tokens we issue")
@@ -157,7 +157,7 @@ for role, route in ROUTES.items():
     for label, over in (("type changed to admin", {"type": "admin"}), ("type changed to seller", {"type": "seller"}), ("sub changed", {"sub": 1}), ("aud changed", {"aud": "admin"}), ("exp pushed out", {"exp": 4102444800}), ("pwd removed", {"pwd": "x"})):
         check(f"{role}: {label} -> 401/403", call("GET", route, edit_payload(TOKENS[role], **over)), [401])
 check("user token with sub switched to another customer -> 401", call("GET", "/user/returns", edit_payload(USER, sub=UID2)), 401)
-check("seller token edited to type admin on an admin route -> 401", call("GET", "/admin/orders", edit_payload(SELLER, type="admin", aud="admin")), 401)
+check("seller token edited to type admin on an admin route -> 401", call("GET", "/admin/order", edit_payload(SELLER, type="admin", aud="admin")), 401)
 
 print("--- forged with the wrong key, algorithm or header")
 now = int(time.time())
@@ -198,16 +198,16 @@ sql(f"insert into admin_user (name, email, \"passwordHash\", role, \"isActive\")
 GA = int(sql(f"select id from admin_user where email='t-grd-a-{RUN}@example.com'"))
 GH = "$2a$10$gtestgtestgtestgtestgu"
 tok = good("admin", GA, GH)
-check("a second admin's token works", call("GET", "/admin/orders", tok), 200)
+check("a second admin's token works", call("GET", "/admin/order", tok), 200)
 sql(f"update admin_user set \"isActive\"=false where id={GA}")
-check("deactivated admin -> 401 on the next request", call("GET", "/admin/orders", tok), 401)
+check("deactivated admin -> 401 on the next request", call("GET", "/admin/order", tok), 401)
 sql(f"update admin_user set \"isActive\"=true where id={GA}")
-check("reactivated admin works again", call("GET", "/admin/orders", tok), 200)
+check("reactivated admin works again", call("GET", "/admin/order", tok), 200)
 sql(f"update admin_user set \"passwordHash\"='$2a$10$changedchangedchangedch' where id={GA}")
-check("changed admin password ends the old token -> 401", call("GET", "/admin/orders", tok), 401)
+check("changed admin password ends the old token -> 401", call("GET", "/admin/order", tok), 401)
 sql(f"delete from admin_user where id={GA}")
-check("deleted admin -> 401", call("GET", "/admin/orders", tok), 401)
-check("an admin cannot reach a seller route", call("GET", "/seller/orders", ADMIN), 403)
+check("deleted admin -> 401", call("GET", "/admin/order", tok), 401)
+check("an admin cannot reach a seller route", call("GET", "/seller/order", ADMIN), 403)
 
 print("--- seller and customer: status, deletion, password")
 sql(f"update seller set \"activeStatus\"='inactive' where id={SID}")
@@ -238,8 +238,8 @@ check("customer 1 and 2 each see their own list", call("GET", "/user/returns", U
 
 print("--- every authenticated route refuses a missing token (sweep)")
 paths = {
-    "admin": ["/admin/dashboard", "/admin/dashboard/attention", "/admin/auth/me", "/admin/orders", "/admin/returns", "/admin/commission/balances", "/admin/commission/changes", "/admin/settings", "/admin/products", "/admin/sellers", "/admin/users", "/admin/proposals", "/admin/payment-gateways", "/admin/carts"],
-    "seller": ["/seller/dashboard", "/seller/dashboard/attention", "/seller/orders", "/seller/returns", "/seller/commission/balance", "/seller/profile", "/seller/proposals", "/seller/products", "/seller/dashboard"],
+    "admin": ["/admin/dashboard", "/admin/dashboard/attention", "/admin/auth/me", "/admin/order", "/admin/returns", "/admin/commission/balances", "/admin/commission/changes", "/admin/settings", "/admin/products", "/admin/sellers", "/admin/users", "/admin/proposals", "/admin/payment-gateways", "/admin/carts"],
+    "seller": ["/seller/dashboard", "/seller/dashboard/attention", "/seller/order", "/seller/returns", "/seller/commission/balance", "/seller/profile", "/seller/proposals", "/seller/products", "/seller/dashboard"],
     "user": ["/user/returns", "/user/profile", "/user/proposals", "/user/wishlist", "/user/addresses"],
 }
 for role, plist in paths.items():

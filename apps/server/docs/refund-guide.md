@@ -37,8 +37,8 @@ For a return, the seller's own "returning money" step stays in the return histor
 
 | Role | Route |
 |---|---|
-| Seller | `GET /seller/refunds?status=&search=&page=`, `GET /seller/refunds/summary`, `GET /seller/refunds/:id`, `POST /seller/refunds/:id/status` (multipart `status`, `amount`, `note`, `transactionId`, `files`) |
-| Admin | the same under `/admin/refunds`, plus `POST /admin/orders/:orderId/refunds` (another record, multipart, default status `refunded`) and `POST /admin/returns/:returnId/money-records` |
-| Buyer | read only: `GET /user/orders/:id` returns `refundStatus` and `refunds` (records with history); `GET /user/returns/:id` returns `moneyRecords` |
+| Seller | `GET /seller/order/refunds?status=&search=&page=`, `GET /seller/order/refunds/summary`, `GET /seller/order/refunds/:id`, `POST /seller/order/refunds/:id/status` (multipart `status`, `amount`, `note`, `transactionId`, `files`) |
+| Admin | the same under `/admin/order/refunds`, plus `POST /admin/order/:orderId/refunds` (another record, multipart, default status `refunded`) and `POST /admin/order/returns/:returnId/money-records` |
+| Buyer | read only: `GET /user/order/:id` returns `refundStatus` and `refunds` (records with history); `GET /user/returns/:id` returns `moneyRecords` |
 
 Screens: seller **Refunds** (with a count badge) and admin **Commerce > Refunds** list the cancelled orders with money paid; the order pages show every record in both portals and for the buyer ("Your refund"). The seller dashboard to-do list counts "Refunds to send back".

@@ -131,7 +131,7 @@ def order_body(sku=119, product=94, qty=1, **over):
     return addr(items=[{"sellerProductId": product, "sellerProductSkuId": sku, "quantity": qty}], **over)
 
 
-A, SL = "/admin/orders", "/seller/orders"
+A, SL = "/admin/order", "/seller/order"
 
 
 def admin_order(**over):
@@ -269,9 +269,9 @@ check("E no cart behind it", (c, o), 201, pred=lambda v: v["cartId"] is None)
 check("E history says the admin placed it", (c, o), 201, pred=lambda v: v["statusHistory"][0]["by"] == {"name": ADMIN_NAME, "type": "admin"} and v["statusHistory"][0]["note"] == f"Order placed by admin {ADMIN_NAME}")
 check("E payment row and history exist", (c, o), 201, pred=lambda v: len(v["payments"]) == 1 and v["payments"][0]["status"] == "due" and v["paymentHistory"][0]["note"].startswith("Order placed by admin"))
 check("E stock taken", (200, stock(119)), 200, pred=lambda v: v == b119 - 2)
-check("E the customer sees it", call("GET", f"/user/orders/{O1}", UT1), 200, pred=lambda v: v["orderNumber"] == o["orderNumber"] and v["statusHistory"][0]["by"]["type"] == "admin")
-check("E and in their list", call("GET", "/user/orders", UT1), 200, pred=lambda v: [r["id"] for r in v["results"]] == [O1])
-check("E the customer can cancel it while pending", call("GET", f"/user/orders/{O1}", UT1), 200, pred=lambda v: v["canCancel"] is True)
+check("E the customer sees it", call("GET", f"/user/order/{O1}", UT1), 200, pred=lambda v: v["orderNumber"] == o["orderNumber"] and v["statusHistory"][0]["by"]["type"] == "admin")
+check("E and in their list", call("GET", "/user/order", UT1), 200, pred=lambda v: [r["id"] for r in v["results"]] == [O1])
+check("E the customer can cancel it while pending", call("GET", f"/user/order/{O1}", UT1), 200, pred=lambda v: v["canCancel"] is True)
 
 c, o = call("POST", SL, S1, order_body(sku=120, qty=1, userId=UID1, paymentGatewayId=MFS, deliveryType="express"))
 check("E seller creates an order for their own shop", (c, o), 201, pred=lambda v: v["seller"]["id"] == SID1 and v["statusHistory"][0]["by"] == {"name": "T Staff Seller 111", "type": "seller"})
@@ -282,7 +282,7 @@ c, o = call("POST", SL, S1, order_body(qty=1, recipientName="T Staff Walkin", co
 check("E walk-in customer: no account", (c, o), 201, pred=lambda v: v["customer"]["isGuest"] is True and v["account"] is None and v["address"]["email"] == "walkin@example.com"
       and "Walkin" in v["address"]["recipientName"])
 O3 = o["id"]
-check("E walk-in can track by number and phone", call("GET", f"/user/orders/track?orderNumber={o['orderNumber']}&phone=%2B8801712345678"), 200, pred=lambda v: v["id"] == O3)
+check("E walk-in can track by number and phone", call("GET", f"/user/order/track?orderNumber={o['orderNumber']}&phone=%2B8801712345678"), 200, pred=lambda v: v["id"] == O3)
 
 c, o = call("POST", A, ADMIN, order_body(sellerId=SID2, product=95, sku=122, qty=3, userId=UID1))
 O4 = o["id"]
@@ -355,7 +355,7 @@ check("G seller cannot jump pending -> delivered -> 403", ST(O2, "delivered", S1
 
 c, v = ST(O1, "confirmed", note="Checked by phone")
 check("G admin confirms with a note", (c, v), 200, pred=lambda v: v["status"] == "confirmed" and v["statusHistory"][-1]["note"] == "Checked by phone" and v["statusHistory"][-1]["by"]["type"] == "admin" and v["statusHistory"][-1]["fromStatus"] == "pending")
-check("G the customer can no longer cancel", call("POST", f"/user/orders/{O1}/cancel", UT1, {}), 403)
+check("G the customer can no longer cancel", call("POST", f"/user/order/{O1}/cancel", UT1, {}), 403)
 check("G seller cannot cancel a confirmed order -> 403", ST(O1, "cancelled", S1, SL), 403, pred=lambda v: "admin" in v["message"])
 check("G seller cannot go back to pending -> 403", ST(O1, "pending", S1, SL), 403)
 check("G seller cannot skip to shipped -> 403", ST(O1, "shipped", S1, SL), 403)
@@ -363,7 +363,7 @@ check("G seller packs", ST(O1, "packed", S1, SL), 200, pred=lambda v: v["status"
 check("G seller ships", ST(O1, "shipped", S1, SL), 200, pred=lambda v: v["status"] == "shipped")
 check("G seller delivers", ST(O1, "delivered", S1, SL), 200, pred=lambda v: v["status"] == "delivered" and v["allowedStatuses"] == [])
 check("G seller cannot cancel a delivered order -> 403", ST(O1, "cancelled", S1, SL), 403)
-check("G the customer sees the whole path with who and when", call("GET", f"/user/orders/{O1}", UT1), 200, pred=lambda v: [h["status"] for h in v["statusHistory"]] == ["pending", "confirmed", "packed", "shipped", "delivered"] and all(h["createdAt"] and h["by"]["name"] for h in v["statusHistory"]) and v["statusHistory"][1]["by"]["type"] == "admin" and v["statusHistory"][2]["by"]["type"] == "seller")
+check("G the customer sees the whole path with who and when", call("GET", f"/user/order/{O1}", UT1), 200, pred=lambda v: [h["status"] for h in v["statusHistory"]] == ["pending", "confirmed", "packed", "shipped", "delivered"] and all(h["createdAt"] and h["by"]["name"] for h in v["statusHistory"]) and v["statusHistory"][1]["by"]["type"] == "admin" and v["statusHistory"][2]["by"]["type"] == "seller")
 
 b = stock(119)
 check("G admin cancels a delivered order", ST(O1, "cancelled"), 200, pred=lambda v: v["status"] == "cancelled" and v["allowedStatuses"] == ["pending", "confirmed", "packed", "shipped", "delivered"])

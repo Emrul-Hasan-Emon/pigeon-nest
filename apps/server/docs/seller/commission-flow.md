@@ -207,7 +207,7 @@ All under `/v1/api/seller/commission`. Sign in as a seller. Read only. Lists use
 A `sellerId` in the query is ignored: you always get your own data. Any write
 (PUT, POST) to these addresses returns 404.
 
-On orders (`/v1/api/seller/orders/{id}`) the response has `commission`:
+On orders (`/v1/api/seller/order/{id}`) the response has `commission`:
 `{ type, value, systemCommission, sellerAmount }`.
 
 

@@ -144,8 +144,8 @@ An **active** cart is shown live (today's prices and stock, `canCheckout`, `issu
 
 | Method | Path | What |
 |---|---|---|
-| `GET` | `/orders` | List, newest first (cursor paging) |
-| `GET` | `/orders/{id}` | Full details |
+| `GET` | `/order` | List, newest first (cursor paging) |
+| `GET` | `/order/{id}` | Full details |
 
 List filters: `status`, `paymentStatus`, `sellerId`, `sellerSearch`, `userId`, `customerSearch`
 (recipient or account name, phone, email), `owner` (`customer`/`guest`), `orderNumber`,
@@ -174,7 +174,7 @@ Details add: `cartId`, `items` (price paid, variant label, image, and `bird`: th
 ## 5. Changing an order's status
 
 ```json
-PATCH /orders/{id}/status
+PATCH /order/{id}/status
 { "status": "confirmed", "note": "Checked by phone" }
 ```
 
@@ -207,7 +207,7 @@ Payment status is **independent** from order status.
 ### 6.1 Record a payment
 
 ```
-POST /orders/{id}/payments        (multipart/form-data)
+POST /order/{id}/payments        (multipart/form-data)
 ```
 
 | Field | Required | Notes |
@@ -227,7 +227,7 @@ receipts are new rows. A payment-status-history line is written each time.
 ### 6.2 Reverse a payment
 
 ```json
-POST /orders/{id}/payments/{paymentId}/reverse
+POST /order/{id}/payments/{paymentId}/reverse
 { "reason": "Customer disputed the transfer" }
 ```
 
@@ -249,7 +249,7 @@ due --(part payment)--> partially_paid --(rest)--> paid
 ## 7. Order updates
 
 ```
-POST /orders/{id}/updates         (multipart/form-data)
+POST /order/{id}/updates         (multipart/form-data)
 ```
 
 Fields: `message` (max 2000) and/or `files` (up to 10). At least one is needed. The customer,
@@ -262,15 +262,15 @@ Typical phone order. The screen does these calls in order.
 
 | Step | Call | Notes |
 |---|---|---|
-| 1. Find the customer | `GET /orders/customers?q=<email or mobile>` | Exact email (any case) or a mobile in any common format. Returns up to 5 `{ id, name, email, phone, canOrder, status }`. Empty list = no account; use a walk-in customer. A suspended account is returned with `canOrder: false` |
+| 1. Find the customer | `GET /order/customers?q=<email or mobile>` | Exact email (any case) or a mobile in any common format. Returns up to 5 `{ id, name, email, phone, canOrder, status }`. Empty list = no account; use a walk-in customer. A suspended account is returned with `canOrder: false` |
 | 2. Pick the seller | `GET /sellers?search=&status=approved&activeStatus=active` | The normal seller list |
-| 3. See their products | `GET /orders/catalog?sellerId=5&search=` | Approved, active products with active variants: `id`, `label`, live `price`, `payable`, `quantity` |
+| 3. See their products | `GET /order/catalog?sellerId=5&search=` | Approved, active products with active variants: `id`, `label`, live `price`, `payable`, `quantity` |
 | 4. Saved address (optional) | `GET /users/{userId}/addresses` | The customer's saved addresses (default first); picking one fills the address fields. If you type an address that is not saved yet, `POST /users/{userId}/addresses` saves it to their book and the screen selects it |
-| 5. Delivery and payment choices | `GET /orders/options?countryCode=BD&subtotal=6400` | `countries`, `deliveryOptions` (charge, days, zone, payable) and active `paymentGateways` |
-| 6. Create | `POST /orders` | below |
+| 5. Delivery and payment choices | `GET /order/options?countryCode=BD&subtotal=6400` | `countries`, `deliveryOptions` (charge, days, zone, payable) and active `paymentGateways` |
+| 6. Create | `POST /order` | below |
 
 ```json
-POST /orders
+POST /order
 { "sellerId": 5, "userId": 129,
   "items": [ { "sellerProductId": 94, "sellerProductSkuId": 119, "quantity": 2 } ],
   "recipientName": "Aisha Rahman", "recipientPhone": "+8801712345678",
@@ -300,8 +300,8 @@ admin <your name>", stock taken. If a customer account was given, the order show
 
 | Method | Path | What |
 |---|---|---|
-| `GET` | `/payments` | All payments, newest first (cursor) |
-| `GET` | `/payments/{id}` | Details: proof, `attachments`, `reversal`, the order summary and that order's payment history |
+| `GET` | `/order/payments` | All payments, newest first (cursor) |
+| `GET` | `/order/payments/{id}` | Details: proof, `attachments`, `reversal`, the order summary and that order's payment history |
 
 Filters: `status`, `orderId`, `orderNumber`, `sellerId`, `gatewayId`, `customerSearch`,
 `transactionId`, `minAmount`, `maxAmount`, `hasAttachments`, `reversed`, `createdFrom`,
@@ -338,17 +338,17 @@ All under `/v1/api/admin`.
 | GET/PATCH | `/shipping-zones/{id}` | One (DELETE is switched off) |
 | GET/PATCH | `/settings` | Global defaults |
 | GET | `/carts`, `/carts/{id}` | Carts |
-| GET | `/orders` | Order list |
-| GET | `/orders/customers` | Find customer by email or mobile |
-| GET | `/orders/catalog` | A seller's sellable products |
-| GET | `/orders/options` | Countries, delivery prices, payment methods |
-| POST | `/orders` | Create an order |
-| GET | `/orders/{id}` | Order details |
-| PATCH | `/orders/{id}/status` | Change status (any) |
-| POST | `/orders/{id}/payments` | Record a payment |
-| POST | `/orders/{id}/payments/{paymentId}/reverse` | Reverse a payment |
-| POST | `/orders/{id}/updates` | Post an update |
-| GET | `/payments`, `/payments/{id}` | Payments |
+| GET | `/order` | Order list |
+| GET | `/order/customers` | Find customer by email or mobile |
+| GET | `/order/catalog` | A seller's sellable products |
+| GET | `/order/options` | Countries, delivery prices, payment methods |
+| POST | `/order` | Create an order |
+| GET | `/order/{id}` | Order details |
+| PATCH | `/order/{id}/status` | Change status (any) |
+| POST | `/order/{id}/payments` | Record a payment |
+| POST | `/order/{id}/payments/{paymentId}/reverse` | Reverse a payment |
+| POST | `/order/{id}/updates` | Post an update |
+| GET | `/order/payments`, `/order/payments/{id}` | Payments |
 | GET/POST | `/users/{userId}/addresses` | A customer's addresses |
 | GET/PATCH | `/users/{userId}/addresses/{id}` | One address (DELETE is switched off) |
 
@@ -376,4 +376,4 @@ Validation is strict: unknown fields in a request body are rejected with `400`.
 
 On the orders list, tick orders that are all in the same status, pick a new status in the bar at the bottom, add an optional note, and press Update. An admin may move them to any other status (cancelling asks you to confirm). Each order moves on its own, so one failing does not undo the others; the result lists which failed and why.
 
-`POST /admin/orders/bulk-status` with `{ orderIds: [1-50 ids], status, note? }`. 400 if the orders are in different statuses, 404 if any id is not found. Same body and result as the seller endpoint.
+`POST /admin/order/bulk-status` with `{ orderIds: [1-50 ids], status, note? }`. 400 if the orders are in different statuses, 404 if any id is not found. Same body and result as the seller endpoint.

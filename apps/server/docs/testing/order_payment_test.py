@@ -74,7 +74,7 @@ def sql(q):
 
 
 P_HOMER, S_HOMER_M = 94, 119
-CK, OR = "/user/checkout", "/user/orders"
+CK, OR = "/user/order/checkout", "/user/order"
 
 
 def restore():
@@ -147,7 +147,7 @@ def detail(oid, s):
     return call("GET", f"{OR}/{oid}", session=s)[1]
 
 
-ADM, SEL = "/admin/orders", "/seller/orders"
+ADM, SEL = "/admin/order", "/seller/order"
 O1, SES1, PAY1 = place("a", SID1)          # 6400 payable
 O2, SES2, PAY2 = place("b", SID1)
 O3, SES3, PAY3 = place("c", SID2)          # other seller
@@ -253,7 +253,7 @@ check("D another customer cannot see them", call("GET", f"{OR}/{O1}", session=SE
 check("D an order with no updates shows none", (200, detail(O3, SES3)), 200, pred=lambda v: v["updates"] == [])
 
 # ================================================================= E lists and details
-AP, SP = "/admin/payments", "/seller/payments"
+AP, SP = "/admin/order/payments", "/seller/order/payments"
 check("E admin list needs admin -> 401/403", call("GET", AP, token=S1), 403)
 check("E no token -> 401", call("GET", AP), 401)
 check("E seller list needs seller -> 403", call("GET", SP, token=ADMIN), 403)

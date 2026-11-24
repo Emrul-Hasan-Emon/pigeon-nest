@@ -973,4 +973,4 @@ These do not exist yet, so they are not described above as features:
 
 ## Printing an invoice or a packing slip
 
-On an order page (seller and admin) press **Print invoice** or **Print packing slip**. The invoice lists items, unit prices, totals, what was paid and what is still due. The packing slip has no prices: a tick box per item, the bird's ring number, hatch date, vaccine and parents, the address, and what to collect on delivery. Menus are hidden when printing. Routes: `/seller/orders/:id/print` and `/admin/orders/:id/print` (`?type=invoice|slip`).
+On an order page (seller and admin) press **Print invoice** or **Print packing slip**. The invoice lists items, unit prices, totals, what was paid and what is still due. The packing slip has no prices: a tick box per item, the bird's ring number, hatch date, vaccine and parents, the address, and what to collect on delivery. Menus are hidden when printing. Routes: `/seller/order/:id/print` and `/admin/order/:id/print` (`?type=invoice|slip`).

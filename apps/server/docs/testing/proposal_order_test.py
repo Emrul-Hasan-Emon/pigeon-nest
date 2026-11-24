@@ -111,7 +111,7 @@ S1_TOKEN, S1 = make_seller("One", 1)
 tok_a, uid_a = register(1)
 tok_b, uid_b = register(2)
 COD = sqlint("select id from payment_gateway where slug='cash-on-delivery'")
-UA, SE, AD, CT, CK = "/user/proposals", "/seller/proposals", "/admin/proposals", "/user/carts", "/user/checkout"
+UA, SE, AD, CT, CK = "/user/proposals", "/seller/proposals", "/admin/proposals", "/user/carts", "/user/order/checkout"
 status_of = lambda pid: sql(f"select status from sku_price_proposal where id={pid}")
 offer = lambda tok, sku, price=1500, qty=1: call("POST", UA, tok, {"sellerProductSkuId": sku, "price": price, "quantity": qty})
 def agreed(tok, sku, price=1500, qty=2):
@@ -230,7 +230,7 @@ check("F the cart is closed", (200, sql(f"select \"isActive\" from cart where id
 check("F order item stored all three prices", (200, sql(f"select \"unitPrice\"||'|'||\"unitDiscountedPrice\"||'|'||\"unitProposalPrice\"||'|'||\"totalProposalPrice\"||'|'||\"proposalId\" from order_item where \"orderId\"={oid} and \"sellerProductSkuId\"={SKU}")), 200, pred=lambda v: v == f"2000|2000|1600|3200|{p2}")
 
 # ---- every role sees both prices
-for who, path, tok in (("buyer", f"/user/orders/{oid}", tok_a), ("seller", f"/seller/orders/{oid}", S1_TOKEN), ("admin", f"/admin/orders/{oid}", ADMIN)):
+for who, path, tok in (("buyer", f"/user/order/{oid}", tok_a), ("seller", f"/seller/order/{oid}", S1_TOKEN), ("admin", f"/admin/order/{oid}", ADMIN)):
     check(f"F {who} order detail shows SKU price and proposal price", call("GET", path, tok), 200,
           pred=lambda v: next(i for i in v["items"] if i["sku"]["id"] == SKU)["skuUnitPrice"] == 2000 and next(i for i in v["items"] if i["sku"]["id"] == SKU)["proposal"]["unitPrice"] == 1600
           and v["totals"]["subtotal"] == 4700)

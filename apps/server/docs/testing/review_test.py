@@ -157,10 +157,10 @@ def buy(token, pid, sku, deliver=True):
     """A customer orders a product; returns (orderId, orderItemId). Delivered unless told otherwise."""
     c, d = call("POST", "/user/carts/items", token, {"sellerProductId": pid, "sellerProductSkuId": sku, "quantity": 1})
     assert c in (200, 201), d
-    c, o = call("POST", f"/user/checkout/{d['cart']['id']}/place", token, addr())
+    c, o = call("POST", f"/user/order/checkout/{d['cart']['id']}/place", token, addr())
     assert c == 201, o
     if deliver:
-        c, x = call("PATCH", f"/admin/orders/{o['id']}/status", ADMIN, {"status": "delivered"})
+        c, x = call("PATCH", f"/admin/order/{o['id']}/status", ADMIN, {"status": "delivered"})
         assert c == 200, x
     return o["id"], sqlint(f"select id from order_item where \"orderId\"={o['id']} order by id limit 1")
 
@@ -229,11 +229,11 @@ check("B unknown order item -> 404", review(tok_a, 99999999), 404)
 check("B someone else's order item -> 404", review(tok_c, I_A1), 404)
 check("B order not delivered yet -> 400", review(tok_b, I_P), 400)
 for st in ("pending", "confirmed", "packed", "shipped", "cancelled"):
-    call("PATCH", f"/admin/orders/{O_P}/status", ADMIN, {"status": st})
+    call("PATCH", f"/admin/order/{O_P}/status", ADMIN, {"status": st})
     check(f"B order at {st} cannot be reviewed -> 400", review(tok_b, I_P), 400)
 check("B nothing saved by the refused tries", (200, sqlint("select count(*) from review where \"sellerProductId\"=%d" % P1)), 200, pred=lambda v: v == 0)
 check("B product rating untouched", (200, rate(P1)), 200, pred=lambda v: v == ["0", "0", "0"])
-call("PATCH", f"/admin/orders/{O_P}/status", ADMIN, {"status": "delivered"})
+call("PATCH", f"/admin/order/{O_P}/status", ADMIN, {"status": "delivered"})
 check("B too many photos -> 400", multi("POST", R, tok_b, {"orderItemId": I_P, "rating": 4}, [(f"p{i}.png", PNG, "image/png") for i in range(6)]), 400)
 check("B a text file as photo -> 400", multi("POST", R, tok_b, {"orderItemId": I_P, "rating": 4}, [("a.txt", b"hello", "text/plain")]), 400)
 check("B a script renamed .png -> 400", multi("POST", R, tok_b, {"orderItemId": I_P, "rating": 4}, [("a.png", b"<script>alert(1)</script>", "image/png")]), 400)

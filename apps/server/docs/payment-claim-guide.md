@@ -9,7 +9,7 @@ A seller keeps up to 10 bank and mobile money accounts (bKash, Nagad, Rocket, Up
 | Seller | `GET /seller/payment-accounts`, `POST /seller/payment-accounts`, `PATCH /seller/payment-accounts/:id` (use `isActive: false` to switch off) |
 | Admin | `GET`, `POST`, `PATCH /admin/sellers/:sellerId/payment-accounts` (the admin seller page has the same panel) |
 
-A bank account needs the account holder name. The order detail (`GET /user/orders/:id`, and the seller and admin order routes) now carries `payTo` and `paymentClaims`.
+A bank account needs the account holder name. The order detail (`GET /user/order/:id`, and the seller and admin order routes) now carries `payTo` and `paymentClaims`.
 
 ## Mark as paid request (cash on delivery only)
 

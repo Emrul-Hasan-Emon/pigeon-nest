@@ -122,7 +122,7 @@ cleanup()
 c, d = call("POST", "/admin/auth/login", body={"email": ADMIN_EMAIL, "password": ADMIN_PASSWORD})
 ADMIN = d["accessToken"]
 COD = int(sql("select id from payment_gateway where slug='cash-on-delivery'"))
-A, SL, CK, CART = "/admin/orders", "/seller/orders", "/user/checkout", "/user/carts"
+A, SL, CK, CART = "/admin/order", "/seller/order", "/user/order/checkout", "/user/carts"
 RA, RS, RU = "/admin/returns", "/seller/returns", "/user/returns"
 
 
@@ -256,7 +256,7 @@ truth("C order commission is the sum of its lines", sql(f"select \"systemCommiss
 truth("C line seller amounts are payable minus commission", sql(f"select string_agg(\"sellerAmount\"::text, ',' order by id) from order_item where \"orderId\"={o1['id']}") == "2880,3420,5850")
 truth("C order seller amount = payable (with delivery) minus commission", sql(f"select \"sellerAmount\" from \"order\" where id={o1['id']}") == "12250")
 check("C seller's order view shows line commission", call("GET", f"{SL}/{o1['id']}", S1), 200, pred=lambda v: [i["systemCommission"] for i in v["items"]] == [320, 380, 650] and all(i["isReturned"] is False for i in v["items"]))
-check("C customer's order view hides line commission", call("GET", f"/user/orders/{o1['id']}", USER), 200, pred=lambda v: all("systemCommission" not in i and "sellerAmount" not in i for i in v["items"]) and v["returns"] == [])
+check("C customer's order view hides line commission", call("GET", f"/user/order/{o1['id']}", USER), 200, pred=lambda v: all("systemCommission" not in i and "sellerAmount" not in i for i in v["items"]) and v["returns"] == [])
 call("PUT", f"/admin/commission/sellers/{SID1}/setting", ADMIN, {"commissionType": "fixed", "commissionAmount": 50})
 of = make_order(((119, 1), (120, 1)))
 truth("C a fixed amount applies per line (2 lines -> 100)", sql(f"select \"systemCommission\" from \"order\" where id={of['id']}") == "100")
@@ -398,7 +398,7 @@ truth("T the ledger got an item row with the item id", sql(f"select count(*) fro
 truth("T the change log has the take-back with before and after", sql(f"select count(*) from system_commission_change_history c join system_commission_history h on h.id=c.\"historyId\" where h.\"orderReturnId\"={RC_ID} and c.\"commissionStatus\"='order_returned_to_customer' and c.\"newTotalCommission\" = c.\"currentTotalCommission\" - 650 and c.\"newDueCommission\" = c.\"currentDueCommission\" - 650") == "1")
 check("T a returned item cannot be requested again (customer)", req(OF["id"], "items", [ic]), 409)
 check("T nor by an admin", adm_req(OF["id"], "items", [ic]), 409)
-check("T the order view says which item is returned", call("GET", f"/user/orders/{OF['id']}", USER), 200, pred=lambda v: [i["isReturned"] for i in v["items"]] == [False, False, True] and v["isReturned"] is False  and len(v["returns"]) == 5)
+check("T the order view says which item is returned", call("GET", f"/user/order/{OF['id']}", USER), 200, pred=lambda v: [i["isReturned"] for i in v["items"]] == [False, False, True] and v["isReturned"] is False  and len(v["returns"]) == 5)
 
 # ============================================================ M  money: full-order returns and the delivery charge
 OM = make_order(((119, 1), (120, 1)))
@@ -424,7 +424,7 @@ truth("M the order and both items are flagged returned", flags(OM["id"]) == ("t"
 check("M a second full request -> 409 (customer)", req(OM["id"], "full_order"), 409)
 check("M a second full request -> 409 (admin)", adm_req(OM["id"], "full_order"), 409)
 check("M an item request on a returned order -> 409", adm_req(OM["id"], "items", items_of(OM["id"])[:1]), 409)
-check("M the order view says it is returned", call("GET", f"/user/orders/{OM['id']}", USER), 200, pred=lambda v: v["isReturned"] is True and all(i["isReturned"] for i in v["items"]) and v["returns"][0]["status"] == "returned")
+check("M the order view says it is returned", call("GET", f"/user/order/{OM['id']}", USER), 200, pred=lambda v: v["isReturned"] is True and all(i["isReturned"] for i in v["items"]) and v["returns"][0]["status"] == "returned")
 check("M the staff order view says it is returned", call("GET", f"{A}/{OM['id']}", ADMIN), 200, pred=lambda v: v["isReturned"] is True and all(i["isReturned"] for i in v["items"]))
 
 OM2 = make_order(((119, 1),))

@@ -157,8 +157,8 @@ sql("update system_setting set value='40' where key='shipping.defaultCharge'")
 for k, v in SEED.items():
     sql(f"update seller_product_sku set quantity={v} where id={k}")
 
-CART, CK, OR = "/user/carts", "/user/checkout", "/user/orders"
-A, SL, AP, SP = "/admin/orders", "/seller/orders", "/admin/payments", "/seller/payments"
+CART, CK, OR = "/user/carts", "/user/order/checkout", "/user/order"
+A, SL, AP, SP = "/admin/order", "/seller/order", "/admin/order/payments", "/seller/order/payments"
 STATUSES = ["pending", "confirmed", "cancelled", "packed", "shipped", "delivered"]
 ctr = [0]
 

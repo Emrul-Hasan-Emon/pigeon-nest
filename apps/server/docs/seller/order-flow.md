@@ -76,8 +76,8 @@ Payment is recorded (any time)       Payment: PARTIALLY_PAID -> PAID
 
 | Method | Path | What |
 |---|---|---|
-| `GET` | `/orders` | Your orders, newest first (cursor paging) |
-| `GET` | `/orders/{id}` | One order in full |
+| `GET` | `/order` | Your orders, newest first (cursor paging) |
+| `GET` | `/order/{id}` | One order in full |
 
 List filters (all optional): `status`, `paymentStatus`, `customerSearch` (recipient or account
 name, phone, email), `owner` (`customer` or `guest`), `orderNumber`, `gatewayId`, `deliveryType`,
@@ -108,7 +108,7 @@ phone, full address, country), `payments` (each with proof `attachments`, the cu
 ## 4. Changing an order's status
 
 ```json
-PATCH /orders/{id}/status
+PATCH /order/{id}/status
 { "status": "confirmed", "note": "Packing tomorrow morning" }
 ```
 
@@ -138,7 +138,7 @@ history with your shop name and the time.
 ### 5.1 Record a payment
 
 ```
-POST /orders/{id}/payments        (multipart/form-data)
+POST /order/{id}/payments        (multipart/form-data)
 ```
 
 | Field | Required | Notes |
@@ -162,7 +162,7 @@ Result `201 { "orderId": 77, "paymentId": 61 }`.
 ### 5.2 Reverse a payment you recorded
 
 ```json
-POST /orders/{id}/payments/{paymentId}/reverse
+POST /order/{id}/payments/{paymentId}/reverse
 { "reason": "Cheque bounced" }
 ```
 
@@ -176,7 +176,7 @@ POST /orders/{id}/payments/{paymentId}/reverse
 ## 6. Order updates
 
 ```
-POST /orders/{id}/updates         (multipart/form-data)
+POST /order/{id}/updates         (multipart/form-data)
 ```
 
 `message` (max 2000) and/or `files` (up to 10); at least one is needed. Examples: a courier
@@ -191,15 +191,15 @@ for **your** shop.
 
 | Step | Call | Notes |
 |---|---|---|
-| 1. Find the customer | `GET /orders/customers?q=<email or mobile>` | Exact email or a mobile in any common format; up to 5 results `{ id, name, email, phone, canOrder, status }`. Empty = no account, so enter a **walk-in customer** instead. `canOrder: false` = suspended |
-| 2. Your products | `GET /orders/catalog?search=` | Your approved, active products with active variants and live `price`, `payable`, `quantity` |
-| 3. Delivery and payment choices | `GET /orders/options?countryCode=BD&subtotal=6400` | `countries`, `deliveryOptions`, active `paymentGateways` |
-| 4. Saved addresses | `GET /orders/customers/{userId}/addresses` | The customer's saved addresses (default first) to pick from. Pick one to fill the address fields |
-| 5. Save a new address (optional) | `POST /orders/customers/{userId}/addresses` | After typing an address that is not saved yet: saves it to the customer's address book (same body and rules as the customer's own `POST /addresses`). The screen then selects it. `400` for a suspended customer |
-| 6. Create | `POST /orders` | below |
+| 1. Find the customer | `GET /order/customers?q=<email or mobile>` | Exact email or a mobile in any common format; up to 5 results `{ id, name, email, phone, canOrder, status }`. Empty = no account, so enter a **walk-in customer** instead. `canOrder: false` = suspended |
+| 2. Your products | `GET /order/catalog?search=` | Your approved, active products with active variants and live `price`, `payable`, `quantity` |
+| 3. Delivery and payment choices | `GET /order/options?countryCode=BD&subtotal=6400` | `countries`, `deliveryOptions`, active `paymentGateways` |
+| 4. Saved addresses | `GET /order/customers/{userId}/addresses` | The customer's saved addresses (default first) to pick from. Pick one to fill the address fields |
+| 5. Save a new address (optional) | `POST /order/customers/{userId}/addresses` | After typing an address that is not saved yet: saves it to the customer's address book (same body and rules as the customer's own `POST /addresses`). The screen then selects it. `400` for a suspended customer |
+| 6. Create | `POST /order` | below |
 
 ```json
-POST /orders
+POST /order
 { "userId": 129,
   "items": [ { "sellerProductId": 94, "sellerProductSkuId": 119, "quantity": 2 } ],
   "recipientName": "Aisha Rahman", "recipientPhone": "+8801712345678",
@@ -224,8 +224,8 @@ cancel it while it is still pending.
 
 | Method | Path | What |
 |---|---|---|
-| `GET` | `/payments` | Payments on **your** orders, newest first (cursor) |
-| `GET` | `/payments/{id}` | Details: proof, files, reversal, the order summary and that order's payment history |
+| `GET` | `/order/payments` | Payments on **your** orders, newest first (cursor) |
+| `GET` | `/order/payments/{id}` | Details: proof, files, reversal, the order summary and that order's payment history |
 
 Filters: `status`, `orderId`, `orderNumber`, `gatewayId`, `customerSearch`, `transactionId`,
 `minAmount`, `maxAmount`, `hasAttachments`, `reversed`, `createdFrom`, `createdTo`, `paidFrom`,
@@ -238,19 +238,19 @@ All under `/v1/api/seller`.
 
 | Method | Path | Purpose |
 |---|---|---|
-| GET | `/orders` | Your orders |
-| GET | `/orders/customers` | Find a customer by email or mobile |
-| GET | `/orders/catalog` | Your sellable products |
-| GET | `/orders/options` | Countries, delivery prices, payment methods |
-| GET | `/orders/customers/{userId}/addresses` | A customer's saved addresses |
-| POST | `/orders/customers/{userId}/addresses` | Save a new address to the customer's book |
-| POST | `/orders` | Create an order for your shop |
-| GET | `/orders/{id}` | Order details |
-| PATCH | `/orders/{id}/status` | Confirm, cancel (pending only), pack, ship, deliver |
-| POST | `/orders/{id}/payments` | Record a payment |
-| POST | `/orders/{id}/payments/{paymentId}/reverse` | Reverse a payment you recorded |
-| POST | `/orders/{id}/updates` | Post an update |
-| GET | `/payments`, `/payments/{id}` | Your payments |
+| GET | `/order` | Your orders |
+| GET | `/order/customers` | Find a customer by email or mobile |
+| GET | `/order/catalog` | Your sellable products |
+| GET | `/order/options` | Countries, delivery prices, payment methods |
+| GET | `/order/customers/{userId}/addresses` | A customer's saved addresses |
+| POST | `/order/customers/{userId}/addresses` | Save a new address to the customer's book |
+| POST | `/order` | Create an order for your shop |
+| GET | `/order/{id}` | Order details |
+| PATCH | `/order/{id}/status` | Confirm, cancel (pending only), pack, ship, deliver |
+| POST | `/order/{id}/payments` | Record a payment |
+| POST | `/order/{id}/payments/{paymentId}/reverse` | Reverse a payment you recorded |
+| POST | `/order/{id}/updates` | Post an update |
+| GET | `/order/payments`, `/order/payments/{id}` | Your payments |
 
 ## 10. Errors
 
@@ -274,7 +274,7 @@ Validation is strict: unknown fields in a request body are rejected with `400`.
 
 Moving many orders at once
 --------------------------
-`POST /v1/api/seller/orders/bulk-status` with `{ orderIds: [..], status, note? }` (1 to 50 ids).
+`POST /v1/api/seller/order/bulk-status` with `{ orderIds: [..], status, note? }` (1 to 50 ids).
 - All the orders must be in the **same status now** (400 otherwise: "All the orders must be in the same status..."),
   and the move must be one a seller may make from it (pending to confirmed or cancelled, confirmed to packed,
   packed to shipped, shipped to delivered; anything else is 400 with the reason).

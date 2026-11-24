@@ -138,7 +138,7 @@ Checkout is for **one cart**. There are two calls.
 ### 4.1 Get the checkout options
 
 ```
-GET /checkout/{cartId}?countryCode=BD
+GET /order/checkout/{cartId}?countryCode=BD
 ```
 
 The cart must be yours and active (`404` otherwise, including a cart that was already ordered).
@@ -167,7 +167,7 @@ details, and ask for each `proofFields` entry.
 ### 4.2 Place the order
 
 ```json
-POST /checkout/{cartId}/place
+POST /order/checkout/{cartId}/place
 { "recipientName": "Aisha Rahman", "recipientPhone": "+8801712345678",
   "contactEmail": "aisha@example.com", "countryCode": "BD", "state": "Dhaka Division",
   "city": "Dhaka", "addressLine": "House 7, Road 3, Banani", "postalCode": "1213",
@@ -217,7 +217,7 @@ their phone number (section 6).
 ### 5.1 List
 
 ```
-GET /orders?page=1&pageSize=10&status=pending&paymentStatus=due&search=PN2611
+GET /order?page=1&pageSize=10&status=pending&paymentStatus=due&search=PN2611
 ```
 
 Page numbers (default page 1, page size 20, max 50). `status` and `paymentStatus` filters,
@@ -237,7 +237,7 @@ A guest sees the orders of their session; a customer sees their account's orders
 ### 5.2 Details
 
 ```
-GET /orders/{id}
+GET /order/{id}
 ```
 
 Someone else's order is `404`. The reply holds: `status`, `paymentStatus`, `canCancel`, `seller`,
@@ -251,7 +251,7 @@ the note, who and when).
 ### 5.3 Cancel
 
 ```json
-POST /orders/{id}/cancel
+POST /order/{id}/cancel
 { "reason": "Ordered by mistake" }
 ```
 
@@ -265,7 +265,7 @@ confirmation, contact the seller; only an admin can cancel it.
 For a guest who has the order number and phone but not the original browser:
 
 ```
-GET /orders/track?orderNumber=PN261120-2L4SMZ&phone=%2B8801712345678
+GET /order/track?orderNumber=PN261120-2L4SMZ&phone=%2B8801712345678
 ```
 
 No sign-in and no session needed. `phone` must be in international format (`%2B` is `+`). A wrong number
@@ -361,12 +361,12 @@ All under `/v1/api/user`.
 | DELETE | `/carts/{cartId}/items/{itemId}` | guest or customer | Remove an item |
 | DELETE | `/carts/{cartId}` | guest or customer | Empty a cart |
 | POST | `/carts/merge` | customer | Fold guest carts (and orders) into my account |
-| GET | `/checkout/{cartId}` | guest or customer | Options: delivery prices, payment methods |
-| POST | `/checkout/{cartId}/place` | guest or customer | Place the order |
-| GET | `/orders` | guest or customer | My orders (page numbers, filters) |
-| GET | `/orders/{id}` | guest or customer | One order in full |
-| POST | `/orders/{id}/cancel` | guest or customer | Cancel while pending |
-| GET | `/orders/track` | anyone | Find an order by number and phone |
+| GET | `/order/checkout/{cartId}` | guest or customer | Options: delivery prices, payment methods |
+| POST | `/order/checkout/{cartId}/place` | guest or customer | Place the order |
+| GET | `/order` | guest or customer | My orders (page numbers, filters) |
+| GET | `/order/{id}` | guest or customer | One order in full |
+| POST | `/order/{id}/cancel` | guest or customer | Cancel while pending |
+| GET | `/order/track` | anyone | Find an order by number and phone |
 | GET/POST | `/addresses` | customer | List / add addresses |
 | GET/PATCH/DELETE | `/addresses/{id}` | customer | One address |
 

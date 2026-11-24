@@ -52,7 +52,7 @@ def register(n):
 
 P_HOMER, S_HOMER_M = 94, 119      # seller 5
 P_SPRINT, S_SPRINT_M = 95, 122    # seller 6
-CART, CK, OR = "/user/carts", "/user/checkout", "/user/orders"
+CART, CK, OR = "/user/carts", "/user/order/checkout", "/user/order"
 SETTINGS = ("shipping.defaultCharge",)
 
 

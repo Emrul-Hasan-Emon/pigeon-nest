@@ -114,7 +114,7 @@ cleanup()
 c, d = call("POST", "/admin/auth/login", body={"email": ADMIN_EMAIL, "password": ADMIN_PASSWORD})
 ADMIN = d["accessToken"]
 COD = int(sql("select id from payment_gateway where slug='cash-on-delivery'"))
-A, SL, CK, CART = "/admin/orders", "/seller/orders", "/user/checkout", "/user/carts"
+A, SL, CK, CART = "/admin/order", "/seller/order", "/user/order/checkout", "/user/carts"
 CA, CS = "/admin/commission", "/seller/commission"
 
 
@@ -320,8 +320,8 @@ put_rule(SID1, "percentage", 33.33)
 ot = place(94, 119, 1)     # 3200 * 33.33% = 1066.56
 check("O two-decimal rounding", (200, row(ot["id"])), 200, pred=lambda v: v[0] == "1066.56" and v[1] == str(round(3300 - 1066.56, 2)))
 put_rule(SID1, "percentage", 10)
-check("O customer never sees commission", call("GET", f"/user/orders/{o['id']}", USER), [200, 404])
-cu = call("GET", f"/user/orders/{o['id']}", None, session=None)
+check("O customer never sees commission", call("GET", f"/user/order/{o['id']}", USER), [200, 404])
+cu = call("GET", f"/user/order/{o['id']}", None, session=None)
 check("O admin sees it on the order", call("GET", f"{A}/{o['id']}", ADMIN), 200, pred=lambda v: v["commission"]["systemCommission"] == 640 and v["commission"]["sellerAmount"] == 5860 and v["commission"]["type"] == "percentage")
 check("O seller sees it on the order", call("GET", f"{SL}/{o['id']}", S1), 200, pred=lambda v: v["commission"]["systemCommission"] == 640)
 sg = sess()
