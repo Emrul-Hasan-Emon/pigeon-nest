@@ -18,6 +18,7 @@ import { ScheduleBadge } from '../schedule-badge';
 import { ReorderModal } from './reorder-modal';
 import type { HomepageListParams, HomepageSection, SectionTypeDefinition } from '@/types/homepage';
 import { LoadingBlock } from '@/components/ui/skeleton';
+import { DELETE_ENABLED } from '@/lib/features';
 
 const PAGE_SIZE = 20;
 const selectClass =
@@ -210,7 +211,7 @@ export function SectionList({ mode }: { mode: 'section' | 'slot' }) {
                   </td>
                   <td className="px-4 py-3 text-right">
                     <Link href={`${base}/${r.id}`} className="mr-3 text-primary hover:underline">Edit</Link>
-                    {!isSlot && (
+                    {DELETE_ENABLED && !isSlot && (
                       <button type="button" onClick={() => setPendingDelete(r)} className="text-destructive hover:underline">Delete</button>
                     )}
                   </td>
