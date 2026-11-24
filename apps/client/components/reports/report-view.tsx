@@ -1,12 +1,12 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Coins, Download, Package, ReceiptText, TrendingUp } from 'lucide-react';
+import { Coins, Download, Package, ReceiptText, Trophy, TrendingUp, Undo2 } from 'lucide-react';
 import { money } from '@/components/orders/ui';
 import { LoadingBlock } from '@/components/ui/skeleton';
 import { downloadReportCsv } from '@/lib/csv';
 import { ApiError } from '@/lib/api/http';
-import type { ProductReportKind, Report, ReportColumn, ReportGroup, ReportKind, ReportName, ReportParams } from '@/types/report';
+import type { ProductReportKind, Report, ReportColumn, ReportGroup, ReportKind, ReportName, ReportParams, ReturnReportBy, SellerRankSort } from '@/types/report';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 const dayInput = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -48,6 +48,19 @@ const PRODUCT_KINDS: { value: ProductReportKind; label: string; hint: string }[]
   { value: 'low', label: 'Low stock', hint: 'What is running out' },
 ];
 
+const RETURN_BYS: { value: ReturnReportBy; label: string; hint: string; adminOnly?: boolean }[] = [
+  { value: 'reason', label: 'By reason', hint: 'Why birds come back' },
+  { value: 'product', label: 'By product', hint: 'Which products come back most' },
+  { value: 'seller', label: 'By seller', hint: 'Which sellers have most returns', adminOnly: true },
+];
+
+const RANK_SORTS: { value: SellerRankSort; label: string }[] = [
+  { value: 'sales', label: 'Most sales' },
+  { value: 'orders', label: 'Most orders' },
+  { value: 'rating', label: 'Best rated' },
+  { value: 'returns', label: 'Most returns' },
+];
+
 function show(value: string | number | null, kind: ReportKind) {
   if (value === null || value === '') return '—';
   if (kind === 'money') return `৳${money(Number(value))}`;
@@ -75,6 +88,8 @@ export function ReportView({ mine, load, sellers, fileBase }: ReportViewProps) {
   const [[from, to], setDates] = useState<[string, string]>(() => PRESETS[1].range());
   const [groupBy, setGroupBy] = useState<ReportGroup>('day');
   const [kind, setKind] = useState<ProductReportKind>('best');
+  const [by, setBy] = useState<ReturnReportBy>('reason');
+  const [sort, setSort] = useState<SellerRankSort>('sales');
   const [sellerId, setSellerId] = useState<number | undefined>(undefined);
   const [report, setReport] = useState<Report | null>(null);
   const [loading, setLoading] = useState(true);
@@ -85,6 +100,8 @@ export function ReportView({ mine, load, sellers, fileBase }: ReportViewProps) {
     { key: 'products', label: mine ? 'My products' : 'Products', hint: 'Best, slow and low stock', icon: Package },
     { key: 'orders', label: 'Orders', hint: 'Where orders are', icon: ReceiptText },
     { key: 'earnings', label: mine ? 'What I earn' : 'Earnings', hint: 'After system commission and refunds', icon: Coins },
+    { key: 'returns', label: 'Returns', hint: 'Why birds come back', icon: Undo2 },
+    ...(mine ? [] : [{ key: 'sellers' as const, label: 'Seller ranking', hint: 'Who sells and returns most', icon: Trophy }]),
   ];
 
   const params = useMemo<ReportParams>(
@@ -93,9 +110,12 @@ export function ReportView({ mine, load, sellers, fileBase }: ReportViewProps) {
       to,
       groupBy: name === 'sales' || name === 'earnings' ? groupBy : undefined,
       kind: name === 'products' ? kind : undefined,
-      sellerId,
+      by: name === 'returns' ? by : undefined,
+      sort: name === 'sellers' ? sort : undefined,
+      // The ranking lists every seller, so it has no seller choice.
+      sellerId: name === 'sellers' ? undefined : sellerId,
     }),
-    [from, to, groupBy, kind, name, sellerId],
+    [from, to, groupBy, kind, by, sort, name, sellerId],
   );
   // The dates do not change low stock: it is how things stand now.
   const datesMatter = !(name === 'products' && kind === 'low');
@@ -148,6 +168,24 @@ export function ReportView({ mine, load, sellers, fileBase }: ReportViewProps) {
       </div>
 
       <section className="space-y-4 rounded-xl border border-border bg-card p-5" aria-label="Report options">
+        {name === 'returns' && (
+          <div className="flex flex-wrap gap-2" role="group" aria-label="How to group returns">
+            {RETURN_BYS.filter((b) => !b.adminOnly || !mine).map((b) => (
+              <button key={b.value} type="button" className={pill(by === b.value)} aria-pressed={by === b.value} onClick={() => setBy(b.value)} title={b.hint}>
+                {b.label}
+              </button>
+            ))}
+          </div>
+        )}
+        {name === 'sellers' && (
+          <div className="flex flex-wrap gap-2" role="group" aria-label="Rank sellers by">
+            {RANK_SORTS.map((o) => (
+              <button key={o.value} type="button" className={pill(sort === o.value)} aria-pressed={sort === o.value} onClick={() => setSort(o.value)}>
+                {o.label}
+              </button>
+            ))}
+          </div>
+        )}
         {name === 'products' && (
           <div className="flex flex-wrap gap-2" role="group" aria-label="Which products">
             {PRODUCT_KINDS.map((k) => (
@@ -213,7 +251,7 @@ export function ReportView({ mine, load, sellers, fileBase }: ReportViewProps) {
                   </select>
                 </label>
               )}
-              {sellers && (
+              {sellers && name !== 'sellers' && (
                 <label className="text-sm text-muted-foreground">
                   Seller
                   <select className={`${field} mt-1 block`} value={sellerId ?? ''} onChange={(e) => setSellerId(e.target.value ? Number(e.target.value) : undefined)}>
@@ -265,7 +303,7 @@ export function ReportView({ mine, load, sellers, fileBase }: ReportViewProps) {
               </div>
               <button
                 type="button"
-                onClick={() => downloadReportCsv(report, `${fileBase}-${name}${name === 'products' ? `-${kind}` : ''}-${report.from}-to-${report.to}.csv`)}
+                onClick={() => downloadReportCsv(report, `${fileBase}-${name}${name === 'products' ? `-${kind}` : name === 'returns' ? `-${by}` : name === 'sellers' ? `-${sort}` : ''}-${report.from}-to-${report.to}.csv`)}
                 disabled={report.rows.length === 0}
                 className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-50"
               >
