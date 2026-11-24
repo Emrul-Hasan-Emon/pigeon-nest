@@ -92,14 +92,14 @@ export const ENDPOINTS = {
     },
 
     homepageSections: {
-      ...resource('/homepage-sections'),
-      sectionTypes: '/homepage-sections/section-types',
-      reorder: '/homepage-sections/reorder',
-      preview: (id: Id) => `/homepage-sections/${id}/preview`,
+      ...resource('/homepage/sections'),
+      sectionTypes: '/homepage/sections/section-types',
+      reorder: '/homepage/sections/reorder',
+      preview: (id: Id) => `/homepage/sections/${id}/preview`,
     },
     homepageSlots: {
-      ...resource('/homepage-slots'),
-      preview: (id: Id) => `/homepage-slots/${id}/preview`,
+      ...resource('/homepage/slots'),
+      preview: (id: Id) => `/homepage/slots/${id}/preview`,
     },
 
     carts: resource('/carts'),
