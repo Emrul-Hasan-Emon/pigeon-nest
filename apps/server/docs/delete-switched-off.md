@@ -19,10 +19,10 @@ To bring it back: set `DELETE_ENABLED = true` in `apps/client/lib/features.ts`, 
 | Admin | `DELETE /admin/payment-gateways/:id` | A payment gateway |
 | Admin | `DELETE /admin/shipping-zones/:id` | A shipping zone |
 | Admin | `DELETE /admin/users/:userId/addresses/:id` | A customer's saved address |
-| Admin | `DELETE /admin/review-replies/:id` | A review reply |
+| Admin | `DELETE /admin/review/replies/:id` | A review reply |
 | Seller | `DELETE /seller/products/:id` | A product (soft delete) |
 | Seller | `DELETE /seller/products/:id/skus/:skuId/parents/sire\|dam` | A bird's father or mother |
-| Seller | `DELETE /seller/review-replies/:id` | A review reply |
+| Seller | `DELETE /seller/review/replies/:id` | A review reply |
 
 ## Still on (customer actions)
 

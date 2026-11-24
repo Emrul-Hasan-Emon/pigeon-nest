@@ -55,7 +55,7 @@ full_cycle(ra["id"])
 c, rc = req(OC["id"], "items", items_of(OC["id"])[:1])
 assert c == 201, rc
 # review on a delivered line of A
-c, rv = multi("POST", "/user/reviews", USER, {"orderItemId": ia[0], "rating": 4, "title": "Fine", "comment": "Good bird"})
+c, rv = multi("POST", "/user/review", USER, {"orderItemId": ia[0], "rating": 4, "title": "Fine", "comment": "Good bird"})
 assert c == 201, rv
 sql("update seller_product_sku set quantity=3 where id=120")
 sql("update seller_product_sku set quantity=0 where id=121")
