@@ -9,11 +9,15 @@ export function ProductTable({
   onChangeStatus,
   onChangeActive,
   onDelete,
+  onCopy,
+  onQuickEdit,
 }: {
   products: Product[];
   onChangeStatus: (product: Product, status: ProductStatus) => void;
   onChangeActive: (product: Product, activeStatus: ProductActiveStatus) => void;
   onDelete: (product: Product) => void;
+  onCopy: (product: Product) => void;
+  onQuickEdit: (product: Product) => void;
 }) {
   return (
     <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
@@ -87,7 +91,7 @@ export function ProductTable({
               <td className="px-4 py-3 text-right tabular-nums text-muted-foreground">{product.wishlistCount ?? 0}</td>
               <td className="px-4 py-3 text-right tabular-nums text-muted-foreground">{product.ratingCount ? `${product.ratingAverage.toFixed(1)} (${product.ratingCount})` : '—'}</td>
               <td className="px-4 py-3 text-right">
-                <div className="flex justify-end gap-3">
+                <div className="flex justify-end gap-3 whitespace-nowrap">
                   <Link
                     href={`/admin/catalog/products/${product.id}`}
                     className="font-medium text-foreground hover:opacity-70"
@@ -100,6 +104,12 @@ export function ProductTable({
                   >
                     Edit
                   </Link>
+                  <button type="button" onClick={() => onQuickEdit(product)} className="font-medium text-primary hover:opacity-70">
+                    Quick edit
+                  </button>
+                  <button type="button" onClick={() => onCopy(product)} className="font-medium text-primary hover:opacity-70">
+                    Copy
+                  </button>
                   <button
                     type="button"
                     onClick={() => onDelete(product)}

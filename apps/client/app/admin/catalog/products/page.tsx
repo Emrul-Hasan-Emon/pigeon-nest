@@ -2,12 +2,15 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { QuickEdit } from '@/components/seller/quick-edit';
 import { ProductTable } from '@/components/admin/catalog/products/product-table';
 import { ReasonModal } from '@/components/admin/sellers/reason-modal';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useToast } from '@/components/ui/toast';
+import { adminProductPortal } from '@/lib/products/portal';
 import { useDebouncedValue } from '@/lib/hooks/use-debounced-value';
-import { deleteProduct, listProducts, updateProduct } from '@/lib/api/products';
+import { copyProduct, deleteProduct, listProducts, updateProduct } from '@/lib/api/products';
 import { ApiError, ConflictApiError, NotFoundApiError } from '@/lib/api/http';
 import type { Product, ProductActiveStatus, ProductListSort, ProductStatus } from '@/types/product';
 import { LoadingBlock } from '@/components/ui/skeleton';
@@ -24,6 +27,8 @@ type PendingReason =
 
 export default function AdminProductsPage() {
   const { showToast } = useToast();
+  const router = useRouter();
+  const [quickEditId, setQuickEditId] = useState<number | null>(null);
 
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search);
@@ -153,6 +158,17 @@ export default function AdminProductsPage() {
     if (done) setPendingReason(null);
   }
 
+  // A copy is a new product, switched off, for the same seller. The admin lands on its edit page.
+  async function handleCopy(product: Product) {
+    try {
+      const copy = await copyProduct(product.id);
+      showToast('Copied. The copy is switched off until you turn it on.', 'success');
+      router.push(`/admin/catalog/products/${copy.id}/edit`);
+    } catch (error) {
+      showToast(error instanceof ApiError ? error.message : 'Could not copy the product.', 'error');
+    }
+  }
+
   async function handleConfirmDelete() {
     if (!pendingDelete) return;
     try {
@@ -252,6 +268,21 @@ export default function AdminProductsPage() {
           onChangeStatus={handleChangeStatus}
           onChangeActive={handleChangeActive}
           onDelete={(product) => setPendingDelete(product)}
+          onCopy={handleCopy}
+          onQuickEdit={(product) => setQuickEditId(product.id)}
+        />
+      )}
+
+      {quickEditId !== null && (
+        <QuickEdit
+          productId={quickEditId}
+          portal={adminProductPortal}
+          onClose={() => setQuickEditId(null)}
+          onSaved={(updated) => {
+            setProducts((current) => current.map((row) => (row.id === updated.id ? { ...row, ...updated } : row)));
+            setQuickEditId(null);
+            showToast('Saved.', 'success');
+          }}
         />
       )}
 
