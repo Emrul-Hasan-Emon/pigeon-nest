@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { PRODUCT_ACTIVE_STYLES, PRODUCT_STATUS_STYLES } from '@/components/products/status-badges';
 import type { Product, ProductActiveStatus, ProductStatus } from '@/types/product';
+import { DELETE_ENABLED } from '@/lib/features';
 
 export function ProductTable({
   products,
@@ -11,6 +12,9 @@ export function ProductTable({
   onDelete,
   onCopy,
   onQuickEdit,
+  picked,
+  onPick,
+  onPickAll,
 }: {
   products: Product[];
   onChangeStatus: (product: Product, status: ProductStatus) => void;
@@ -18,12 +22,17 @@ export function ProductTable({
   onDelete: (product: Product) => void;
   onCopy: (product: Product) => void;
   onQuickEdit: (product: Product) => void;
+  picked: number[];
+  onPick: (id: number) => void;
+  onPickAll: (all: boolean) => void;
 }) {
+  const allPicked = products.length > 0 && products.every((p) => picked.includes(p.id));
   return (
     <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
       <table className="min-w-full divide-y divide-border text-sm">
         <thead className="bg-muted">
           <tr>
+            <th className="w-10 px-4 py-3"><input type="checkbox" aria-label="Select every product on this page" checked={allPicked} onChange={(e) => onPickAll(e.target.checked)} /></th>
             <th className="px-4 py-3 text-left font-medium text-muted-foreground">Image</th>
             <th className="px-4 py-3 text-left font-medium text-muted-foreground">Name</th>
             <th className="px-4 py-3 text-left font-medium text-muted-foreground">Seller</th>
@@ -38,13 +47,14 @@ export function ProductTable({
         <tbody className="divide-y divide-border">
           {products.length === 0 && (
             <tr>
-              <td colSpan={8} className="px-4 py-6 text-center text-muted-foreground">
+              <td colSpan={9} className="px-4 py-6 text-center text-muted-foreground">
                 No products found.
               </td>
             </tr>
           )}
           {products.map((product) => (
-            <tr key={product.id} className="border-t border-border">
+            <tr key={product.id} className={`border-t border-border ${picked.includes(product.id) ? 'bg-accent/40' : ''}`}>
+              <td className="px-4 py-3"><input type="checkbox" aria-label={`Select ${product.name}`} checked={picked.includes(product.id)} onChange={() => onPick(product.id)} /></td>
               <td className="px-4 py-3">
                 {product.thumbnailUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -110,13 +120,15 @@ export function ProductTable({
                   <button type="button" onClick={() => onCopy(product)} className="font-medium text-primary hover:opacity-70">
                     Copy
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => onDelete(product)}
-                    className="font-medium text-destructive hover:opacity-70"
-                  >
-                    Delete
-                  </button>
+                  {DELETE_ENABLED && (
+                    <button
+                      type="button"
+                      onClick={() => onDelete(product)}
+                      className="font-medium text-destructive hover:opacity-70"
+                    >
+                      Delete
+                    </button>
+                  )}
                 </div>
               </td>
             </tr>
