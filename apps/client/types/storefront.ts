@@ -32,6 +32,15 @@ export interface StoreProduct {
   ratingCount: number;
   seller: { id: number; name: string } | null;
   category: { id: number; name: string; slug: string } | null;
+  breed?: string | null;
+  bloodline?: string | null;
+  vaccinated?: boolean;
+}
+
+/** The breeds and bloodlines buyers can filter by, with how many birds each has. */
+export interface BirdFilters {
+  breeds: { name: string; count: number }[];
+  bloodlines: { name: string; count: number }[];
 }
 
 export interface StoreSection {
@@ -80,6 +89,9 @@ export interface ProductQuery {
   featured?: boolean;
   minPrice?: number;
   maxPrice?: number;
+  breed?: string;
+  bloodline?: string;
+  vaccinated?: boolean;
   sort?: ProductSortKey;
   page?: number;
   pageSize?: number;

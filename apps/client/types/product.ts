@@ -188,3 +188,41 @@ export interface ProductStatusHistoryResponse {
   results: ProductStatusHistoryEntry[];
   nextCursor: number | null;
 }
+
+export type BulkProductAction = 'activate' | 'deactivate' | 'price' | 'approve' | 'reject' | 'suspend';
+
+export interface BulkProductPayload {
+  productIds: number[];
+  action: BulkProductAction;
+  mode?: 'percent' | 'amount';
+  direction?: 'increase' | 'decrease';
+  value?: number;
+  reason?: string;
+}
+
+export interface BulkProductResult {
+  action: BulkProductAction;
+  updated: number;
+  failed: number;
+  results: Array<{ id: number; name: string | null; ok: boolean; error?: string }>;
+}
+
+export type StockReason = 'initial' | 'edited' | 'order_placed' | 'order_cancelled' | 'order_reopened';
+
+/** One change to the stock of one option. */
+export interface StockMovement {
+  id: number;
+  sku: { id: number; label: string };
+  change: number;
+  quantityAfter: number;
+  reason: StockReason;
+  orderId: number | null;
+  note: string | null;
+  by: string | null;
+  createdAt: string;
+}
+
+export interface StockMovementPage {
+  results: StockMovement[];
+  nextCursor: number | null;
+}
