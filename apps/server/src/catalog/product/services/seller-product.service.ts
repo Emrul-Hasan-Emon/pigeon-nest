@@ -12,6 +12,7 @@ import {
   ProductMediaFiles,
 } from './admin-product.service';
 import { ProductStatusHistoryService } from './product-status-history.service';
+import { BulkProductDto } from '../dtos/bulk-product.dto';
 
 // Seller-facing wrapper around the shared product engine. Every call is scoped
 // to the calling seller (someone else's product is a 404) and the engine
@@ -80,6 +81,10 @@ export class SellerProductService {
     return this.productService.removeParent(id, skuId, role, {
       sellerId: seller.id,
     });
+  }
+
+  bulk(seller: Seller, dto: BulkProductDto) {
+    return this.productService.bulkChange(dto, this.historyService.sellerActor(seller), { sellerId: seller.id });
   }
 
   copy(seller: Seller, id: number) {
