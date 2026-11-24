@@ -470,3 +470,16 @@ aside nav { scrollbar-width: thin; scrollbar-color: rgb(255 255 255 / 0.16) tran
 }
 
 
+
+/* ---------- Printing an invoice or packing slip ----------
+   The page adds `print-doc` to the body while an order print view is open. Menus and bars are hidden and the sheet
+   fills the paper. */
+@media print {
+  body.print-doc :is(aside, header, nav, .print-hide) { display: none !important; }
+  body.print-doc :is(.admin-main, .seller-main) { margin: 0 !important; padding: 0 !important; }
+  body.print-doc :is(.admin-main, .seller-main) > div { max-width: none !important; padding: 0 !important; }
+  body.print-doc .print-sheet { border: 0 !important; box-shadow: none !important; padding: 0 !important; }
+  body.print-doc, body.print-doc .bg-background { background: #fff !important; }
+}
+
+
