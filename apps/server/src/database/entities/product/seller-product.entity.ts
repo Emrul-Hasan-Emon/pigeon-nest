@@ -6,7 +6,6 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
-  Unique,
 } from 'typeorm';
 import { BaseEntity } from '../base.entity';
 import { Seller } from '../seller/seller.entity';
@@ -19,7 +18,6 @@ import { SellerProductStatusChangeHistory } from './seller-product-status-change
 import { SellerProductMedia } from '../product-media/seller-product-media.entity';
 
 @Entity()
-@Unique(['sellerId', 'slug'])
 @Check('CHK_seller_product_wishlistCount', '"wishlistCount" >= 0')
 @Check('CHK_seller_product_rating', '"ratingCount" >= 0 AND "ratingSum" >= 0 AND "ratingAverage" BETWEEN 0 AND 5')
 export class SellerProduct extends BaseEntity {
