@@ -1,5 +1,5 @@
 import { Transform, Type } from 'class-transformer';
-import { IsEnum, IsInt, IsNumber, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
+import { IsEnum, IsInt, IsNumber, IsOptional, IsString, Matches, Max, MaxLength, Min } from 'class-validator';
 import { MAX_DECIMAL_12_2, MAX_INT32 } from '../../shared/constants/limits';
 import { emptyToUndefined } from '../../shared/utils/transform.util';
 import { ProposalParty, SkuPriceProposalStatus } from '../../database/enums/sku-price-proposal.enums';
@@ -94,6 +94,39 @@ class ListBase extends Paged {
   @IsOptional()
   @IsEnum(ProposalParty)
   awaiting?: ProposalParty;
+
+  // SKU code
+  @IsOptional()
+  @Transform(emptyToUndefined)
+  @IsString()
+  @MaxLength(100)
+  skuSearch?: string;
+
+  // offered on or after this day / on or before this day (YYYY-MM-DD)
+  @IsOptional()
+  @Transform(emptyToUndefined)
+  @Matches(/^\d{4}-\d{2}-\d{2}$/)
+  from?: string;
+
+  @IsOptional()
+  @Transform(emptyToUndefined)
+  @Matches(/^\d{4}-\d{2}-\d{2}$/)
+  to?: string;
+
+  // per-unit price in the latest offer
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber(MONEY)
+  @Min(0)
+  @Max(MAX_DECIMAL_12_2)
+  minPrice?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber(MONEY)
+  @Min(0)
+  @Max(MAX_DECIMAL_12_2)
+  maxPrice?: number;
 }
 
 export class ListUserProposalsQueryDto extends ListBase {}

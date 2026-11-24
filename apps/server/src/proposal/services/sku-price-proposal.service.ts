@@ -143,6 +143,11 @@ export class SkuPriceProposalService {
     if (query.sellerProductSkuId !== undefined) where.push(`pr."sellerProductSkuId" = ${add(query.sellerProductSkuId)}`);
     if (query.productId !== undefined) where.push(`pr."sellerProductId" = ${add(query.productId)}`);
     if (query.search) where.push(`p.name ILIKE ${add(likeContains(query.search))}`);
+    if (query.skuSearch) where.push(`k.sku ILIKE ${add(likeContains(query.skuSearch))}`);
+    if (query.from) where.push(`pr."createdAt" >= ${add(query.from)}::date`);
+    if (query.to) where.push(`pr."createdAt" < (${add(query.to)}::date + 1)`);
+    if (query.minPrice !== undefined) where.push(`pr.price >= ${add(query.minPrice)}`);
+    if (query.maxPrice !== undefined) where.push(`pr.price <= ${add(query.maxPrice)}`);
     if (query.buyerSearch) {
       const q = add(likeContains(query.buyerSearch));
       where.push(`(u.name ILIKE ${q} OR u.email ILIKE ${q} OR u.phone ILIKE ${q})`);
