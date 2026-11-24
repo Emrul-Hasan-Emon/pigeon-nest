@@ -44,6 +44,11 @@ export interface MyProfilePayload {
   description?: string;
 }
 
+/** The selling switch and a planned break. Blank dates and note are cleared. */
+export function setSelling(payload: { isEnabledForSell: boolean; breakStartsOn?: string; breakEndsOn?: string; note?: string }) {
+  return sellerHttp.patch<SellerView>(`${ENDPOINTS.seller.profile.detail}/selling`, payload);
+}
+
 export function updateMyProfile(payload: MyProfilePayload) {
   const form = new FormData();
   if (payload.name !== undefined) form.set('name', payload.name);
