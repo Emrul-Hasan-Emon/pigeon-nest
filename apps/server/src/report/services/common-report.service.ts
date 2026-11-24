@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { LOW_STOCK_AT } from '../../dashboard/services/seller-overview.service';
+import { LOW_STOCK_AT } from '../../dashboard/services/common-dashboard.service';
 import { tidy } from '../../shared/utils/money.util';
 import { RETURN_REASON_LABEL, ReturnReasonCode } from '../../database/enums/return-reason-code.enum';
 import { ProductReportKind, ReportGroup, ReturnReportBy } from '../dtos/report.dtos';

@@ -5,10 +5,9 @@ import { tidy } from '../../shared/utils/money.util';
 import { WishlistInsightsService } from '../../wishlist/services/wishlist-insights.service';
 import { DashboardQueryDto } from '../dtos/dashboard.dtos';
 import { resolveWindow } from '../utils/dashboard-window.util';
-import { DashboardMetricsService } from './dashboard-metrics.service';
+import { CommonDashboardService, LOW_STOCK_AT } from './common-dashboard.service';
 
 /** A SKU with this many left or fewer (and more than none) counts as running low. */
-export const LOW_STOCK_AT = 5;
 
 /** How many wishlist products the dashboard lists. */
 const WISHLIST_TOP = 5;
@@ -18,9 +17,9 @@ const WISHLIST_TOP = 5;
  * products and their wishlist demand. Never reads another seller's data.
  */
 @Injectable()
-export class SellerOverviewService {
+export class SellerDashboardService {
   constructor(
-    private readonly metrics: DashboardMetricsService,
+    private readonly metrics: CommonDashboardService,
     private readonly dataSource: DataSource,
     private readonly wishlist: WishlistInsightsService,
   ) {}
@@ -70,8 +69,8 @@ export class SellerOverviewService {
   }
 
   private compose(
-    work: Awaited<ReturnType<SellerOverviewService['work']>>,
-    stock: Awaited<ReturnType<SellerOverviewService['stock']>>,
+    work: Awaited<ReturnType<SellerDashboardService['work']>>,
+    stock: Awaited<ReturnType<SellerDashboardService['stock']>>,
     returns: { requested: number; inProgress: number },
     productsPending: number,
   ) {

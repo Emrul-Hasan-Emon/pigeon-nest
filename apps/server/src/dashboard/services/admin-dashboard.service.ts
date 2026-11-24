@@ -3,13 +3,13 @@ import { DataSource } from 'typeorm';
 import { tidy } from '../../shared/utils/money.util';
 import { DashboardQueryDto } from '../dtos/dashboard.dtos';
 import { resolveWindow } from '../utils/dashboard-window.util';
-import { DashboardMetricsService } from './dashboard-metrics.service';
+import { CommonDashboardService } from './common-dashboard.service';
 
 /** The admin's landing page: the whole platform for one period, and what needs an admin's attention now. */
 @Injectable()
 export class AdminDashboardService {
   constructor(
-    private readonly metrics: DashboardMetricsService,
+    private readonly metrics: CommonDashboardService,
     private readonly dataSource: DataSource,
   ) {}
 

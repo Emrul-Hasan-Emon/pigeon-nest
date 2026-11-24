@@ -3,6 +3,9 @@ import { DataSource } from 'typeorm';
 import { tidy } from '../../shared/utils/money.util';
 import { bucketKeys, DashboardWindow, percentChange } from '../utils/dashboard-window.util';
 
+/** An option counts as low on stock at this many or fewer. The seller dashboard and the low stock report use it. */
+export const LOW_STOCK_AT = 5;
+
 /**
  * The queries both dashboards share. Every one takes an optional seller: with a seller it counts only that
  * seller's orders and returns, without one it counts the whole platform.
@@ -13,7 +16,7 @@ import { bucketKeys, DashboardWindow, percentChange } from '../utils/dashboard-w
  * - Net sales = sales - refunds. Net commission = commission on those sales - commission taken back by returns.
  */
 @Injectable()
-export class DashboardMetricsService {
+export class CommonDashboardService {
   constructor(private readonly dataSource: DataSource) {}
 
   private q<T = Record<string, unknown>>(sql: string, params: unknown[]): Promise<T[]> {
