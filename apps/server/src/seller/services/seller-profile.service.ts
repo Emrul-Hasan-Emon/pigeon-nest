@@ -53,6 +53,11 @@ export class SellerProfileService {
       changed = true;
     }
 
+    if (dto.description !== undefined && dto.description !== seller.description) {
+      seller.description = dto.description;
+      changed = true;
+    }
+
     if (!changed) {
       return this.commonSellerService.toSellerView(seller);
     }

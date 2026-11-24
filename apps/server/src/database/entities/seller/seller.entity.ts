@@ -21,6 +21,10 @@ export class Seller extends BaseEntity {
   @Column()
   passwordHash: string;
 
+  // Short "about us" text, shown on the public seller page.
+  @Column({ type: 'text', nullable: true })
+  description: string | null;
+
   @Column({ nullable: true })
   avatarUrl: string;
 
