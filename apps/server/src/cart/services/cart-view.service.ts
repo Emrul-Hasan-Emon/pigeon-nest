@@ -9,6 +9,7 @@ import { SellerStatus } from '../../database/enums/seller-status.enum';
 import { SkuPriceProposalStatus } from '../../database/enums/sku-price-proposal.enums';
 import { effectivePrice } from '../../storefront/storefront-product.service';
 import { tidy } from '../../shared/utils/money.util';
+import { isShopClosed } from '../../shared/utils/shop-break.util';
 
 export type CartLineStatus = 'ok' | 'unavailable' | 'out_of_stock' | 'insufficient_stock';
 
@@ -78,7 +79,8 @@ export class CartViewService {
       !!seller &&
       !seller.deletedAt &&
       seller.status === SellerStatus.APPROVED &&
-      seller.activeStatus === SellerActiveStatus.ACTIVE;
+      seller.activeStatus === SellerActiveStatus.ACTIVE &&
+      !isShopClosed(seller);
 
     const lines = (cart.items ?? []).map((item) => this.line(item, sellerLive));
     const ok = lines.filter((l) => l.status === 'ok');
