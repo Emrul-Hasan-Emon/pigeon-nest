@@ -44,3 +44,7 @@ Screens
 `/seller/reviews`: three cards (average rating, reviews waiting for your reply,
 low ratings), filters for product, stars and "Not answered yet", and each review
 with its thread and a Reply box. Products table: a Rating column beside "Saved by".
+
+## Your public page
+
+Buyers see your overall rating and every review of your products on `/sellers/<your id>`. Write an "About your shop" text in My profile so buyers know who you are. Your phone and email are never shown there.

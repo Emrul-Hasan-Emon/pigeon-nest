@@ -122,7 +122,7 @@ There are exactly two ways.
     - Name (required)
     - Phone number with country (required)
     - Password (required, at least 6 characters)
-    - Email, commission rate, payout info, photos (optional)
+    - Email, system commission rate, payout info, photos (optional)
 
   What the system does
     - Creates the account as  APPROVED + ACTIVE straight away.
@@ -192,7 +192,7 @@ pending list directly; the seller must resubmit first.
 Where: admin panel -> Sellers -> Edit.
 
 The admin controls everything about any seller:
-  - name, email, phone, password, commission rate, payout info, photos
+  - name, email, phone, password, system commission rate, payout info, photos
   - approval status (pending / approved / rejected)
   - activity status (active / inactive / suspended)
   - a note explaining the change (required to reject or suspend, see section 15)
@@ -241,7 +241,7 @@ The seller may change ONLY these things:
   - password (needs the current password; new one must differ and be 8-72
     characters)
 
-The seller can NEVER change: approval status, activity status, commission rate,
+The seller can NEVER change: approval status, activity status, system commission rate,
 payout info, rejection reason. If someone tries to send those, the system
 refuses the whole request.
 
@@ -546,3 +546,16 @@ Where the admin sees it
              NO  -> Profile and password changes only.
                     If they are rejected and change real profile details,
                     they go back to pending for another review.
+
+## About text and the public seller page
+
+- `PATCH /seller/profile` accepts an optional `description` (multipart, up to 1000 characters). A blank value clears it.
+- Anyone can read the public page data without signing in:
+  - `GET /user/sellers/:id` returns name, avatar, join date, product count, `description`, `ratingAverage`, `ratingCount` and a 1-5 `breakdown`. It never returns phone, email, ID images or payout details.
+  - `GET /user/sellers/:id/reviews` returns published reviews across all the seller's products, newest first. Query: `rating` (1-5), `limit`, `cursor`. Each review has the product name and slug and a masked reviewer name.
+- Both return 404 unless the seller is approved and active.
+- The client page is `/sellers/:id`. It has a Share button (share sheet, or copies the link). The seller profile page has a "See my public page" link.
+
+### Admin and the about text
+
+`POST /admin/sellers` and `PATCH /admin/sellers/:id` also accept `description` (up to 1000 characters, blank clears it). The admin seller form has an "About the shop" box with a link to the public page.
