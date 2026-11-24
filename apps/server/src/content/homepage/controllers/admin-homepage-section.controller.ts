@@ -25,7 +25,6 @@ import {
   ListHomepageSectionQueryDto,
   ReorderHomepageSectionsDto,
   UpdateHomepageSectionDto,
-  UpdateHomepageSlotDto,
 } from '../dtos/homepage-section.dtos';
 import { HomepageService } from '../services/homepage.service';
 import { AdminAuthGuard } from '../../../auth/guards/admin-auth.guard';
@@ -91,44 +90,4 @@ export class AdminHomepageSectionController {
   // remove(@Param('id', ParseIdPipe) id: number) {
   //   return this.homepage.remove(id);
   // }
-}
-
-@UseGuards(AdminAuthGuard)
-@Controller({ path: 'api/admin/homepage-slots', version: '1' })
-export class AdminHomepageSlotController {
-  constructor(private readonly homepage: HomepageService) {}
-
-  @Get()
-  list(
-    @Query() query: ListHomepageSectionQueryDto,
-    @CursorPaginationParams() pagination: CursorPagination,
-  ) {
-    return this.homepage.list(
-      HomepagePage.SLOTS,
-      query,
-      pagination,
-      HomepageSort.DISPLAY_ORDER,
-    );
-  }
-
-  @Get(':id')
-  details(@Param('id', ParseIdPipe) id: number) {
-    return this.homepage.details(id, HomepagePage.SLOTS);
-  }
-
-  @Get(':id/preview')
-  preview(
-    @Param('id', ParseIdPipe) id: number,
-    @Query() query: HomepageDeviceQueryDto,
-  ) {
-    return this.homepage.preview(id, HomepagePage.SLOTS, query.device);
-  }
-
-  @Patch(':id')
-  update(
-    @Param('id', ParseIdPipe) id: number,
-    @Body() dto: UpdateHomepageSlotDto,
-  ) {
-    return this.homepage.update(id, dto, HomepagePage.SLOTS);
-  }
 }

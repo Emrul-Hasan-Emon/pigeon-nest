@@ -1,9 +1,7 @@
 import { Module } from '@nestjs/common';
 import { StorefrontModule } from '../../storefront/storefront.module';
-import {
-  AdminHomepageSectionController,
-  AdminHomepageSlotController,
-} from './controllers/admin-homepage-section.controller';
+import { AdminHomepageSectionController } from './controllers/admin-homepage-section.controller';
+import { AdminHomepageSlotController } from './controllers/admin-homepage-slot.controller';
 import { StorefrontHomepageController } from './controllers/storefront-homepage.controller';
 import { HomepageConfigService } from './services/homepage-config.service';
 import { HomepageLookupService } from './services/homepage-lookup.service';
