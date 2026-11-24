@@ -96,6 +96,9 @@ export interface SellerOverview extends DashboardBase {
     lowStockAt: number;
     productsPending: number;
     reviewsUnanswered: number;
+    questionsToAnswer: number;
+    paymentClaims: number;
+    refundsToSend: number;
   };
   balance: { total: number; due: number; paid: number };
   reviews: { count: number; average: number | null };

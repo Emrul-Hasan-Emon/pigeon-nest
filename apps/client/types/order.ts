@@ -165,6 +165,12 @@ export interface OrderDetail extends OrderSummary {
     countryCode: string;
     countryName: string;
   };
+  /** Where to pay (a customer sees the active accounts only), and the "I have paid" messages. */
+  payTo?: import('./payment').PaymentAccount[];
+  /** Money back for a cancelled order, and every record of it. */
+  refundStatus?: import('./refund').RefundStatus | null;
+  refunds?: import('./refund').RefundRecord[];
+  paymentClaims?: import('./payment').PaymentClaim[];
   payments: OrderPayment[];
   paymentHistory: PaymentHistoryEntry[];
   updates: { id: number; message: string | null; attachments: Attachment[]; by: Actor; createdAt: string }[];
