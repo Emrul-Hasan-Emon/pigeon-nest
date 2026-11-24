@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Seller } from '../../database/entities/seller/seller.entity';
-import { ProductReportDto, ProductReportKind, ReportGroup, ReportGroupedDto, ReportRangeDto } from '../dtos/report.dtos';
+import { ProductReportDto, ProductReportKind, ReportGroup, ReportGroupedDto, ReportRangeDto, ReturnReportBy, ReturnReportDto } from '../dtos/report.dtos';
 import { resolveReportWindow } from '../utils/report-range.util';
 import { CommonReportService } from './common-report.service';
 
@@ -23,5 +23,9 @@ export class SellerReportService {
 
   earnings(seller: Seller, q: ReportGroupedDto) {
     return this.reports.earnings(seller.id, resolveReportWindow(q), q.groupBy ?? ReportGroup.DAY, true);
+  }
+
+  returnReasons(seller: Seller, q: ReturnReportDto) {
+    return this.reports.returnReasons(seller.id, resolveReportWindow(q), q.by ?? ReturnReportBy.REASON);
   }
 }
