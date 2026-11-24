@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsEnum, IsInt, IsOptional, Matches, Min } from 'class-validator';
+import { IsEnum, IsIn, IsInt, IsOptional, Matches, Min } from 'class-validator';
 
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -61,4 +61,58 @@ export class AdminOrderReportDto extends ReportRangeDto {
   @IsInt()
   @Min(1)
   sellerId?: number;
+}
+
+export enum ReturnReportBy {
+  REASON = 'reason',
+  PRODUCT = 'product',
+  SELLER = 'seller',
+}
+
+/** Return reasons report for a seller: by reason or by product. */
+export class ReturnReportDto extends ReportRangeDto {
+  @IsOptional()
+  @IsIn([ReturnReportBy.REASON, ReturnReportBy.PRODUCT])
+  by?: ReturnReportBy;
+}
+
+/** The admin may also group by seller, or narrow to one seller. */
+export class AdminReturnReportDto extends ReportRangeDto {
+  @IsOptional()
+  @IsEnum(ReturnReportBy)
+  by?: ReturnReportBy;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  sellerId?: number;
+}
+
+export enum SellerRankSort {
+  SALES = 'sales',
+  ORDERS = 'orders',
+  RATING = 'rating',
+  RETURNS = 'returns',
+}
+
+/** The admin's seller ranking: who sells most, who is rated best, who has the most returns. */
+export class SellerRankingDto extends ReportRangeDto {
+  @IsOptional()
+  @IsEnum(SellerRankSort)
+  sort?: SellerRankSort;
+}
+
+/** A monthly statement: the month as YYYY-MM. Left out, this month. */
+export class StatementQueryDto {
+  @IsOptional()
+  @Matches(/^\d{4}-(0[1-9]|1[0-2])$/, { message: 'month must look like 2026-11' })
+  month?: string;
+}
+
+export class AdminStatementQueryDto extends StatementQueryDto {
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  sellerId: number;
 }
