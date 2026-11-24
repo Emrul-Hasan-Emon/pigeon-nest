@@ -2,7 +2,7 @@
 
 `GET /v1/api/admin/dashboard?range=` for admins (whole platform) and `GET /v1/api/seller/dashboard?range=` for approved, active sellers (their own data only). One call per dashboard returns every figure on the page. `range` is `7d`, `30d` (default), `90d` or `12m`. The period before, of the same length, is the comparison. The old product-count endpoint and `/seller/dashboard/overview` are gone: product counts and wishlist demand are now part of this response.
 
-Code: `src/dashboard/`. One shared `DashboardMetricsService` runs the queries (with an optional seller id), `AdminDashboardService` and `SellerOverviewService` add what is specific to each role, and each role has its own controller.
+Code: `src/dashboard/`. One shared `CommonDashboardService` runs the queries (with an optional seller id), `AdminDashboardService` and `SellerDashboardService` add what is specific to each role, and each role has its own controller.
 
 ## What the numbers mean
 
