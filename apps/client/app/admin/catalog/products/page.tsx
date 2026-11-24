@@ -10,7 +10,8 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useToast } from '@/components/ui/toast';
 import { adminProductPortal } from '@/lib/products/portal';
 import { useDebouncedValue } from '@/lib/hooks/use-debounced-value';
-import { copyProduct, deleteProduct, listProducts, updateProduct } from '@/lib/api/products';
+import { BulkProductBar } from '@/components/products/bulk-bar';
+import { bulkProducts, copyProduct, deleteProduct, listProducts, updateProduct } from '@/lib/api/products';
 import { ApiError, ConflictApiError, NotFoundApiError } from '@/lib/api/http';
 import type { Product, ProductActiveStatus, ProductListSort, ProductStatus } from '@/types/product';
 import { LoadingBlock } from '@/components/ui/skeleton';
@@ -29,6 +30,7 @@ export default function AdminProductsPage() {
   const { showToast } = useToast();
   const router = useRouter();
   const [quickEditId, setQuickEditId] = useState<number | null>(null);
+  const [picked, setPicked] = useState<number[]>([]);
 
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search);
@@ -268,10 +270,15 @@ export default function AdminProductsPage() {
           onChangeStatus={handleChangeStatus}
           onChangeActive={handleChangeActive}
           onDelete={(product) => setPendingDelete(product)}
+          picked={picked}
+          onPick={(id) => setPicked((c) => (c.includes(id) ? c.filter((x) => x !== id) : [...c, id]))}
+          onPickAll={(all) => setPicked(all ? products.map((p) => p.id) : [])}
           onCopy={handleCopy}
           onQuickEdit={(product) => setQuickEditId(product.id)}
         />
       )}
+
+      {picked.length > 0 && <BulkProductBar selected={picked} admin run={bulkProducts} onDone={fetchFirstPage} onClear={() => setPicked([])} />}
 
       {quickEditId !== null && (
         <QuickEdit
