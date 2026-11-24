@@ -102,14 +102,15 @@ export class AdminUserAddressController {
     return this.addresses.update(userId, id, dto, await this.actors.resolve(admin));
   }
 
-  @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(
-    @CurrentUser() admin: JwtPayload,
-    @Param('userId', ParseIdPipe) userId: number,
-    @Param('id', ParseIdPipe) id: number,
-  ) {
-    await this.addresses.ensureUser(userId);
-    return this.addresses.remove(userId, id, await this.actors.resolve(admin));
-  }
+  // Delete is switched off for now. Remove these comment marks to bring it back.
+  // @Delete(':id')
+  // @HttpCode(HttpStatus.NO_CONTENT)
+  // async remove(
+  //   @CurrentUser() admin: JwtPayload,
+  //   @Param('userId', ParseIdPipe) userId: number,
+  //   @Param('id', ParseIdPipe) id: number,
+  // ) {
+  //   await this.addresses.ensureUser(userId);
+  //   return this.addresses.remove(userId, id, await this.actors.resolve(admin));
+  // }
 }
