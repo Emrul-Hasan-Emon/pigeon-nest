@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { SellerFrame } from '@/components/seller/seller-frame';
+import { ShopBreakBanner } from '@/components/seller/shop-break';
 import { StatusBanner } from '@/components/seller/status-banner';
 import { SellerOverviewView } from '@/components/dashboard/seller-overview';
 import { getMyProfile } from '@/lib/api/seller-portal';
@@ -50,6 +51,7 @@ export default function SellerDashboardPage() {
         {failed && <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">Failed to load the dashboard.</p>}
         {/* Numbers are only available to approved and active sellers. */}
         {seller && !seller.access.canManage && !loading && <StatusBanner seller={seller} />}
+        {seller && !loading && <ShopBreakBanner seller={seller} onChanged={setSeller} />}
         {seller?.access.canManage && <SellerOverviewView title={`Welcome, ${seller.name}`} />}
     </SellerFrame>
   );
