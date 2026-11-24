@@ -85,11 +85,12 @@ export class AdminHomepageSectionController {
     return this.homepage.update(id, dto, HomepagePage.MAIN);
   }
 
-  @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id', ParseIdPipe) id: number) {
-    return this.homepage.remove(id);
-  }
+  // Delete is switched off for now. Remove these comment marks to bring it back.
+  // @Delete(':id')
+  // @HttpCode(HttpStatus.NO_CONTENT)
+  // remove(@Param('id', ParseIdPipe) id: number) {
+  //   return this.homepage.remove(id);
+  // }
 }
 
 @UseGuards(AdminAuthGuard)
