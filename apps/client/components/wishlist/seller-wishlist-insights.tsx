@@ -59,11 +59,11 @@ export function WishlistInsightsView({ data, title = 'Wishlist demand', searchin
       <div className="mb-4 overflow-hidden rounded-xl border border-border bg-border shadow-sm">
         <div className="grid grid-cols-2 gap-px">
           <div className="bg-card px-5 py-4">
-            <p className="text-xs text-muted-foreground">Total saves</p>
+            <p className="text-xs font-semibold text-muted-foreground">Total saves</p>
             <p className="mt-1 font-[family-name:var(--font-display)] text-2xl font-semibold tracking-tight text-foreground">{data.totalSaves}</p>
           </div>
           <div className="bg-card px-5 py-4">
-            <p className="text-xs text-muted-foreground">Products saved</p>
+            <p className="text-xs font-semibold text-muted-foreground">Products saved</p>
             <p className="mt-1 font-[family-name:var(--font-display)] text-2xl font-semibold tracking-tight text-foreground">
               {data.productsSaved}
               <span className="text-base font-normal text-muted-foreground"> of {data.products}</span>

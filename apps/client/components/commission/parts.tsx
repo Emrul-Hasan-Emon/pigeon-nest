@@ -44,7 +44,7 @@ export function Cards({ items }: { items: { label: string; value: string; hint?:
     <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
       {items.map((c) => (
         <div key={c.label} className="rounded-xl border border-border bg-card p-4 shadow-sm">
-          <p className="text-xs text-muted-foreground">{c.label}</p>
+          <p className="text-xs font-semibold text-muted-foreground">{c.label}</p>
           <p className={`mt-1 text-2xl font-bold ${c.tone === 'warn' ? 'text-amber-700' : c.tone === 'good' ? 'text-emerald-700' : 'text-foreground'}`}>{c.value}</p>
           {c.hint && <p className="mt-1 text-xs text-muted-foreground">{c.hint}</p>}
         </div>

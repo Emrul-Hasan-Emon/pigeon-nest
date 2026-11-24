@@ -103,7 +103,7 @@ export function SellerOffers() {
           { label: 'Closed', value: summary?.closed },
         ].map((c) => (
           <div key={c.label} className="rounded-xl border border-border bg-card p-4 shadow-sm">
-            <p className="text-xs text-muted-foreground">{c.label}</p>
+            <p className="text-xs font-semibold text-muted-foreground">{c.label}</p>
             <p className={`mt-1 text-2xl font-bold ${c.warn && summary && summary.awaitingYou > 0 ? 'text-amber-700' : 'text-foreground'}`}>{c.value ?? '—'}</p>
           </div>
         ))}

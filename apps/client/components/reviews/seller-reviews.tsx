@@ -156,7 +156,7 @@ export function SellerReviews() {
     <div>
       <section className="mb-6 grid gap-4 md:grid-cols-3" aria-label="Summary">
         <div className="rounded-xl border border-border bg-card p-5">
-          <p className="text-sm text-muted-foreground">Average rating</p>
+          <p className="text-sm font-semibold text-muted-foreground">Average rating</p>
           <p className="mt-1 font-[family-name:var(--font-serif)] text-4xl font-semibold text-foreground">
             {summary && summary.ratingCount ? summary.ratingAverage.toFixed(1) : '—'}
             <span className="text-lg text-muted-foreground"> / 5</span>
@@ -167,7 +167,7 @@ export function SellerReviews() {
           </p>
         </div>
         <div className={`rounded-xl border p-5 ${summary && summary.unreplied > 0 ? 'border-amber-300 bg-amber-50' : 'border-border bg-card'}`}>
-          <p className="text-sm text-muted-foreground">Waiting for your reply</p>
+          <p className="text-sm font-semibold text-muted-foreground">Waiting for your reply</p>
           <p className={`mt-1 font-[family-name:var(--font-serif)] text-4xl font-semibold ${summary && summary.unreplied > 0 ? 'text-amber-700' : 'text-emerald-700'}`}>{summary?.unreplied ?? 0}</p>
           <p className="mt-1 text-sm text-muted-foreground">
             {summary && summary.unreplied > 0 ? 'A quick reply shows buyers you care.' : 'You have answered every review.'}
