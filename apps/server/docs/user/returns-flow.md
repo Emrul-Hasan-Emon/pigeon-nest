@@ -42,3 +42,9 @@ Screens
 -------
 Footer "Your returns", `/returns`, `/returns/:id`, and the Returns box on the
 order page.
+
+Which bird
+----------
+Each return item carries `bird`: your order's copy of the pigeon as it was sold (ring number, hatch date,
+vaccination, breed, bloodline, sire and dam), or `null` for other items and older orders. The
+return pages show the ring, age and breed under the item so everyone knows which bird is meant.

@@ -24,14 +24,20 @@ API: `GET /returns` (status, scope, search, pages), `GET /returns/:id`,
 out of order answers 409. Each response is the whole return with
 `actions.sellerNext`, the buttons to show now.
 
-Commission
+System commission
 ----------
-Each item's commission was worked out when the order was placed. When an admin
-confirms a return, that commission comes off your balance (Commission > Balance
-changes shows before and after). The return page lists the commission that comes
+Each item's system commission was worked out when the order was placed. When an admin
+confirms a return, that system commission comes off your balance (System commission > Balance
+changes shows before and after). The return page lists the system commission that comes
 back per item.
 
 Screens
 -------
 Returns (list with filters), a return's page (items, refund, history, your next
-step). The order page lists the order's returns and shows commission per item.
+step). The order page lists the order's returns and shows system commission per item.
+
+Which bird
+----------
+Each return item carries `bird`: the order's copy of the pigeon as it was sold (ring number, hatch date,
+vaccination, breed, bloodline, sire and dam), or `null` for other items and older orders. The
+return pages show the ring, age and breed under the item so everyone knows which bird is meant.

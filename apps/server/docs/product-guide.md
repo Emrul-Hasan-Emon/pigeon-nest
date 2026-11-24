@@ -168,6 +168,66 @@ The system enforces these rules:
 
 Covered in section 12.
 
+### 3.5 Bird details (breed, ring number, parents and more)
+
+Pigeon Nest sells pigeons, and a pigeon buyer wants to know the bird, not just
+the price. These facts are all **optional**. A seller who leaves them empty
+loses nothing; buyers simply see "not given".
+
+The facts sit on two levels, depending on what they describe.
+
+**On the product (true for every SKU under it):**
+
+| Field | What it means | Limit |
+|---|---|---|
+| **Breed** | For example Homer or Roller. | 120 characters |
+| **Bloodline** | The family line, for example Janssen. | 120 characters |
+| **Bloodline note** | More about the line. | 5,000 characters |
+| **Vaccination note** | The vaccination programme in general, for example "PMV and paratyphoid every year". | 5,000 characters |
+| **Health note** | Health history and checks. | 5,000 characters |
+| **Race record** | Results and achievements. | 5,000 characters |
+
+**On the SKU (one SKU = one bird, or one batch):**
+
+| Field | What it means | Limit |
+|---|---|---|
+| **Ring number** | The number on the leg ring. It identifies one bird. | 60 characters |
+| **Hatch date** | The day the bird hatched. The age is worked out from it. | A real date, `YYYY-MM-DD`, not in the future |
+| **Vaccine name** | Which vaccine this bird had. | 120 characters |
+| **Vaccinated on** | The date of that vaccination. | A real date, not in the future, and not before the hatch date |
+| **Sire and dam** | The father and the mother. Each has a name, a ring number and one photo, all optional. | Name 120, ring 60, photo up to 10MB |
+
+Why two levels: a ring number or a hatch date describes one bird, so it cannot
+be shared by every SKU of a product. Breed and bloodline describe the whole
+listing, so typing them once is enough.
+
+Rules:
+
+- **One ring = one bird.** A ring number can be used only once per seller,
+  upper or lower case does not matter. Saving a second bird with the same ring
+  is refused. A bird that is deleted frees its ring.
+- A SKU has **at most one sire and one dam**. Adding one that already exists
+  changes it.
+- A blank value (or `null`) clears a field. Leaving a field out of a save
+  leaves it as it was.
+- A parent with no name, no ring number and no photo is not saved.
+- Removing a parent also removes its photo file. Replacing a photo removes the
+  old file.
+- A seller can change these only while the product is not locked (section 4.3).
+- Parent photos are not part of the product's gallery (section 12).
+
+**Orders keep a copy.** When an order is placed, each item stores the bird as it
+was sold: ring number, hatch date, vaccine name and date, breed, bloodline, and
+the names and ring numbers of the sire and dam (not the photos). If the seller
+edits the SKU later, the order still shows what the buyer bought. Orders placed
+before this feature have no copy (`bird` is `null`).
+
+Where it is shown: the admin and seller product responses carry the product
+fields and each SKU's `parents`. The shop's product response (`/user/products/:id`)
+carries a `bird` block on the product and on every SKU, with the parents' photos.
+Order responses carry `items[].bird`. See `admin/product-flow.md`,
+`seller/product-flow.md` and `user/product-flow.md` for the addresses.
+
 ---
 
 ## 4. The two states of a product: Status and Activity
@@ -563,6 +623,12 @@ list.
 - Removing a SKU hides it (a "soft" delete, section 13).
 - You cannot update and remove the same SKU in one save.
 
+### 11.4a Bird detail rules
+
+See section 3.5. In short: every bird field is optional, ring numbers are unique
+per seller, dates must be real and not in the future, the vaccination date
+cannot be before the hatch date, and a blank value clears a field.
+
 ### 11.5 Numbers that look big
 
 For safety, whole-number fields cannot exceed about 2.1 billion, and price
@@ -793,6 +859,17 @@ instead of numbers.
 | "SKU variants cannot be changed; remove the SKU and add a new one" | Variants are locked once a SKU exists. |
 | "SKU code cannot be changed" | The SKU code is locked once a SKU exists. |
 | "Thumbnail must be 10MB or smaller" | The thumbnail is too large. |
+| "Ring number X is already on another of your birds" | Another SKU of the same seller already has that ring number. |
+| "Ring number X is used twice in this request" | Two SKUs in one save carry the same ring number. |
+| "Hatch date cannot be in the future" / "Vaccination date cannot be in the future" | The date is after today. |
+| "Hatch date is not a real date" | For example 2026-02-31. |
+| "The vaccination date cannot be before the hatch date" | The bird would have been vaccinated before it hatched. |
+| "hatchDate must be a date like 2026-03-14" | The date is not in `YYYY-MM-DD` form. |
+| "Give a name, a ring number or a photo for the parent" | A new parent was saved with nothing in it. |
+| "That parent is not on this bird" | Removing a sire or dam that was never added. |
+| "role must be sire or dam" | The address used another word. |
+| "The photo must be 10MB or smaller" | The parent photo is too large. |
+| "That option does not belong to this product" | The SKU id in a parent address is from another product. |
 | "Products are not available right now" (seller screen) | The seller's own account is not approved and active. |
 
 ---
@@ -875,6 +952,11 @@ Deleted products are only hidden. History lines are never erased.
 | **Featured** | An admin-only "highlight" marker. |
 | **Baseline** | The first history line written for products that already existed. |
 | **Dashboard** | The seller's landing page of summary numbers. |
+| **Ring number** | The number on a pigeon's leg ring. It identifies one bird. |
+| **Hatch date** | The day a bird hatched. Its age comes from this. |
+| **Bloodline** | The family line a bird comes from. |
+| **Sire / dam** | A bird's father / mother. |
+| **Bird snapshot** | The copy of a bird's details stored on an order item at the time of sale. |
 
 ---
 
