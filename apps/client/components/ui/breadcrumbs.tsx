@@ -4,14 +4,14 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ChevronRight } from 'lucide-react';
 
-const LABELS: Record<string, string> = { ui: 'UI', sku: 'SKU', new: 'New' };
+const LABELS: Record<string, string> = { ui: 'UI', sku: 'SKU', new: 'New', commission: 'System commission' };
 
 function labelFor(segment: string) {
   if (/^\d+$/.test(segment)) return `#${segment}`;
   return LABELS[segment] ?? segment.replace(/-/g, ' ').replace(/^./, (c) => c.toUpperCase());
 }
 
-/** Where the person is: "Admin / Commission / Balance changes", each earlier step a link. */
+/** Where the person is: "Admin / System commission / Balance changes", each earlier step a link. */
 export function Breadcrumbs({ rootLabel, rootPath, homeHref }: { rootLabel: string; rootPath: string; homeHref: string }) {
   const pathname = usePathname();
   const parts = pathname.split('/').filter(Boolean).slice(1);

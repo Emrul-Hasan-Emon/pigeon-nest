@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Bird, ChevronDown, CircleHelp, LayoutDashboard, Banknote, HandCoins, RotateCcw, ArrowRightLeft, Coins, Flag, Heart, Star, ClipboardCheck, ReceiptText, Wallet, ShoppingCart, ShoppingBag, CreditCard, Globe2, Settings2, History, Image as ImageIcon, LayoutTemplate, Layers, Rows3, Package, SlidersHorizontal, Store, Tags, Users } from 'lucide-react';
+import { Bird, ChevronDown, CircleHelp, LayoutDashboard, LineChart, Banknote, HandCoins, RotateCcw, ArrowRightLeft, Coins, Flag, Heart, Star, ClipboardCheck, ReceiptText, Wallet, ShoppingCart, ShoppingBag, CreditCard, Globe2, Settings2, History, Image as ImageIcon, LayoutTemplate, Layers, Rows3, Package, SlidersHorizontal, Store, Tags, Users } from 'lucide-react';
 
 const NAV_GROUPS = [
   {
@@ -11,6 +11,7 @@ const NAV_GROUPS = [
     items: [
       { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
       { href: '/admin/dashboard/guide', label: 'Dashboard guide', icon: CircleHelp },
+      { href: '/admin/reports', label: 'Reports', icon: LineChart },
     ],
   },
   {
@@ -46,12 +47,12 @@ const NAV_GROUPS = [
     ],
   },
   {
-    label: 'Commission',
+    label: 'System commission',
     items: [
       { href: '/admin/commission', label: 'Balances', icon: Coins },
-      { href: '/admin/commission/history', label: 'Commission ledger', icon: History },
+      { href: '/admin/commission/history', label: 'System commission ledger', icon: History },
       { href: '/admin/commission/changes', label: 'Balance changes', icon: ArrowRightLeft },
-      { href: '/admin/commission/disbursements', label: 'Commission payments', icon: Banknote },
+      { href: '/admin/commission/disbursements', label: 'System commission payments', icon: Banknote },
     ],
   },
   {

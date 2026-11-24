@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { Bird, CircleHelp, Coins, CreditCard, HandCoins, Heart, House, Package, ReceiptText, RotateCcw, Star, UserRound } from 'lucide-react';
+import { Bird, CircleHelp, Coins, CreditCard, HandCoins, Heart, House, LineChart, Package, ReceiptText, RotateCcw, Star, UserRound } from 'lucide-react';
 import { getSellerProposalSummary } from '@/lib/api/proposals';
 import { listSellerReturns } from '@/lib/api/returns';
 
@@ -25,7 +25,12 @@ const GROUPS = [
       { key: 'wishlist', href: '/seller/wishlist', label: 'Wishlist', icon: Heart, tile: 'bg-rose-400/20 text-rose-300' },
     ],
   },
-  { items: [{ key: 'commission', href: '/seller/commission', label: 'Commission', icon: Coins, tile: 'bg-yellow-400/20 text-yellow-300' }] },
+  {
+    items: [
+      { key: 'reports', href: '/seller/reports', label: 'Reports', icon: LineChart, tile: 'bg-indigo-400/20 text-indigo-300' },
+      { key: 'commission', href: '/seller/commission', label: 'System commission', icon: Coins, tile: 'bg-yellow-400/20 text-yellow-300' },
+    ],
+  },
   {
     items: [
       { key: 'profile', href: '/seller/profile', label: 'My profile', icon: UserRound, tile: 'bg-slate-400/25 text-slate-200' },
