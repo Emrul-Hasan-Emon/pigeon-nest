@@ -1,0 +1,172 @@
+{
+  "slug": "payments",
+  "title": "Payments",
+  "icon": "credit-card",
+  "order": 50,
+  "summary": "The list of all money received for your orders. Use it to check who paid, how much, and when.",
+  "openPath": "/seller/payments",
+  "openLabel": "Open payments",
+  "sections": [
+    {
+      "id": "what",
+      "title": "What is this page?",
+      "intro": "Payments is a record book. Every time money is received for one of your orders, one line is added here. The line says which order, how much, who paid, and when.",
+      "blocks": [
+        {
+          "type": "points",
+          "title": "In simple words",
+          "items": [
+            "One line is one payment. An order can have more than one line, for example when a buyer pays half now and half later.",
+            "The page shows money you received. It does not show what you owe the marketplace. That is on the System commission page.",
+            "You do not add payments on this page. You add them on the order itself (see \"What you must do\" below). This page is for looking and checking."
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "info",
+          "text": "Think of it like your own notebook of money in. If a payment is not on this list, the website does not know about it, and the order is not marked paid."
+        }
+      ]
+    },
+    {
+      "id": "why",
+      "title": "Why does it matter to you?",
+      "blocks": [
+        {
+          "type": "points",
+          "items": [
+            "An order counts as a sale on your dashboard only after it is fully paid. A missing payment line means a missing sale in your reports.",
+            "Your system commission is counted when an order is fully paid. So the payment lines decide what you owe the marketplace.",
+            "Each line keeps the proof (a screenshot or photo) and the transaction number. If a buyer says \"I paid\" or \"I did not pay\", you can show the proof.",
+            "You can see at a glance which orders are still waiting for money, so you do not forget to follow up."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "read",
+      "title": "How to read the list",
+      "blocks": [
+        {
+          "type": "words",
+          "title": "The buttons at the top (payment status)",
+          "items": [
+            {
+              "term": "All payments",
+              "means": "Everything, with no filter."
+            },
+            {
+              "term": "Not paid yet",
+              "means": "Orders where nothing was received yet."
+            },
+            {
+              "term": "Part paid",
+              "means": "The buyer paid some of the total. The rest is still due."
+            },
+            {
+              "term": "Paid",
+              "means": "The full amount was received."
+            }
+          ]
+        },
+        {
+          "type": "words",
+          "title": "Each line shows",
+          "items": [
+            {
+              "term": "Order",
+              "means": "Which order the money is for. Press \"Open\" to see the whole payment."
+            },
+            {
+              "term": "Customer",
+              "means": "Who paid."
+            },
+            {
+              "term": "Amount",
+              "means": "How much was received (in ৳)."
+            },
+            {
+              "term": "Paid by",
+              "means": "The way they paid: bKash, Nagad, bank, cash and so on."
+            },
+            {
+              "term": "Transaction ID",
+              "means": "The number on the payment slip or message. Use it to find the money in your own bKash or bank."
+            },
+            {
+              "term": "Reversed",
+              "means": "A red mark. This payment was cancelled after it was added, for example because it was a mistake."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "find",
+      "title": "Find a payment fast",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "How to",
+          "steps": [
+            "Press \"Payments\" in the left menu.",
+            "Press a status button to show only that kind, for example \"Not paid yet\".",
+            "Or type an order number, a customer name or phone, or a Transaction ID in the boxes.",
+            "Use \"Paid by\" to see only bKash, only bank, and so on.",
+            "Use the amount and date boxes to look at a certain period or size.",
+            "Press \"Clear all filters\" to start again."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "do",
+      "title": "What you must do with this list",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "A simple routine",
+          "steps": [
+            "Open \"Not paid yet\" and \"Part paid\" often. These are orders still waiting for money.",
+            "When money arrives in your bKash, Nagad or bank, find the order and record the payment on it. (Orders topic, \"Record a payment\".)",
+            "Open the new line and check that the amount and the proof are right.",
+            "If you made a mistake, open the order and press \"Reverse\" on that payment. Then record it again correctly."
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "warn",
+          "text": "Never record a payment you have not really received. A false payment marks the order as paid, adds it to your sales, and adds system commission that you must pay."
+        }
+      ]
+    },
+    {
+      "id": "faq",
+      "title": "Questions people ask",
+      "blocks": [
+        {
+          "type": "faq",
+          "title": "Common questions",
+          "items": [
+            {
+              "q": "Where do I add a new payment?",
+              "a": "Open the order and use \"Record payment\" there. This page only lists payments."
+            },
+            {
+              "q": "Why is an order not on this list?",
+              "a": "It may have no payment yet. Press the \"Not paid yet\" button to see those orders."
+            },
+            {
+              "q": "Can I change an amount?",
+              "a": "No. Reverse the payment and record it again with the right amount. This keeps a clear history."
+            },
+            {
+              "q": "What does the red \"Reversed\" mark mean?",
+              "a": "That payment was cancelled. It no longer counts as money received."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
