@@ -1,14 +1,63 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { field, money, outlineButton, primaryButton, useApiError } from '@/components/orders/ui';
+import Link from 'next/link';
+import { field, money as plainMoney, outlineButton, primaryButton, useApiError } from '@/components/orders/ui';
 import { OfferStatusBadge, OfferTimeline } from '@/components/seller/proposals/offer-parts';
 import { Modal } from '@/components/ui/modal';
 import { useToast } from '@/components/ui/toast';
 import { getSellerProposal, sellerAcceptProposal, sellerCounterProposal, sellerRejectProposal } from '@/lib/api/proposals';
+import { formatDateTime } from '@/lib/datetime';
 import type { ProposalDetail } from '@/types/proposal';
 
 type Mode = 'counter' | 'reject' | null;
+
+const money = (n: number) => `৳${plainMoney(n)}`;
+
+function Fig({ label, value, hint }: { label: string; value: string; hint?: string }) {
+  return (
+    <div className="rounded-lg bg-muted/60 px-3 py-2.5">
+      <dt className="text-sm text-muted-foreground">{label}</dt>
+      <dd className="mt-0.5 text-xl font-semibold text-foreground">{value}</dd>
+      {hint && <p className="text-sm text-muted-foreground">{hint}</p>}
+    </div>
+  );
+}
+
+function Row({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <dt className="text-sm text-muted-foreground">{label}</dt>
+      <dd className="text-base font-medium text-foreground">{children}</dd>
+    </div>
+  );
+}
+
+/** How far the offer is from the shop's price, in words. */
+function gap(o: ProposalDetail) {
+  const diff = o.skuPriceNow - o.price;
+  if (diff <= 0) return 'The buyer is offering your full price or more.';
+  const pct = Math.round((diff / o.skuPriceNow) * 100);
+  return `The buyer wants ${money(diff)} off each piece (${pct}% less than your price). For ${o.quantity} ${o.quantity === 1 ? 'piece' : 'pieces'}, you would earn ${money(diff * o.quantity)} less in all.`;
+}
+
+/** What is happening with this offer, and whose move it is. */
+function stateSentence(o: ProposalDetail) {
+  switch (o.status) {
+    case 'pending':
+      return o.awaitingParty === 'seller'
+        ? 'It is your turn. Say yes, suggest another price, or say no.'
+        : 'You answered. Now the buyer must say yes, suggest another price, or cancel.';
+    case 'accepted':
+      return 'You agreed to this price. It stays locked for the buyer to order.';
+    case 'used':
+      return 'The buyer has ordered at the agreed price. Nothing more to do.';
+    case 'rejected':
+      return 'This offer was turned down.';
+    default:
+      return 'This offer was cancelled.';
+  }
+}
 
 /** One offer: figures, price history and the actions the API says this seller may take now. */
 export function SellerOfferModal({ id, onClose, onChanged }: { id: number; onClose: () => void; onChanged: () => void }) {
@@ -79,67 +128,102 @@ export function SellerOfferModal({ id, onClose, onChanged }: { id: number; onClo
   const can = (a: string) => Boolean(offer?.actions.includes(a as never));
 
   return (
-    <Modal title={offer ? `Offer #${offer.id}` : 'Offer'} onClose={onClose} widthClassName="max-w-2xl">
+    <Modal title={offer ? `Price offer #${offer.id}` : 'Price offer'} onClose={onClose} widthClassName="max-w-2xl">
       {!offer && !error && <p className="py-6 text-center text-muted-foreground">Loading…</p>}
       {error && <p role="alert" className="mb-3 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p>}
       {offer && (
-        <div className="space-y-4">
-          <div className="flex flex-wrap items-start justify-between gap-2">
-            <div>
-              <p className="font-medium text-foreground">{offer.product.name}</p>
-              <p className="text-sm text-muted-foreground">{offer.sku.label ?? offer.sku.sku ?? `SKU #${offer.sku.id}`} · from {offer.buyer.name}</p>
+        <div className="space-y-5">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-3">
+              {offer.product.thumbnailUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={offer.product.thumbnailUrl} alt="" className="h-16 w-16 shrink-0 rounded-lg border border-border object-cover" />
+              )}
+              <div className="min-w-0">
+                <p className="text-sm text-muted-foreground">Product</p>
+                <Link href={`/seller/products/${offer.product.id}`} className="text-lg font-semibold text-primary underline underline-offset-2 hover:opacity-70">
+                  {offer.product.name}
+                </Link>
+                <p className="text-sm text-muted-foreground">Option: {offer.sku.label ?? offer.sku.sku ?? `SKU #${offer.sku.id}`}{offer.sku.sku && offer.sku.label ? ` · SKU code ${offer.sku.sku}` : ''}</p>
+              </div>
             </div>
             <OfferStatusBadge proposal={offer} />
           </div>
 
-          <dl className="grid grid-cols-2 gap-3 rounded-lg border border-border p-3 text-sm sm:grid-cols-4">
-            <div><dt className="text-xs text-muted-foreground">Quantity</dt><dd className="font-medium text-foreground">{offer.quantity}</dd></div>
-            <div><dt className="text-xs text-muted-foreground">Price per unit</dt><dd className="font-medium text-foreground">{money(offer.price)}</dd></div>
-            <div><dt className="text-xs text-muted-foreground">Total</dt><dd className="font-medium text-foreground">{money(offer.total)}</dd></div>
-            <div><dt className="text-xs text-muted-foreground">SKU price</dt><dd className="font-medium text-foreground">{money(offer.skuPriceNow)} <span className="text-xs font-normal text-muted-foreground">(was {money(offer.skuPriceAtCreate)})</span></dd></div>
-          </dl>
+          <p className="rounded-lg bg-muted/60 px-4 py-3 text-base text-foreground">{stateSentence(offer)}</p>
+
+          <section aria-label="The offer">
+            <h3 className="mb-2 text-base font-semibold text-foreground">What the buyer is asking</h3>
+            <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <Fig label="Buyer offers (each)" value={money(offer.price)} />
+              <Fig label="How many they want" value={String(offer.quantity)} />
+              <Fig label="They would pay in all" value={money(offer.total)} />
+              <Fig label="Your selling price (each)" value={money(offer.skuPriceNow)} hint={offer.skuPriceNow !== offer.skuPriceAtCreate ? `Was ${money(offer.skuPriceAtCreate)} when offered` : undefined} />
+            </dl>
+            <p className="mt-2 text-base text-foreground">{gap(offer)}</p>
+            <p className={`mt-1 text-base ${offer.quantity > offer.stock ? 'font-medium text-red-700' : 'text-muted-foreground'}`}>
+              Pieces you have in stock: {offer.stock}{offer.quantity > offer.stock ? ` — not enough for the ${offer.quantity} they want` : ''}
+            </p>
+          </section>
 
           {offer.skuPriceNowLower && (
-            <p className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-800">
-              The SKU price is now {money(offer.skuPriceNow)}, lower than this offer. The buyer will pay the lower price.
+            <p className="rounded-md bg-amber-50 px-4 py-3 text-base text-amber-800">
+              Your price is now {money(offer.skuPriceNow)}, lower than this offer. The buyer will pay the lower price.
             </p>
           )}
           {offer.status === 'accepted' && (
-            <p className="rounded-md bg-emerald-50 px-3 py-2 text-sm text-emerald-800">This offer is accepted and locked. The buyer can now order at this price.</p>
+            <p className="rounded-md bg-emerald-50 px-4 py-3 text-base text-emerald-800">You said yes. The price is locked and the buyer can now order at it.</p>
           )}
           {offer.status === 'used' && offer.orderId !== null && (
-            <p className="rounded-md bg-indigo-50 px-3 py-2 text-sm text-indigo-800">The buyer ordered at this price (order #{offer.orderId}).</p>
+            <p className="rounded-md bg-indigo-50 px-4 py-3 text-base text-indigo-800">
+              The buyer ordered at this price: <Link href={`/seller/orders/${offer.orderId}`} className="font-semibold underline">order #{offer.orderId}</Link>.
+            </p>
           )}
-          {offer.closeNote && <p className="text-sm text-muted-foreground">Closing note: {offer.closeNote}</p>}
+          {offer.closeNote && (
+            <p className="text-base text-foreground"><span className="font-medium">Last message: </span>{offer.closeNote}</p>
+          )}
+
+          <section aria-label="About this offer">
+            <h3 className="mb-2 text-base font-semibold text-foreground">Details</h3>
+            <dl className="grid gap-x-6 gap-y-3 rounded-lg border border-border p-4 sm:grid-cols-2">
+              <Row label="Offer number">#{offer.id}</Row>
+              <Row label="Buyer">{offer.buyer.name}</Row>
+              <Row label="First offer made on">{formatDateTime(offer.createdAt)}</Row>
+              <Row label="Last updated on">{formatDateTime(offer.updatedAt)}</Row>
+              {offer.acceptedAt && <Row label="You said yes on">{formatDateTime(offer.acceptedAt)}</Row>}
+              {offer.usedAt && <Row label="Buyer ordered on">{formatDateTime(offer.usedAt)}</Row>}
+              {offer.closedByType && <Row label="Closed by">{offer.closedByType === 'user' ? 'The buyer' : offer.closedByType === 'seller' ? 'You' : 'The admin team'}</Row>}
+            </dl>
+          </section>
 
           <div>
-            <h3 className="mb-2 text-sm font-semibold text-foreground">Price history</h3>
+            <h3 className="mb-2 text-base font-semibold text-foreground">What happened so far (first to last)</h3>
             <OfferTimeline history={offer.history} />
           </div>
 
           {mode === 'counter' && (
             <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-3">
               <div className="flex flex-wrap gap-3">
-                <label className="text-sm text-foreground">Your price per unit
+                <label className="text-sm text-foreground">Your new price for each piece
                   <input className={`${field} mt-1 block w-40`} type="number" min={0} value={price} onChange={(e) => setPrice(e.target.value)} />
                 </label>
-                <label className="text-sm text-foreground">Quantity
+                <label className="text-sm text-foreground">How many pieces
                   <input className={`${field} mt-1 block w-28`} type="number" min={1} value={qty} onChange={(e) => setQty(e.target.value)} />
                 </label>
               </div>
-              <label className="block text-sm text-foreground">Note (optional)
+              <label className="block text-sm text-foreground">Message to the buyer (optional)
                 <textarea className={`${field} mt-1 block w-full`} rows={2} maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} />
               </label>
               <div className="flex justify-end gap-2">
                 <button type="button" className={outlineButton} disabled={busy} onClick={() => setMode(null)}>Back</button>
-                <button type="button" className={primaryButton} disabled={busy} onClick={sendCounter}>{busy ? 'Sending…' : 'Send counter offer'}</button>
+                <button type="button" className={primaryButton} disabled={busy} onClick={sendCounter}>{busy ? 'Sending…' : 'Send my price'}</button>
               </div>
             </div>
           )}
 
           {mode === 'reject' && (
             <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-3">
-              <label className="block text-sm text-foreground">Note to the buyer (optional)
+              <label className="block text-sm text-foreground">Message to the buyer (optional)
                 <textarea className={`${field} mt-1 block w-full`} rows={2} maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} />
               </label>
               <div className="flex justify-end gap-2">
@@ -150,7 +234,7 @@ export function SellerOfferModal({ id, onClose, onChanged }: { id: number; onClo
                   onClick={() => run(() => sellerRejectProposal(offer.id, { note: note.trim() || undefined }), 'Offer rejected.')}
                   className="rounded-md bg-destructive px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50"
                 >
-                  {busy ? 'Rejecting…' : 'Reject offer'}
+                  {busy ? 'Saving…' : 'Say no to this offer'}
                 </button>
               </div>
             </div>
@@ -158,11 +242,11 @@ export function SellerOfferModal({ id, onClose, onChanged }: { id: number; onClo
 
           {mode === null && offer.actions.length > 0 && (
             <div className="flex flex-wrap justify-end gap-2 border-t border-border pt-3">
-              {can('reject') && <button type="button" className={outlineButton} disabled={busy} onClick={() => { setNote(''); setMode('reject'); }}>Reject</button>}
-              {can('counter') && <button type="button" className={outlineButton} disabled={busy} onClick={startCounter}>Counter</button>}
+              {can('reject') && <button type="button" className={outlineButton} disabled={busy} onClick={() => { setNote(''); setMode('reject'); }}>Say no</button>}
+              {can('counter') && <button type="button" className={outlineButton} disabled={busy} onClick={startCounter}>Suggest another price</button>}
               {can('accept') && (
                 <button type="button" className={primaryButton} disabled={busy} onClick={() => run(() => sellerAcceptProposal(offer.id), 'Offer accepted.')}>
-                  {busy ? 'Accepting…' : 'Accept'}
+                  {busy ? 'Saving…' : 'Say yes'}
                 </button>
               )}
             </div>
