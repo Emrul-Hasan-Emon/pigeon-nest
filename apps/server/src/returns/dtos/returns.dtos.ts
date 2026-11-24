@@ -15,6 +15,7 @@ import {
   MinLength,
   ValidateIf,
 } from 'class-validator';
+import { ReturnReasonCode } from '../../database/enums/return-reason-code.enum';
 import { ReturnScope } from '../../database/enums/return-scope.enum';
 import { ReturnStatus } from '../../database/enums/return-status.enum';
 import { MAX_INT32 } from '../../shared/constants/limits';
@@ -53,6 +54,11 @@ export class CreateReturnDto {
   @Min(1, { each: true })
   @Max(MAX_INT32, { each: true })
   orderItemIds?: number[];
+
+  // Why the bird or item comes back. Left out, it counts as "other".
+  @IsOptional()
+  @IsEnum(ReturnReasonCode)
+  reasonCode?: ReturnReasonCode;
 
   @Transform(trimString)
   @IsString()
