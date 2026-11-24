@@ -12,6 +12,7 @@ import type { Product, ProductListResponse, SellerProductListParams } from '@/ty
 import type { CategoryTreeNode } from '@/types/category';
 import type { CollectionListResponse } from '@/types/collection';
 import type { AttributeListResponse } from '@/types/attribute';
+import type { BulkProductPayload, BulkProductResult } from '@/types/product';
 
 // The seller's own products. A seller cannot send sellerId, isFeatured,
 // status or reason; the server rejects them.
@@ -59,6 +60,11 @@ export function listSellerCollections() {
 
 export function listSellerAttributes() {
   return sellerHttp.get<AttributeListResponse>(ENDPOINTS.seller.catalog.attributes, { limit: 100 });
+}
+
+/** Switch many of the seller's products on or off, or change their prices. */
+export function bulkMyProducts(payload: BulkProductPayload) {
+  return sellerHttp.post<BulkProductResult>(`${ENDPOINTS.seller.products.list}/bulk`, payload);
 }
 
 /** A new product made from one of the seller's own. It starts switched off. */

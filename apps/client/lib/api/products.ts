@@ -9,6 +9,7 @@ import type {
   ProductStatusHistoryParams,
   ProductStatusHistoryResponse,
 } from '@/types/product';
+import type { BulkProductPayload, BulkProductResult, StockMovementPage } from '@/types/product';
 
 export interface SkuVariantPayload {
   attributeId: number;
@@ -117,6 +118,11 @@ export function updateProduct(id: number, payload: UpdateProductPayload) {
   return http.patch<Product>(ENDPOINTS.admin.products.detail(id), payload);
 }
 
+/** Change many products at once (on or off, price, approve, reject, suspend). */
+export function bulkProducts(payload: BulkProductPayload) {
+  return http.post<BulkProductResult>(`${ENDPOINTS.admin.products.list}/bulk`, payload);
+}
+
 /** A new product made from this one, same seller, switched off. */
 export function copyProduct(id: number) {
   return http.post<Product>(`${ENDPOINTS.admin.products.detail(id)}/copy`);
@@ -182,4 +188,9 @@ export function buildMediaForm(payload: ProductMediaFilesPayload) {
 /** The status log of one of the seller's own products (newest first). */
 export function listSellerProductStatusHistory(productId: number, params: { cursor?: number; limit?: number } = {}) {
   return sellerHttp.get<ProductStatusHistoryResponse>(`/products/${productId}/status-history`, { ...params });
+}
+
+/** A product's stock log, newest first. Admin only. */
+export function listStockHistory(productId: number, params: { cursor?: number; limit?: number }) {
+  return http.get<StockMovementPage>(`${ENDPOINTS.admin.products.detail(productId)}/stock-history`, { ...params });
 }
