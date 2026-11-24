@@ -1,0 +1,369 @@
+{
+  "slug": "products",
+  "title": "My products",
+  "icon": "package",
+  "order": 40,
+  "summary": "Your shop window. Add your birds and items, set prices and stock, and keep every detail correct.",
+  "openPath": "/seller/products",
+  "openLabel": "Open my products",
+  "sections": [
+    {
+      "id": "what",
+      "title": "What is this page?",
+      "intro": "This is the list of everything you sell. Buyers only see what is here. A good product, with clear pictures, the right price and the right stock, is how you get orders.",
+      "blocks": [
+        {
+          "type": "words",
+          "title": "Words to know",
+          "items": [
+            {
+              "term": "Product",
+              "means": "One thing you sell: it has a name, pictures and a description."
+            },
+            {
+              "term": "Option (SKU)",
+              "means": "One version of a product that a buyer can buy: one bird, one batch, one colour or one size. Each option has its own price and its own stock. A product has at least one option and at most 100."
+            },
+            {
+              "term": "Approved / Pending / Rejected",
+              "means": "The review state. Your new products start as Approved. Only an admin can change it to Pending (on hold) or Rejected (turned down)."
+            },
+            {
+              "term": "Active / Inactive / Suspended",
+              "means": "The on-off state. Active is on sale. Inactive means you switched it off. Suspended means an admin switched it off."
+            },
+            {
+              "term": "Locked",
+              "means": "A product that an admin rejected or suspended. You cannot change it until the admin changes it back."
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "info",
+          "text": "A product shows to buyers only when it is Approved, Active, has stock above zero, and your selling switch (in My profile) is on."
+        }
+      ]
+    },
+    {
+      "id": "list",
+      "title": "Read and use the product list",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "How to",
+          "steps": [
+            "Press \"My products\" in the left menu.",
+            "Type in \"Search product name…\" to find a product.",
+            "Use \"All statuses\" and \"Any activity\" to show only some products, for example only Pending or only Inactive.",
+            "Use \"Sort\" to show \"Newest first\" or \"Most saved first\".",
+            "Read the columns: Status, Activity, Category, \"Saved by\" (how many buyers saved it) and Rating.",
+            "Press a product to open it."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "add",
+      "title": "Add a new product",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "How to",
+          "steps": [
+            "Press \"My products\" and then \"Add product\".",
+            {
+              "text": "Choose the Category.",
+              "detail": "This is required. Pick the closest one."
+            },
+            {
+              "text": "Write the Name.",
+              "detail": "This is required, up to 400 characters, with at least one letter or number. Use a clear name that buyers will search for. Two products may have the same name."
+            },
+            "Choose a Collection if you want. This is optional.",
+            "Write the Description if you want. Say what is special about the bird or item.",
+            "Fill in \"About the birds\" if it is a bird (see below).",
+            "Add at least one option in \"Options you sell (each bird, colour or size)\" (see below).",
+            "Add pictures (see below).",
+            "Press \"Create product\". You land on the new product page."
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "info",
+          "text": "A new product is saved as Approved and Active. Buyers can see it as soon as it has stock above zero and your selling switch is on. An admin can still reject or suspend a product later."
+        },
+        {
+          "type": "note",
+          "tone": "info",
+          "text": "If the pictures fail to upload, the product is still saved. You are taken to its Edit page to try the pictures again."
+        }
+      ]
+    },
+    {
+      "id": "options",
+      "title": "Options: price and stock",
+      "intro": "Every product needs at least one option. This is the thing the buyer really buys.",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "How to fill an option",
+          "steps": [
+            "Press \"Add SKU\" for each version you sell.",
+            {
+              "text": "Choose the variants.",
+              "detail": "A variant is a choice like Ring Size: Small or Gender: Male. Pick at least one. You can use each kind of choice only once on an option. Two options of one product cannot have exactly the same choices."
+            },
+            {
+              "text": "SKU code (optional).",
+              "detail": "Your own short code, for example HOM-BB-M. Up to 100 characters."
+            },
+            {
+              "text": "Price.",
+              "detail": "This is required. It can have at most two decimal places."
+            },
+            {
+              "text": "Offer price (optional).",
+              "detail": "A lower sale price. It can never be higher than the normal price. Leave it empty if you have no sale."
+            },
+            "Offer start and end date (optional). The sale only works between these days. The end must be after the start.",
+            "Quantity in stock: how many you have. A whole number, zero or more.",
+            "Low-stock alert: the number at or below which the website calls the stock low. It is 5 at the start.",
+            "Tick \"Accept price proposals\" if buyers may offer their own price, and fill \"Lowest price I will consider\". See the Price offers topic.",
+            "Choose which option is the default. The default is shown first. One option must be the default.",
+            "Keep the option switched on (\"Customers can buy this option\") to let buyers buy it."
+          ]
+        },
+        {
+          "type": "points",
+          "title": "Good to know",
+          "items": [
+            "An option with quantity 0 is out of stock. Buyers cannot buy it. It shows on your dashboard in red.",
+            "The SKU code and the variants cannot be changed after you save an option. If you made a mistake, remove the option and add a new one.",
+            "You cannot remove the last option of a product.",
+            "Stock goes down when an order is placed and comes back if the order is cancelled."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "birds",
+      "title": "Bird details",
+      "intro": "Pigeon buyers want to know the bird, not only the price. Every bird detail is optional, but a buyer trusts a bird with clear details more.",
+      "blocks": [
+        {
+          "type": "words",
+          "title": "\"About the birds\": the same for every option",
+          "items": [
+            {
+              "term": "Breed",
+              "means": "For example Homer or Roller."
+            },
+            {
+              "term": "Bloodline",
+              "means": "The family line, for example Janssen. You can add a note about it."
+            },
+            {
+              "term": "Vaccination note",
+              "means": "How you vaccinate in general, for example \"every year\"."
+            },
+            {
+              "term": "Health note",
+              "means": "Health history and checks."
+            },
+            {
+              "term": "Race record",
+              "means": "Results and wins."
+            }
+          ]
+        },
+        {
+          "type": "words",
+          "title": "\"About this bird\": for one option",
+          "items": [
+            {
+              "term": "Ring number",
+              "means": "The number on the leg ring. It names one bird. You can use one ring number only once in your shop."
+            },
+            {
+              "term": "Hatched on",
+              "means": "The day the bird hatched. The age shows under it. It must be a real day and not in the future."
+            },
+            {
+              "term": "Vaccine and Vaccinated on",
+              "means": "Which vaccine, and the day. The day cannot be before the hatch day or in the future."
+            },
+            {
+              "term": "Father and Mother",
+              "means": "A name, a ring number and a photo for each parent. All optional."
+            }
+          ]
+        },
+        {
+          "type": "points",
+          "title": "Good to know",
+          "items": [
+            "On a saved option, each parent box saves on its own, straight away.",
+            "On a new option, the parents are saved right after the product. If one fails, the product is still saved and a message tells you to add it again.",
+            "You cannot remove a parent. Save a new name, ring or photo over the old one.",
+            "The details are copied onto each order, so you pack the right bird even if you edit the option later."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pictures",
+      "title": "Pictures and videos",
+      "blocks": [
+        {
+          "type": "points",
+          "items": [
+            "The thumbnail is the main picture. It shows in lists. It is a picture only, up to 10 MB.",
+            "The gallery can have pictures or videos. You can add up to 20 files at a time, up to 50 MB each.",
+            "Pictures can be jpg, png, webp, gif, avif or heic. Videos can be mp4, webm or mov.",
+            "The website checks the real file, not only its name, so a wrong file renamed to .jpg is refused.",
+            "Good pictures sell: show the whole bird, the eye, the wings and the ring."
+          ]
+        },
+        {
+          "type": "steps",
+          "title": "How to change pictures",
+          "steps": [
+            "Open the product and press \"Edit\".",
+            "Replace or remove the thumbnail. You cannot do both in one save.",
+            "Add new gallery files, or remove old ones.",
+            "Press Save."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "edit",
+      "title": "Change a product",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "Full edit",
+          "steps": [
+            "Open the product from the list.",
+            "Press \"Edit\".",
+            "Change what you need.",
+            "Press Save."
+          ]
+        },
+        {
+          "type": "steps",
+          "title": "Quick edit: only price, offer price and stock",
+          "steps": [
+            "On the product list, press \"Quick edit\" on the product.",
+            "A window shows every option with its Price, Offer price, In stock and \"Customers can buy this option\".",
+            "Change the numbers. An empty offer price means no offer.",
+            "Press Save."
+          ]
+        },
+        {
+          "type": "steps",
+          "title": "Switch a product on or off",
+          "steps": [
+            "Use the on-off control on the list or on the product page.",
+            "Off (Inactive) hides it from buyers. Nothing is lost. Switch it on to sell again."
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "warn",
+          "text": "A Rejected or Suspended product is locked. Every save is refused and a notice shows on the page. Contact the admin team."
+        }
+      ]
+    },
+    {
+      "id": "copy",
+      "title": "Copy a product",
+      "intro": "Use this when you sell many similar birds.",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "How to",
+          "steps": [
+            "Press \"Copy\" on the product list, or \"Copy this product\" on the product page.",
+            "You land on the Edit page of the new product.",
+            "Change the name and the details.",
+            "Add stock and switch it on when it is ready."
+          ]
+        },
+        {
+          "type": "points",
+          "items": [
+            "The copy is named \"Name (copy)\", and starts switched off.",
+            "Copied: category, collection, description, bird facts, every option with its price and settings, and the pictures (as new files).",
+            "Not copied: SKU codes, ring numbers, hatch and vaccine dates, parents, and stock. Every option starts at stock 0."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bulk",
+      "title": "Change many products at once",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "How to",
+          "steps": [
+            "On the product list, tick the products. You can tick every product on the page with the top box.",
+            "A bar appears. Choose an action: \"Switch on (show to buyers)\", \"Switch off (hide from buyers)\" or \"Change prices\".",
+            "Follow the form and confirm."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "status",
+      "title": "Why can buyers not see my product?",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "Check these, in order",
+          "steps": [
+            "Is the product Approved? If it is Pending or Rejected, an admin changed it.",
+            "Is it Active? Inactive means you switched it off. Suspended means an admin did.",
+            "Does at least one option have stock above zero, and is that option switched on?",
+            "Is your selling switch on? Open \"My profile\" and check the Selling card.",
+            "Is your seller account approved and active?"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "faq",
+      "title": "Questions people ask",
+      "blocks": [
+        {
+          "type": "faq",
+          "title": "Common questions",
+          "items": [
+            {
+              "q": "Can I delete a product?",
+              "a": "No. Deleting is switched off. Switch the product off instead."
+            },
+            {
+              "q": "Can I use the same name twice?",
+              "a": "Yes. Two products can have the same name."
+            },
+            {
+              "q": "Where is the stock history?",
+              "a": "Stock history is for the admin team only."
+            },
+            {
+              "q": "Why can I not change the SKU code?",
+              "a": "The code and the variants are fixed after you save an option. Remove the option and add a new one."
+            },
+            {
+              "q": "What does \"Most saved first\" show?",
+              "a": "The products that most buyers saved in their wishlist. See the Wishlist topic."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
