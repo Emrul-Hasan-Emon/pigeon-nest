@@ -25,15 +25,14 @@ import {
   UpdateHomepageSlotDto,
 } from '../dtos/homepage-section.dtos';
 import { SECTION_DEFINITIONS } from '../registry/section-registry';
-import { HomepageConfigService } from './homepage-config.service';
-import { Device, HomepageResolverService } from './homepage-resolver.service';
+import { CommonHomepageService, Device } from './common-homepage.service';
 
+/** What an admin does with homepage sections and slots: list, read, create, change, reorder and preview them. */
 @Injectable()
-export class HomepageService {
+export class AdminHomepageService {
   constructor(
     private readonly db: DatabaseService,
-    private readonly configService: HomepageConfigService,
-    private readonly resolver: HomepageResolverService,
+    private readonly common: CommonHomepageService,
   ) {}
 
   sectionTypes() {
@@ -88,7 +87,7 @@ export class HomepageService {
 
   async details(id: number, page: HomepagePage) {
     const section = await this.findOrThrow(id, page);
-    const enriched = await this.configService.enrich(
+    const enriched = await this.common.enrich(
       section.sectionType,
       section.config,
     );
@@ -96,9 +95,9 @@ export class HomepageService {
   }
 
   async create(dto: CreateHomepageSectionDto) {
-    const definition = this.configService.definitionOrThrow(dto.sectionType);
+    const definition = this.common.definitionOrThrow(dto.sectionType);
     this.assertWindow(dto.startsAt, dto.endsAt);
-    const config = await this.configService.normalize(dto.sectionType, dto.config);
+    const config = await this.common.normalize(dto.sectionType, dto.config);
 
     const count = await this.db.homepageSection.count({
       where: { page: HomepagePage.MAIN },
@@ -153,7 +152,7 @@ export class HomepageService {
     }
     const type = dto.sectionType ?? section.sectionType;
     if (dto.config !== undefined || typeChanged) {
-      section.config = await this.configService.normalize(type, dto.config);
+      section.config = await this.common.normalize(type, dto.config);
     }
     section.sectionType = type;
 
@@ -215,28 +214,12 @@ export class HomepageService {
 
   async preview(id: number, page: HomepagePage, device: Device = 'web') {
     const section = await this.findOrThrow(id, page);
-    const resolved = await this.resolver.resolve(section, device);
+    const resolved = await this.common.resolve(section, device);
     return {
       ...resolved,
       device,
-      visible: this.resolver.isVisible(section, device),
+      visible: this.common.isVisible(section, device),
     };
-  }
-
-  /** Public: what the storefront shows right now. */
-  async storefront(page: HomepagePage, device: Device) {
-    const qb = this.db.homepageSection
-      .createQueryBuilder('s')
-      .where('s.page = :page', { page })
-      .orderBy(page === HomepagePage.SLOTS ? 's.slotNo' : 's.sortOrder', 'ASC')
-      .addOrderBy('s.id', 'ASC');
-    const sections = (await qb.getMany()).filter((s) =>
-      this.resolver.isVisible(s, device),
-    );
-    const resolved = await Promise.all(
-      sections.map((s) => this.resolver.resolve(s, device)),
-    );
-    return { page, device, sections: resolved.filter((s) => s.items.length > 0) };
   }
 
   private async findOrThrow(id: number, page: HomepagePage) {
