@@ -33,6 +33,7 @@ import { UpdateSellerProductDto } from '../dtos/update-seller-product.dto';
 import { ListSellerProductQueryDto } from '../dtos/list-seller-product-query.dto';
 import { UpdateProductMediaFilesDto } from '../dtos/update-product-media-files.dto';
 import { SellerAuthGuard } from '../../../auth/guards/seller-auth.guard';
+import { BulkProductDto } from '../dtos/bulk-product.dto';
 
 const MEDIA_FILE_FIELDS = FileFieldsInterceptor(
   [
@@ -89,6 +90,12 @@ export class SellerProductController {
   }
 
   // A new product made from this one, switched off, so the seller can edit it before selling.
+  // Switch many products on or off, or change their prices (100 at most).
+  @Post('bulk')
+  bulk(@CurrentSeller() seller: Seller, @Body() dto: BulkProductDto) {
+    return this.sellerProductService.bulk(seller, dto);
+  }
+
   @Post(':id/copy')
   copy(@CurrentSeller() seller: Seller, @Param('id', ParseIdPipe) id: number) {
     return this.sellerProductService.copy(seller, id);
@@ -137,21 +144,23 @@ export class SellerProductController {
     return this.sellerProductService.saveParent(seller, id, skuId, role, dto, image);
   }
 
-  @Delete(':id/skus/:skuId/parents/:role')
-  removeParent(
-    @CurrentSeller() seller: Seller,
-    @Param('id', ParseIdPipe) id: number,
-    @Param('skuId', ParseIdPipe) skuId: number,
-    @Param('role', new ParseEnumPipe(ParentRole, { exceptionFactory: () => new BadRequestException('role must be sire or dam') })) role: ParentRole,
-  ) {
-    return this.sellerProductService.removeParent(seller, id, skuId, role);
-  }
+  // Delete is switched off for now. Remove these comment marks to bring it back.
+  // @Delete(':id/skus/:skuId/parents/:role')
+  // removeParent(
+  //   @CurrentSeller() seller: Seller,
+  //   @Param('id', ParseIdPipe) id: number,
+  //   @Param('skuId', ParseIdPipe) skuId: number,
+  //   @Param('role', new ParseEnumPipe(ParentRole, { exceptionFactory: () => new BadRequestException('role must be sire or dam') })) role: ParentRole,
+  // ) {
+  //   return this.sellerProductService.removeParent(seller, id, skuId, role);
+  // }
 
-  @Delete(':id')
-  remove(
-    @CurrentSeller() seller: Seller,
-    @Param('id', ParseIdPipe) id: number,
-  ) {
-    return this.sellerProductService.remove(seller, id);
-  }
+  // Delete is switched off for now. Remove these comment marks to bring it back.
+  // @Delete(':id')
+  // remove(
+  //   @CurrentSeller() seller: Seller,
+  //   @Param('id', ParseIdPipe) id: number,
+  // ) {
+  //   return this.sellerProductService.remove(seller, id);
+  // }
 }
