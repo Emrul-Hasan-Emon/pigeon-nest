@@ -2,7 +2,7 @@ import { BadRequestException, ConflictException, Injectable, NotFoundException }
 import { randomInt } from 'crypto';
 import { EntityManager } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
-import { CommissionService } from '../../commission/services/commission.service';
+import { CommonCommissionService } from '../../commission/services/common-commission.service';
 import { DatabaseService } from '../../database/database.service';
 import { Order } from '../../database/entities/order/order.entity';
 import { OrderItem } from '../../database/entities/order/order-item.entity';
@@ -43,7 +43,7 @@ type Who = 'user' | 'admin';
 export class CommonReturnService {
   constructor(
     private readonly db: DatabaseService,
-    private readonly commission: CommissionService,
+    private readonly commission: CommonCommissionService,
     private readonly settings: SystemSettingsService,
     private readonly files: OrderFileService,
   ) {}

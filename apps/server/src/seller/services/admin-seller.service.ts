@@ -15,7 +15,7 @@ import { getCursorPaginateData } from '../../shared/utils/cursor-paginate.util';
 import { likeContains } from '../../shared/utils/like.util';
 import { CommonSellerService, SellerImages } from './common-seller.service';
 import { SellerStatusHistoryService } from './seller-status-history.service';
-import { SellerSettingService } from '../../commission/services/seller-setting.service';
+import { CommonCommissionService } from '../../commission/services/common-commission.service';
 import { Seller } from '../../database/entities/seller/seller.entity';
 import { SellerSetting } from '../../database/entities/commission/seller-setting.entity';
 import { In } from 'typeorm';
@@ -26,7 +26,7 @@ export class AdminSellerService {
     private readonly databaseService: DatabaseService,
     private readonly commonSellerService: CommonSellerService,
     private readonly sellerStatusHistoryService: SellerStatusHistoryService,
-    private readonly sellerSettings: SellerSettingService,
+    private readonly sellerSettings: CommonCommissionService,
   ) {}
 
   /** Both commission fields together, or neither. */

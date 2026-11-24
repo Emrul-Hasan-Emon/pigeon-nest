@@ -7,7 +7,7 @@ import { OrderStatusHistory } from '../../database/entities/order/order-status-h
 import { SellerProductSku } from '../../database/entities/product/seller-product-sku.entity';
 import { AuthUserType } from '../../database/enums/auth-user-type.enum';
 import { OrderStatus } from '../../database/enums/order-status.enum';
-import { CommissionService } from '../../commission/services/commission.service';
+import { CommonCommissionService } from '../../commission/services/common-commission.service';
 import { PaymentStatus } from '../../database/enums/payment-status.enum';
 import { assertNoLiveReturns } from '../../returns/utils/return-guard.util';
 import { transitionDenied } from '../utils/order-status-rules';
@@ -44,7 +44,7 @@ export interface StatusChange {
 export class OrderStatusService {
   constructor(
     private readonly db: DatabaseService,
-    private readonly commission: CommissionService,
+    private readonly commission: CommonCommissionService,
     private readonly refunds: OrderRefundService,
   ) {}
 

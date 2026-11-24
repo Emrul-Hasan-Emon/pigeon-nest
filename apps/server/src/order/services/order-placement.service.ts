@@ -15,7 +15,7 @@ import { PaymentStatus } from '../../database/enums/payment-status.enum';
 import { GATEWAY_TYPE_LABELS, proofFieldsFor } from '../../payment/utils/payment-gateway.util';
 import { ShippingQuote, ShippingZoneService } from '../../settings/services/shipping-zone.service';
 import { countryName } from '../../settings/utils/countries';
-import { CommissionService } from '../../commission/services/commission.service';
+import { CommonCommissionService } from '../../commission/services/common-commission.service';
 import { newOrderNumber } from '../utils/order-number.util';
 import { tidy } from '../../shared/utils/money.util';
 import { StockReason } from '../../database/enums/stock-movement.enum';
@@ -73,7 +73,7 @@ export class OrderPlacementService {
   constructor(
     private readonly db: DatabaseService,
     private readonly shipping: ShippingZoneService,
-    private readonly commission: CommissionService,
+    private readonly commission: CommonCommissionService,
   ) {}
 
   async activeGateway(id: number): Promise<PaymentGateway> {

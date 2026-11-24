@@ -9,7 +9,7 @@ import { AuthUserType } from '../../database/enums/auth-user-type.enum';
 import { OrderStatus } from '../../database/enums/order-status.enum';
 import { PaymentStatus } from '../../database/enums/payment-status.enum';
 import { RecordPaymentDto, ReversePaymentDto } from '../dtos/order-staff.dtos';
-import { CommissionService } from '../../commission/services/commission.service';
+import { CommonCommissionService } from '../../commission/services/common-commission.service';
 import { OrderFileService, StoredAttachment } from './order-file.service';
 import { OrderScope, StatusActor } from './order-status.service';
 import { moneyGreater, tidy } from '../../shared/utils/money.util';
@@ -27,7 +27,7 @@ export class OrderPaymentService {
   constructor(
     private readonly db: DatabaseService,
     private readonly files: OrderFileService,
-    private readonly commission: CommissionService,
+    private readonly commission: CommonCommissionService,
   ) {}
 
   async record(
