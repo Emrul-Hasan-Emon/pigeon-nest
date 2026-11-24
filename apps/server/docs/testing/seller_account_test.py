@@ -129,7 +129,7 @@ def new_seller(status="pending", active="inactive", reason=None):
     patch = {"status": status, "activeStatus": active}
     if status == "rejected" or active == "suspended":
         patch["reason"] = reason or "test setup"  # required by the API for these
-    c2, _ = call("PATCH", f"/admin/sellers/{sid}", ADMIN, body=patch)
+    c2, _ = call("PATCH", f"/admin/seller/{sid}", ADMIN, body=patch)
     assert c2 == 200
     return {"id": sid, "phone": ph, "token": d["accessToken"]}
 
@@ -269,10 +269,10 @@ now = int(time.time())
 expired = forge({"sub": S_PEND["id"], "type": "seller", "iat": now - 7200, "exp": now - 3600})
 wrong = forge({"sub": S_PEND["id"], "type": "seller", "iat": now, "exp": now + 3600}, secret="nope")
 check("C seller token on admin products -> 403", call("GET", "/admin/products", S_PEND["token"]), 403)
-check("C seller token on admin sellers -> 403", call("GET", "/admin/sellers", S_PEND["token"]), 403)
-check("C seller token on admin seller-requests -> 403", call("GET", "/admin/seller-requests", S_PEND["token"]), 403)
-check("C seller token cannot approve -> 403", call("POST", f"/admin/seller-requests/{S_PEND['id']}/approve", S_PEND["token"]), 403)
-check("C seller token cannot PATCH admin seller -> 403", call("PATCH", f"/admin/sellers/{S_PEND['id']}", S_PEND["token"], body={"activeStatus": "active"}), 403)
+check("C seller token on admin sellers -> 403", call("GET", "/admin/seller", S_PEND["token"]), 403)
+check("C seller token on admin seller-requests -> 403", call("GET", "/admin/seller/requests", S_PEND["token"]), 403)
+check("C seller token cannot approve -> 403", call("POST", f"/admin/seller/requests/{S_PEND['id']}/approve", S_PEND["token"]), 403)
+check("C seller token cannot PATCH admin seller -> 403", call("PATCH", f"/admin/seller/{S_PEND['id']}", S_PEND["token"], body={"activeStatus": "active"}), 403)
 check("C admin token on seller profile -> 403", call("GET", "/seller/profile", ADMIN), 403)
 check("C admin token cannot PATCH seller profile -> 403", call("PATCH", "/seller/profile", ADMIN, form=[("name", "x")]), 403)
 for m, pth in [("GET", "/seller/profile"), ("PATCH", "/seller/profile"), ("PATCH", "/seller/profile/password")]:
@@ -360,7 +360,7 @@ for n, f in [("name blank", dict(name="   ")), ("name 256 chars", dict(name="n" 
 other = new_seller("approved", "active")
 check("D profile rejects: phone owned by another seller", patch_profile(P["token"], phone=other["phone"]), 400)
 em2 = sql(f"select coalesce(email,'') from seller where id={other['id']}") or f"t-other-{int(time.time())}@example.com"
-call("PATCH", f"/admin/sellers/{other['id']}", ADMIN, body={"email": f"t-owner-{int(time.time())}@example.com"})
+call("PATCH", f"/admin/seller/{other['id']}", ADMIN, body={"email": f"t-owner-{int(time.time())}@example.com"})
 owner_email = sql(f"select email from seller where id={other['id']}")
 check("D profile rejects: email owned by another seller (any case)", patch_profile(P["token"], email=owner_email.upper()), 400)
 check("D profile rejects: avatar text file", call("PATCH", "/seller/profile", P["token"], form=[("avatar", f"@{TXT};type=text/plain")]), 400)
@@ -402,90 +402,90 @@ check("D ...and works for login", login(PC["phone"], "a" * 72), 200)
 # live status changes apply to tokens already issued
 L = new_seller("approved", "active")
 check("D [live] approved+active token: access.canManage", me(L["token"]), 200, pred=lambda d: d["access"]["canManage"] is True)
-call("PATCH", f"/admin/sellers/{L['id']}", ADMIN, body={"activeStatus": "suspended", "reason": "live test"})
+call("PATCH", f"/admin/seller/{L['id']}", ADMIN, body={"activeStatus": "suspended", "reason": "live test"})
 check("D [live] admin suspends -> the SAME token is blocked at once", patch_profile(L["token"], name="T-x"), 403)
 check("D [live] suspended token can still read status", me(L["token"]), 200, pred=lambda d: d["access"]["code"] == "SELLER_SUSPENDED")
-call("PATCH", f"/admin/sellers/{L['id']}", ADMIN, body={"activeStatus": "active"})
+call("PATCH", f"/admin/seller/{L['id']}", ADMIN, body={"activeStatus": "active"})
 check("D [live] admin reinstates -> the same token works again", patch_profile(L["token"], name="T-y"), 200)
-call("PATCH", f"/admin/sellers/{L['id']}", ADMIN, body={"status": "rejected", "activeStatus": "inactive", "reason": "live test"})
+call("PATCH", f"/admin/seller/{L['id']}", ADMIN, body={"status": "rejected", "activeStatus": "inactive", "reason": "live test"})
 check("D [live] admin rejects -> access drops to profile-only", me(L["token"]), 200, pred=lambda d: d["access"]["canManage"] is False and d["access"]["code"] == "SELLER_REJECTED")
 sql(f"delete from seller where id={L['id']}")
 check("D [live] seller deleted -> token rejected 401", me(L["token"]), 401)
 
 # ================================================================= E. ADMIN REQUESTS
 print("\n== E. admin seller-requests ==")
-for m, pth in [("GET", "/admin/seller-requests"), ("POST", "/admin/seller-requests/1/approve"), ("POST", "/admin/seller-requests/1/reject")]:
+for m, pth in [("GET", "/admin/seller/requests"), ("POST", "/admin/seller/requests/1/approve"), ("POST", "/admin/seller/requests/1/reject")]:
     check(f"E {m} {pth} no token -> 401", call(m, pth), 401)
-check("E list shows only pending sellers", call("GET", "/admin/seller-requests?limit=100", ADMIN), 200,
+check("E list shows only pending sellers", call("GET", "/admin/seller/requests?limit=100", ADMIN), 200,
       pred=lambda d: len(d["results"]) > 0 and all(r["status"] == "pending" for r in d["results"]))
-check("E list rows have NID/avatar urls and no passwordHash", call("GET", "/admin/seller-requests?limit=100", ADMIN), 200,
+check("E list rows have NID/avatar urls and no passwordHash", call("GET", "/admin/seller/requests?limit=100", ADMIN), 200,
       pred=lambda d: all("nidFrontImageUrl" in r and "passwordHash" not in r for r in d["results"]))
-check("E list newest first", call("GET", "/admin/seller-requests?limit=100", ADMIN), 200, pred=lambda d: [r["id"] for r in d["results"]] == sorted([r["id"] for r in d["results"]], reverse=True))
+check("E list newest first", call("GET", "/admin/seller/requests?limit=100", ADMIN), 200, pred=lambda d: [r["id"] for r in d["results"]] == sorted([r["id"] for r in d["results"]], reverse=True))
 total_pending = int(sql("select count(*) from seller where status='pending'"))
 seen, cur = [], None
 while True:
-    c, d = call("GET", "/admin/seller-requests?limit=5" + (f"&cursor={cur}" if cur else ""), ADMIN)
+    c, d = call("GET", "/admin/seller/requests?limit=5" + (f"&cursor={cur}" if cur else ""), ADMIN)
     seen += [r["id"] for r in d["results"]]
     cur = d["nextCursor"]
     if not cur:
         break
 check("E cursor walk visits every pending seller once", (200, seen), 200, pred=lambda s: len(s) == total_pending and len(set(s)) == total_pending, note=f"expected {total_pending}")
 approved_ids = [int(x) for x in sql("select id from seller where status='approved'").split()]
-check("E approved sellers are not in the list", call("GET", "/admin/seller-requests?limit=100", ADMIN), 200, pred=lambda d: not set(approved_ids) & {r["id"] for r in d["results"]})
-check("E search by phone", call("GET", f"/admin/seller-requests?search={S_PEND['phone'].replace('+', '%2B')}", ADMIN), 200, pred=lambda d: [r["id"] for r in d["results"]] == [S_PEND["id"]])
-check("E search by partial phone", call("GET", f"/admin/seller-requests?search={S_PEND['phone'][-8:]}", ADMIN), 200, pred=lambda d: S_PEND["id"] in [r["id"] for r in d["results"]])
-check("E search by name (case-insens.)", call("GET", "/admin/seller-requests?search=T-REG-1", ADMIN), 200, pred=lambda d: all("t-reg-1" in r["name"].lower() for r in d["results"]))
-check("E search '%' matches literally (nothing)", call("GET", "/admin/seller-requests?search=%25", ADMIN), 200, pred=lambda d: d["results"] == [])
-check("E unknown query param -> 400", call("GET", "/admin/seller-requests?foo=1", ADMIN), 400)
-check("E limit=101 -> 400", call("GET", "/admin/seller-requests?limit=101", ADMIN), 400)
-check("E huge cursor -> 400", call("GET", "/admin/seller-requests?cursor=99999999999", ADMIN), 400)
+check("E approved sellers are not in the list", call("GET", "/admin/seller/requests?limit=100", ADMIN), 200, pred=lambda d: not set(approved_ids) & {r["id"] for r in d["results"]})
+check("E search by phone", call("GET", f"/admin/seller/requests?search={S_PEND['phone'].replace('+', '%2B')}", ADMIN), 200, pred=lambda d: [r["id"] for r in d["results"]] == [S_PEND["id"]])
+check("E search by partial phone", call("GET", f"/admin/seller/requests?search={S_PEND['phone'][-8:]}", ADMIN), 200, pred=lambda d: S_PEND["id"] in [r["id"] for r in d["results"]])
+check("E search by name (case-insens.)", call("GET", "/admin/seller/requests?search=T-REG-1", ADMIN), 200, pred=lambda d: all("t-reg-1" in r["name"].lower() for r in d["results"]))
+check("E search '%' matches literally (nothing)", call("GET", "/admin/seller/requests?search=%25", ADMIN), 200, pred=lambda d: d["results"] == [])
+check("E unknown query param -> 400", call("GET", "/admin/seller/requests?foo=1", ADMIN), 400)
+check("E limit=101 -> 400", call("GET", "/admin/seller/requests?limit=101", ADMIN), 400)
+check("E huge cursor -> 400", call("GET", "/admin/seller/requests?cursor=99999999999", ADMIN), 400)
 
 A1 = new_seller("pending", "inactive")
-c, d = call("POST", f"/admin/seller-requests/{A1['id']}/approve", ADMIN)
+c, d = call("POST", f"/admin/seller/requests/{A1['id']}/approve", ADMIN)
 check("E approve -> approved + active", (c, d), 200, pred=lambda d: d["status"] == "approved" and d["activeStatus"] == "active" and d["rejectionReason"] is None and "passwordHash" not in d)
 check("E approved seller now has full access (existing token)", me(A1["token"]), 200, pred=lambda d: d["access"]["canManage"] is True and d["access"]["code"] is None)
-check("E approve again -> 409", call("POST", f"/admin/seller-requests/{A1['id']}/approve", ADMIN), 409)
-check("E reject an approved seller -> 409", call("POST", f"/admin/seller-requests/{A1['id']}/reject", ADMIN, body={"reason": "x"}), 409)
-check("E approved seller leaves the request list", call("GET", f"/admin/seller-requests?search={A1['phone'].replace('+', '%2B')}", ADMIN), 200, pred=lambda d: d["results"] == [])
+check("E approve again -> 409", call("POST", f"/admin/seller/requests/{A1['id']}/approve", ADMIN), 409)
+check("E reject an approved seller -> 409", call("POST", f"/admin/seller/requests/{A1['id']}/reject", ADMIN, body={"reason": "x"}), 409)
+check("E approved seller leaves the request list", call("GET", f"/admin/seller/requests?search={A1['phone'].replace('+', '%2B')}", ADMIN), 200, pred=lambda d: d["results"] == [])
 
 R5 = new_seller("pending", "inactive")
-c, d = call("POST", f"/admin/seller-requests/{R5['id']}/reject", ADMIN, body={"reason": "  NID photo is unreadable  "})
+c, d = call("POST", f"/admin/seller/requests/{R5['id']}/reject", ADMIN, body={"reason": "  NID photo is unreadable  "})
 check("E reject with reason -> rejected + inactive", (c, d), 200, pred=lambda d: d["status"] == "rejected" and d["activeStatus"] == "inactive" and d["rejectionReason"] == "NID photo is unreadable")
 check("E rejected seller reads the reason + access", me(R5["token"]), 200, pred=lambda d: d["rejectionReason"] == "NID photo is unreadable" and d["access"]["code"] == "SELLER_REJECTED")
 check("E rejected seller can log in", login(R5["phone"]), 200)
-check("E reject again -> 409", call("POST", f"/admin/seller-requests/{R5['id']}/reject", ADMIN, body={"reason": "x"}), 409)
-check("E approve a rejected seller directly -> 409 (must resubmit)", call("POST", f"/admin/seller-requests/{R5['id']}/approve", ADMIN), 409)
-check("E rejected seller is not in the list", call("GET", f"/admin/seller-requests?search={R5['phone'].replace('+', '%2B')}", ADMIN), 200, pred=lambda d: d["results"] == [])
+check("E reject again -> 409", call("POST", f"/admin/seller/requests/{R5['id']}/reject", ADMIN, body={"reason": "x"}), 409)
+check("E approve a rejected seller directly -> 409 (must resubmit)", call("POST", f"/admin/seller/requests/{R5['id']}/approve", ADMIN), 409)
+check("E rejected seller is not in the list", call("GET", f"/admin/seller/requests?search={R5['phone'].replace('+', '%2B')}", ADMIN), 200, pred=lambda d: d["results"] == [])
 c, d = patch_profile(R5["token"], name="T-resubmitted")
 check("E rejected seller resubmits by editing -> pending", (c, d), 200, pred=lambda d: d["status"] == "pending")
-check("E ...and reappears in the request list", call("GET", f"/admin/seller-requests?search={R5['phone'].replace('+', '%2B')}", ADMIN), 200, pred=lambda d: [r["id"] for r in d["results"]] == [R5["id"]])
-check("E ...and can be approved after resubmission", call("POST", f"/admin/seller-requests/{R5['id']}/approve", ADMIN), 200, pred=lambda d: d["status"] == "approved" and d["activeStatus"] == "active")
+check("E ...and reappears in the request list", call("GET", f"/admin/seller/requests?search={R5['phone'].replace('+', '%2B')}", ADMIN), 200, pred=lambda d: [r["id"] for r in d["results"]] == [R5["id"]])
+check("E ...and can be approved after resubmission", call("POST", f"/admin/seller/requests/{R5['id']}/approve", ADMIN), 200, pred=lambda d: d["status"] == "approved" and d["activeStatus"] == "active")
 
 R6 = new_seller("pending", "inactive")
-check("E reject without a body -> 400 (reason required)", call("POST", f"/admin/seller-requests/{R6['id']}/reject", ADMIN), 400)
+check("E reject without a body -> 400 (reason required)", call("POST", f"/admin/seller/requests/{R6['id']}/reject", ADMIN), 400)
 check("E ...seller untouched, still pending", (200, dbrow(R6["id"])), 200, pred=lambda r: r["status"] == "pending" and r["active"] == "inactive")
 R7 = new_seller("pending", "inactive")
-check("E reject with blank reason -> 400 (reason required)", call("POST", f"/admin/seller-requests/{R7['id']}/reject", ADMIN, body={"reason": "   "}), 400)
-check("E reject with empty-string reason -> 400", call("POST", f"/admin/seller-requests/{R7['id']}/reject", ADMIN, body={"reason": ""}), 400)
-check("E reject with null reason -> 400", call("POST", f"/admin/seller-requests/{R7['id']}/reject", ADMIN, body={"reason": None}), 400)
+check("E reject with blank reason -> 400 (reason required)", call("POST", f"/admin/seller/requests/{R7['id']}/reject", ADMIN, body={"reason": "   "}), 400)
+check("E reject with empty-string reason -> 400", call("POST", f"/admin/seller/requests/{R7['id']}/reject", ADMIN, body={"reason": ""}), 400)
+check("E reject with null reason -> 400", call("POST", f"/admin/seller/requests/{R7['id']}/reject", ADMIN, body={"reason": None}), 400)
 R8 = new_seller("pending", "inactive")
-check("E reject reason 1001 chars -> 400", call("POST", f"/admin/seller-requests/{R8['id']}/reject", ADMIN, body={"reason": "r" * 1001}), 400)
-check("E reject reason wrong type -> 400", call("POST", f"/admin/seller-requests/{R8['id']}/reject", ADMIN, body={"reason": 5}), 400)
-check("E reject unknown field -> 400", call("POST", f"/admin/seller-requests/{R8['id']}/reject", ADMIN, body={"reason": "x", "status": "approved"}), 400)
-check("E reject reason 1000 chars ok", call("POST", f"/admin/seller-requests/{R8['id']}/reject", ADMIN, body={"reason": "r" * 1000}), 200)
+check("E reject reason 1001 chars -> 400", call("POST", f"/admin/seller/requests/{R8['id']}/reject", ADMIN, body={"reason": "r" * 1001}), 400)
+check("E reject reason wrong type -> 400", call("POST", f"/admin/seller/requests/{R8['id']}/reject", ADMIN, body={"reason": 5}), 400)
+check("E reject unknown field -> 400", call("POST", f"/admin/seller/requests/{R8['id']}/reject", ADMIN, body={"reason": "x", "status": "approved"}), 400)
+check("E reject reason 1000 chars ok", call("POST", f"/admin/seller/requests/{R8['id']}/reject", ADMIN, body={"reason": "r" * 1000}), 200)
 SUSP = new_seller("pending", "suspended")
-check("E approve a suspended pending seller -> 409", call("POST", f"/admin/seller-requests/{SUSP['id']}/approve", ADMIN), 409)
-check("E reject a suspended pending seller -> 409", call("POST", f"/admin/seller-requests/{SUSP['id']}/reject", ADMIN, body={"reason": "x"}), 409)
+check("E approve a suspended pending seller -> 409", call("POST", f"/admin/seller/requests/{SUSP['id']}/approve", ADMIN), 409)
+check("E reject a suspended pending seller -> 409", call("POST", f"/admin/seller/requests/{SUSP['id']}/reject", ADMIN, body={"reason": "x"}), 409)
 check("E ...suspension untouched", (200, dbrow(SUSP["id"])), 200, pred=lambda r: r["active"] == "suspended" and r["status"] == "pending")
 for act in ("approve", "reject"):
-    check(f"E {act} unknown seller -> 404", call("POST", f"/admin/seller-requests/987654/{act}", ADMIN, body={"reason": "x"}), 404)
+    check(f"E {act} unknown seller -> 404", call("POST", f"/admin/seller/requests/987654/{act}", ADMIN, body={"reason": "x"}), 404)
     for bad in ("abc", "0", "-1", "99999999999", "1.5"):
-        check(f"E {act} id '{bad}' -> 400", call("POST", f"/admin/seller-requests/{bad}/{act}", ADMIN, body={"reason": "x"}), 400)
-check("E GET on approve path -> 404", call("GET", f"/admin/seller-requests/{A1['id']}/approve", ADMIN), 404)
+        check(f"E {act} id '{bad}' -> 400", call("POST", f"/admin/seller/requests/{bad}/{act}", ADMIN, body={"reason": "x"}), 400)
+check("E GET on approve path -> 404", call("GET", f"/admin/seller/requests/{A1['id']}/approve", ADMIN), 404)
 
 # ================================================================= F. ADMIN SELLER API (activeStatus, phone)
 print("\n== F. admin seller API ==")
-c, d = call("POST", "/admin/sellers", ADMIN, form=[("name", "T-admin-made"), ("phone", phone("IN")), ("password", PW)])
+c, d = call("POST", "/admin/seller", ADMIN, form=[("name", "T-admin-made"), ("phone", phone("IN")), ("password", PW)])
 check("F admin-created seller is approved + active", (c, d), 201, pred=lambda d: d["status"] == "approved" and d["activeStatus"] == "active" and "isActive" not in d)
 AM = d["id"] if c == 201 else None
 check("F admin-created seller can log in as seller", login(d["phone"]), 200, pred=lambda x: x["seller"]["access"]["canManage"] is True)
@@ -497,25 +497,25 @@ for n, form in [("local-format phone", [("name", "T-a"), ("phone", "01712345678"
                 ("isActive field (removed)", [("name", "T-a"), ("phone", phone()), ("password", PW), ("isActive", "true")]),
                 ("activeStatus not accepted on create", [("name", "T-a"), ("phone", phone()), ("password", PW), ("activeStatus", "suspended")]),
                 ("status not accepted on create", [("name", "T-a"), ("phone", phone()), ("password", PW), ("status", "pending")])]:
-    check(f"F admin create rejects: {n}", call("POST", "/admin/sellers", ADMIN, form=form), 400)
-check("F admin list filter activeStatus=suspended", call("GET", "/admin/sellers?activeStatus=suspended&limit=100", ADMIN), 200, pred=lambda d: all(r["activeStatus"] == "suspended" for r in d["results"]) and len(d["results"]) > 0)
-check("F admin list filter activeStatus=active", call("GET", "/admin/sellers?activeStatus=active&limit=100", ADMIN), 200, pred=lambda d: all(r["activeStatus"] == "active" for r in d["results"]))
-check("F admin list filter activeStatus invalid -> 400", call("GET", "/admin/sellers?activeStatus=banned", ADMIN), 400)
-check("F admin list old isActive param -> 400", call("GET", "/admin/sellers?isActive=true", ADMIN), 400)
-check("F admin list status+activeStatus combined", call("GET", "/admin/sellers?status=approved&activeStatus=suspended&limit=100", ADMIN), 200, pred=lambda d: all(r["status"] == "approved" and r["activeStatus"] == "suspended" for r in d["results"]))
-check("F admin list search matches phone", call("GET", f"/admin/sellers?search={d['phone'].replace('+', '%2B')}", ADMIN), 200, pred=lambda x: [r["id"] for r in x["results"]] == [AM])
-check("F admin list rows expose activeStatus + rejectionReason, no isActive", call("GET", "/admin/sellers?limit=3", ADMIN), 200, pred=lambda x: all("activeStatus" in r and "rejectionReason" in r and "isActive" not in r for r in x["results"]))
+    check(f"F admin create rejects: {n}", call("POST", "/admin/seller", ADMIN, form=form), 400)
+check("F admin list filter activeStatus=suspended", call("GET", "/admin/seller?activeStatus=suspended&limit=100", ADMIN), 200, pred=lambda d: all(r["activeStatus"] == "suspended" for r in d["results"]) and len(d["results"]) > 0)
+check("F admin list filter activeStatus=active", call("GET", "/admin/seller?activeStatus=active&limit=100", ADMIN), 200, pred=lambda d: all(r["activeStatus"] == "active" for r in d["results"]))
+check("F admin list filter activeStatus invalid -> 400", call("GET", "/admin/seller?activeStatus=banned", ADMIN), 400)
+check("F admin list old isActive param -> 400", call("GET", "/admin/seller?isActive=true", ADMIN), 400)
+check("F admin list status+activeStatus combined", call("GET", "/admin/seller?status=approved&activeStatus=suspended&limit=100", ADMIN), 200, pred=lambda d: all(r["status"] == "approved" and r["activeStatus"] == "suspended" for r in d["results"]))
+check("F admin list search matches phone", call("GET", f"/admin/seller?search={d['phone'].replace('+', '%2B')}", ADMIN), 200, pred=lambda x: [r["id"] for r in x["results"]] == [AM])
+check("F admin list rows expose activeStatus + rejectionReason, no isActive", call("GET", "/admin/seller?limit=3", ADMIN), 200, pred=lambda x: all("activeStatus" in r and "rejectionReason" in r and "isActive" not in r for r in x["results"]))
 for v in ("active", "inactive", "suspended"):
-    check(f"F admin sets activeStatus={v}", call("PATCH", f"/admin/sellers/{AM}", ADMIN, body={"activeStatus": v, "reason": "f test"}), 200, pred=lambda x, v=v: x["activeStatus"] == v)
-check("F admin PATCH activeStatus invalid -> 400", call("PATCH", f"/admin/sellers/{AM}", ADMIN, body={"activeStatus": "banned"}), 400)
-check("F admin PATCH isActive (removed) -> 400", call("PATCH", f"/admin/sellers/{AM}", ADMIN, body={"isActive": True}), 400)
-check("F admin PATCH phone local format -> 400", call("PATCH", f"/admin/sellers/{AM}", ADMIN, body={"phone": "01712345678"}), 400)
-check("F admin PATCH phone duplicate -> 400", call("PATCH", f"/admin/sellers/{AM}", ADMIN, body={"phone": p1}), 400)
-check("F admin PATCH phone normalised", call("PATCH", f"/admin/sellers/{AM}", ADMIN, body={"phone": "+65 8123 4567"}), 200, pred=lambda x: x["phone"] == "+6581234567")
-call("PATCH", f"/admin/sellers/{AM}", ADMIN, body={"status": "rejected", "reason": "manual"})
-check("F admin PATCH status approved clears rejectionReason", call("PATCH", f"/admin/sellers/{AM}", ADMIN, body={"status": "approved"}), 200, pred=lambda x: x["rejectionReason"] is None)
-check("F admin PATCH reason 1001 chars -> 400", call("PATCH", f"/admin/sellers/{AM}", ADMIN, body={"reason": "r" * 1001}), 400)
-check("F admin PATCH old rejectionReason field -> 400", call("PATCH", f"/admin/sellers/{AM}", ADMIN, body={"rejectionReason": "x"}), 400)
+    check(f"F admin sets activeStatus={v}", call("PATCH", f"/admin/seller/{AM}", ADMIN, body={"activeStatus": v, "reason": "f test"}), 200, pred=lambda x, v=v: x["activeStatus"] == v)
+check("F admin PATCH activeStatus invalid -> 400", call("PATCH", f"/admin/seller/{AM}", ADMIN, body={"activeStatus": "banned"}), 400)
+check("F admin PATCH isActive (removed) -> 400", call("PATCH", f"/admin/seller/{AM}", ADMIN, body={"isActive": True}), 400)
+check("F admin PATCH phone local format -> 400", call("PATCH", f"/admin/seller/{AM}", ADMIN, body={"phone": "01712345678"}), 400)
+check("F admin PATCH phone duplicate -> 400", call("PATCH", f"/admin/seller/{AM}", ADMIN, body={"phone": p1}), 400)
+check("F admin PATCH phone normalised", call("PATCH", f"/admin/seller/{AM}", ADMIN, body={"phone": "+65 8123 4567"}), 200, pred=lambda x: x["phone"] == "+6581234567")
+call("PATCH", f"/admin/seller/{AM}", ADMIN, body={"status": "rejected", "reason": "manual"})
+check("F admin PATCH status approved clears rejectionReason", call("PATCH", f"/admin/seller/{AM}", ADMIN, body={"status": "approved"}), 200, pred=lambda x: x["rejectionReason"] is None)
+check("F admin PATCH reason 1001 chars -> 400", call("PATCH", f"/admin/seller/{AM}", ADMIN, body={"reason": "r" * 1001}), 400)
+check("F admin PATCH old rejectionReason field -> 400", call("PATCH", f"/admin/seller/{AM}", ADMIN, body={"rejectionReason": "x"}), 400)
 
 # product eligibility follows approved + active
 print("\n== G. product eligibility ==")
@@ -527,7 +527,7 @@ check("G approved+active seller can receive products", product_for(states["appro
 for label in ("pending", "approved_inactive", "rejected", "approved_suspended", "pending_suspended"):
     sid = states[label]["id"]
     if label == "rejected":  # became pending after the edit test
-        call("PATCH", f"/admin/sellers/{sid}", ADMIN, body={"status": "rejected", "reason": "g test"})
+        call("PATCH", f"/admin/seller/{sid}", ADMIN, body={"status": "rejected", "reason": "g test"})
     check(f"G [{label}] seller cannot receive products -> 409", product_for(sid), 409)
 
 
@@ -536,7 +536,7 @@ print("\n== H. status change history ==")
 
 
 def hist(sid, extra=""):
-    c, d = call("GET", f"/admin/seller-status-history?sellerId={sid}&limit=100{extra}", ADMIN)
+    c, d = call("GET", f"/admin/seller/status-history?sellerId={sid}&limit=100{extra}", ADMIN)
     assert c == 200, (c, d)
     return d["results"]  # newest first
 
@@ -560,30 +560,30 @@ register(phone=d["seller"]["phone"])  # duplicate -> refused
 check("H failed registrations write no history", (200, int(sql("select count(*) from seller_status_change_history"))), 200, pred=lambda v: v == n_hist)
 
 # H2 admin-created
-c, d = call("POST", "/admin/sellers", ADMIN, form=[("name", "T-hist-admin"), ("phone", phone("IN")), ("password", PW)])
+c, d = call("POST", "/admin/seller", ADMIN, form=[("name", "T-hist-admin"), ("phone", phone("IN")), ("password", PW)])
 HA = d["id"]
 rows = hist(HA)
 check("H admin-created seller: one 'admin_created' row, approved + active", (200, rows), 200, pred=lambda r: len(r) == 1 and r[0]["action"] == "admin_created" and r[0]["toStatus"] == "approved" and r[0]["toActiveStatus"] == "active" and r[0]["fromStatus"] is None)
 check("H ...tracker fields = the admin", (200, rows), 200, pred=lambda r: r[0]["createdBy"] == ADMIN_INFO["id"] and r[0]["creatorType"] == "admin" and r[0]["creatorName"] == ADMIN_INFO["name"])
 before = int(sql("select count(*) from seller_status_change_history"))
-call("POST", "/admin/sellers", ADMIN, form=[("name", "T-hist-bad"), ("phone", "01712345678"), ("password", PW)])
+call("POST", "/admin/seller", ADMIN, form=[("name", "T-hist-bad"), ("phone", "01712345678"), ("password", PW)])
 check("H failed admin create writes no history", (200, int(sql("select count(*) from seller_status_change_history"))), 200, pred=lambda n: n == before)
 
 # H3 approve
-c, d = call("POST", f"/admin/seller-requests/{HS}/approve", ADMIN)
+c, d = call("POST", f"/admin/seller/requests/{HS}/approve", ADMIN)
 rows = hist(HS)
 check("H approve adds an 'approved' row on top", (200, rows), 200, pred=lambda r: len(r) == 2 and r[0]["action"] == "approved")
 check("H ...pending/inactive -> approved/active, by the admin, no reason", (200, rows), 200, pred=lambda r: (r[0]["fromStatus"], r[0]["fromActiveStatus"], r[0]["toStatus"], r[0]["toActiveStatus"]) == ("pending", "inactive", "approved", "active") and r[0]["creatorType"] == "admin" and r[0]["createdBy"] == ADMIN_INFO["id"] and r[0]["reason"] is None)
 n = hist_count(HS)
-call("POST", f"/admin/seller-requests/{HS}/approve", ADMIN)
+call("POST", f"/admin/seller/requests/{HS}/approve", ADMIN)
 check("H refused approve (409) writes no history", (200, hist_count(HS)), 200, pred=lambda v: v == n)
 
 # H4 reject (required reason)
 RJ = new_seller("pending", "inactive")
 n = hist_count(RJ["id"])
-check("H reject with no reason is refused", call("POST", f"/admin/seller-requests/{RJ['id']}/reject", ADMIN, body={}), 400)
+check("H reject with no reason is refused", call("POST", f"/admin/seller/requests/{RJ['id']}/reject", ADMIN, body={}), 400)
 check("H ...writes no history and changes nothing", (200, (hist_count(RJ["id"]), dbrow(RJ["id"])["status"])), 200, pred=lambda v: v == (n, "pending"))
-c, d = call("POST", f"/admin/seller-requests/{RJ['id']}/reject", ADMIN, body={"reason": "  Photos unclear  "})
+c, d = call("POST", f"/admin/seller/requests/{RJ['id']}/reject", ADMIN, body={"reason": "  Photos unclear  "})
 rows = hist(RJ["id"])
 check("H reject with reason adds a 'rejected' row", (200, rows), 200, pred=lambda r: r[0]["action"] == "rejected" and r[0]["reason"] == "Photos unclear" and r[0]["toStatus"] == "rejected" and r[0]["toActiveStatus"] == "inactive" and r[0]["fromStatus"] == "pending")
 check("H ...the seller sees the same reason", me(RJ["token"]), 200, pred=lambda d: d["rejectionReason"] == "Photos unclear")
@@ -605,69 +605,69 @@ check("H editing a pending seller writes no history", (200, hist_count(RJ["id"])
 # H6 admin edits
 AE = new_seller("approved", "active")
 base = hist_count(AE["id"])
-check("H admin suspend without reason -> 400", call("PATCH", f"/admin/sellers/{AE['id']}", ADMIN, body={"activeStatus": "suspended"}), 400)
+check("H admin suspend without reason -> 400", call("PATCH", f"/admin/seller/{AE['id']}", ADMIN, body={"activeStatus": "suspended"}), 400)
 check("H ...unchanged and no history", (200, (dbrow(AE["id"])["active"], hist_count(AE["id"]))), 200, pred=lambda v: v == ("active", base))
-check("H admin suspend with blank reason -> 400", call("PATCH", f"/admin/sellers/{AE['id']}", ADMIN, body={"activeStatus": "suspended", "reason": "   "}), 400)
-check("H admin reject via PATCH without reason -> 400", call("PATCH", f"/admin/sellers/{AE['id']}", ADMIN, body={"status": "rejected"}), 400)
+check("H admin suspend with blank reason -> 400", call("PATCH", f"/admin/seller/{AE['id']}", ADMIN, body={"activeStatus": "suspended", "reason": "   "}), 400)
+check("H admin reject via PATCH without reason -> 400", call("PATCH", f"/admin/seller/{AE['id']}", ADMIN, body={"status": "rejected"}), 400)
 check("H ...unchanged and no history", (200, (dbrow(AE["id"])["status"], hist_count(AE["id"]))), 200, pred=lambda v: v == ("approved", base))
-check("H admin suspend with reason -> 200", call("PATCH", f"/admin/sellers/{AE['id']}", ADMIN, body={"activeStatus": "suspended", "reason": "Fake products reported"}), 200)
+check("H admin suspend with reason -> 200", call("PATCH", f"/admin/seller/{AE['id']}", ADMIN, body={"activeStatus": "suspended", "reason": "Fake products reported"}), 200)
 rows = hist(AE["id"])
 check("H ...adds an 'admin_updated' row with the note", (200, rows), 200, pred=lambda r: len(r) == base + 1 and r[0]["action"] == "admin_updated" and r[0]["reason"] == "Fake products reported" and r[0]["fromActiveStatus"] == "active" and r[0]["toActiveStatus"] == "suspended" and r[0]["fromStatus"] == "approved" and r[0]["toStatus"] == "approved")
 check("H ...tracker fields = the admin", (200, rows), 200, pred=lambda r: r[0]["creatorType"] == "admin" and r[0]["createdBy"] == ADMIN_INFO["id"] and r[0]["creatorName"] == ADMIN_INFO["name"])
 n = hist_count(AE["id"])
-call("PATCH", f"/admin/sellers/{AE['id']}", ADMIN, body={"activeStatus": "suspended", "reason": "again"})
-call("PATCH", f"/admin/sellers/{AE['id']}", ADMIN, form=None, body={"name": "T-hist-renamed"})
+call("PATCH", f"/admin/seller/{AE['id']}", ADMIN, body={"activeStatus": "suspended", "reason": "again"})
+call("PATCH", f"/admin/seller/{AE['id']}", ADMIN, form=None, body={"name": "T-hist-renamed"})
 check("H setting the same status again, or editing only the name, writes no history", (200, hist_count(AE["id"])), 200, pred=lambda v: v == n)
-check("H un-suspend needs no reason", call("PATCH", f"/admin/sellers/{AE['id']}", ADMIN, body={"activeStatus": "active"}), 200)
-check("H ...optional note is accepted and stored", call("PATCH", f"/admin/sellers/{AE['id']}", ADMIN, body={"activeStatus": "inactive", "reason": "On holiday"}), 200)
+check("H un-suspend needs no reason", call("PATCH", f"/admin/seller/{AE['id']}", ADMIN, body={"activeStatus": "active"}), 200)
+check("H ...optional note is accepted and stored", call("PATCH", f"/admin/seller/{AE['id']}", ADMIN, body={"activeStatus": "inactive", "reason": "On holiday"}), 200)
 rows = hist(AE["id"])
 check("H ...rows reflect both changes in order", (200, rows), 200, pred=lambda r: (r[0]["toActiveStatus"], r[0]["reason"], r[1]["toActiveStatus"], r[1]["reason"]) == ("inactive", "On holiday", "active", None))
-check("H reject via PATCH with reason -> status rejected + seller sees the reason", call("PATCH", f"/admin/sellers/{AE['id']}", ADMIN, body={"status": "rejected", "reason": "Policy breach"}), 200, pred=lambda d: d["rejectionReason"] == "Policy breach")
+check("H reject via PATCH with reason -> status rejected + seller sees the reason", call("PATCH", f"/admin/seller/{AE['id']}", ADMIN, body={"status": "rejected", "reason": "Policy breach"}), 200, pred=lambda d: d["rejectionReason"] == "Policy breach")
 check("H ...logged as admin_updated with that reason", (200, hist(AE["id"])[0]), 200, pred=lambda r: r["reason"] == "Policy breach" and r["toStatus"] == "rejected" and r["fromStatus"] == "approved")
-check("H admin approving clears the rejection reason, note optional", call("PATCH", f"/admin/sellers/{AE['id']}", ADMIN, body={"status": "approved"}), 200, pred=lambda d: d["rejectionReason"] is None)
+check("H admin approving clears the rejection reason, note optional", call("PATCH", f"/admin/seller/{AE['id']}", ADMIN, body={"status": "approved"}), 200, pred=lambda d: d["rejectionReason"] is None)
 
 # H7 concurrency: two admins approve the same pending seller
 CC = new_seller("pending", "inactive")
 with cf.ThreadPoolExecutor(6) as pool:
-    outs = list(pool.map(lambda _: call("POST", f"/admin/seller-requests/{CC['id']}/approve", ADMIN)[0], range(6)))
+    outs = list(pool.map(lambda _: call("POST", f"/admin/seller/requests/{CC['id']}/approve", ADMIN)[0], range(6)))
 approved_rows = int(sql(f"select count(*) from seller_status_change_history where \"sellerId\"={CC['id']} and action='approved'"))
 check("H 6 simultaneous approvals -> one 200, five 409, no 500", (200, outs), 200, pred=lambda o: o.count(200) == 1 and o.count(409) == 5, note=str(outs))
 check("H ...exactly one 'approved' history row", (200, approved_rows), 200, pred=lambda v: v == 1)
 
 # H8 list endpoint
 print("-- history list API")
-for m, pth in [("GET", "/admin/seller-status-history")]:
+for m, pth in [("GET", "/admin/seller/status-history")]:
     check("H list no token -> 401", call(m, pth), 401)
     check("H list garbage token -> 401", call(m, pth, "a.b.c"), 401)
     check("H list with a seller token -> 403 (admin only)", call(m, pth, HT), 403)
-for m, pth in [("POST", "/admin/seller-status-history"), ("PATCH", "/admin/seller-status-history/1"), ("DELETE", "/admin/seller-status-history/1"), ("PUT", "/admin/seller-status-history/1")]:
+for m, pth in [("POST", "/admin/seller/status-history"), ("PATCH", "/admin/seller/status-history/1"), ("DELETE", "/admin/seller/status-history/1"), ("PUT", "/admin/seller/status-history/1")]:
     check(f"H {m} on the history is not allowed (read-only) -> 404", call(m, pth, ADMIN, body={}), 404)
-allc, alld = call("GET", "/admin/seller-status-history?limit=100", ADMIN)
+allc, alld = call("GET", "/admin/seller/status-history?limit=100", ADMIN)
 check("H list newest first across all sellers", (allc, alld), 200, pred=lambda d: [r["id"] for r in d["results"]] == sorted([r["id"] for r in d["results"]], reverse=True) and len(d["results"]) > 0)
 total_for = hist_count(AE["id"])
 seen, cur = [], None
 while True:
-    c, d = call("GET", f"/admin/seller-status-history?sellerId={AE['id']}&limit=2" + (f"&cursor={cur}" if cur else ""), ADMIN)
+    c, d = call("GET", f"/admin/seller/status-history?sellerId={AE['id']}&limit=2" + (f"&cursor={cur}" if cur else ""), ADMIN)
     seen += [r["id"] for r in d["results"]]
     cur = d["nextCursor"]
     if not cur:
         break
 check("H cursor walk (limit 2) returns every row of one seller exactly once, newest first", (200, seen), 200, pred=lambda s: len(s) == total_for and len(set(s)) == total_for and s == sorted(s, reverse=True), note=f"expected {total_for}")
 check("H sellerId filter only returns that seller", (200, hist(AE["id"])), 200, pred=lambda r: all(x["sellerId"] == AE["id"] for x in r))
-check("H filter action=approved", call("GET", "/admin/seller-status-history?action=approved&limit=100", ADMIN), 200, pred=lambda d: len(d["results"]) > 0 and all(r["action"] == "approved" for r in d["results"]))
-check("H filter action=baseline returns the migrated rows", call("GET", "/admin/seller-status-history?action=baseline&limit=100", ADMIN), 200, pred=lambda d: len(d["results"]) > 0 and all(r["creatorName"] == "System" and r["fromStatus"] is None for r in d["results"]))
-check("H filter toStatus=rejected", call("GET", "/admin/seller-status-history?toStatus=rejected&limit=100", ADMIN), 200, pred=lambda d: all(r["toStatus"] == "rejected" for r in d["results"]) and len(d["results"]) > 0)
-check("H filter toActiveStatus=suspended", call("GET", "/admin/seller-status-history?toActiveStatus=suspended&limit=100", ADMIN), 200, pred=lambda d: all(r["toActiveStatus"] == "suspended" for r in d["results"]) and len(d["results"]) > 0)
-check("H combined filters (action + sellerId)", call("GET", f"/admin/seller-status-history?sellerId={AE['id']}&action=admin_updated&limit=100", ADMIN), 200, pred=lambda d: all(r["action"] == "admin_updated" and r["sellerId"] == AE["id"] for r in d["results"]) and len(d["results"]) >= 4)
-check("H search by seller phone", call("GET", f"/admin/seller-status-history?search={RJ['phone'].replace('+', '%2B')}&limit=100", ADMIN), 200, pred=lambda d: len(d["results"]) > 0 and all(r["seller"]["id"] == RJ["id"] for r in d["results"]))
-check("H search by seller name (case-insensitive)", call("GET", "/admin/seller-status-history?search=T-HIST-ADMIN&limit=100", ADMIN), 200, pred=lambda d: len(d["results"]) >= 1 and all("t-hist-admin" in r["seller"]["name"].lower() for r in d["results"]))
-check("H search '%' matches literally (nothing)", call("GET", "/admin/seller-status-history?search=%25&limit=100", ADMIN), 200, pred=lambda d: d["results"] == [])
-check("H no match returns an empty page", call("GET", "/admin/seller-status-history?search=zzzzzz-nothing", ADMIN), 200, pred=lambda d: d["results"] == [] and d["nextCursor"] is None)
+check("H filter action=approved", call("GET", "/admin/seller/status-history?action=approved&limit=100", ADMIN), 200, pred=lambda d: len(d["results"]) > 0 and all(r["action"] == "approved" for r in d["results"]))
+check("H filter action=baseline returns the migrated rows", call("GET", "/admin/seller/status-history?action=baseline&limit=100", ADMIN), 200, pred=lambda d: len(d["results"]) > 0 and all(r["creatorName"] == "System" and r["fromStatus"] is None for r in d["results"]))
+check("H filter toStatus=rejected", call("GET", "/admin/seller/status-history?toStatus=rejected&limit=100", ADMIN), 200, pred=lambda d: all(r["toStatus"] == "rejected" for r in d["results"]) and len(d["results"]) > 0)
+check("H filter toActiveStatus=suspended", call("GET", "/admin/seller/status-history?toActiveStatus=suspended&limit=100", ADMIN), 200, pred=lambda d: all(r["toActiveStatus"] == "suspended" for r in d["results"]) and len(d["results"]) > 0)
+check("H combined filters (action + sellerId)", call("GET", f"/admin/seller/status-history?sellerId={AE['id']}&action=admin_updated&limit=100", ADMIN), 200, pred=lambda d: all(r["action"] == "admin_updated" and r["sellerId"] == AE["id"] for r in d["results"]) and len(d["results"]) >= 4)
+check("H search by seller phone", call("GET", f"/admin/seller/status-history?search={RJ['phone'].replace('+', '%2B')}&limit=100", ADMIN), 200, pred=lambda d: len(d["results"]) > 0 and all(r["seller"]["id"] == RJ["id"] for r in d["results"]))
+check("H search by seller name (case-insensitive)", call("GET", "/admin/seller/status-history?search=T-HIST-ADMIN&limit=100", ADMIN), 200, pred=lambda d: len(d["results"]) >= 1 and all("t-hist-admin" in r["seller"]["name"].lower() for r in d["results"]))
+check("H search '%' matches literally (nothing)", call("GET", "/admin/seller/status-history?search=%25&limit=100", ADMIN), 200, pred=lambda d: d["results"] == [])
+check("H no match returns an empty page", call("GET", "/admin/seller/status-history?search=zzzzzz-nothing", ADMIN), 200, pred=lambda d: d["results"] == [] and d["nextCursor"] is None)
 for n_, q in [("sellerId=0", "sellerId=0"), ("sellerId=abc", "sellerId=abc"), ("sellerId=-1", "sellerId=-1"), ("sellerId too big", "sellerId=99999999999"), ("sellerId=1.5", "sellerId=1.5"),
               ("invalid action", "action=hacked"), ("invalid toStatus", "toStatus=banned"), ("invalid toActiveStatus", "toActiveStatus=gone"),
               ("unknown param", "foo=1"), ("limit=101", "limit=101"), ("huge cursor", "cursor=99999999999"), ("search 201 chars", "search=" + "a" * 201)]:
-    check(f"H list rejects: {n_}", call("GET", f"/admin/seller-status-history?{q}", ADMIN), 400)
-check("H unknown seller id returns an empty page, not an error", call("GET", "/admin/seller-status-history?sellerId=987654321", ADMIN), 200, pred=lambda d: d["results"] == [])
+    check(f"H list rejects: {n_}", call("GET", f"/admin/seller/status-history?{q}", ADMIN), 400)
+check("H unknown seller id returns an empty page, not an error", call("GET", "/admin/seller/status-history?sellerId=987654321", ADMIN), 200, pred=lambda d: d["results"] == [])
 
 # H9 baseline migration: every pre-existing (non test) seller has a timeline
 no_hist = sql("select count(*) from seller s where s.name not like 'T-%' and not exists (select 1 from seller_status_change_history h where h.\"sellerId\"=s.id)")

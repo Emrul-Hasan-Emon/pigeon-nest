@@ -150,7 +150,7 @@ rejected, suspended, pending+suspended, approved+suspended.
 | Password change: wrong current 401; same password, too short, too long, missing, unknown field 400; success 200; old password stops working; 72-character password accepted | checked |
 | Live changes: admin suspends, the seller's existing token is blocked at once but can still read status; admin reinstates, same token works; admin rejects, access drops to profile-only; seller row removed, token rejected | checked |
 
-### E. Admin seller requests (`/v1/api/admin/seller-requests`)
+### E. Admin seller requests (`/v1/api/admin/seller/requests`)
 
 | Case | Expected |
 |---|---|
@@ -172,7 +172,7 @@ rejected, suspended, pending+suspended, approved+suspended.
 | Bad ids (`abc`, `0`, `-1`, `99999999999`, `1.5`) | 400 |
 | Wrong HTTP method on approve | 404 |
 
-### F. Admin seller API (`/v1/api/admin/sellers`)
+### F. Admin seller API (`/v1/api/admin/seller`)
 
 | Case | Expected |
 |---|---|
@@ -194,7 +194,7 @@ rejected, suspended, pending+suspended, approved+suspended.
 | Admin creates a product for an approved + active seller | 201 |
 | Same for pending, approved+inactive, rejected, approved+suspended, pending+suspended | 409 |
 
-### H. Status change history (`/v1/api/admin/seller-status-history`)
+### H. Status change history (`/v1/api/admin/seller/status-history`)
 
 Every change of `status` or `activeStatus` is written to an append-only log in
 the same transaction as the change. Rejecting or suspending needs a note.
