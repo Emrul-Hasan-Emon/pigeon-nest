@@ -72,6 +72,25 @@ export class StorefrontProductQueryDto extends PageQueryDto {
   @Max(MAX_DECIMAL_12_2)
   maxPrice?: number;
 
+  // Bird filters: the exact breed or bloodline a seller gave (not case sensitive).
+  @IsOptional()
+  @Transform(emptyToUndefined)
+  @IsString()
+  @MaxLength(120)
+  breed?: string;
+
+  @IsOptional()
+  @Transform(emptyToUndefined)
+  @IsString()
+  @MaxLength(120)
+  bloodline?: string;
+
+  // true: only birds with a vaccination date on a live option.
+  @IsOptional()
+  @Transform(parseBoolean)
+  @IsBoolean()
+  vaccinated?: boolean;
+
   @IsOptional()
   @IsEnum(ProductSort)
   sort?: ProductSort;
