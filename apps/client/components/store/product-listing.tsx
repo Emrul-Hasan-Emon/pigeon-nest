@@ -2,10 +2,10 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { getCategoryTree, listCollections, listProducts } from '@/lib/api/storefront';
+import { getBirdFilters, getCategoryTree, listCollections, listProducts } from '@/lib/api/storefront';
 import { ProductCard } from './product-card';
 import { Pagination } from './pagination';
-import type { CategoryNode, PageResult, ProductSortKey, StoreCollection, StoreProduct } from '@/types/storefront';
+import type { BirdFilters, CategoryNode, PageResult, ProductSortKey, StoreCollection, StoreProduct } from '@/types/storefront';
 
 const PAGE_SIZE = 24;
 const SORTS: { value: ProductSortKey; label: string }[] = [
@@ -53,6 +53,9 @@ export function ProductListing({
   const category = params.get('category') ?? '';
   const collection = params.get('collection') ?? '';
   const featured = params.get('featured') === 'true';
+  const breed = params.get('breed') ?? '';
+  const bloodline = params.get('bloodline') ?? '';
+  const vaccinated = params.get('vaccinated') === 'true';
   const pageParam = Number.parseInt(params.get('page') ?? '1', 10);
   const page = Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1;
   const sizeParam = Number.parseInt(params.get('pageSize') ?? '', 10);
@@ -66,6 +69,8 @@ export function ProductListing({
   const [failed, setFailed] = useState(false);
   const [tree, setTree] = useState<CategoryNode[]>([]);
   const [collections, setCollections] = useState<StoreCollection[]>([]);
+  // The breeds and bloodlines that exist. If they cannot be loaded the bird filters are simply left out.
+  const [birds, setBirds] = useState<BirdFilters | null>(null);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -76,6 +81,7 @@ export function ProductListing({
   useEffect(() => {
     if (showCategoryFilter) getCategoryTree().then(setTree).catch(() => undefined);
     if (showCollectionFilter) listCollections().then((r) => setCollections(r.results)).catch(() => undefined);
+    getBirdFilters().then(setBirds).catch(() => undefined);
   }, [showCategoryFilter, showCollectionFilter]);
 
   const update = useCallback(
@@ -92,7 +98,7 @@ export function ProductListing({
     [params, pathname, router],
   );
 
-  const key = `${q}|${sort}|${min}|${max}|${category}|${collection}|${featured}|${page}|${pageSize}|${fixed.categoryId}|${fixed.collectionId}|${fixed.sellerId}`;
+  const key = `${q}|${sort}|${min}|${max}|${category}|${collection}|${featured}|${breed}|${bloodline}|${vaccinated}|${page}|${pageSize}|${fixed.categoryId}|${fixed.collectionId}|${fixed.sellerId}`;
   const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
@@ -111,6 +117,9 @@ export function ProductListing({
       collectionId: fixed.collectionId ?? (collection ? Number(collection) : undefined),
       sellerId: fixed.sellerId,
       featured: featured || undefined,
+      breed: breed || undefined,
+      bloodline: bloodline || undefined,
+      vaccinated: vaccinated || undefined,
     })
       .then((r) => !cancelled && setData(r))
       .catch(() => !cancelled && setFailed(true))
@@ -137,7 +146,7 @@ export function ProductListing({
     update({ min: lo, max: hi });
   }
 
-  const filtered = !!(q || min || max || category || collection || featured);
+  const filtered = !!(q || min || max || category || collection || featured || breed || bloodline || vaccinated);
   const categoryOptions = useMemo(() => flatten(tree), [tree]);
   const from = data && data.total > 0 ? (data.page - 1) * data.pageSize + 1 : 0;
   const to = data ? Math.min(data.total, data.page * data.pageSize) : 0;
@@ -166,6 +175,30 @@ export function ProductListing({
             ))}
           </select>
         )}
+        {birds && birds.breeds.length > 0 && (
+          <select aria-label="Breed" value={breed} onChange={(e) => update({ breed: e.target.value })} className={control}>
+            <option value="">All breeds</option>
+            {birds.breeds.map((b) => (
+              <option key={b.name} value={b.name}>{`${b.name} (${b.count})`}</option>
+            ))}
+          </select>
+        )}
+        {birds && birds.bloodlines.length > 0 && (
+          <select aria-label="Bloodline" value={bloodline} onChange={(e) => update({ bloodline: e.target.value })} className={control}>
+            <option value="">All bloodlines</option>
+            {birds.bloodlines.map((b) => (
+              <option key={b.name} value={b.name}>{`${b.name} (${b.count})`}</option>
+            ))}
+          </select>
+        )}
+        <button
+          type="button"
+          aria-pressed={vaccinated}
+          onClick={() => update({ vaccinated: vaccinated ? null : 'true' })}
+          className={`inline-flex h-9 items-center gap-1.5 rounded-full border px-3.5 text-sm font-medium transition-colors ${vaccinated ? 'border-st-ink bg-st-ink text-white' : 'border-st-line bg-white text-st-ink hover:border-st-ink'}`}
+        >
+          Vaccinated only
+        </button>
         {featured && (
           <button
             type="button"
