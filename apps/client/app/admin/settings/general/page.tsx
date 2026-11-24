@@ -94,7 +94,7 @@ export default function GeneralSettingsPage() {
       </div>
 
       <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-        <h2 className="mb-1 font-semibold text-foreground">Seller commission</h2>
+        <h2 className="mb-1 font-semibold text-foreground">Seller system commission</h2>
         <p className="mb-4 text-xs text-muted-foreground">
           The platform&apos;s cut, worked out for each item and added up for the order. It counts once the order is fully paid and comes back off when an item is returned.
           A seller with their own rate (set on the seller&apos;s page) uses that instead. Changes affect new orders only.
@@ -110,7 +110,7 @@ export default function GeneralSettingsPage() {
               </label>
             ) : (
               <label key={s.key} className="block text-sm text-foreground">
-                {draft['commission.type'] === 'percentage' ? 'Commission percentage' : 'Commission amount per item'}
+                {draft['commission.type'] === 'percentage' ? 'System commission percentage' : 'System commission amount per item'}
                 <input className={fieldClass} inputMode="decimal" value={draft[s.key] as string} onChange={(e) => setDraft((d) => ({ ...d, [s.key]: e.target.value }))} />
                 <span className="mt-1 block text-xs text-muted-foreground">{draft['commission.type'] === 'percentage' ? 'From 0 to 100, at most 2 decimals.' : 'At most 2 decimals.'}</span>
               </label>
