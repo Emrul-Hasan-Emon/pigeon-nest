@@ -49,74 +49,105 @@ export function PaymentDetailView({ role, id }: { role: StaffRole; id: number })
     );
   }
 
+  const reversed = Boolean(payment.reversal);
+  const o = payment.order;
+  const summary = reversed
+    ? `This payment of ৳${money(payment.amount)} was taken back (reversed). It no longer counts as money received.`
+    : payment.status === 'due'
+      ? `৳${money(payment.amount)} is still to be paid by ${payment.customer?.name ?? 'the customer'} (${payment.gateway.name}).`
+      : `৳${money(payment.amount)} was received${payment.paidAt ? ` on ${formatDateTime(payment.paidAt)}` : ''}, paid by ${payment.gateway.name}.`;
+
   return (
     <div className="max-w-4xl space-y-5">
       <div>
-        <Link href={`${root}/payments`} className="text-sm text-primary hover:underline">← Payments</Link>
+        <Link href={`${root}/payments`} className="text-base text-primary hover:underline">← All payments</Link>
         <div className="mt-1 flex flex-wrap items-center gap-3">
-          <h1 className="text-2xl font-bold text-foreground">Payment #{payment.id}</h1>
-          {payment.reversal ? <span className="rounded-full bg-destructive/10 px-2.5 py-0.5 text-xs font-medium text-destructive">Reversed</span> : <PaymentStatusBadge status={payment.status} />}
+          <h1 className="text-foreground">Payment #{payment.id}</h1>
+          {reversed ? <span className="rounded-full bg-destructive/10 px-3 py-1 text-sm font-medium text-destructive">Taken back</span> : <PaymentStatusBadge status={payment.status} />}
         </div>
       </div>
 
+      <p className={`rounded-xl px-5 py-4 text-lg font-medium ${reversed ? 'bg-destructive/10 text-destructive' : payment.status === 'due' ? 'bg-amber-50 text-amber-800' : 'bg-emerald-50 text-emerald-800'}`}>{summary}</p>
+
       <div className="grid gap-4 md:grid-cols-3">
         <div className={card}>
-          <p className="text-xs text-muted-foreground">{payment.status === 'due' ? 'Expected' : 'Received'}</p>
-          <p className="text-xl font-semibold text-foreground">{money(payment.amount)}</p>
-          <p className="text-sm text-muted-foreground">via {payment.gateway.name}</p>
-          {payment.paidAt && <p className="text-xs text-muted-foreground">Paid {formatDateTime(payment.paidAt)}</p>}
-          {payment.transactionId && <p className="mt-1 text-sm text-foreground">Transaction {payment.transactionId}</p>}
+          <h2 className="mb-3 text-lg font-semibold text-foreground">The money</h2>
+          <dl className="space-y-3">
+            <Row label={payment.status === 'due' ? 'Amount to be paid' : 'Amount received'}><span className="text-2xl font-semibold">৳{money(payment.amount)}</span></Row>
+            <Row label="Paid by">{payment.gateway.name}</Row>
+            <Row label="Money received on">{payment.paidAt ? formatDateTime(payment.paidAt) : 'Not received yet'}</Row>
+            <Row label="Transaction ID">{payment.transactionId ?? 'None given'}</Row>
+          </dl>
         </div>
         <div className={card}>
-          <p className="text-xs text-muted-foreground">Order</p>
-          <Link href={`${root}/orders/${payment.order.id}`} className="font-medium text-primary hover:underline">{payment.order.orderNumber}</Link>
-          <div className="mt-1 flex gap-2"><OrderStatusBadge status={payment.order.status} /><PaymentStatusBadge status={payment.order.paymentStatus} /></div>
-          <p className="mt-2 text-sm text-muted-foreground">Payable {money(payment.order.payable)} · received {money(payment.order.amountPaid)} · due {money(payment.order.balanceDue)}</p>
+          <h2 className="mb-3 text-lg font-semibold text-foreground">The order</h2>
+          <dl className="space-y-3">
+            <Row label="Order number"><Link href={`${root}/orders/${o.id}`} className="text-primary hover:underline">{o.orderNumber}</Link> <span className="text-sm font-normal text-muted-foreground">(tap to open)</span></Row>
+            <Row label="Order status"><span className="mr-2 inline-block"><OrderStatusBadge status={o.status} /></span></Row>
+            <Row label="Whole order costs">৳{money(o.payable)}</Row>
+            <Row label="Received so far">৳{money(o.amountPaid)}</Row>
+            <Row label="Still to pay">{o.balanceDue > 0 ? <span className="text-amber-700">৳{money(o.balanceDue)}</span> : <span className="text-emerald-700">Nothing, fully paid</span>}</Row>
+          </dl>
         </div>
         <div className={card}>
-          <p className="text-xs text-muted-foreground">Customer</p>
-          <p className="font-medium text-foreground">{payment.customer?.name}{payment.customer?.isGuest && <span className="ml-2 rounded-full bg-muted px-2 py-0.5 text-xs font-normal text-muted-foreground">Guest</span>}</p>
-          <p className="text-sm text-muted-foreground">{payment.customer?.phone}</p>
-          {payment.customer?.email && <p className="text-sm text-muted-foreground">{payment.customer.email}</p>}
-          {role === 'admin' && payment.seller && <p className="mt-2 text-sm text-muted-foreground">Seller: {payment.seller.name}</p>}
+          <h2 className="mb-3 text-lg font-semibold text-foreground">The customer</h2>
+          <dl className="space-y-3">
+            <Row label="Name">{payment.customer?.name}{payment.customer?.isGuest && <span className="ml-2 rounded-full bg-muted px-2 py-0.5 text-xs font-normal text-muted-foreground">Guest</span>}</Row>
+            <Row label="Phone">{payment.customer?.phone ?? '—'}</Row>
+            {payment.customer?.email && <Row label="Email">{payment.customer.email}</Row>}
+            {role === 'admin' && payment.seller && <Row label="Seller">{payment.seller.name}</Row>}
+          </dl>
         </div>
       </div>
 
       {payment.reversal && (
-        <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-5 text-sm">
-          <h2 className="mb-1 font-semibold text-destructive">This payment was reversed</h2>
-          <p className="text-foreground">{payment.reversal.reason}</p>
-          <p className="mt-1 text-xs text-muted-foreground">{actorLabel(payment.reversal.by)} · {formatDateTime(payment.reversal.at)}. It no longer counts towards what the order has received.</p>
+        <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-5">
+          <h2 className="mb-1 text-lg font-semibold text-destructive">Why this payment was taken back</h2>
+          <p className="text-base text-foreground">{payment.reversal.reason}</p>
+          <p className="mt-1 text-sm text-muted-foreground">By {actorLabel(payment.reversal.by)} on {formatDateTime(payment.reversal.at)}.</p>
         </div>
       )}
 
       {(payment.description || payment.proof || payment.attachments.length > 0) && (
         <div className={card}>
-          <h2 className="mb-2 text-sm font-semibold text-foreground">Proof of payment</h2>
-          {payment.recordedBy && <p className="text-xs text-muted-foreground">Recorded by {actorLabel(payment.recordedBy)}</p>}
-          {payment.description && <p className="mt-1 whitespace-pre-wrap text-sm text-foreground">{payment.description}</p>}
-          {payment.proof && <p className="mt-1 text-sm text-muted-foreground">Customer details: {Object.entries(payment.proof).map(([k, v]) => `${k}: ${v}`).join(', ')}</p>}
+          <h2 className="mb-2 text-lg font-semibold text-foreground">Proof of payment</h2>
+          <dl className="space-y-3">
+            {payment.recordedBy && <Row label="Written down by">{actorLabel(payment.recordedBy)}</Row>}
+            {payment.description && <Row label="Note"><span className="whitespace-pre-wrap font-normal">{payment.description}</span></Row>}
+            {payment.proof && Object.entries(payment.proof).map(([k, v]) => <Row key={k} label={`Customer’s ${k}`}>{String(v)}</Row>)}
+          </dl>
+          {payment.attachments.length > 0 && <p className="mb-1 mt-3 text-base font-semibold text-foreground">Files ({payment.attachments.length})</p>}
           <AttachmentList items={payment.attachments} />
         </div>
       )}
 
       <div className={card}>
-        <h2 className="mb-3 text-sm font-semibold text-foreground">Payment history of this order</h2>
-        <ol className="space-y-3">
+        <h2 className="mb-1 text-lg font-semibold text-foreground">What happened to this order’s payments</h2>
+        <p className="mb-3 text-sm text-muted-foreground">Oldest first. The line marked “this payment” is the one you are looking at.</p>
+        <ol className="space-y-4">
           {payment.history.map((h) => (
-            <li key={h.id} className="border-l-2 border-border pl-3 text-sm">
-              <p className="text-foreground">
+            <li key={h.id} className="border-l-2 border-border pl-4">
+              <p className="text-base text-foreground">
                 {h.fromStatus ? <>{PAYMENT_STATUS_LABEL[h.fromStatus]} → </> : null}<strong>{PAYMENT_STATUS_LABEL[h.status]}</strong>
-                {h.amount > 0 && <span className="text-muted-foreground"> · {money(h.amount)} received, {money(h.amountPaidAfter)} in total</span>}
-                {h.amount < 0 && <span className="text-destructive"> · {money(-h.amount)} reversed, {money(h.amountPaidAfter)} left in total</span>}
-                {h.paymentId === payment.id && <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">this payment</span>}
+                {h.paymentId === payment.id && <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-sm text-primary">this payment</span>}
               </p>
-              {h.note && <p className="text-muted-foreground">{h.note}</p>}
-              <p className="text-xs text-muted-foreground">{actorLabel(h.by)} · {formatDateTime(h.createdAt)}</p>
+              {h.amount > 0 && <p className="text-base text-foreground">৳{money(h.amount)} received. ৳{money(h.amountPaidAfter)} received in all.</p>}
+              {h.amount < 0 && <p className="text-base text-destructive">৳{money(-h.amount)} taken back. ৳{money(h.amountPaidAfter)} left in all.</p>}
+              {h.note && <p className="text-base text-muted-foreground">Note: {h.note}</p>}
+              <p className="text-sm text-muted-foreground">{actorLabel(h.by)} · {formatDateTime(h.createdAt)}</p>
             </li>
           ))}
         </ol>
       </div>
+    </div>
+  );
+}
+
+function Row({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <dt className="text-sm text-muted-foreground">{label}</dt>
+      <dd className="text-base font-medium text-foreground">{children}</dd>
     </div>
   );
 }
