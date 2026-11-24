@@ -20,6 +20,7 @@ import { ProposalModule } from './proposal/proposal.module';
 import { WishlistModule } from './wishlist/wishlist.module';
 import { ReturnsModule } from './returns/returns.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { ReportModule } from './report/report.module';
 import { ReviewModule } from './review/review.module';
 
 @Module({
@@ -45,6 +46,7 @@ import { ReviewModule } from './review/review.module';
     ProposalModule,
     ReturnsModule,
     DashboardModule,
+    ReportModule,
     ReviewModule,
   ],
   controllers: [AppController],
