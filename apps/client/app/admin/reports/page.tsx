@@ -18,7 +18,7 @@ export default function AdminReportsPage() {
   return (
     <div>
       <h1 className="text-2xl font-bold text-foreground">Reports</h1>
-      <p className="mb-5 text-sm text-muted-foreground">Sales, products, orders and earnings for the whole marketplace, or for one seller. Press Download CSV to open a report in Excel or Google Sheets.</p>
+      <p className="mb-5 text-sm text-muted-foreground">Sales, products, orders, earnings and returns for the whole marketplace, or for one seller, plus a ranking of sellers. Press Download CSV to open a report in Excel or Google Sheets.</p>
       <ReportView mine={false} load={getAdminReport} sellers={sellers} fileBase="marketplace" />
     </div>
   );
