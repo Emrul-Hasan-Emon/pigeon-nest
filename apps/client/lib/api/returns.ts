@@ -14,6 +14,7 @@ function createForm(input: CreateReturnInput) {
   form.append('orderId', String(input.orderId));
   form.append('scope', input.scope);
   if (input.orderItemIds?.length) form.append('orderItemIds', input.orderItemIds.join(','));
+  if (input.reasonCode) form.append('reasonCode', input.reasonCode);
   form.append('reason', input.reason);
   if (input.includeDeliveryCharge !== undefined) form.append('includeDeliveryCharge', String(input.includeDeliveryCharge));
   for (const f of input.files ?? []) form.append('files', f);

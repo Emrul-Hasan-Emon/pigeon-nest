@@ -1,6 +1,7 @@
 import { userHttp } from './http';
 import { ENDPOINTS } from '../endpoints';
 import type {
+  BirdFilters,
   CategoryNode,
   SeeAllTarget,
   PageResult,
@@ -24,6 +25,9 @@ export function getHomepage(device: StoreDevice, page: 'main' | 'slots' = 'main'
 
 export function listProducts(query: ProductQuery) {
   return userHttp.get<PageResult<StoreProduct>>(E.products.list, { ...query });
+}
+export function getBirdFilters() {
+  return userHttp.get<BirdFilters>(`${E.products.list}/bird-filters`);
 }
 export function getProduct(id: number) {
   return userHttp.get<ProductDetail>(E.products.detail(id));
