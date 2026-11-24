@@ -2,12 +2,12 @@ import { http, sellerHttp, userHttp } from './http';
 import type { ClaimPage, PaymentAccount, PaymentAccountInput, PaymentClaimStatus, Statement } from '@/types/payment';
 
 // Seller payment accounts (the seller's own) and the admin's view of any seller's
-export const listMyPaymentAccounts = () => sellerHttp.get<PaymentAccount[]>('/payment-accounts');
-export const createMyPaymentAccount = (input: PaymentAccountInput) => sellerHttp.post<PaymentAccount>('/payment-accounts', input);
-export const updateMyPaymentAccount = (id: number, input: PaymentAccountInput) => sellerHttp.patch<PaymentAccount>(`/payment-accounts/${id}`, input);
-export const listSellerPaymentAccounts = (sellerId: number) => http.get<PaymentAccount[]>(`/sellers/${sellerId}/payment-accounts`);
-export const createSellerPaymentAccount = (sellerId: number, input: PaymentAccountInput) => http.post<PaymentAccount>(`/sellers/${sellerId}/payment-accounts`, input);
-export const updateSellerPaymentAccount = (sellerId: number, id: number, input: PaymentAccountInput) => http.patch<PaymentAccount>(`/sellers/${sellerId}/payment-accounts/${id}`, input);
+export const listMyPaymentAccounts = () => sellerHttp.get<PaymentAccount[]>('/profile/payment-accounts');
+export const createMyPaymentAccount = (input: PaymentAccountInput) => sellerHttp.post<PaymentAccount>('/profile/payment-accounts', input);
+export const updateMyPaymentAccount = (id: number, input: PaymentAccountInput) => sellerHttp.patch<PaymentAccount>(`/profile/payment-accounts/${id}`, input);
+export const listSellerPaymentAccounts = (sellerId: number) => http.get<PaymentAccount[]>(`/seller/${sellerId}/payment-accounts`);
+export const createSellerPaymentAccount = (sellerId: number, input: PaymentAccountInput) => http.post<PaymentAccount>(`/seller/${sellerId}/payment-accounts`, input);
+export const updateSellerPaymentAccount = (sellerId: number, id: number, input: PaymentAccountInput) => http.patch<PaymentAccount>(`/seller/${sellerId}/payment-accounts/${id}`, input);
 
 // "I have paid" messages
 export interface ClaimInput {
