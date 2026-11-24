@@ -82,8 +82,8 @@ export const ENDPOINTS = {
       history: '/commission/history',
       changes: '/commission/changes',
       disbursements: resource('/commission/disbursements'),
-      rule: (sellerId: Id) => `/sellers/${sellerId}/commission-setting`,
-      settingHistory: '/seller-settings/history',
+      rule: (sellerId: Id) => `/commission/sellers/${sellerId}/setting`,
+      settingHistory: '/commission/settings/history',
     },
     countries: { list: '/countries' },
     shippingZones: {
