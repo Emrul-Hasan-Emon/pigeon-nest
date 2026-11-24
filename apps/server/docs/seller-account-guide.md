@@ -559,3 +559,18 @@ Where the admin sees it
 ### Admin and the about text
 
 `POST /admin/sellers` and `PATCH /admin/sellers/:id` also accept `description` (up to 1000 characters, blank clears it). The admin seller form has an "About the shop" box with a link to the public page.
+
+## Seller setup checklist
+
+`GET /seller/onboarding` returns the seller's checklist: profile picture, about text, email, ID front and back, first product, a product picture, bird details, and a product on sale (with stock). Each step has `done`, a plain `label`, a `hint` and the page to fix it. `percent` is steps done out of 8. The seller dashboard shows it as "Get your shop ready" until everything is done.
+
+Admins see every approved seller: `GET /admin/seller-onboarding?show=all|incomplete|complete&search=&page=` (summary, progress and the steps still to do), and one seller at `GET /admin/seller-onboarding/:sellerId`. Screen: **Sellers > Seller setup**.
+
+## Selling switch and planned break
+
+`isEnabledForSell` on the seller is on by default. `PATCH /seller/profile/selling` with `{ isEnabledForSell, breakStartsOn?, breakEndsOn?, note? }`.
+
+- **Off:** the seller is hidden from buyers until it is switched on again.
+- **Planned break:** set `breakStartsOn` and `breakEndsOn` (both days included; set both or neither; the end cannot be before the start or in the past). The seller is hidden only between those days and comes back by itself.
+- **What "hidden" means:** the seller's public page and reviews return 404, the seller is left out of the seller list and the homepage, every product of theirs returns 404 and drops out of the store, search, wishlist, cart and checkout, and their product questions and reviews are unreachable. Orders already placed carry on as usual, and the buyer's order history still shows them.
+- The seller sets it on **My profile > Selling** (an on/off switch and the planned break); the dashboard shows a banner while hidden or when a break is planned. The admin seller list shows "Selling off" or "On a planned break".
