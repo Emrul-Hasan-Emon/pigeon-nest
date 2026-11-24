@@ -1,7 +1,9 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { ExternalLink } from 'lucide-react';
 import { PhoneInput } from '@/components/phone-input';
 import { SellerFrame } from '@/components/seller/seller-frame';
 import { StatusBanner } from '@/components/seller/status-banner';
@@ -21,6 +23,7 @@ export default function SellerProfilePage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [description, setDescription] = useState('');
   const [avatar, setAvatar] = useState<File | null>(null);
   const [nidFront, setNidFront] = useState<File | null>(null);
   const [nidBack, setNidBack] = useState<File | null>(null);
@@ -42,6 +45,7 @@ export default function SellerProfilePage() {
     setName(next.name);
     setEmail(next.email ?? '');
     setPhone(next.phone ?? '');
+    setDescription(next.description ?? '');
     setAvatar(null);
     setNidFront(null);
     setNidBack(null);
@@ -83,6 +87,7 @@ export default function SellerProfilePage() {
         name: name !== seller.name ? name : undefined,
         email: email !== (seller.email ?? '') ? email : undefined,
         phone: phone !== seller.phone ? phone : undefined,
+        description: description.trim() !== (seller.description ?? '') ? description : undefined,
         avatar,
         nidFrontImage: nidFront,
         nidBackImage: nidBack,
@@ -134,7 +139,17 @@ export default function SellerProfilePage() {
 
   return (
     <SellerFrame active="profile" width="max-w-3xl">
-        <h1 className="mb-4 text-2xl font-bold text-foreground">My profile</h1>
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <h1 className="text-2xl font-bold text-foreground">My profile</h1>
+          <Link
+            href={`/sellers/${seller.id}`}
+            target="_blank"
+            className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground hover:bg-muted"
+          >
+            <ExternalLink aria-hidden="true" className="h-4 w-4" />
+            See my public page
+          </Link>
+        </div>
         <StatusBanner seller={seller} />
 
         <form
@@ -162,6 +177,22 @@ export default function SellerProfilePage() {
               <PhoneInput defaultValue={seller.phone ?? ''} onChange={setPhone} disabled={!canEdit} />
             </div>
           </div>
+
+          <label className="mt-4 block text-sm text-foreground">
+            About your shop <span className="ml-1 rounded bg-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground">Optional</span>
+            <textarea
+              className={`${inputClass} min-h-28`}
+              disabled={!canEdit}
+              maxLength={1000}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Tell buyers who you are: how long you have kept pigeons, which breeds, how you care for your birds."
+            />
+            <span className="mt-1 flex justify-between text-xs text-muted-foreground">
+              <span>Customers read this on your public page.</span>
+              <span>{description.length} / 1000</span>
+            </span>
+          </label>
 
           <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-3">
             {(

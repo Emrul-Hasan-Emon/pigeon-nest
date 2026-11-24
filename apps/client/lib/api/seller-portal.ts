@@ -40,6 +40,8 @@ export interface MyProfilePayload {
   avatar?: File | null;
   nidFrontImage?: File | null;
   nidBackImage?: File | null;
+  /** Blank clears it. */
+  description?: string;
 }
 
 export function updateMyProfile(payload: MyProfilePayload) {
@@ -47,6 +49,7 @@ export function updateMyProfile(payload: MyProfilePayload) {
   if (payload.name !== undefined) form.set('name', payload.name);
   if (payload.email !== undefined) form.set('email', payload.email);
   if (payload.phone !== undefined) form.set('phone', payload.phone);
+  if (payload.description !== undefined) form.set('description', payload.description);
   if (payload.avatar) form.set('avatar', payload.avatar);
   if (payload.nidFrontImage) form.set('nidFrontImage', payload.nidFrontImage);
   if (payload.nidBackImage) form.set('nidBackImage', payload.nidBackImage);
