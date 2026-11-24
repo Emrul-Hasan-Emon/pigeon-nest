@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useCart } from '@/lib/cart/cart-context';
 import { ApiError } from '@/lib/api/http';
 import { Stars } from '@/components/reviews/stars';
+import { ProductQuestions } from './product-questions';
 import { ProductReviews } from './product-reviews';
 import { ProposalPanel } from './proposal-panel';
 import { SellerCartPanel } from './seller-cart-panel';
@@ -308,6 +309,8 @@ export function ProductDetailView({ product }: { product: ProductDetail }) {
           {sku && <p className="mt-3 text-xs text-st-slate">SKU {sku.sku}</p>}
         </div>
       </div>
+
+      <ProductQuestions productId={product.id} sellerName={product.seller.name} />
 
       <ProductReviews productId={product.id} />
 
