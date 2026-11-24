@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { getProduct } from '@/lib/api/products';
 import { NotFoundApiError } from '@/lib/api/http';
 import { useToast } from '@/components/ui/toast';
+import { ProductReviewsPanel } from '@/components/admin/reviews/product-reviews-panel';
 import { ProductStatusHistoryPanel } from '@/components/admin/catalog/products/product-status-history-panel';
 import {
   isProductVisible,
@@ -14,6 +15,7 @@ import {
 } from '@/components/products/status-badges';
 import type { Product } from '@/types/product';
 import { LoadingBlock } from '@/components/ui/skeleton';
+import { BirdFactsCard, hasSkuBird, SkuBirdLine } from '@/components/products/bird-fields';
 
 export default function ProductDetailsPage() {
   const params = useParams<{ id: string }>();
@@ -124,6 +126,8 @@ export default function ProductDetailsPage() {
         </div>
       </div>
 
+      <BirdFactsCard product={product} />
+
       {product.seller && (
         <div className="mb-5 flex items-center gap-4 rounded-xl border border-border bg-card p-5">
           {product.seller.avatarUrl ? (
@@ -213,8 +217,8 @@ export default function ProductDetailsPage() {
             </thead>
             <tbody>
               {(product.skus ?? []).map((sku) => (
+                <Fragment key={sku.id}>
                 <tr
-                  key={sku.id}
                   className={`border-t border-border ${!sku.isActive ? 'opacity-50' : ''}`}
                 >
                   <td className="py-2">
@@ -255,6 +259,14 @@ export default function ProductDetailsPage() {
                     </span>
                   </td>
                 </tr>
+                {hasSkuBird(sku) && (
+                  <tr className={!sku.isActive ? 'opacity-50' : ''}>
+                    <td colSpan={7} className="pb-3 pl-2">
+                      <SkuBirdLine sku={sku} />
+                    </td>
+                  </tr>
+                )}
+                </Fragment>
               ))}
               {(product.skus ?? []).length === 0 && (
                 <tr>
@@ -269,6 +281,8 @@ export default function ProductDetailsPage() {
       </div>
 
       <ProductStatusHistoryPanel productId={product.id} />
+
+      <ProductReviewsPanel productId={product.id} />
     </div>
   );
 }
