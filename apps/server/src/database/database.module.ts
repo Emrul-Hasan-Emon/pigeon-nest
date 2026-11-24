@@ -22,6 +22,12 @@ import { Shop } from './entities/shop/shop.entity';
 import { SellerProduct } from './entities/product/seller-product.entity';
 import { SellerProductSku } from './entities/product/seller-product-sku.entity';
 import { SellerProductSkuVariant } from './entities/product/seller-product-sku-variant.entity';
+import { ProductQuestion } from './entities/product/product-question.entity';
+import { StockMovement } from './entities/product/stock-movement.entity';
+import { OrderRefund } from './entities/order/order-refund.entity';
+import { OrderRefundStatusHistory } from './entities/order/order-refund-status-history.entity';
+import { PaymentClaim } from './entities/payment/payment-claim.entity';
+import { SellerPaymentAccount } from './entities/payment/seller-payment-account.entity';
 import { SellerProductSkuParent } from './entities/product/seller-product-sku-parent.entity';
 import { SellerProductMedia } from './entities/product-media/seller-product-media.entity';
 import { Order } from './entities/order/order.entity';
@@ -90,6 +96,12 @@ export const DATABASE_ENTITIES = [
   SellerProductSku,
   SellerProductSkuVariant,
   SellerProductSkuParent,
+  ProductQuestion,
+  StockMovement,
+  PaymentClaim,
+  OrderRefund,
+  OrderRefundStatusHistory,
+  SellerPaymentAccount,
   SellerProductMedia,
   Order,
   OrderItem,
