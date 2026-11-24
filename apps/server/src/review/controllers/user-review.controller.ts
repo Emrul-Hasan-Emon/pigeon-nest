@@ -21,40 +21,39 @@ import { ParseIdPipe } from '../../shared/pipes/parse-id.pipe';
 import {
   CreateReviewDto,
   ListMyReviewsQueryDto,
+  ListProductReviewsQueryDto,
+  ListRepliesQueryDto,
   ReplyDto,
   ReportDto,
+  UpdateReplyDto,
   UpdateReviewDto,
   VotesQueryDto,
 } from '../dtos/review.dtos';
 import { MAX_IMAGE_BYTES, MAX_REVIEW_IMAGES } from '../review.constants';
-import { customerActor } from '../services/review-core.service';
-import { ReviewEngagementService } from '../services/review-engagement.service';
-import { ReviewReplyService } from '../services/review-reply.service';
-import { ReviewService } from '../services/review.service';
+import { CommonReviewService, customerActor } from '../services/common-review.service';
+import { UserReviewService } from '../services/user-review.service';
 import { UserAuthGuard } from '../../auth/guards/user-auth.guard';
 
 const IMAGES = FilesInterceptor('images', MAX_REVIEW_IMAGES, {
   limits: { fileSize: MAX_IMAGE_BYTES, files: MAX_REVIEW_IMAGES },
 });
 
-// ---------------------------------------------------------------- public
-
-@UseGuards(UserAuthGuard, UserAccessGuard)
-@Controller({ path: 'api/user/reviews', version: '1' })
+@Controller({ path: 'api/user/review', version: '1' })
 export class UserReviewController {
   constructor(
-    private readonly reviews: ReviewService,
-    private readonly engagement: ReviewEngagementService,
-    private readonly replies: ReviewReplyService,
+    private readonly reviews: UserReviewService,
+    private readonly common: CommonReviewService,
   ) {}
 
   // multipart: orderItemId, rating, title, comment, images (up to 5)
+  @UseGuards(UserAuthGuard, UserAccessGuard)
   @Post()
   @UseInterceptors(IMAGES)
   create(@CurrentUserAccount() user: User, @Body() dto: CreateReviewDto, @UploadedFiles() images?: Express.Multer.File[]) {
     return this.reviews.create(user, dto, images);
   }
 
+  @UseGuards(UserAuthGuard, UserAccessGuard)
   @Get()
   @RequireUserAccess('any')
   mine(@CurrentUserAccount() user: User, @Query() _q: ListMyReviewsQueryDto, @CursorPaginationParams() pagination: CursorPagination) {
@@ -62,6 +61,7 @@ export class UserReviewController {
   }
 
   // delivered order lines that still wait for a review
+  @UseGuards(UserAuthGuard, UserAccessGuard)
   @Get('pending')
   @RequireUserAccess('any')
   pending(@CurrentUserAccount() user: User, @Query() _q: ListMyReviewsQueryDto, @CursorPaginationParams() pagination: CursorPagination) {
@@ -69,18 +69,74 @@ export class UserReviewController {
   }
 
   // ids of the reviews on a product I voted helpful
+  @UseGuards(UserAuthGuard, UserAccessGuard)
   @Get('votes')
   @RequireUserAccess('any')
   votes(@CurrentUserAccount() user: User, @Query() query: VotesQueryDto) {
     return this.reviews.votes(user, query.productId);
   }
 
+  // ---- anyone may read a product's rating, its published reviews and their reply threads
+
+  @Get('product/:productId/summary')
+  productSummary(@Param('productId', ParseIdPipe) productId: number) {
+    return this.reviews.productSummary(productId);
+  }
+
+  @Get('product/:productId')
+  productList(
+    @Param('productId', ParseIdPipe) productId: number,
+    @Query() query: ListProductReviewsQueryDto,
+    @CursorPaginationParams() pagination: CursorPagination,
+  ) {
+    return this.reviews.productList(productId, query, pagination);
+  }
+
+  @Get('seller/:sellerId')
+  sellerList(
+    @Param('sellerId', ParseIdPipe) sellerId: number,
+    @Query() query: ListProductReviewsQueryDto,
+    @CursorPaginationParams() pagination: CursorPagination,
+  ) {
+    return this.reviews.listForSeller(sellerId, query, pagination);
+  }
+
+  // ---- replies
+
+  @UseGuards(UserAuthGuard, UserAccessGuard)
+  @Patch('replies/:id')
+  updateReply(@CurrentUserAccount() user: User, @Param('id', ParseIdPipe) id: number, @Body() dto: UpdateReplyDto) {
+    return this.common.update(customerActor(user), id, dto.body);
+  }
+
+  @UseGuards(UserAuthGuard, UserAccessGuard)
+  @Delete('replies/:id')
+  removeReply(@CurrentUserAccount() user: User, @Param('id', ParseIdPipe) id: number) {
+    return this.common.remove(customerActor(user), id);
+  }
+
+  @UseGuards(UserAuthGuard, UserAccessGuard)
+  @Post('replies/:id/report')
+  reportReply(@CurrentUserAccount() user: User, @Param('id', ParseIdPipe) id: number, @Body() dto: ReportDto) {
+    return this.common.reportReply(customerActor(user), id, dto);
+  }
+
+  // ---- one review
+
+  // Replies straight under the review, or the answers to one reply with ?parentId=
+  @Get(':id/replies')
+  thread(@Param('id', ParseIdPipe) id: number, @Query() query: ListRepliesQueryDto, @CursorPaginationParams() pagination: CursorPagination) {
+    return this.common.thread(id, query, pagination);
+  }
+
+  @UseGuards(UserAuthGuard, UserAccessGuard)
   @Get(':id')
   @RequireUserAccess('any')
   one(@CurrentUserAccount() user: User, @Param('id', ParseIdPipe) id: number) {
     return this.reviews.getMine(user, id);
   }
 
+  @UseGuards(UserAuthGuard, UserAccessGuard)
   @Patch(':id')
   @UseInterceptors(IMAGES)
   update(
@@ -92,29 +148,34 @@ export class UserReviewController {
     return this.reviews.update(user, id, dto, images);
   }
 
+  @UseGuards(UserAuthGuard, UserAccessGuard)
   @Delete(':id')
   remove(@CurrentUserAccount() user: User, @Param('id', ParseIdPipe) id: number) {
     return this.reviews.remove(user, id);
   }
 
+  @UseGuards(UserAuthGuard, UserAccessGuard)
   @Post(':id/helpful')
   helpful(@CurrentUserAccount() user: User, @Param('id', ParseIdPipe) id: number) {
-    return this.engagement.markHelpful(user, id);
+    return this.reviews.markHelpful(user, id);
   }
 
+  @UseGuards(UserAuthGuard, UserAccessGuard)
   @Delete(':id/helpful')
   unhelpful(@CurrentUserAccount() user: User, @Param('id', ParseIdPipe) id: number) {
-    return this.engagement.unmarkHelpful(user, id);
+    return this.reviews.unmarkHelpful(user, id);
   }
 
+  @UseGuards(UserAuthGuard, UserAccessGuard)
   @Post(':id/report')
   report(@CurrentUserAccount() user: User, @Param('id', ParseIdPipe) id: number, @Body() dto: ReportDto) {
-    return this.engagement.reportReview(customerActor(user), id, dto);
+    return this.common.reportReview(customerActor(user), id, dto);
   }
 
   // Only the reviewer may reply (to the review, or to any reply in its thread).
+  @UseGuards(UserAuthGuard, UserAccessGuard)
   @Post(':id/replies')
   reply(@CurrentUserAccount() user: User, @Param('id', ParseIdPipe) id: number, @Body() dto: ReplyDto) {
-    return this.replies.create(customerActor(user), id, dto);
+    return this.common.create(customerActor(user), id, dto);
   }
 }
