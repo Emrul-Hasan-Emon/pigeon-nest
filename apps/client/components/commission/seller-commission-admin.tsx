@@ -13,6 +13,7 @@ import { ChangeLog } from './change-log';
 import { LedgerList } from './ledger-list';
 import { SettingHistory } from './setting-history';
 import { LoadingBlock } from '@/components/ui/skeleton';
+import { useBreadcrumbTitle } from '@/components/ui/breadcrumbs';
 
 type Tab = 'ledger' | 'changes' | 'payments' | 'rule';
 
@@ -20,6 +21,7 @@ type Tab = 'ledger' | 'changes' | 'payments' | 'rule';
 export function SellerCommissionAdmin({ sellerId }: { sellerId: number }) {
   const { showToast } = useToast();
   const [b, setB] = useState<BalanceDetail | null>(null);
+  useBreadcrumbTitle(b?.sellerName);
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>('ledger');
   const [refresh, setRefresh] = useState(0);

@@ -7,12 +7,14 @@ import { getZone } from '@/lib/api/shipping';
 import { useToast } from '@/components/ui/toast';
 import type { ShippingZone } from '@/types/shipping';
 import { LoadingBlock } from '@/components/ui/skeleton';
+import { useBreadcrumbTitle } from '@/components/ui/breadcrumbs';
 
 export default function EditZonePage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const { showToast } = useToast();
   const [zone, setZone] = useState<ShippingZone | null>(null);
+  useBreadcrumbTitle(zone?.name);
 
   useEffect(() => {
     getZone(Number(params.id))

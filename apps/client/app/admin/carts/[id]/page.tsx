@@ -8,6 +8,7 @@ import { NotFoundApiError } from '@/lib/api/http';
 import { formatDateTime } from '@/lib/datetime';
 import type { AdminCartDetail } from '@/types/cart';
 import { LoadingBlock } from '@/components/ui/skeleton';
+import { useBreadcrumbTitle } from '@/components/ui/breadcrumbs';
 
 const STATUS: Record<string, string> = {
   ok: 'Available',
@@ -19,6 +20,7 @@ const STATUS: Record<string, string> = {
 export default function AdminCartDetailPage() {
   const params = useParams<{ id: string }>();
   const [cart, setCart] = useState<AdminCartDetail | null>(null);
+  useBreadcrumbTitle(cart ? `Cart #${cart.id}` : null);
   const [state, setState] = useState<'loading' | 'missing' | 'error' | 'ready'>('loading');
 
   useEffect(() => {

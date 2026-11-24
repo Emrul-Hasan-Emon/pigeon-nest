@@ -7,11 +7,13 @@ import { formatDateTime } from '@/lib/datetime';
 import { commissionApi } from '@/lib/api/commission';
 import type { CommissionRole, DisburseDetail } from '@/types/commission';
 import { LoadingBlock } from '@/components/ui/skeleton';
+import { useBreadcrumbTitle } from '@/components/ui/breadcrumbs';
 
 export function DisburseDetailView({ role, id }: { role: CommissionRole; id: number }) {
   const api = useMemo(() => commissionApi(role), [role]);
   const errorMessage = useApiError(role);
   const [d, setD] = useState<DisburseDetail | null>(null);
+  useBreadcrumbTitle(d ? `Payment #${d.id}` : null);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
     api.disbursement(id).then(setD).catch((e) => setError(errorMessage(e, 'Failed to load this payment.')));
