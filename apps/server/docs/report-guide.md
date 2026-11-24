@@ -40,3 +40,11 @@ Same rules as the dashboards. A sale is a paid, not cancelled order, counted on 
 ## CSV
 
 Built in the browser from the same JSON (`lib/csv.ts`), so the file always matches the screen. It starts with a byte-order mark for Excel, and cells beginning with `= + - @` get a leading apostrophe.
+
+## Returns report (why birds come back)
+
+`GET /seller/reports/returns` and `GET /admin/reports/returns`, with `by=reason` (default), `product`, or (admin only) `seller`, plus `from`, `to` and (admin) `sellerId`. It counts returns asked for in the dates; a return the customer cancelled is left out. The customer picks a reason group when asking for a return (`reasonCode`: not_as_described, sick_or_injured, wrong_bird, damaged_in_transit, late_delivery, changed_mind, other); returns made before this count as `other`.
+
+## Seller ranking (admin only)
+
+`GET /admin/reports/sellers?sort=sales|orders|rating|returns`. Every approved seller for the dates: paid orders, sales, system commission, returns, returns per 100 paid orders, products on sale, rating and reviews.

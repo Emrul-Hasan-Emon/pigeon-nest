@@ -96,3 +96,10 @@ choice, partial then full returns, admin any-status (including undo), cancel and
 payment-reversal guards, concurrency, the window, guest orders, lists and views,
 and consistency checks (balances, change chain, flags, refunds). `KEEP=1` leaves
 the data in place for looking at the screens.
+
+
+---
+
+## Return window and money records
+
+The return window (days after delivery) is enforced for buyers on the server and shown on their order page, and an admin can add extra money records on a return when the buyer says the refund never arrived. See `refund-guide.md`.
