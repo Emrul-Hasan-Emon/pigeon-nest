@@ -100,7 +100,7 @@ export class WishlistInsightsService {
   }
 
   /** Products with the most saves, busiest first. */
-  async mostSaved(opts: { sellerId?: number; categoryId?: number; limit?: number }) {
+  async mostSaved(opts: { sellerId?: number; categoryId?: number; limit?: number; search?: string }) {
     const params: unknown[] = [];
     const add = (v: unknown) => {
       params.push(v);
@@ -109,6 +109,7 @@ export class WishlistInsightsService {
     const where = [`p."deletedAt" IS NULL`, `p."wishlistCount" > 0`];
     if (opts.sellerId !== undefined) where.push(`p."sellerId" = ${add(opts.sellerId)}`);
     if (opts.categoryId !== undefined) where.push(`p."categoryId" = ${add(opts.categoryId)}`);
+    if (opts.search) where.push(`p.name ILIKE ${add(likeContains(opts.search))}`);
     const rows: Array<Record<string, any>> = await this.repo.query(
       `SELECT p.id, p.name, p.slug, p."thumbnailUrl", p."wishlistCount", p.status, p."activeStatus",
               s.id AS "sellerId", s.name AS "sellerName", c.id AS "categoryId", c.name AS "categoryName"
@@ -134,7 +135,7 @@ export class WishlistInsightsService {
   }
 
   /** The seller's own demand: totals and top products. Counts only, never who. */
-  async sellerInsights(sellerId: number, limit = 10) {
+  async sellerInsights(sellerId: number, limit = 10, search?: string) {
     const [totals] = await this.repo.query(
       `SELECT COALESCE(SUM("wishlistCount"), 0)::int AS "totalSaves",
               COUNT(*) FILTER (WHERE "wishlistCount" > 0)::int AS "productsSaved",
@@ -142,6 +143,6 @@ export class WishlistInsightsService {
          FROM seller_product WHERE "sellerId" = $1 AND "deletedAt" IS NULL`,
       [sellerId],
     );
-    return { ...totals, top: await this.mostSaved({ sellerId, limit }) };
+    return { ...totals, top: await this.mostSaved({ sellerId, limit, search }) };
   }
 }

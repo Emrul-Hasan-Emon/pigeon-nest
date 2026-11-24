@@ -125,4 +125,11 @@ export class InsightsQueryDto {
   @Min(1)
   @Max(50)
   limit?: number;
+
+  // product name
+  @IsOptional()
+  @Transform(emptyToUndefined)
+  @IsString()
+  @MaxLength(200)
+  search?: string;
 }

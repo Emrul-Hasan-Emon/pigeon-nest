@@ -64,7 +64,7 @@ export class SellerWishlistController {
 
   @Get('insights')
   insightsFor(@CurrentSeller() seller: Seller, @Query() query: InsightsQueryDto) {
-    return this.insights.sellerInsights(seller.id, query.limit);
+    return this.insights.sellerInsights(seller.id, query.limit, query.search);
   }
 }
 
