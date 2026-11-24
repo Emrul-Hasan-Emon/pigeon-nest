@@ -9,6 +9,7 @@ import { ReturnStatus } from '../../database/enums/return-status.enum';
 import { likeContains } from '../../shared/utils/like.util';
 import { pageResult, resolvePage } from '../../shared/utils/page-paginate.util';
 import { AdminListReturnsQueryDto } from '../dtos/returns.dtos';
+import { refundRecordView } from '../../order/utils/refund-view.util';
 
 /** Who is looking, and which returns they may see. */
 export interface ReturnScopeFilter {
@@ -78,7 +79,9 @@ export class ReturnViewService {
       .addOrderBy('ri.id', 'ASC')
       .getOne();
     if (!ret) throw new NotFoundException('Return not found');
-    return this.full(ret, filter.viewer);
+    // Money records for this return (an admin can add another when the buyer says the money never came).
+    const money = await this.db.orderRefund.find({ where: { orderReturnId: ret.id }, relations: { history: true }, order: { id: 'DESC' } });
+    return { ...this.full(ret, filter.viewer), moneyRecords: money.map((m) => refundRecordView(m)) };
   }
 
   /** Every return on one order, newest first. Used on the order screens. */
@@ -106,6 +109,7 @@ export class ReturnViewService {
       status: r.status,
       scope: r.scope,
       reason: r.reason,
+      reasonCode: r.reasonCode,
       order: this.orderRef(r),
       seller: r.order?.seller ? { id: r.order.seller.id, name: r.order.seller.name } : { id: r.sellerId, name: 'Seller' },
       itemCount: (r.items ?? []).length,
