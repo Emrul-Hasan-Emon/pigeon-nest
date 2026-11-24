@@ -263,7 +263,7 @@ Typical phone order. The screen does these calls in order.
 | Step | Call | Notes |
 |---|---|---|
 | 1. Find the customer | `GET /order/customers?q=<email or mobile>` | Exact email (any case) or a mobile in any common format. Returns up to 5 `{ id, name, email, phone, canOrder, status }`. Empty list = no account; use a walk-in customer. A suspended account is returned with `canOrder: false` |
-| 2. Pick the seller | `GET /sellers?search=&status=approved&activeStatus=active` | The normal seller list |
+| 2. Pick the seller | `GET /seller?search=&status=approved&activeStatus=active` | The normal seller list |
 | 3. See their products | `GET /order/catalog?sellerId=5&search=` | Approved, active products with active variants: `id`, `label`, live `price`, `payable`, `quantity` |
 | 4. Saved address (optional) | `GET /users/{userId}/addresses` | The customer's saved addresses (default first); picking one fills the address fields. If you type an address that is not saved yet, `POST /users/{userId}/addresses` saves it to their book and the screen selects it |
 | 5. Delivery and payment choices | `GET /order/options?countryCode=BD&subtotal=6400` | `countries`, `deliveryOptions` (charge, days, zone, payable) and active `paymentGateways` |

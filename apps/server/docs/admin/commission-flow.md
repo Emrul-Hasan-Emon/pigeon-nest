@@ -270,8 +270,8 @@ All under `/v1/api/admin`. Sign in as admin. Lists use `cursor` and `limit` (1 t
 | GET    | /commission/settings/history                       | Rate changes. `sellerId`, `settingType`, `from`, `to`     |
 | GET    | /settings                                      | Includes `commission.type` and `commission.amount`        |
 | PATCH  | /settings                                      | `{ "settings": { "commission.type": "fixed", "commission.amount": 50 } }` |
-| POST   | /sellers                                       | multipart; optional `commissionType` + `commissionAmount` |
-| PATCH  | /sellers/{id}                                  | same two fields to change the rate                        |
+| POST   | /seller                                        | multipart; optional `commissionType` + `commissionAmount` |
+| PATCH  | /seller/{id}                                   | same two fields to change the rate                        |
 
 `type` values: `order_commission`, `commission_payment`. `commissionType` values:
 `percentage`, `fixed`. `paymentStatus` values: `due`, `partially_paid`, `paid`.
