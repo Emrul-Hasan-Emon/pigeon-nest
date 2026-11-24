@@ -9,6 +9,7 @@ import { deleteGateway, listGatewayTypes, listGateways, updateGateway } from '@/
 import { ApiError, ConflictApiError, NotFoundApiError } from '@/lib/api/http';
 import type { GatewayListParams, GatewayTypeRule, PaymentGateway } from '@/types/payment-gateway';
 import { LoadingBlock } from '@/components/ui/skeleton';
+import { DELETE_ENABLED } from '@/lib/features';
 
 const PAGE_SIZE = 20;
 const selectClass =
@@ -177,7 +178,7 @@ export default function PaymentGatewaysPage() {
                   </td>
                   <td className="px-4 py-3 text-right">
                     <Link href={`/admin/settings/payment-gateways/${g.id}`} className="mr-3 text-primary hover:underline">Edit</Link>
-                    <button type="button" onClick={() => setPendingDelete(g)} className="text-destructive hover:underline">Delete</button>
+                    {DELETE_ENABLED && <button type="button" onClick={() => setPendingDelete(g)} className="text-destructive hover:underline">Delete</button>}
                   </td>
                 </tr>
               ))}
