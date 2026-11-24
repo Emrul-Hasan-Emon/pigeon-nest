@@ -32,7 +32,7 @@ export function SellerTable({
             <th className="px-4 py-3 text-left font-medium text-muted-foreground">Name</th>
             <th className="px-4 py-3 text-left font-medium text-muted-foreground">Email</th>
             <th className="px-4 py-3 text-left font-medium text-muted-foreground">Phone</th>
-            <th className="px-4 py-3 text-left font-medium text-muted-foreground">Commission</th>
+            <th className="px-4 py-3 text-left font-medium text-muted-foreground">System commission</th>
             <th className="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
             <th className="px-4 py-3 text-left font-medium text-muted-foreground">Activity</th>
             <th className="px-4 py-3 text-right font-medium text-muted-foreground">Actions</th>
