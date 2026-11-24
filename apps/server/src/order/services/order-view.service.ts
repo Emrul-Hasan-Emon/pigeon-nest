@@ -18,6 +18,7 @@ export interface SkuSnapshot {
   imageUrl?: string | null;
   thumbnailUrl?: string | null;
   slug?: string;
+  bird?: Record<string, unknown>;
 }
 
 /** How orders look in API responses. Seller and admin screens reuse these. */
@@ -251,6 +252,8 @@ export class OrderViewService {
       productName: item.productName,
       productSlug: sku.slug ?? null,
       sku: { id: item.sellerProductSkuId, code: sku.code ?? null, label: sku.label ?? '' },
+      // Pigeon facts as they were when the order was placed; null for other items and older orders.
+      bird: sku.bird ?? null,
       imageUrl: this.image(item),
       quantity: item.quantity,
       unitPrice: item.unitPrice,

@@ -130,13 +130,15 @@ export class ReturnViewService {
 
   private item(ri: { id: number; orderItemId: number; quantity: number; refundAmount: number; commissionAmount: number; reason: string | null; orderItem?: OrderItem }, viewer: AuthUserType) {
     const oi = ri.orderItem;
-    const sku = (oi?.skuData ?? {}) as { label?: string; thumbnailUrl?: string; imageUrl?: string; slug?: string };
+    const sku = (oi?.skuData ?? {}) as { label?: string; thumbnailUrl?: string; imageUrl?: string; slug?: string; bird?: Record<string, unknown> };
     return {
       id: ri.id,
       orderItemId: ri.orderItemId,
       productName: oi?.productName ?? 'Item',
       productId: oi?.sellerProductId ?? null,
       skuLabel: sku.label ?? null,
+      // The bird as it was sold, so everyone knows which one is being returned. Null for other items and older orders.
+      bird: sku.bird ?? null,
       imageUrl: sku.thumbnailUrl ?? sku.imageUrl ?? null,
       quantity: ri.quantity,
       refundAmount: ri.refundAmount,
