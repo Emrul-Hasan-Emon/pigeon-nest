@@ -48,11 +48,11 @@ export function SellerOverviewView({ title = 'Dashboard' }: { title?: string }) 
               label="You keep"
               value={taka(t.sellerEarnings)}
               change={t.change.sellerEarnings}
-              note="After commission and refunds"
+              note="After system commission and refunds"
               spark={data.series.map((p) => p.grossSales - p.refunds)}
               support={[
                 { label: 'Sales', value: taka(t.grossSales) },
-                { label: 'Commission', value: taka(t.commission.net) },
+                { label: 'System commission', value: taka(t.commission.net) },
                 { label: 'Refunds', value: `${taka(t.refunds.amount)} (${t.refunds.count})` },
               ]}
             />
@@ -73,7 +73,7 @@ export function SellerOverviewView({ title = 'Dashboard' }: { title?: string }) 
                 ]}
               />
               <StatStrip
-                title="Commission"
+                title="System commission"
                 stats={[
                   { label: "On this period's sales", value: taka(t.commission.net), change: t.change.netCommission },
                   { label: 'You owe', value: taka(data.balance.due), hint: 'The marketplace, right now' },

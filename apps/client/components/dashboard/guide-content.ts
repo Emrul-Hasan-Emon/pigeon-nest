@@ -53,7 +53,7 @@ export const ADMIN_GUIDE: GuideSection[] = [
   PERIOD,
   {
     title: 'The lead card and the figures',
-    intro: 'The dark card at the top left is net sales, with the sales, refunds and commission it is made of listed under it. The cards below group the other figures: Orders, Commission and Marketplace.',
+    intro: 'The dark card at the top left is net sales, with the sales, refunds and system commission it is made of listed under it. The cards below group the other figures: Orders, System commission and Marketplace.',
     items: [
       {
         name: 'Sales',
@@ -85,15 +85,15 @@ export const ADMIN_GUIDE: GuideSection[] = [
         tip: 'A rising rate usually points to a quality or description problem with some seller or product.',
       },
       {
-        name: 'Commission earned (lead card) and Earned this period',
-        means: "The marketplace's cut from the period's sales, after taking back the commission on returned items.",
-        how: 'Commission on paid orders placed in the period - commission taken back by returns confirmed in the period. Each item has its own commission, worked out when the order was placed.',
+        name: 'System commission earned (lead card) and Earned this period',
+        means: "The marketplace's cut from the period's sales, after taking back the system commission on returned items.",
+        how: 'System commission on paid orders placed in the period - system commission taken back by returns confirmed in the period. Each item has its own system commission, worked out when the order was placed.',
       },
       {
         name: 'Owed by sellers',
         means: 'What sellers still have to pay the marketplace right now, added up over all sellers. The line under it says how many sellers owe something.',
-        how: "The sum of every seller's due commission balance. It is a live balance, not a period figure.",
-        tip: 'A seller who paid commission and then had an order returned can show a negative balance. That is a credit to them.',
+        how: "The sum of every seller's due system commission balance. It is a live balance, not a period figure.",
+        tip: 'A seller who paid system commission and then had an order returned can show a negative balance. That is a credit to them.',
       },
     ],
   },
@@ -107,7 +107,7 @@ export const ADMIN_GUIDE: GuideSection[] = [
       },
       {
         name: 'Top sellers',
-        means: 'The five sellers with the most sales in the period, with their paid orders and the commission on them.',
+        means: 'The five sellers with the most sales in the period, with their paid orders and the system commission on them.',
         how: 'Sales of fully paid, not cancelled orders, grouped by seller. Click a name to open the seller.',
       },
       {
@@ -131,12 +131,12 @@ export const ADMIN_GUIDE: GuideSection[] = [
   },
   STATUSES,
   {
-    title: 'Marketplace and commission balances',
+    title: 'Marketplace and system commission balances',
     items: [
       { name: 'Customers', means: 'All customer accounts. The line under it says how many joined in the period.' },
       { name: 'Sellers', means: 'All seller accounts. The line says how many are new in the period and how many are approved and active.' },
       { name: 'Live products', means: 'Products customers can see and buy now: approved by an admin and switched on by the seller.' },
-      { name: 'Paid in so far', means: 'Commission sellers have already paid to the marketplace, in total. The line under it shows all the commission earned to date.' },
+      { name: 'Paid in so far', means: 'System commission sellers have already paid to the marketplace, in total. The line under it shows all the system commission earned to date.' },
     ],
   },
 ];
@@ -145,7 +145,7 @@ export const SELLER_GUIDE: GuideSection[] = [
   PERIOD,
   {
     title: 'Your sales',
-    intro: 'The dark card at the top left is what you keep, with your sales, the commission and the refunds under it. The cards below group the other figures: Orders and Commission.',
+    intro: 'The dark card at the top left is what you keep, with your sales, the system commission and the refunds under it. The cards below group the other figures: Orders and System commission.',
     items: [
       {
         name: 'Sales',
@@ -155,9 +155,9 @@ export const SELLER_GUIDE: GuideSection[] = [
       },
       {
         name: 'You keep',
-        means: 'What is left for you after the marketplace takes its commission and after refunds.',
-        how: "Your share of the paid orders (sales minus commission) - the money refunded for confirmed returns, plus the commission taken back on them.",
-        tip: 'When an item is returned, the marketplace gives its commission on that item back, so you lose the refund minus that commission.',
+        means: 'What is left for you after the marketplace takes its system commission and after refunds.',
+        how: "Your share of the paid orders (sales minus system commission) - the money refunded for confirmed returns, plus the system commission taken back on them.",
+        tip: 'When an item is returned, the marketplace gives its system commission on that item back, so you lose the refund minus that system commission.',
       },
       { name: 'Orders placed', means: 'Every order for your birds created in the period, whether it was paid or cancelled.' },
       { name: 'Average order', means: 'What a typical paid order is worth.', how: 'Sales / number of paid orders.' },
@@ -172,15 +172,15 @@ export const SELLER_GUIDE: GuideSection[] = [
         how: 'Paid orders in the period that have a return which is not cancelled or rejected, divided by paid orders in the period.',
       },
       {
-        name: "Commission (lead card) and On this period's sales",
-        means: "The marketplace's cut from this period's sales, after the commission given back on returns.",
-        how: 'Each item carries its own commission, worked out when the order was placed from your own rate or the marketplace rate.',
+        name: "System commission (lead card) and On this period's sales",
+        means: "The marketplace's cut from this period's sales, after the system commission given back on returns.",
+        how: 'Each item carries its own system commission, worked out when the order was placed from your own rate or the marketplace rate.',
       },
       {
         name: 'You owe',
         means: 'What you still have to pay the marketplace right now. The line under it shows what you have paid so far.',
-        how: 'Your live commission balance, not a period figure. Details and payments are under Commission.',
-        tip: 'If a returned order was already paid for, your balance can go below zero. That is a credit and it cancels against the commission on your next orders.',
+        how: 'Your live system commission balance, not a period figure. Details and payments are under System commission.',
+        tip: 'If a returned order was already paid for, your balance can go below zero. That is a credit and it cancels against the system commission on your next orders.',
       },
     ],
   },
