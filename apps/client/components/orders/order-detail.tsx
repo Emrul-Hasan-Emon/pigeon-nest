@@ -27,6 +27,7 @@ import {
   useApiError,
 } from './ui';
 import { LoadingBlock } from '@/components/ui/skeleton';
+import { useBreadcrumbTitle } from '@/components/ui/breadcrumbs';
 
 const card = 'rounded-xl border border-border bg-card p-5 shadow-sm';
 
@@ -35,6 +36,7 @@ export function OrderDetailView({ role, id }: { role: StaffRole; id: number }) {
   const errorMessage = useApiError(role);
   const { showToast } = useToast();
   const [order, setOrder] = useState<OrderDetail | null>(null);
+  useBreadcrumbTitle(order?.orderNumber);
   const [state, setState] = useState<'loading' | 'missing' | 'error' | 'ready'>('loading');
   const root = base(role);
 

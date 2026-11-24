@@ -18,6 +18,7 @@ import { NotFoundApiError } from '@/lib/api/http';
 import type { ReturnDetail, ReturnStatus } from '@/types/returns';
 import { OrderLink, RETURN_LABEL, ReturnBadge, ReturnItemsTable, ReturnTimeline, SCOPE_LABEL } from './parts';
 import { LoadingBlock } from '@/components/ui/skeleton';
+import { useBreadcrumbTitle } from '@/components/ui/breadcrumbs';
 
 const card = 'rounded-xl border border-border bg-card p-5 shadow-sm';
 
@@ -174,6 +175,7 @@ function AdminActions({ r, onChanged }: { r: ReturnDetail; onChanged: (r: Return
 export function ReturnDetailView({ role, id }: { role: 'admin' | 'seller'; id: number }) {
   const errorMessage = useApiError(role);
   const [r, setR] = useState<ReturnDetail | null>(null);
+  useBreadcrumbTitle(r ? `Return #${r.id}` : null);
   const [error, setError] = useState<string | null>(null);
   const [missing, setMissing] = useState(false);
   const load = useCallback(() => {

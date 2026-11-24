@@ -16,12 +16,14 @@ import {
   PaymentStatusBadge,
 } from './ui';
 import { LoadingBlock } from '@/components/ui/skeleton';
+import { useBreadcrumbTitle } from '@/components/ui/breadcrumbs';
 
 const card = 'rounded-xl border border-border bg-card p-5 shadow-sm';
 
 export function PaymentDetailView({ role, id }: { role: StaffRole; id: number }) {
   const api = useMemo(() => orderApi(role), [role]);
   const [payment, setPayment] = useState<PaymentDetail | null>(null);
+  useBreadcrumbTitle(payment ? `Payment #${payment.id}` : null);
   const [state, setState] = useState<'loading' | 'missing' | 'error' | 'ready'>('loading');
   const root = base(role);
 
