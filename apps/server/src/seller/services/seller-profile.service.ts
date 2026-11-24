@@ -10,14 +10,12 @@ import { ChangeSellerPasswordDto } from '../dtos/change-seller-password.dto';
 import { SellingSwitchDto } from '../dtos/shop-break.dto';
 import { UpdateSellerProfileDto } from '../dtos/update-seller-profile.dto';
 import { CommonSellerService, SellerImages } from './common-seller.service';
-import { SellerStatusHistoryService } from './seller-status-history.service';
 
 @Injectable()
 export class SellerProfileService {
   constructor(
     private readonly databaseService: DatabaseService,
     private readonly commonSellerService: CommonSellerService,
-    private readonly sellerStatusHistoryService: SellerStatusHistoryService,
     private readonly tokens: TokenService,
   ) {}
 
@@ -107,14 +105,14 @@ export class SellerProfileService {
       images,
       resubmitting
         ? (manager, result) =>
-            this.sellerStatusHistoryService.record(manager, {
+            this.commonSellerService.record(manager, {
               sellerId: result.id,
               fromStatus: SellerStatus.REJECTED,
               fromActiveStatus: result.activeStatus,
               toStatus: result.status,
               toActiveStatus: result.activeStatus,
               action: SellerStatusChangeAction.RESUBMITTED,
-              actor: this.sellerStatusHistoryService.sellerActor(result),
+              actor: this.commonSellerService.sellerActor(result),
             })
         : undefined,
     );
