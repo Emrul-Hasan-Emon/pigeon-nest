@@ -1,0 +1,94 @@
+{
+  "slug": "statements",
+  "title": "Statements",
+  "icon": "file-text",
+  "order": 150,
+  "summary": "One page for one month: what you sold, what the marketplace kept, what you paid and what you owe.",
+  "openPath": "/seller/statements",
+  "openLabel": "Open statements",
+  "sections": [
+    {
+      "id": "what",
+      "title": "What is a statement?",
+      "intro": "A statement is a monthly paper, like a bank statement. It lists your paid orders, the system commission, the returns and refunds, and the payments you made to the marketplace, and it ends with how much you owe.",
+      "blocks": [
+        {
+          "type": "points",
+          "title": "Why you need it",
+          "items": [
+            "You can check every taka of the month in one place.",
+            "You can print it or save it as a PDF and keep it for your records.",
+            "It helps you see what to pay the marketplace.",
+            "If you and the marketplace do not agree on a number, the statement is the proof."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "open",
+      "title": "Open and print a statement",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "How to",
+          "steps": [
+            "Press \"Statements\" in the left menu.",
+            "Choose the month.",
+            "Read the page from the top.",
+            "Press \"Print\" to print it or to save it as a PDF."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "read",
+      "title": "Read the statement",
+      "blocks": [
+        {
+          "type": "words",
+          "title": "Parts of the page",
+          "items": [
+            {
+              "term": "The month in short",
+              "means": "The big numbers at a glance: sales, system commission, refunds and what you keep."
+            },
+            {
+              "term": "Paid orders",
+              "means": "Each paid order of the month: the order, the amount and its system commission."
+            },
+            {
+              "term": "Returns and refunds",
+              "means": "Returns that were finished in the month, the refund amount and the system commission given back."
+            },
+            {
+              "term": "You paid the marketplace",
+              "means": "The payments you made to the marketplace this month."
+            },
+            {
+              "term": "Owed at the start of the month",
+              "means": "What you owed on day one."
+            },
+            {
+              "term": "Added this month (net of returns)",
+              "means": "The new system commission of the month, after the part given back from returns."
+            },
+            {
+              "term": "Owed at the end of the month",
+              "means": "What you owe at the end. This is the number to pay."
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "info",
+          "text": "If a number is negative, the marketplace owes you. This happens when an order that was already paid for was returned."
+        },
+        {
+          "type": "note",
+          "tone": "info",
+          "text": "If there is nothing in a month, the page says \"No paid orders this month.\" or \"No payments this month.\""
+        }
+      ]
+    }
+  ]
+}
