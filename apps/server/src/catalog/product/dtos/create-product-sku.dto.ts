@@ -23,7 +23,9 @@ import { SkuVariantPairDto } from './sku-variant-pair.dto';
 
 const MONEY = { maxDecimalPlaces: 2, allowNaN: false, allowInfinity: false };
 
-export class CreateProductSkuDto {
+import { BirdSkuFieldsDto } from './bird-fields.dto';
+
+export class CreateProductSkuDto extends BirdSkuFieldsDto {
   // Blank strings are treated as "no code".
   @IsOptional()
   @Transform(({ value }: { value: unknown }) =>

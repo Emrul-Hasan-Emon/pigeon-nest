@@ -16,9 +16,10 @@ import { IsDefinedWhenPresent } from '../../../shared/decorators/defined-when-pr
 import { MAX_INT32 } from '../../../shared/constants/limits';
 import { trimString } from '../../../shared/utils/transform.util';
 import { CreateProductSkuDto } from './create-product-sku.dto';
+import { BirdProductFieldsDto } from './bird-fields.dto';
 
 // Fields both admins and sellers can set when creating a product.
-export class CreateProductBaseDto {
+export class CreateProductBaseDto extends BirdProductFieldsDto {
   @IsInt()
   @Min(1)
   @Max(MAX_INT32)
