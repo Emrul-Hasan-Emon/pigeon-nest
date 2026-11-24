@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { createContext, useContext, useEffect, useState } from 'react';
 import { ChevronRight } from 'lucide-react';
 
-const LABELS: Record<string, string> = { ui: 'UI', sku: 'SKU', new: 'New', commission: 'System commission' };
+const LABELS: Record<string, string> = { ui: 'UI', sku: 'SKU', new: 'New', commission: 'System commission', onboarding: 'Seller setup' };
 
 function labelFor(segment: string) {
   if (/^\d+$/.test(segment)) return `#${segment}`;
