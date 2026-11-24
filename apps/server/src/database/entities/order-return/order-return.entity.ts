@@ -3,6 +3,7 @@ import { BaseEntity } from '../base.entity';
 import { Order } from '../order/order.entity';
 import { User } from '../person/user.entity';
 import { Seller } from '../seller/seller.entity';
+import { ReturnReasonCode } from '../../enums/return-reason-code.enum';
 import { ReturnScope } from '../../enums/return-scope.enum';
 import { ReturnStatus } from '../../enums/return-status.enum';
 import { OrderReturnAttachment } from './order-return-attachment.entity';
@@ -48,6 +49,10 @@ export class OrderReturn extends BaseEntity {
 
   @Column({ type: 'varchar', length: 20 })
   scope: ReturnScope;
+
+  // The reason group the customer picked. The written reason below adds the detail.
+  @Column({ type: 'varchar', length: 30, default: ReturnReasonCode.OTHER })
+  reasonCode: ReturnReasonCode;
 
   @Column({ type: 'text' })
   reason: string;
