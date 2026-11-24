@@ -56,12 +56,28 @@ export interface ReturnItemView {
   commissionAmount?: number;
 }
 
+/** Why a bird or item comes back, picked by the customer. */
+export type ReturnReasonCode = 'not_as_described' | 'sick_or_injured' | 'wrong_bird' | 'damaged_in_transit' | 'late_delivery' | 'changed_mind' | 'other';
+
+export const RETURN_REASONS: { value: ReturnReasonCode; label: string }[] = [
+  { value: 'not_as_described', label: 'Not as described' },
+  { value: 'sick_or_injured', label: 'Sick or injured' },
+  { value: 'wrong_bird', label: 'Wrong bird or item sent' },
+  { value: 'damaged_in_transit', label: 'Hurt or damaged on the way' },
+  { value: 'late_delivery', label: 'Arrived too late' },
+  { value: 'changed_mind', label: 'Changed my mind' },
+  { value: 'other', label: 'Other' },
+];
+
+export const returnReasonLabel = (code: ReturnReasonCode | undefined) => RETURN_REASONS.find((r) => r.value === code)?.label ?? 'Other';
+
 export interface ReturnSummary {
   id: number;
   returnNumber: string;
   status: ReturnStatus;
   scope: ReturnScope;
   reason: string;
+  reasonCode?: ReturnReasonCode;
   order: { id: number; orderNumber: string | null; status: string | null; isReturned: boolean };
   seller: { id: number; name: string };
   itemCount: number;
@@ -76,6 +92,8 @@ export interface ReturnSummary {
 }
 
 export interface ReturnDetail extends ReturnSummary {
+  /** Extra money records an admin added for this return. */
+  moneyRecords?: import('./refund').RefundRecord[];
   itemsAmount: number;
   deliveryAmount: number;
   deliveryCharge: number;
@@ -147,6 +165,7 @@ export interface CreateReturnInput {
   orderId: number;
   scope: ReturnScope;
   orderItemIds?: number[];
+  reasonCode?: ReturnReasonCode;
   reason: string;
   /** Admin only: full-order returns. */
   includeDeliveryCharge?: boolean;

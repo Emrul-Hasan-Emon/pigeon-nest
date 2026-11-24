@@ -23,14 +23,18 @@ export interface Report {
   rows: Record<string, string | number | null>[];
 }
 
-export type ReportName = 'sales' | 'products' | 'orders' | 'earnings';
+export type ReportName = 'sales' | 'products' | 'orders' | 'earnings' | 'returns' | 'sellers';
 export type ReportGroup = 'day' | 'month';
 export type ProductReportKind = 'best' | 'slow' | 'low';
+export type ReturnReportBy = 'reason' | 'product' | 'seller';
+export type SellerRankSort = 'sales' | 'orders' | 'rating' | 'returns';
 
 export interface ReportParams {
   from: string;
   to: string;
   groupBy?: ReportGroup;
   kind?: ProductReportKind;
+  by?: ReturnReportBy;
+  sort?: SellerRankSort;
   sellerId?: number;
 }
