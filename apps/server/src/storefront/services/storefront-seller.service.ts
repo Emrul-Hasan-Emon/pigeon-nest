@@ -5,6 +5,7 @@ import { SellerStatus } from '../../database/enums/seller-status.enum';
 import { likeContains } from '../../shared/utils/like.util';
 import { PageRequest, pageResult } from '../../shared/utils/page-paginate.util';
 import { StorefrontProductService } from '../storefront-product.service';
+import { sellerOpenSql } from '../../shared/utils/shop-break.util';
 
 export enum SellerSort {
   NEWEST = 'newest',
@@ -29,7 +30,9 @@ export class StorefrontSellerService {
     return this.db.seller
       .createQueryBuilder('s')
       .where('s.status = :st', { st: SellerStatus.APPROVED })
-      .andWhere('s.activeStatus = :ac', { ac: SellerActiveStatus.ACTIVE });
+      .andWhere('s.activeStatus = :ac', { ac: SellerActiveStatus.ACTIVE })
+      // A seller who is not selling right now is not shown anywhere: not the page, not the list, not their products.
+      .andWhere(sellerOpenSql('s'));
   }
 
   async list(search: string | undefined, sort: SellerSort | undefined, page: PageRequest) {
