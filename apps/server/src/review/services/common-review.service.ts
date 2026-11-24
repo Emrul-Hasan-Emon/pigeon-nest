@@ -1,15 +1,38 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { Review } from '../../database/entities/review/review.entity';
+import { Seller } from '../../database/entities/seller/seller.entity';
+import { User } from '../../database/entities/person/user.entity';
 import { AuthUserType } from '../../database/enums/auth-user-type.enum';
-import { ReviewStatus } from '../../database/enums/review.enums';
+import { ReviewStatus, ReviewTarget } from '../../database/enums/review.enums';
 import { CursorPagination } from '../../shared/decorators/cursor-pagination-params.decorator';
 import { Actor } from '../../shared/types/actor.type';
 import { getCursorPaginateData } from '../../shared/utils/cursor-paginate.util';
-import { ListRepliesQueryDto, ReplyDto } from '../dtos/review.dtos';
+import { ListRepliesQueryDto, ReplyDto, ReportDto } from '../dtos/review.dtos';
 import { EDIT_WINDOW_DAYS, MAX_REPLIES_PER_REVIEW, MAX_REPLY_DEPTH } from '../review.constants';
-import { created, ReviewCoreService, touched } from './review-core.service';
+
+export const customerActor = (u: User): Actor => ({ id: u.id, type: AuthUserType.USER, name: u.name });
+export const sellerActor = (s: Seller): Actor => ({ id: s.id, type: AuthUserType.SELLER, name: s.name });
+
+/** Tracker columns for a new row. */
+export const created = (a: Actor) => ({
+  createdBy: a.id,
+  creatorType: a.type,
+  creatorName: a.name,
+  updatedBy: a.id,
+  updaterType: a.type,
+  updaterName: a.name,
+});
+
+/** Tracker columns for a change. */
+export const touched = (a: Actor) => ({ updatedBy: a.id, updaterType: a.type, updaterName: a.name });
+
+export interface ImageView {
+  id: number;
+  url: string;
+  fileName: string;
+}
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 export const SUPPORT_NAME = 'Support';
@@ -31,18 +54,77 @@ interface ThreadRow {
   replyCount: number;
 }
 
-/** Threaded replies under a review: the reviewer, the product's seller and Support may write them. */
+/** What all three roles share: names, ratings, status history, photos, threaded replies and reports. */
 @Injectable()
-export class ReviewReplyService {
-  constructor(
-    @InjectRepository(Review) private readonly repo: Repository<Review>,
-    private readonly core: ReviewCoreService,
-  ) {}
+export class CommonReviewService {
+  constructor(@InjectRepository(Review) private readonly repo: Repository<Review>) {}
+
+  /** "Rahim Khan" becomes "Rahim K." — the public never sees a full name, phone or email. */
+  maskName(name: string | null | undefined): string {
+    const parts = (name ?? '').trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) return 'Customer';
+    if (parts.length === 1) return parts[0];
+    return `${parts[0]} ${Array.from(parts[parts.length - 1])[0].toUpperCase()}.`;
+  }
+
+  /** Serialises every review change on one product, so its rating cannot drift. */
+  async lockProduct(m: EntityManager, productId: number) {
+    await m.query(`SELECT id FROM seller_product WHERE id = $1 FOR UPDATE`, [productId]);
+  }
+
+  /** Rebuilds the product's rating from its published, not-deleted reviews. Call with the product locked. */
+  async recomputeRating(m: EntityManager, productId: number) {
+    await m.query(
+      `UPDATE seller_product p
+          SET "ratingCount" = a.n, "ratingSum" = a.s,
+              "ratingAverage" = CASE WHEN a.n = 0 THEN 0 ELSE ROUND(a.s::numeric / a.n, 2)::float8 END
+         FROM (SELECT COUNT(*)::int AS n, COALESCE(SUM(rating), 0)::int AS s
+                 FROM review
+                WHERE "sellerProductId" = $1 AND status = 'published' AND "deletedAt" IS NULL) a
+        WHERE p.id = $1`,
+      [productId],
+    );
+  }
+
+  async recordStatus(
+    m: EntityManager,
+    actor: Actor,
+    target: { type: ReviewTarget; id: number; reviewId: number },
+    from: ReviewStatus,
+    to: ReviewStatus,
+    reason: string | null,
+  ) {
+    await m.query(
+      `INSERT INTO review_status_history ("targetType", "targetId", "reviewId", "fromStatus", "toStatus", reason,
+         "createdBy", "creatorType", "creatorName", "updatedBy", "updaterType", "updaterName")
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $7, $8, $9)`,
+      [target.type, target.id, target.reviewId, from, to, reason, actor.id, actor.type, actor.name],
+    );
+  }
+
+  /** Photos for a set of reviews, oldest first. */
+  async imagesFor(m: EntityManager, reviewIds: number[]): Promise<Map<number, ImageView[]>> {
+    const out = new Map<number, ImageView[]>();
+    if (reviewIds.length === 0) return out;
+    const rows: { id: number; reviewId: number; fileUrl: string; fileName: string }[] = await m.query(
+      `SELECT id, "reviewId", "fileUrl", "fileName" FROM review_attachment
+        WHERE "reviewId" = ANY($1) AND "deletedAt" IS NULL ORDER BY "sortOrder", id`,
+      [reviewIds],
+    );
+    for (const r of rows) {
+      const list = out.get(r.reviewId) ?? [];
+      list.push({ id: r.id, url: r.fileUrl, fileName: r.fileName });
+      out.set(r.reviewId, list);
+    }
+    return out;
+  }
+
+  // ---------------------------------------------------------------- replies
 
   /** The name shown beside a reply: a masked customer, the shop, or Support. */
   displayName(actor: Actor): string {
     if (actor.type === AuthUserType.ADMIN) return SUPPORT_NAME;
-    if (actor.type === AuthUserType.USER) return this.core.maskName(actor.name);
+    if (actor.type === AuthUserType.USER) return this.maskName(actor.name);
     return actor.name;
   }
 
@@ -225,5 +307,72 @@ export class ReviewReplyService {
       );
     });
     return { id: replyId, deleted: true };
+  }
+
+  // ---------------------------------------------------------------- reports
+
+  async publishedReview(id: number) {
+    const [r] = await this.repo.query(
+      `SELECT r.id, r."userId", r.status, r."deletedAt", p."sellerId"
+         FROM review r LEFT JOIN seller_product p ON p.id = r."sellerProductId" WHERE r.id = $1`,
+      [id],
+    );
+    if (!r || r.deletedAt || r.status !== ReviewStatus.PUBLISHED) throw new NotFoundException('Review not found');
+    return r as { id: number; userId: number; sellerId: number };
+  }
+
+
+  /** A customer reports someone else's review or reply on a product. */
+  async reportReview(actor: Actor, reviewId: number, dto: ReportDto) {
+    const review = await this.publishedReview(reviewId);
+    this.assertMayReport(actor, review.userId, review.sellerId, false);
+    return this.fileReport(actor, ReviewTarget.REVIEW, reviewId, reviewId, dto);
+  }
+
+  async reportReply(actor: Actor, replyId: number, dto: ReportDto) {
+    const [reply] = await this.repo.query(
+      `SELECT x.id, x."reviewId", x."authorType", x."authorId", x.status, x."deletedAt" FROM review_reply x WHERE x.id = $1`,
+      [replyId],
+    );
+    if (!reply || reply.deletedAt || reply.status !== ReviewStatus.PUBLISHED) throw new NotFoundException('Reply not found');
+    const review = await this.publishedReview(reply.reviewId);
+    this.assertMayReport(actor, review.userId, review.sellerId, true);
+    if (reply.authorType === actor.type && reply.authorId === actor.id) {
+      throw new BadRequestException('You cannot report your own reply');
+    }
+    return this.fileReport(actor, ReviewTarget.REPLY, replyId, reply.reviewId, dto);
+  }
+
+  /**
+   * A seller may report only on their own products. A customer may report any published review but their own;
+   * a reply is different: the reviewer may report an abusive answer under their own review (not their own reply).
+   */
+  private assertMayReport(actor: Actor, reviewUserId: number, sellerId: number, isReply: boolean) {
+    if (actor.type === AuthUserType.SELLER && sellerId !== actor.id) throw new NotFoundException('Review not found');
+    if (!isReply && actor.type === AuthUserType.USER && reviewUserId === actor.id) {
+      throw new ForbiddenException('You cannot report your own review');
+    }
+  }
+
+  private async fileReport(actor: Actor, type: ReviewTarget, targetId: number, reviewId: number, dto: ReportDto) {
+    const t = created(actor);
+    try {
+      return await this.repo.manager.transaction(async (m) => {
+        await m.query(`SELECT id FROM review WHERE id = $1 FOR UPDATE`, [reviewId]);
+        const [{ id }] = await m.query(
+          `INSERT INTO review_report ("targetType", "targetId", "reviewId", "reporterType", "reporterId", "reporterName", reason, note,
+             "createdBy", "creatorType", "creatorName", "updatedBy", "updaterType", "updaterName")
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $9, $10, $11) RETURNING id`,
+          [type, targetId, reviewId, actor.type, actor.id, actor.name, dto.reason, dto.note ?? null, t.createdBy, t.creatorType, t.creatorName],
+        );
+        if (type === ReviewTarget.REVIEW) {
+          await m.query(`UPDATE review SET "reportCount" = "reportCount" + 1 WHERE id = $1`, [reviewId]);
+        }
+        return { id, targetType: type, targetId, status: 'open' };
+      });
+    } catch (error: any) {
+      if (error?.code === '23505') throw new ConflictException('You already reported this and it is waiting for review');
+      throw error;
+    }
   }
 }

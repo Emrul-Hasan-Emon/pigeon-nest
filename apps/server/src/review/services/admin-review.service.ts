@@ -8,14 +8,14 @@ import { Actor } from '../../shared/types/actor.type';
 import { getCursorPaginateData } from '../../shared/utils/cursor-paginate.util';
 import { likeContains } from '../../shared/utils/like.util';
 import { AdminListReportsQueryDto, AdminListReviewsQueryDto, ResolveReportDto } from '../dtos/review.dtos';
-import { ReviewCoreService, touched } from './review-core.service';
+import { CommonReviewService, touched } from './common-review.service';
 
 /** Admin: read every review, hide or restore it, and settle reports. Admins never edit review text. */
 @Injectable()
-export class ReviewAdminService {
+export class AdminReviewService {
   constructor(
     @InjectRepository(Review) private readonly repo: Repository<Review>,
-    private readonly core: ReviewCoreService,
+    private readonly common: CommonReviewService,
   ) {}
 
   async list(query: AdminListReviewsQueryDto, pagination: CursorPagination) {
@@ -101,7 +101,7 @@ export class ReviewAdminService {
       [id],
     );
     if (!r) throw new NotFoundException('Review not found');
-    const images = await this.core.imagesFor(this.repo.manager, [id]);
+    const images = await this.common.imagesFor(this.repo.manager, [id]);
     const edits = await this.repo.query(
       `SELECT id, "fromRating", "toRating", "fromTitle", "toTitle", "fromComment", "toComment", "imagesAdded", "imagesRemoved",
               "createdAt", "creatorName" FROM review_edit_history WHERE "reviewId" = $1 ORDER BY id DESC`,
@@ -132,7 +132,7 @@ export class ReviewAdminService {
     const [r] = await this.repo.query(`SELECT "sellerProductId" FROM review WHERE id = $1 AND "deletedAt" IS NULL`, [id]);
     if (!r) throw new NotFoundException('Review not found');
     await this.repo.manager.transaction(async (m) => {
-      await this.core.lockProduct(m, r.sellerProductId);
+      await this.common.lockProduct(m, r.sellerProductId);
       const [row] = await m.query(`SELECT status, "deletedAt" FROM review WHERE id = $1 FOR UPDATE`, [id]);
       if (!row || row.deletedAt) throw new NotFoundException('Review not found');
       if (row.status !== ReviewStatus.HIDDEN) throw new BadRequestException('This review is not hidden');
@@ -142,8 +142,8 @@ export class ReviewAdminService {
            "updatedBy" = $2, "updaterType" = $3, "updaterName" = $4 WHERE id = $1`,
         [id, t.updatedBy, t.updaterType, t.updaterName],
       );
-      await this.core.recordStatus(m, actor, { type: ReviewTarget.REVIEW, id, reviewId: id }, ReviewStatus.HIDDEN, ReviewStatus.PUBLISHED, reason ?? null);
-      await this.core.recomputeRating(m, r.sellerProductId);
+      await this.common.recordStatus(m, actor, { type: ReviewTarget.REVIEW, id, reviewId: id }, ReviewStatus.HIDDEN, ReviewStatus.PUBLISHED, reason ?? null);
+      await this.common.recomputeRating(m, r.sellerProductId);
     });
     return this.details(id);
   }
@@ -151,7 +151,7 @@ export class ReviewAdminService {
   private async hideReview(m: EntityManager, actor: Actor, id: number, reason: string) {
     const [r] = await m.query(`SELECT "sellerProductId" FROM review WHERE id = $1 AND "deletedAt" IS NULL`, [id]);
     if (!r) throw new NotFoundException('Review not found');
-    await this.core.lockProduct(m, r.sellerProductId);
+    await this.common.lockProduct(m, r.sellerProductId);
     const [row] = await m.query(`SELECT status, "deletedAt" FROM review WHERE id = $1 FOR UPDATE`, [id]);
     if (!row || row.deletedAt) throw new NotFoundException('Review not found');
     if (row.status !== ReviewStatus.PUBLISHED) throw new BadRequestException('This review is already hidden');
@@ -161,8 +161,8 @@ export class ReviewAdminService {
          "updatedBy" = $3, "updaterType" = $4, "updaterName" = $5 WHERE id = $1`,
       [id, reason, t.updatedBy, t.updaterType, t.updaterName],
     );
-    await this.core.recordStatus(m, actor, { type: ReviewTarget.REVIEW, id, reviewId: id }, ReviewStatus.PUBLISHED, ReviewStatus.HIDDEN, reason);
-    await this.core.recomputeRating(m, r.sellerProductId);
+    await this.common.recordStatus(m, actor, { type: ReviewTarget.REVIEW, id, reviewId: id }, ReviewStatus.PUBLISHED, ReviewStatus.HIDDEN, reason);
+    await this.common.recomputeRating(m, r.sellerProductId);
   }
 
   // ---- replies ----
@@ -182,7 +182,7 @@ export class ReviewAdminService {
          "updatedBy" = $3, "updaterType" = $4, "updaterName" = $5 WHERE id = $1`,
       [replyId, reason, t.updatedBy, t.updaterType, t.updaterName],
     );
-    await this.core.recordStatus(m, actor, { type: ReviewTarget.REPLY, id: replyId, reviewId: x.reviewId }, ReviewStatus.PUBLISHED, ReviewStatus.HIDDEN, reason);
+    await this.common.recordStatus(m, actor, { type: ReviewTarget.REPLY, id: replyId, reviewId: x.reviewId }, ReviewStatus.PUBLISHED, ReviewStatus.HIDDEN, reason);
   }
 
   async restoreReply(actor: Actor, replyId: number, reason?: string) {
@@ -196,7 +196,7 @@ export class ReviewAdminService {
            "updatedBy" = $2, "updaterType" = $3, "updaterName" = $4 WHERE id = $1`,
         [replyId, t.updatedBy, t.updaterType, t.updaterName],
       );
-      await this.core.recordStatus(m, actor, { type: ReviewTarget.REPLY, id: replyId, reviewId: x.reviewId }, ReviewStatus.HIDDEN, ReviewStatus.PUBLISHED, reason ?? null);
+      await this.common.recordStatus(m, actor, { type: ReviewTarget.REPLY, id: replyId, reviewId: x.reviewId }, ReviewStatus.HIDDEN, ReviewStatus.PUBLISHED, reason ?? null);
     });
     return this.replyView(replyId);
   }

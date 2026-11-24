@@ -5,14 +5,14 @@ import { Review } from '../../database/entities/review/review.entity';
 import { CursorPagination } from '../../shared/decorators/cursor-pagination-params.decorator';
 import { getCursorPaginateData } from '../../shared/utils/cursor-paginate.util';
 import { ListSellerReviewsQueryDto } from '../dtos/review.dtos';
-import { ReviewCoreService } from './review-core.service';
+import { CommonReviewService } from './common-review.service';
 
 /** A seller reads reviews of their own products. Customers appear only as a masked name. */
 @Injectable()
-export class ReviewSellerService {
+export class SellerReviewService {
   constructor(
     @InjectRepository(Review) private readonly repo: Repository<Review>,
-    private readonly core: ReviewCoreService,
+    private readonly common: CommonReviewService,
   ) {}
 
   async list(sellerId: number, query: ListSellerReviewsQueryDto, pagination: CursorPagination) {
@@ -43,7 +43,7 @@ export class ReviewSellerService {
       params,
     );
     const page = getCursorPaginateData<{ id: number }>(rows, pagination.limit);
-    const images = await this.core.imagesFor(this.repo.manager, page.results.map((r) => r.id));
+    const images = await this.common.imagesFor(this.repo.manager, page.results.map((r) => r.id));
     return {
       ...page,
       results: (page.results as any[]).map((r) => ({
@@ -55,7 +55,7 @@ export class ReviewSellerService {
         title: r.title,
         comment: r.comment,
         images: images.get(r.id) ?? [],
-        reviewerName: this.core.maskName(r.userName),
+        reviewerName: this.common.maskName(r.userName),
         skuData: r.skuData,
         helpfulCount: r.helpfulCount,
         replyCount: r.replyCount,
