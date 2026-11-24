@@ -92,7 +92,7 @@ Each group below is one section of the script. "Expected" is the HTTP status.
 | Image over 10 MB | 413 |
 | Rejected requests create no seller row and store no files | checked |
 | Minimal valid registration | 201, access token returned |
-| New seller is `pending` + `inactive`, commission 0, no payout info, name trimmed, phone stored as E.164, no `passwordHash` in the response | checked |
+| New seller is `pending` + `inactive`, system commission 0, no payout info, name trimmed, phone stored as E.164, no `passwordHash` in the response | checked |
 | Response contains access flags (can edit profile yes, can manage no, code `SELLER_PENDING`) | checked |
 | Password stored as a bcrypt hash | checked |
 | Same phone again, and the same phone written with spaces/dashes | 400 |

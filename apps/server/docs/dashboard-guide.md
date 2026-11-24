@@ -12,15 +12,15 @@ Code: `src/dashboard/`. One shared `DashboardMetricsService` runs the queries (w
 | Refunds | `refundAmount` of returns that reached `returned`, counted on the day they were confirmed |
 | Net sales | Sales - refunds |
 | Average order | Sales / paid orders |
-| Commission earned | `systemCommission` of those paid orders |
-| Commission returned | `commissionAmount` of the returns confirmed in the period |
-| Net commission | Earned - returned |
-| You keep (seller) | `sellerAmount` of those paid orders - (refunds - commission returned) |
+| System commission earned | `systemCommission` of those paid orders |
+| System commission returned | `commissionAmount` of the returns confirmed in the period |
+| Net system commission | Earned - returned |
+| You keep (seller) | `sellerAmount` of those paid orders - (refunds - system commission returned) |
 | Return rate | Paid orders in the period with a return that is not cancelled or rejected, as a share of paid orders |
 | Top products | Lines of paid, not cancelled orders, returned lines left out, by revenue |
 | Change | Percent against the period before, `null` when that period had nothing |
 
-Counts under "Needs attention" and "To do" are live, whatever the period. Commission owed is the current balance (`system_commission`), not a period figure.
+Counts under "Needs attention" and "To do" are live, whatever the period. System commission owed is the current balance (`system_commission`), not a period figure.
 
 ## Response
 
