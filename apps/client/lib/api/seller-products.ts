@@ -2,6 +2,8 @@ import { sellerHttp } from './http';
 import { ENDPOINTS } from '../endpoints';
 import {
   buildMediaForm,
+  buildParentForm,
+  type SkuParentPayload,
   type CreateProductPayload,
   type ProductMediaFilesPayload,
   type UpdateProductPayload,
@@ -38,6 +40,14 @@ export function updateMyProductMediaFiles(id: number, payload: ProductMediaFiles
   return sellerHttp.patch<Product>(ENDPOINTS.seller.products.mediaFiles(id), buildMediaForm(payload));
 }
 
+export function saveMyProductParent(productId: number, skuId: number, role: 'sire' | 'dam', payload: SkuParentPayload) {
+  return sellerHttp.put<Product>(ENDPOINTS.seller.products.parent(productId, skuId, role), buildParentForm(payload));
+}
+
+export function removeMyProductParent(productId: number, skuId: number, role: 'sire' | 'dam') {
+  return sellerHttp.delete<Product>(ENDPOINTS.seller.products.parent(productId, skuId, role));
+}
+
 // Read-only lookups for the product form.
 export function getSellerCategoryTree() {
   return sellerHttp.get<CategoryTreeNode[]>(ENDPOINTS.seller.catalog.categoryTree);
@@ -49,4 +59,9 @@ export function listSellerCollections() {
 
 export function listSellerAttributes() {
   return sellerHttp.get<AttributeListResponse>(ENDPOINTS.seller.catalog.attributes, { limit: 100 });
+}
+
+/** A new product made from one of the seller's own. It starts switched off. */
+export function copyMyProduct(id: number) {
+  return sellerHttp.post<Product>(`/products/${id}/copy`);
 }
