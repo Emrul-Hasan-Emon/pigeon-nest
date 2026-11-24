@@ -78,7 +78,7 @@ export function ReturnList({ role }: { role: 'admin' | 'seller' }) {
             <table className="min-w-full divide-y divide-border text-sm">
               <thead className="bg-muted">
                 <tr>
-                  {['Return', 'Order', ...(role === 'admin' ? ['Seller'] : []), 'Kind', 'Refund', 'Commission back', 'Status', 'Requested'].map((h) => (
+                  {['Return', 'Order', ...(role === 'admin' ? ['Seller'] : []), 'Kind', 'Refund', 'System commission back', 'Status', 'Requested'].map((h) => (
                     <th key={h} className="px-4 py-3 text-left font-medium text-muted-foreground">{h}</th>
                   ))}
                   <th className="px-4 py-3 text-right font-medium text-muted-foreground">Actions</th>

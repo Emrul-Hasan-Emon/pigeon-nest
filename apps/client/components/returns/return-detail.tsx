@@ -151,10 +151,10 @@ function AdminActions({ r, onChanged }: { r: ReturnDetail; onChanged: (r: Return
       </label>
       {enteringReturned && (
         <p className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-900">
-          Marking this returned takes {money(r.items.reduce((n, i) => n + (i.commissionAmount ?? 0), 0))} of commission off the seller and flags {r.scope === 'full_order' ? 'the items' : 'the item(s)'} as returned.
+          Marking this returned takes {money(r.items.reduce((n, i) => n + (i.commissionAmount ?? 0), 0))} of system commission off the seller and flags {r.scope === 'full_order' ? 'the items' : 'the item(s)'} as returned.
         </p>
       )}
-      {leavingReturned && <p className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-900">Moving this out of returned puts the commission back on the seller and clears the returned flags.</p>}
+      {leavingReturned && <p className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-900">Moving this out of returned puts the system commission back on the seller and clears the returned flags.</p>}
       {r.actions.canEditDelivery && (
         <label className="flex items-start gap-2 text-sm text-foreground">
           <input type="checkbox" className="mt-1" checked={delivery} onChange={(e) => setDelivery(e.target.checked)} />
@@ -235,7 +235,7 @@ export function ReturnDetailView({ role, id }: { role: 'admin' | 'seller'; id: n
               <Fact label="Items">{money(r.itemsAmount)}</Fact>
               <Fact label="Delivery">{r.scope === 'full_order' ? (r.includeDeliveryCharge ? money(r.deliveryAmount) : 'Not refunded') : 'Not refunded'}</Fact>
               <Fact label="Total refund"><strong>{money(r.refundAmount)}</strong></Fact>
-              <Fact label="Commission back">{money(r.commissionAmount ?? 0)}</Fact>
+              <Fact label="System commission back">{money(r.commissionAmount ?? 0)}</Fact>
             </dl>
             {r.returnedAt && <p className="mt-3 text-xs text-muted-foreground">Returned {formatDateTime(r.returnedAt)}</p>}
           </section>
