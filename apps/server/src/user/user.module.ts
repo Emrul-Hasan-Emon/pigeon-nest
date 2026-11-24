@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ActorResolverService } from '../shared/services/actor-resolver.service';
-import { AdminUserAddressController, UserAddressController } from './controllers/address.controllers';
+import { AdminUserAddressController } from './controllers/admin-user-address.controller';
+import { UserAddressController } from './controllers/user-address.controller';
 import { AddressService } from './services/address.service';
 import { AdminUserController } from './controllers/admin-user.controller';
 import { AdminUserStatusHistoryController } from './controllers/admin-user-status-history.controller';

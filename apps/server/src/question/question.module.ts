@@ -3,7 +3,8 @@ import { ActorResolverService } from '../shared/services/actor-resolver.service'
 import { StorefrontModule } from '../storefront/storefront.module';
 import { AdminQuestionController } from './controllers/admin-question.controller';
 import { SellerQuestionController } from './controllers/seller-question.controller';
-import { ProductQuestionController, UserQuestionController } from './controllers/user-question.controller';
+import { ProductQuestionController } from './controllers/product-question.controller';
+import { UserQuestionController } from './controllers/user-question.controller';
 import { AdminQuestionService } from './services/admin-question.service';
 import { CommonQuestionService } from './services/common-question.service';
 import { SellerQuestionService } from './services/seller-question.service';
