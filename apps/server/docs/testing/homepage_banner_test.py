@@ -150,11 +150,11 @@ check("A patch clear endsAt with blank", call("PATCH", f"/admin/banners/{b4['id'
 check("A patch missing -> 404", call("PATCH", "/admin/banners/99999999", A, form=[("title", "x")]), 404)
 
 # ================================================================= B section types + validation
-c, types = call("GET", "/admin/homepage-sections/section-types", A)
+c, types = call("GET", "/admin/homepage/sections/section-types", A)
 check("B section-types lists 8 types with fields", (c, types), 200, pred=lambda v: len(v) == 8 and all(t["fields"] is not None for t in v))
-check("B section-types no token -> 401", call("GET", "/admin/homepage-sections/section-types"), 401)
+check("B section-types no token -> 401", call("GET", "/admin/homepage/sections/section-types"), 401)
 
-H = "/admin/homepage-sections"
+H = "/admin/homepage/sections"
 check("B create unknown type -> 400", call("POST", H, A, body={"sectionType": "nope"}), 400)
 check("B create missing type -> 400", call("POST", H, A, body={"config": {}}), 400)
 check("B create unknown top-level key -> 400", call("POST", H, A, body={"sectionType": "featured_products", "foo": 1}), 400)
@@ -372,7 +372,7 @@ check("I create works again after clearing", call("POST", H, A, body={"sectionTy
 sql("delete from homepage_section where page='main'")
 
 # ================================================================= J slots
-S = "/admin/homepage-slots"
+S = "/admin/homepage/slots"
 c, slots = call("GET", S, A)
 check("J slots list: exactly 4, ordered by slotNo", (c, slots), 200, pred=lambda v: [r["slotNo"] for r in v["results"]] == [1, 2, 3, 4] and v["nextCursor"] is None)
 slot_ids = [r["id"] for r in slots["results"]]

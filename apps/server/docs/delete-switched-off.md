@@ -15,7 +15,7 @@ To bring it back: set `DELETE_ENABLED = true` in `apps/client/lib/features.ts`, 
 | Admin | `DELETE /admin/attributes/:id` | An attribute |
 | Admin | `DELETE /admin/attribute-values/:id` | An attribute value |
 | Admin | `DELETE /admin/banners/:id` | A banner |
-| Admin | `DELETE /admin/homepage-sections/:id` | A homepage section |
+| Admin | `DELETE /admin/homepage/sections/:id` | A homepage section |
 | Admin | `DELETE /admin/payment-gateways/:id` | A payment gateway |
 | Admin | `DELETE /admin/shipping-zones/:id` | A shipping zone |
 | Admin | `DELETE /admin/users/:userId/addresses/:id` | A customer's saved address |
