@@ -1,5 +1,7 @@
 'use client';
 
+import { Opt } from '@/components/products/field-tag';
+import { RotateCcw, Trash2, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { adminProductPortal, type ProductPortal } from '@/lib/products/portal';
 import { ApiError } from '@/lib/api/http';
@@ -82,7 +84,7 @@ export function ProductMediaManager({
       </div>
 
       <div className="mb-5">
-        <span className="text-sm font-medium text-foreground">Thumbnail</span>
+        <span className="text-sm font-medium text-foreground">Thumbnail <Opt /></span>
         <div className="mt-2 flex items-center gap-4">
           {shownThumbnail ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -93,7 +95,7 @@ export function ProductMediaManager({
             </span>
           )}
           <div className="flex flex-col items-start gap-2">
-            <label className="cursor-pointer rounded-md border border-border px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted">
+            <label className="cursor-pointer rounded-md border border-border px-3.5 py-2 text-sm font-semibold text-foreground hover:bg-muted">
               {thumbnailUrl || newThumbnail ? 'Replace' : 'Upload'}
               <input
                 type="file"
@@ -107,12 +109,12 @@ export function ProductMediaManager({
               />
             </label>
             {newThumbnail && (
-              <button type="button" onClick={() => setNewThumbnail(null)} className="text-xs text-muted-foreground">
-                Discard new thumbnail
+              <button type="button" onClick={() => setNewThumbnail(null)} className="rounded-md border border-red-200 bg-red-50 px-3 py-1.5 text-sm font-semibold text-red-700 hover:bg-red-100">
+                Discard new picture
               </button>
             )}
             {thumbnailUrl && !newThumbnail && (
-              <label className="flex items-center gap-1 text-xs text-destructive">
+              <label className="flex cursor-pointer items-center gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-1.5 text-sm font-semibold text-red-700 hover:bg-red-100">
                 <input
                   type="checkbox"
                   checked={removeThumbnail}
@@ -127,8 +129,8 @@ export function ProductMediaManager({
 
       <div>
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-foreground">Gallery ({media.length})</span>
-          <label className="cursor-pointer rounded-md border border-border px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted">
+          <span className="text-sm font-medium text-foreground">Gallery ({media.length}) <Opt /></span>
+          <label className="cursor-pointer rounded-md border border-border px-3.5 py-2 text-sm font-semibold text-foreground hover:bg-muted">
             Add files
             <input
               type="file"
@@ -168,9 +170,12 @@ export function ProductMediaManager({
                   <button
                     type="button"
                     onClick={() => toggleRemoveId(item.id)}
-                    className="absolute inset-x-0 bottom-0 bg-black/60 py-1 text-[10px] font-medium text-white hover:underline"
+                    className={`absolute inset-x-0 bottom-0 flex items-center justify-center gap-1.5 py-2 text-sm font-semibold text-white transition-colors ${
+                      marked ? 'bg-slate-700 hover:bg-slate-800' : 'bg-red-600 hover:bg-red-700'
+                    }`}
                   >
-                    {marked ? 'Undo remove' : 'Remove'}
+                    {marked ? <RotateCcw aria-hidden="true" className="h-4 w-4" /> : <Trash2 aria-hidden="true" className="h-4 w-4" />}
+                    {marked ? 'Undo' : 'Remove'}
                   </button>
                 </div>
               );
@@ -179,16 +184,17 @@ export function ProductMediaManager({
         )}
 
         {newFiles.length > 0 && (
-          <ul className="mt-3 space-y-1 text-xs text-muted-foreground">
+          <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
             {newFiles.map((file, index) => (
               <li key={`${file.name}-${index}`} className="flex items-center justify-between">
                 <span className="truncate">+ {file.name}</span>
                 <button
                   type="button"
                   onClick={() => setNewFiles((current) => current.filter((_, i) => i !== index))}
-                  className="ml-2 text-destructive"
+                  className="ml-2 flex shrink-0 items-center gap-1 rounded-md border border-red-200 bg-red-50 px-2.5 py-1 text-sm font-semibold text-red-700 hover:bg-red-100"
                 >
-                  ✕
+                  <X aria-hidden="true" className="h-4 w-4" />
+                  Remove
                 </button>
               </li>
             ))}
