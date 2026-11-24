@@ -1,13 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { money, ReturnStateBadge } from './return-parts';
 import { createMyReturn, getMyReturnEligibility } from '@/lib/api/returns';
 import { ApiError } from '@/lib/api/http';
 import { formatDate } from '@/lib/datetime';
-import type { ReturnEligibility, ReturnScope } from '@/types/returns';
+import { RETURN_REASONS, type ReturnEligibility, type ReturnReasonCode, type ReturnScope } from '@/types/returns';
 import type { OrderDetail } from '@/types/order';
 
 const card = 'rounded-xl border border-st-line bg-white p-4 sm:p-5';
@@ -20,12 +20,26 @@ export function ReturnRequest({ order }: { order: OrderDetail }) {
   const [elig, setElig] = useState<ReturnEligibility | null>(null);
   const [scope, setScope] = useState<ReturnScope>('items');
   const [picked, setPicked] = useState<number[]>([]);
+  const [reasonCode, setReasonCode] = useState<ReturnReasonCode>('not_as_described');
   const [reason, setReason] = useState('');
   const [files, setFiles] = useState<File[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const candidate = order.status === 'delivered' && order.paymentStatus === 'paid' && !order.isReturned;
+  // The return window, known as soon as the page opens, so a late buyer is told at once and is not offered a button.
+  const [window0, setWindow0] = useState<{ days: number; endsAt: string | null; ended: boolean } | null>(null);
+  useEffect(() => {
+    if (!candidate) return;
+    let live = true;
+    getMyReturnEligibility(order.id)
+      .then((e) => live && setWindow0({ days: e.returnWindowDays, endsAt: e.windowEndsAt, ended: Boolean(e.windowEndsAt && new Date(e.windowEndsAt).getTime() < Date.now()) }))
+      .catch(() => undefined);
+    return () => {
+      live = false;
+    };
+  }, [candidate, order.id]);
+  const windowEnded = window0?.ended === true;
   if (!candidate && order.returns.length === 0) return null;
 
   async function begin() {
@@ -49,7 +63,7 @@ export function ReturnRequest({ order }: { order: OrderDetail }) {
     if (scope === 'items' && picked.length === 0) return setError('Choose at least one item.');
     setBusy(true);
     try {
-      const r = await createMyReturn({ orderId: order.id, scope, orderItemIds: scope === 'items' ? picked : undefined, reason: reason.trim(), files });
+      const r = await createMyReturn({ orderId: order.id, scope, orderItemIds: scope === 'items' ? picked : undefined, reasonCode, reason: reason.trim(), files });
       router.push(`/returns/${r.id}?opened=1`);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'We could not send your request.');
@@ -74,8 +88,14 @@ export function ReturnRequest({ order }: { order: OrderDetail }) {
         </ul>
       )}
       {error && !open && <p role="alert" className="mb-2 text-sm text-destructive">{error}</p>}
-      {!open && candidate && (
+      {!open && candidate && windowEnded && order.returns.length === 0 && (
+        <p className="text-sm text-st-slate">
+          The return window of {window0?.days} days ended on <span className="font-medium text-st-ink">{formatDate(window0?.endsAt)}</span>. You can no longer ask to return items from this order. If something is wrong, please contact the seller.
+        </p>
+      )}
+      {!open && candidate && !windowEnded && (
         <div>
+          {window0?.endsAt && <p className="mb-2 text-sm text-st-slate">You can ask for a return until <span className="font-medium text-st-ink">{formatDate(window0.endsAt)}</span> ({window0.days} days after delivery).</p>}
           <button type="button" onClick={begin} className="rounded-full border border-st-line px-4 py-1.5 text-sm font-medium text-st-ink hover:bg-st-dove">Return items from this order</button>
           <p className="mt-1 text-xs text-st-slate">You can ask once for each item, or for the whole order.</p>
         </div>
@@ -111,6 +131,12 @@ export function ReturnRequest({ order }: { order: OrderDetail }) {
                   {picked.length > 0 && <li className="pt-1 text-sm font-medium text-st-ink">Refund {money(total)}</li>}
                 </ul>
               )}
+              <label className="block text-sm font-medium text-st-ink">
+                Why are you returning it?
+                <select className={`${input} mt-1`} value={reasonCode} onChange={(e) => setReasonCode(e.target.value as ReturnReasonCode)}>
+                  {RETURN_REASONS.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
+                </select>
+              </label>
               <label className="block text-sm text-st-ink">
                 What is wrong?
                 <textarea className={`${input} mt-1`} rows={3} maxLength={2000} value={reason} onChange={(e) => setReason(e.target.value)} />
