@@ -8,6 +8,8 @@ screens.
 
 If you only have two minutes, read sections 1, 3 and 4.
 
+> **Delete is switched off for now** in the seller portal and the admin panel (no Delete button, and the delete routes are commented out). See `delete-switched-off.md`. The delete steps below describe how it works when it is switched back on.
+
 ---
 
 ## Contents
@@ -77,7 +79,7 @@ so anyone with admin access can later see who changed what, when, and why.
 
 | Person | What they are | What they do with products |
 |---|---|---|
-| **Admin** | A staff member who runs the marketplace. | Can see **every** product of **every** seller. Can create, edit, approve, reject, suspend, activate, deactivate and delete any product. Can read the history log. |
+| **Admin** | A staff member who runs the marketplace. | Can see **every** product of **every** seller. Can create, edit, approve, reject, suspend, activate, deactivate and (when delete is switched on) delete any product. Can read the history log. |
 | **Seller** | A shop owner who has an approved and active seller account. | Can see and manage **only their own** products, within the limits in this guide. Cannot see other sellers' products. Cannot read the history log. |
 | **Customer** | A shopper. | Can only see products that are **visible** (approved and active). Customers cannot create or change products. (The customer-facing shop is not part of this guide.) |
 
@@ -244,7 +246,7 @@ but waiting for approval. Keep them apart in your mind.
 
 | Status | Plain meaning | What the seller can do | Who can set it |
 |---|---|---|---|
-| **Approved** | The marketplace is happy with this product. | Everything allowed to a seller (edit, switch active/inactive, delete, manage pictures). | Admin. Also the **automatic starting state** for every new product. |
+| **Approved** | The marketplace is happy with this product. | Everything allowed to a seller (edit, switch active/inactive, manage pictures; delete is switched off for now). | Admin. Also the **automatic starting state** for every new product. |
 | **Pending** | The admin has put the product "on hold" for a look. | **Still everything.** Pending does **not** lock the seller. | Admin only. |
 | **Rejected** | The admin turned the product down. | **Nothing at all except looking at it.** No editing, no changing activity, no deleting, no picture changes. The seller can read the reason. | Admin only. A reason is **mandatory**. |
 
@@ -342,7 +344,7 @@ approved and active (section 14) for any of the seller rows to work.
 | Switch Active / Inactive | Yes | Yes | **No** | No |
 | Suspend a product | **Yes** (reason required) | **No** | No | No |
 | Lift a suspension | **Yes** | **No** | No | No |
-| Delete a product | Yes | Yes | **No** | "Product not found" |
+| Delete a product (switched off for now) | Yes | Yes | **No** | "Product not found" |
 | See a product's status history | **Yes** | **No** | No | No |
 | See their dashboard numbers | n/a | Yes | Yes | n/a |
 
@@ -433,7 +435,7 @@ Each scenario says what the person does and exactly what the system does.
 | 5 | Seller tries to choose a different seller for the product. | **Refused.** The seller is always themselves. |
 | 6 | Seller tries to mark it Featured, or to write a reason. | **Refused.** Those are admin-only. |
 | 7 | Seller creates a product with no SKU. | **Refused.** At least one SKU is required. |
-| 8 | Seller creates a second product with the same name as one they already have. | **Refused.** "This seller already has a product with this name". (Two different sellers may use the same name.) |
+| 8 | Seller creates a second product with the same name as one they already have. | **Allowed.** A name does not have to be unique. Each product has its own id. |
 | 9 | Admin creates a product for an approved and active seller. | Created. Approved + Active by default. History: "Created by admin". |
 | 10 | Admin creates a product for a pending, inactive, rejected or suspended **seller**. | **Refused.** "Seller must be approved and active to receive products". |
 | 11 | Admin creates a product and sets Status Rejected or Activity Suspended but gives no reason. | **Refused.** A reason is required. |
@@ -588,9 +590,7 @@ list.
 - A name is required, up to 400 characters, and must contain at least one
   letter or number.
 - Spaces at the start and end are removed automatically.
-- Each **seller** can use a given name only **once**. The check ignores
-  capital letters: "Racing Homer" and "racing homer" count as the same.
-- Two different sellers may use the same name.
+- A name does not have to be unique. One seller may create many products with the same name.
 - Changing a product's name also updates its web address (slug).
 - A deleted product's name becomes free again.
 
@@ -680,13 +680,13 @@ Sellers cannot change media on a locked (rejected or suspended) product.
 
 ## 13. Deleting a product
 
+**Switched off for now.** There is no Delete button, and `DELETE /admin/products/:id` and `DELETE /seller/products/:id` answer 404. Switch the product off (Inactive) instead. This section describes how delete works when it is switched back on.
+
 - An admin can delete any product. A seller can delete their own product, but
   **not** when it is Rejected or Suspended.
 - Delete is a **"soft" delete**: the product disappears from every list and
   can no longer be opened, but its record, and its history diary, are kept in
   the database.
-- The product's web name (slug) is freed, so the seller can create a new
-  product with the same name.
 - Deleting asks for confirmation first, and cannot be undone from the screen.
 - If a seller's whole account is later removed from the database, their products
   and their history go with it.
@@ -739,7 +739,7 @@ Columns: picture, name, seller, category, **Status**, **Activity**, actions.
     reason. The confirm button stays disabled until a reason is typed, and
     **nothing is saved before that**.
   - Cancelling the pop-up leaves the product unchanged.
-- Actions per row: **View**, **Edit**, **Delete**.
+- Actions per row: **View**, **Edit**, **Quick edit** and **Copy**. **Delete** is switched off for now.
 - Buttons at the top: **Status history** and **Add product**.
 - The list loads 20 at a time with **Load more**, newest products first.
 
@@ -791,7 +791,7 @@ After logging in, the seller always lands on the **Dashboard** (section 17).
 - Search by name. Filter by Status and by Activity.
 - **Activity** is a small drop-down offering **Active** and **Inactive**. If the
   product is locked, the drop-down is replaced by a plain badge.
-- Actions: **Edit** and **Delete** on normal products; **only View** on locked
+- Actions: **Edit**, **Quick edit** and **Copy** on normal products (**Delete** is switched off for now); **only View** on locked
   ones.
 - If a product is rejected or suspended, the admin's reason appears in red under
   the name.
@@ -849,7 +849,6 @@ instead of numbers.
 | "A reason is required when rejecting or suspending a product" | The admin tried to reject or suspend without writing a reason. |
 | "Only an admin can change status or suspend a product" | A seller tried to change Status or suspend. |
 | "Seller must be approved and active to receive products" | An admin tried to give a product to a seller whose account is not approved and active. |
-| "This seller already has a product with this name" | That seller already uses that name. |
 | "Product not found" | The product does not exist, was deleted, or belongs to another seller. |
 | "A product must keep at least one SKU" | An edit would have removed the last SKU. |
 | "Only one SKU can be the default" | Two SKUs were marked as default. |
@@ -963,3 +962,19 @@ Deleted products are only hidden. History lines are never erased.
 *Related documents:* `seller-account-guide.md` (how seller accounts work) and
 `testing/seller-account-testing.md` (how everything, including products, is
 tested).
+
+---
+
+## Breed and bloodline filters
+
+Shoppers can filter the product list by **breed**, **bloodline** and **Vaccinated only** (a vaccination date on a live option). `GET /user/products?breed=&bloodline=&vaccinated=true` (exact match, not case sensitive). The search box also matches breed and bloodline. `GET /user/products/bird-filters` lists the breeds and bloodlines that exist, with counts. Each product card shows its breed and bloodline and a Vaccinated badge.
+
+---
+
+## Bulk product actions
+
+`POST /seller/products/bulk` and `POST /admin/products/bulk` with `{ productIds: [1-100], action, ... }`. Actions: `activate`, `deactivate`, `price` (with `mode` percent or amount, `direction` increase or decrease, and `value`; offer prices move the same way and a price cannot drop below 1). Admin only: `approve`, `reject` and `suspend` (with `reason`). Each product goes through the normal update, so locks, history and checks apply: a rejected or suspended product cannot be changed by its seller, and one failing does not stop the others. The answer lists each product with `ok` or an `error`. Another seller's product is "Product not found".
+
+## Stock history
+
+Every change to the stock of an option is kept: starting stock, changes typed in by the seller or admin, stock taken by an order, and stock put back (or taken again) when an order is cancelled or reopened. **Admin only:** `GET /admin/products/:id/stock-history`, cursor paged (`cursor`, `limit`), newest first. Sellers do not see it. Each row has the option, the change, the stock after, the reason, the order and who did it (a customer's name is masked). Shown on the admin product details page.
