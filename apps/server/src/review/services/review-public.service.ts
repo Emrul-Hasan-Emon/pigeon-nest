@@ -6,6 +6,7 @@ import { CursorPagination } from '../../shared/decorators/cursor-pagination-para
 import { StorefrontProductService } from '../../storefront/storefront-product.service';
 import { ListProductReviewsQueryDto, ReviewSort } from '../dtos/review.dtos';
 import { ReviewCoreService } from './review-core.service';
+import { sellerOpenSql } from '../../shared/utils/shop-break.util';
 
 /** What anyone may read: a product's rating and its published reviews. Names are masked. */
 @Injectable()
@@ -89,7 +90,7 @@ export class ReviewPublicService {
   /** Published reviews across all of one shop's products, newest first. Only for a shop customers can see. */
   async listForSeller(sellerId: number, query: ListProductReviewsQueryDto, pagination: CursorPagination) {
     const visible = await this.repo.query(
-      `SELECT 1 FROM seller WHERE id = $1 AND status = 'approved' AND "activeStatus" = 'active' AND "deletedAt" IS NULL`,
+      `SELECT 1 FROM seller s WHERE s.id = $1 AND s.status = 'approved' AND s."activeStatus" = 'active' AND s."deletedAt" IS NULL AND ${sellerOpenSql('s')}`,
       [sellerId],
     );
     if (visible.length === 0) throw new NotFoundException('Seller not found');
