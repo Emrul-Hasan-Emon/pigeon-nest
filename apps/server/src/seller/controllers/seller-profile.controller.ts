@@ -2,7 +2,9 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Patch,
+  Post,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
@@ -11,7 +13,11 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { SellerAccessGuard } from '../../auth/guards/seller-access.guard';
 import { RequireSellerAccess } from '../../auth/decorators/require-seller-access.decorator';
 import { CurrentSeller } from '../../auth/decorators/current-seller.decorator';
+import { AuthUserType } from '../../database/enums/auth-user-type.enum';
 import { Seller } from '../../database/entities/seller/seller.entity';
+import { ParseIdPipe } from '../../shared/pipes/parse-id.pipe';
+import { CreatePaymentAccountDto, UpdatePaymentAccountDto } from '../dtos/payment-account.dto';
+import { CommonSellerService } from '../services/common-seller.service';
 import { SellerProfileService } from '../services/seller-profile.service';
 import { SellingSwitchDto } from '../dtos/shop-break.dto';
 import { UpdateSellerProfileDto } from '../dtos/update-seller-profile.dto';
@@ -33,10 +39,14 @@ interface ProfileFiles {
   nidBackImage?: Express.Multer.File[];
 }
 
+// A seller's own account: profile, selling switch, password, shop set-up checklist and payment accounts.
 @UseGuards(SellerAuthGuard, SellerAccessGuard)
 @Controller({ path: 'api/seller/profile', version: '1' })
 export class SellerProfileController {
-  constructor(private readonly sellerProfileService: SellerProfileService) {}
+  constructor(
+    private readonly sellerProfileService: SellerProfileService,
+    private readonly common: CommonSellerService,
+  ) {}
 
   // Readable in every state (even suspended) so the seller can see why.
   @Get()
@@ -75,5 +85,32 @@ export class SellerProfileController {
     @Body() dto: ChangeSellerPasswordDto,
   ) {
     return this.sellerProfileService.changePassword(seller, dto);
+  }
+
+  // The "get your shop ready" checklist. Readable in every state.
+  @Get('onboarding')
+  @RequireSellerAccess('any')
+  getOnboarding(@CurrentSeller() seller: Seller) {
+    return this.common.onboardingFor(seller.id);
+  }
+
+  // Bank and mobile money accounts: what buyers see on an order when they have to pay.
+  @Get('payment-accounts')
+  @RequireSellerAccess('any')
+  listAccounts(@CurrentSeller() seller: Seller) {
+    return this.common.listAccounts(seller.id);
+  }
+
+  @Post('payment-accounts')
+  @RequireSellerAccess('profile')
+  createAccount(@CurrentSeller() seller: Seller, @Body() dto: CreatePaymentAccountDto) {
+    return this.common.createAccount(seller.id, dto, { id: seller.id, type: AuthUserType.SELLER, name: seller.name });
+  }
+
+  // Change an account, or switch it off with { isActive: false }.
+  @Patch('payment-accounts/:id')
+  @RequireSellerAccess('profile')
+  updateAccount(@CurrentSeller() seller: Seller, @Param('id', ParseIdPipe) id: number, @Body() dto: UpdatePaymentAccountDto) {
+    return this.common.updateAccount(seller.id, id, dto, { id: seller.id, type: AuthUserType.SELLER, name: seller.name });
   }
 }
