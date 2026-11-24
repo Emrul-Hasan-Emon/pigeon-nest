@@ -12,6 +12,7 @@ import { WishlistButton } from './wishlist-button';
 import { money } from './product-card';
 import { ProductCard } from './product-card';
 import { Breadcrumb, Container } from './page-parts';
+import { AboutBird, SelectedBird } from './bird-panel';
 import type { ProductDetail, ProductSku } from '@/types/storefront';
 
 interface GalleryItem {
@@ -263,6 +264,8 @@ export function ProductDetailView({ product }: { product: ProductDetail }) {
             <p role={addMessage.ok ? 'status' : 'alert'} className={`mt-2 text-sm ${addMessage.ok ? 'text-st-teal' : 'text-destructive'}`}>{addMessage.text}</p>
           )}
 
+          <SelectedBird bird={sku?.bird} />
+
           {sku && (
             <div className="mt-5">
               <ProposalPanel productPath={`/products/${product.id}-${product.slug}`} sku={sku} />
@@ -279,6 +282,8 @@ export function ProductDetailView({ product }: { product: ProductDetail }) {
               <p className="mt-1.5 max-w-prose whitespace-pre-line text-sm leading-relaxed text-st-slate">{product.description}</p>
             </section>
           )}
+
+          <AboutBird bird={product.bird} />
 
           <section className="mt-6 flex items-center gap-3 rounded-xl border border-st-line bg-white p-3">
             <div className="rounded-full bg-gradient-to-br from-[#2e8f8b] via-[#4a6fa5] to-[#6a55a8] p-[2px]">
