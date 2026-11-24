@@ -1,25 +1,14 @@
 import { Module } from '@nestjs/common';
 import { StorefrontModule } from '../../storefront/storefront.module';
-import { AdminHomepageSectionController } from './controllers/admin-homepage-section.controller';
-import { AdminHomepageSlotController } from './controllers/admin-homepage-slot.controller';
+import { AdminHomepageController } from './controllers/admin-homepage.controller';
 import { StorefrontHomepageController } from './controllers/storefront-homepage.controller';
-import { HomepageConfigService } from './services/homepage-config.service';
-import { HomepageLookupService } from './services/homepage-lookup.service';
-import { HomepageResolverService } from './services/homepage-resolver.service';
-import { HomepageService } from './services/homepage.service';
+import { AdminHomepageService } from './services/admin-homepage.service';
+import { CommonHomepageService } from './services/common-homepage.service';
+import { StorefrontHomepageService } from './services/storefront-homepage.service';
 
 @Module({
   imports: [StorefrontModule],
-  controllers: [
-    AdminHomepageSectionController,
-    AdminHomepageSlotController,
-    StorefrontHomepageController,
-  ],
-  providers: [
-    HomepageService,
-    HomepageConfigService,
-    HomepageLookupService,
-    HomepageResolverService,
-  ],
+  controllers: [AdminHomepageController, StorefrontHomepageController],
+  providers: [AdminHomepageService, StorefrontHomepageService, CommonHomepageService],
 })
 export class HomepageModule {}
