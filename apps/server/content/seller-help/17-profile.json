@@ -1,0 +1,193 @@
+{
+  "slug": "profile",
+  "title": "My profile",
+  "icon": "user-round",
+  "order": 170,
+  "summary": "Your shop details, your documents, your password, and the switch that opens or closes your shop.",
+  "openPath": "/seller/profile",
+  "openLabel": "Open my profile",
+  "sections": [
+    {
+      "id": "what",
+      "title": "What is this page?",
+      "intro": "This is where you tell buyers and the marketplace who you are. A complete profile looks trustworthy, and some parts are needed before you can sell.",
+      "blocks": [
+        {
+          "type": "words",
+          "title": "What you can change",
+          "items": [
+            {
+              "term": "Profile details",
+              "means": "Your name, email and the About text. The phone number is used to sign in."
+            },
+            {
+              "term": "About text",
+              "means": "Write who you are: how long you have kept pigeons, which breeds you keep, and how you care for them. Customers read this on your public page. Your phone and email are never shown there."
+            },
+            {
+              "term": "Profile picture",
+              "means": "Your photo or shop logo."
+            },
+            {
+              "term": "NID front and NID back",
+              "means": "Photos of your national ID card, front and back. These are for the admin team to check who you are. Buyers do not see them. Each picture is changed on its own."
+            },
+            {
+              "term": "Change password",
+              "means": "Set a new password. You must type the old one first."
+            },
+            {
+              "term": "Selling",
+              "means": "The switch that opens or closes your shop, and the planned break."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "complete",
+      "title": "Complete your profile",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "How to",
+          "steps": [
+            "Press \"My profile\" in the left menu.",
+            "Under \"Profile details\", write your About text.",
+            "Add your email. It is optional.",
+            "Add your profile picture.",
+            "Add the NID front and NID back pictures.",
+            "Press Save."
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "info",
+          "text": "These steps are also on the \"Get your shop ready\" list on your dashboard. A complete profile helps the admin team to approve you and helps buyers trust you."
+        }
+      ]
+    },
+    {
+      "id": "password",
+      "title": "Change your password",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "How to",
+          "steps": [
+            "Find \"Change password\".",
+            "Type your current password.",
+            "Type the new password.",
+            "Press the change button."
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "warn",
+          "text": "Never tell your password to anyone. The marketplace team will never ask for it."
+        }
+      ]
+    },
+    {
+      "id": "switch",
+      "title": "Open or close your shop: the Selling card",
+      "intro": "Sometimes you need to stop selling: you are travelling, or your birds are sick. You can close your shop for a while, and open it again when you are ready.",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "Stop selling now",
+          "steps": [
+            "Open \"My profile\" and find the \"Selling\" card.",
+            "Turn the switch off.",
+            "At once, buyers cannot see your shop, your products, your reviews or your public page.",
+            "Turn it on again any time to open your shop."
+          ]
+        },
+        {
+          "type": "steps",
+          "title": "Plan a break (\"Plan a break (optional)\")",
+          "steps": [
+            "Selling must be on.",
+            "Choose the first day of your break.",
+            "Choose the last day of your break.",
+            "Write a short note if you want, for example \"Eid holiday\".",
+            "Press Save. The page says \"A break is planned.\" with the days.",
+            "On the first day your shop closes by itself. After the last day it opens by itself.",
+            "To cancel the plan, press \"Remove the planned break\"."
+          ]
+        },
+        {
+          "type": "points",
+          "title": "Good to know",
+          "items": [
+            "A shop is closed if the switch is off, or if today is between the first and the last day of a planned break.",
+            "Both days must be set for the break to work.",
+            "A banner shows on your pages while your shop is closed."
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "warn",
+          "text": "Orders already placed still need your work while your shop is closed. Confirm, pack and send them."
+        }
+      ]
+    },
+    {
+      "id": "account",
+      "title": "Your account state",
+      "blocks": [
+        {
+          "type": "words",
+          "title": "What the notice at the top may say",
+          "items": [
+            {
+              "term": "Waiting for approval",
+              "means": "You registered. An admin must accept you. You can log in and fix your profile, but you cannot sell yet."
+            },
+            {
+              "term": "Rejected",
+              "means": "An admin turned the registration down and gave a reason. Fix your profile and try again."
+            },
+            {
+              "term": "Switched off (inactive)",
+              "means": "An admin switched your account off. You can log in and fix your profile, but you cannot run your business."
+            },
+            {
+              "term": "Suspended",
+              "means": "An admin froze your account. You can log in and read, but you cannot change anything."
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "info",
+          "text": "You can always log in, whatever the state. Only an admin can approve you, switch you on, or lift a suspension. To run your shop, you must be approved and active."
+        }
+      ]
+    },
+    {
+      "id": "faq",
+      "title": "Questions people ask",
+      "blocks": [
+        {
+          "type": "faq",
+          "title": "Common questions",
+          "items": [
+            {
+              "q": "Can buyers see my phone or email?",
+              "a": "No. Your public page only shows your shop name, your About text and your reviews."
+            },
+            {
+              "q": "I switched selling off. Do my orders stop?",
+              "a": "No. Existing orders stay. Finish them."
+            },
+            {
+              "q": "Can I change my phone number?",
+              "a": "The phone number is used to sign in. Ask the admin team if you need a new one."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
