@@ -13,7 +13,7 @@ Addresses (admin token, under `/v1/api/admin/products`)
   A blank string or `null` clears a field; a missing field stays.
 - `PUT /:id/skus/:skuId/parents/sire|dam`: multipart `name`, `ringNumber`,
   `removeImage`, `image` (up to 10MB).
-- `DELETE /:id/skus/:skuId/parents/sire|dam`.
+- `DELETE /:id/skus/:skuId/parents/sire|dam`. **Switched off for now** (404).
 - `GET /:id` returns everything, each SKU with `parents` (sire first).
 
 Differences from a seller

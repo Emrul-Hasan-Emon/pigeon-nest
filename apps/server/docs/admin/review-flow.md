@@ -33,7 +33,7 @@ Moderate a reply
 ----------------
 - `POST /review-replies/:id/hide` with `{ reason }` and `/restore`. The public
   sees "hidden by a moderator"; you still read the text.
-- `PATCH` and `DELETE /review-replies/:id` work on replies you wrote yourself only
+- `PATCH` works on replies you wrote yourself only (`DELETE /review-replies/:id` is switched off for now, 404)
   (404 on anyone else's).
 - `POST /reviews/:id/replies` answers as "Support".
 
