@@ -9,6 +9,7 @@ import { formatDateTime } from '@/lib/datetime';
 import { useCursorList } from '@/lib/hooks/use-cursor-list';
 import { reviewStatusBadge } from './review-list';
 import type { AdminReview } from '@/types/review';
+import { DELETE_ENABLED } from '@/lib/features';
 
 function Item({ review, onChanged }: { review: AdminReview; onChanged: () => void }) {
   const api = useMemo<ThreadApi>(
@@ -16,7 +17,7 @@ function Item({ review, onChanged }: { review: AdminReview; onChanged: () => voi
       load: (parentId, cursor) => listAdminThread(review.id, { parentId: parentId ?? undefined, cursor, limit: 20 }),
       create: (body, parentId) => replyAsAdmin(review.id, body, parentId),
       edit: (rid, body) => editReplyAsAdmin(rid, body),
-      remove: (rid) => deleteReplyAsAdmin(rid),
+      remove: DELETE_ENABLED ? (rid: number) => deleteReplyAsAdmin(rid) : undefined,
       hide: (rid, reason) => hideReply(rid, reason),
       restore: (rid) => restoreReply(rid),
     }),
