@@ -23,6 +23,7 @@ import { Shop } from './entities/shop/shop.entity';
 import { SellerProduct } from './entities/product/seller-product.entity';
 import { SellerProductSku } from './entities/product/seller-product-sku.entity';
 import { SellerProductSkuVariant } from './entities/product/seller-product-sku-variant.entity';
+import { SellerProductSkuParent } from './entities/product/seller-product-sku-parent.entity';
 import { SellerProductMedia } from './entities/product-media/seller-product-media.entity';
 import { Order } from './entities/order/order.entity';
 import { OrderItem } from './entities/order/order-item.entity';
@@ -75,6 +76,7 @@ export class DatabaseService implements OnApplicationBootstrap {
   sellerProduct: Repository<SellerProduct>;
   sellerProductSku: Repository<SellerProductSku>;
   sellerProductSkuVariant: Repository<SellerProductSkuVariant>;
+  sellerProductSkuParent: Repository<SellerProductSkuParent>;
   sellerProductMedia: Repository<SellerProductMedia>;
   order: Repository<Order>;
   orderItem: Repository<OrderItem>;
@@ -142,6 +144,8 @@ export class DatabaseService implements OnApplicationBootstrap {
     private sellerProductSkuRepository: Repository<SellerProductSku>,
     @InjectRepository(SellerProductSkuVariant)
     private sellerProductSkuVariantRepository: Repository<SellerProductSkuVariant>,
+    @InjectRepository(SellerProductSkuParent)
+    private sellerProductSkuParentRepository: Repository<SellerProductSkuParent>,
     @InjectRepository(SellerProductMedia)
     private sellerProductMediaRepository: Repository<SellerProductMedia>,
     @InjectRepository(Order) private orderRepository: Repository<Order>,
@@ -216,6 +220,7 @@ export class DatabaseService implements OnApplicationBootstrap {
     this.sellerProduct = this.sellerProductRepository;
     this.sellerProductSku = this.sellerProductSkuRepository;
     this.sellerProductSkuVariant = this.sellerProductSkuVariantRepository;
+    this.sellerProductSkuParent = this.sellerProductSkuParentRepository;
     this.sellerProductMedia = this.sellerProductMediaRepository;
     this.order = this.orderRepository;
     this.orderItem = this.orderItemRepository;

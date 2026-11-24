@@ -103,6 +103,25 @@ export class SellerProduct extends BaseEntity {
   @Column({ type: 'text', nullable: true })
   suspensionReason: string | null;
 
+  // About the birds, true for every SKU of this product. All optional.
+  @Column({ type: 'varchar', length: 120, nullable: true })
+  breed: string | null;
+
+  @Column({ type: 'varchar', length: 120, nullable: true })
+  bloodline: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  bloodlineNote: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  vaccinationNote: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  healthNote: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  raceRecord: string | null;
+
   @Column({ nullable: true })
   seoTitle: string;
 

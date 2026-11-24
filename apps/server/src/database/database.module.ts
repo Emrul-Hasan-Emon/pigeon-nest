@@ -22,6 +22,7 @@ import { Shop } from './entities/shop/shop.entity';
 import { SellerProduct } from './entities/product/seller-product.entity';
 import { SellerProductSku } from './entities/product/seller-product-sku.entity';
 import { SellerProductSkuVariant } from './entities/product/seller-product-sku-variant.entity';
+import { SellerProductSkuParent } from './entities/product/seller-product-sku-parent.entity';
 import { SellerProductMedia } from './entities/product-media/seller-product-media.entity';
 import { Order } from './entities/order/order.entity';
 import { OrderItem } from './entities/order/order-item.entity';
@@ -88,6 +89,7 @@ export const DATABASE_ENTITIES = [
   SellerProduct,
   SellerProductSku,
   SellerProductSkuVariant,
+  SellerProductSkuParent,
   SellerProductMedia,
   Order,
   OrderItem,
