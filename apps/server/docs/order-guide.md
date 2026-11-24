@@ -278,7 +278,9 @@ The system does all of this in one go, or none of it:
   4. Creates the ORDER: status PENDING, payment status DUE, with a unique order
      number, the seller, the address, the delivery price and time as quoted,
      and the payment method (id, name and short name are saved).
-  5. Saves each item with the price it was sold at.
+  5. Saves each item with the price it was sold at, and, for a pigeon that has
+     them, a copy of its details (ring number, hatch date, vaccination, breed,
+     bloodline, sire and dam). Later edits to the bird do not change the order.
   6. Creates the PAYMENT record (status due) and saves anything the customer
      typed as proof (for example the transaction ID).
   7. Writes the first line of both histories ("Order placed").

@@ -99,7 +99,7 @@ A list row:
 **`allowedStatuses` tells you exactly which moves you may make right now.** Build your buttons
 from it.
 
-Details add: `items` (with the price paid and the variant; for an item bought at a price proposal also `skuUnitPrice`, the SKU price at that time, and `proposal` with `id`, `unitPrice`, `lineTotal`. The order `subtotal` and your commission use the proposal total), `totals` (`subtotal`, `deliveryCharge`,
+Details add: `items` (with the price paid and the variant, and `bird`: the ring number, hatch date, vaccination, breed, bloodline, sire and dam as sold, or `null`, so you pack the right bird; for an item bought at a price proposal also `skuUnitPrice`, the SKU price at that time, and `proposal` with `id`, `unitPrice`, `lineTotal`. The order `subtotal` and your system commission use the proposal total), `totals` (`subtotal`, `deliveryCharge`,
 `payable`, `amountPaid`, `balanceDue`), `delivery` (type, expected days), `address` (recipient,
 phone, full address, country), `payments` (each with proof `attachments`, the customer's typed
 `proof` such as the transaction ID, `recordedBy`, and `reversal`), `paymentHistory`,
@@ -271,3 +271,17 @@ change the same order or pay it at the same moment, only one action wins and the
 Stock is given back once, and a payment can never push the received amount above the total.
 
 Validation is strict: unknown fields in a request body are rejected with `400`.
+
+Moving many orders at once
+--------------------------
+`POST /v1/api/seller/orders/bulk-status` with `{ orderIds: [..], status, note? }` (1 to 50 ids).
+- All the orders must be in the **same status now** (400 otherwise: "All the orders must be in the same status..."),
+  and the move must be one a seller may make from it (pending to confirmed or cancelled, confirmed to packed,
+  packed to shipped, shipped to delivered; anything else is 400 with the reason).
+- An id that is not yours is 404 for the whole request.
+- Each order is moved on its own, through the same rules and history as a single change, so one failing does not
+  undo the others. The answer is `{ status, updated, failed, results: [{ id, orderNumber, ok, error? }] }`.
+In the portal: tick orders on Orders. Once one is ticked, orders at a different step are greyed out. The header
+tick selects every order at the picked step on the page. A bar shows "N orders selected", "Move to" (only the
+steps that are allowed), an optional note and "Update N orders". Cancelling asks for confirmation first.
+

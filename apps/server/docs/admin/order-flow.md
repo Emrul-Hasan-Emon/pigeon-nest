@@ -166,7 +166,7 @@ A list row:
   "createdAt": "..." }
 ```
 
-Details add: `cartId`, `items` (price paid, variant label, image; for an item bought at a price proposal also `skuUnitPrice`, the SKU price at that time, and `proposal` with `id`, `unitPrice`, `lineTotal`. The order `subtotal` and the commission use the proposal total), `totals` (`subtotal`,
+Details add: `cartId`, `items` (price paid, variant label, image, and `bird`: the ring number, hatch date, vaccination, breed, bloodline, sire and dam as sold, or `null`; for an item bought at a price proposal also `skuUnitPrice`, the SKU price at that time, and `proposal` with `id`, `unitPrice`, `lineTotal`. The order `subtotal` and the system commission use the proposal total), `totals` (`subtotal`,
 `deliveryCharge`, `payable`, `amountPaid`, `balanceDue`, `savings`), `delivery`, `address`,
 `payments` (each with `attachments`, `reversal`, `recordedBy`), `paymentHistory`, `statusHistory`,
 `updates`, `note`, and `account` (the customer's user record, if they have one).
@@ -371,3 +371,9 @@ change the same order or pay it at the same moment, only one action wins and the
 Stock is given back once, and a payment can never push the received amount above the total.
 
 Validation is strict: unknown fields in a request body are rejected with `400`.
+
+## Moving many orders at once
+
+On the orders list, tick orders that are all in the same status, pick a new status in the bar at the bottom, add an optional note, and press Update. An admin may move them to any other status (cancelling asks you to confirm). Each order moves on its own, so one failing does not undo the others; the result lists which failed and why.
+
+`POST /admin/orders/bulk-status` with `{ orderIds: [1-50 ids], status, note? }`. 400 if the orders are in different statuses, 404 if any id is not found. Same body and result as the seller endpoint.
