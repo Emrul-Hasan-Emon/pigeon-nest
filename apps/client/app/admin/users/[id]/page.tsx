@@ -12,12 +12,14 @@ import { NotFoundApiError } from '@/lib/api/http';
 import { useToast } from '@/components/ui/toast';
 import type { User } from '@/types/user';
 import { LoadingBlock } from '@/components/ui/skeleton';
+import { useBreadcrumbTitle } from '@/components/ui/breadcrumbs';
 
 export default function UserDetailsPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const { showToast } = useToast();
   const [user, setUser] = useState<User | null>(null);
+  useBreadcrumbTitle(user?.name);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

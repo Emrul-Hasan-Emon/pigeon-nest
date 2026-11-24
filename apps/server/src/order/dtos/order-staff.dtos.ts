@@ -2,6 +2,7 @@ import { Transform, Type } from 'class-transformer';
 import {
   ArrayMaxSize,
   ArrayMinSize,
+  ArrayUnique,
   IsArray,
   ValidateNested,
   Length,
@@ -20,6 +21,8 @@ import {
 import { DeliveryType } from '../../database/enums/delivery-type.enum';
 import { OrderStatus } from '../../database/enums/order-status.enum';
 import { PaymentStatus } from '../../database/enums/payment-status.enum';
+import { RefundStatus } from '../../database/enums/refund-status.enum';
+import { PageQueryDto } from '../../shared/utils/page-paginate.util';
 import { PlaceOrderDto } from './order.dtos';
 import { MAX_DECIMAL_12_2, MAX_INT32 } from '../../shared/constants/limits';
 import { emptyToUndefined, parseBoolean, trimString } from '../../shared/utils/transform.util';
@@ -280,6 +283,27 @@ export class ChangeOrderStatusDto {
   note?: string;
 }
 
+/** Move several orders to one new status at once. They must all be in the same status now. */
+export class BulkChangeOrderStatusDto {
+  @IsArray()
+  @ArrayMinSize(1)
+  @ArrayMaxSize(50)
+  @ArrayUnique()
+  @IsInt({ each: true })
+  @Min(1, { each: true })
+  @Max(MAX_INT32, { each: true })
+  orderIds: number[];
+
+  @IsEnum(OrderStatus)
+  status: OrderStatus;
+
+  @IsOptional()
+  @Transform(emptyToUndefined)
+  @IsString()
+  @MaxLength(500)
+  note?: string;
+}
+
 export class CustomerSearchQueryDto {
   // An email address or a mobile number.
   @Transform(trimString)
@@ -360,4 +384,70 @@ export class CreateStaffOrderDto extends PlaceOrderDto {
   @ValidateNested({ each: true })
   @Type(() => StaffOrderItemDto)
   items: StaffOrderItemDto[];
+}
+
+// ---- refunds of cancelled orders ----
+
+/** Moving a refund on. Files come as multipart `files`. `amount`, `note` and proof matter when the status becomes refunded. */
+export class ChangeRefundStatusDto {
+  @IsEnum(RefundStatus)
+  status: RefundStatus;
+
+  // What was sent back. Must be exactly what the buyer paid.
+  @IsOptional()
+  @Transform(toNumber)
+  @IsNumber({ allowNaN: false, allowInfinity: false, maxDecimalPlaces: 2 })
+  @Min(0.01)
+  @Max(MAX_DECIMAL_12_2)
+  amount?: number;
+
+  @IsOptional()
+  @Transform(emptyToUndefined)
+  @IsString()
+  @MaxLength(1000)
+  note?: string;
+
+  @IsOptional()
+  @Transform(emptyToUndefined)
+  @IsString()
+  @MaxLength(120)
+  transactionId?: string;
+}
+
+/** An admin adds another refund record, for example when a buyer says an earlier one never arrived. Status defaults to refunded. */
+export class AddRefundRecordDto {
+  @IsOptional()
+  @IsEnum(RefundStatus)
+  status?: RefundStatus;
+
+  @IsOptional()
+  @Transform(toNumber)
+  @IsNumber({ allowNaN: false, allowInfinity: false, maxDecimalPlaces: 2 })
+  @Min(0.01)
+  @Max(MAX_DECIMAL_12_2)
+  amount?: number;
+
+  @IsOptional()
+  @Transform(emptyToUndefined)
+  @IsString()
+  @MaxLength(1000)
+  note?: string;
+
+  @IsOptional()
+  @Transform(emptyToUndefined)
+  @IsString()
+  @MaxLength(120)
+  transactionId?: string;
+}
+
+export class ListRefundsQueryDto extends PageQueryDto {
+  @IsOptional()
+  @IsEnum(RefundStatus)
+  status?: RefundStatus;
+
+  @IsOptional()
+  @Transform(emptyToUndefined)
+  @IsString()
+  @MaxLength(100)
+  search?: string;
 }

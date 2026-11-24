@@ -32,6 +32,15 @@ export interface StoreProduct {
   ratingCount: number;
   seller: { id: number; name: string } | null;
   category: { id: number; name: string; slug: string } | null;
+  breed?: string | null;
+  bloodline?: string | null;
+  vaccinated?: boolean;
+}
+
+/** The breeds and bloodlines buyers can filter by, with how many birds each has. */
+export interface BirdFilters {
+  breeds: { name: string; count: number }[];
+  bloodlines: { name: string; count: number }[];
 }
 
 export interface StoreSection {
@@ -80,6 +89,9 @@ export interface ProductQuery {
   featured?: boolean;
   minPrice?: number;
   maxPrice?: number;
+  breed?: string;
+  bloodline?: string;
+  vaccinated?: boolean;
   sort?: ProductSortKey;
   page?: number;
   pageSize?: number;
@@ -121,6 +133,56 @@ export interface SellerCard {
   productCount: number;
 }
 
+/** The public page of one seller: the card plus the about text and the shop rating. */
+export interface SellerDetails extends SellerCard {
+  description: string | null;
+  ratingAverage: number;
+  ratingCount: number;
+  breakdown: Record<'1' | '2' | '3' | '4' | '5', number>;
+}
+
+/** A review of one of the seller's products, as anyone may read it. The name is masked. */
+export interface SellerPublicReview {
+  id: number;
+  productId: number;
+  productName: string;
+  productSlug: string;
+  rating: number;
+  title: string | null;
+  comment: string | null;
+  images: { id: number; url: string }[];
+  reviewerName: string;
+  helpfulCount: number;
+  createdAt: string;
+}
+
+/** A bird's father or mother as the seller gave it. */
+export interface BirdParent {
+  name: string | null;
+  ringNumber: string | null;
+  imageUrl: string | null;
+}
+
+/** What the seller says about the birds of a product. Every value may be null. */
+export interface ProductBird {
+  breed: string | null;
+  bloodline: string | null;
+  bloodlineNote: string | null;
+  vaccinationNote: string | null;
+  healthNote: string | null;
+  raceRecord: string | null;
+}
+
+/** What the seller says about the one bird an option sells. */
+export interface SkuBird {
+  ringNumber: string | null;
+  hatchDate: string | null;
+  vaccineName: string | null;
+  vaccinatedOn: string | null;
+  sire: BirdParent | null;
+  dam: BirdParent | null;
+}
+
 export interface ProductSku {
   id: number;
   sku: string;
@@ -135,6 +197,7 @@ export interface ProductSku {
   isDefault: boolean;
   /** Buyers may propose their own price for this SKU. */
   acceptProposals: boolean;
+  bird?: SkuBird;
   variants: { attributeId: number; valueId: number }[];
 }
 
@@ -153,6 +216,7 @@ export interface ProductDetail {
   isFeatured: boolean;
   ratingAverage: number;
   ratingCount: number;
+  bird?: ProductBird;
   seoTitle: string | null;
   seoDescription: string | null;
   category: Crumb | null;

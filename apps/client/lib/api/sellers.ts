@@ -14,6 +14,8 @@ export interface SellerWritePayload {
   name?: string;
   email?: string | null;
   phone?: string | null;
+  /** Shown on the public seller page. Blank clears it. */
+  description?: string;
   password?: string;
   /** Send both to set or change the seller's own commission. */
   commissionType?: 'percentage' | 'fixed';
@@ -33,6 +35,7 @@ function buildBody(payload: SellerWritePayload): FormData | Record<string, unkno
     if (payload.name !== undefined) form.set('name', payload.name);
     if (payload.email) form.set('email', payload.email);
     if (payload.phone) form.set('phone', payload.phone);
+    if (payload.description !== undefined) form.set('description', payload.description);
     if (payload.password) form.set('password', payload.password);
     if (payload.commissionType !== undefined && payload.commissionAmount !== undefined) {
       form.set('commissionType', payload.commissionType);
@@ -51,6 +54,7 @@ function buildBody(payload: SellerWritePayload): FormData | Record<string, unkno
   if (payload.name !== undefined) json.name = payload.name;
   if (payload.email) json.email = payload.email;
   if (payload.phone) json.phone = payload.phone;
+  if (payload.description !== undefined) json.description = payload.description;
   if (payload.password) json.password = payload.password;
   if (payload.commissionType !== undefined && payload.commissionAmount !== undefined) {
     json.commissionType = payload.commissionType;

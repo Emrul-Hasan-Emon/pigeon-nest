@@ -10,6 +10,15 @@ import type { AdminWishlistRow } from '@/types/wishlist';
 
 const EMPTY = { search: '', userSearch: '', sellerSearch: '' };
 
+function Lbl({ text, children }: { text: string; children: React.ReactNode }) {
+  return (
+    <label className="block text-sm font-medium text-foreground">
+      {text}
+      <span className="mt-1 block font-normal">{children}</span>
+    </label>
+  );
+}
+
 const AVAILABILITY: Record<string, { label: string; tone: string }> = {
   available: { label: 'Available', tone: 'bg-emerald-100 text-emerald-700' },
   out_of_stock: { label: 'Out of stock', tone: 'bg-amber-100 text-amber-800' },
@@ -46,11 +55,11 @@ export function AdminWishlistList({ userId }: { userId?: number }) {
 
   return (
     <div>
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <input className={`${field} w-56`} placeholder="Product name" aria-label="Product name" value={f.search} onChange={set('search')} />
-        {wide && <input className={`${field} w-64`} placeholder="Customer name, email or phone" aria-label="Customer" value={f.userSearch} onChange={set('userSearch')} />}
-        {wide && <input className={`${field} w-64`} placeholder="Seller name, email or phone" aria-label="Seller" value={f.sellerSearch} onChange={set('sellerSearch')} />}
-        {dirty && <button type="button" onClick={() => setF(EMPTY)} className={outlineButton}>Clear filters</button>}
+      <div className="mb-4 flex flex-wrap items-end gap-3">
+        <Lbl text="Product name"><input className={`${field} w-56`} placeholder="Part of the name" value={f.search} onChange={set('search')} /></Lbl>
+        {wide && <Lbl text="Customer (name, email or phone)"><input className={`${field} w-64`} placeholder="Who saved it" value={f.userSearch} onChange={set('userSearch')} /></Lbl>}
+        {wide && <Lbl text="Seller (name, email or phone)"><input className={`${field} w-64`} placeholder="Whose product it is" value={f.sellerSearch} onChange={set('sellerSearch')} /></Lbl>}
+        {dirty && <button type="button" onClick={() => setF(EMPTY)} className={outlineButton}>Clear all filters</button>}
       </div>
       <ListFrame {...list}>
         <table className="min-w-full divide-y divide-border text-sm">

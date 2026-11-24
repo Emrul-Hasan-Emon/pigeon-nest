@@ -13,6 +13,7 @@ import { RequireSellerAccess } from '../../auth/decorators/require-seller-access
 import { CurrentSeller } from '../../auth/decorators/current-seller.decorator';
 import { Seller } from '../../database/entities/seller/seller.entity';
 import { SellerProfileService } from '../services/seller-profile.service';
+import { SellingSwitchDto } from '../dtos/shop-break.dto';
 import { UpdateSellerProfileDto } from '../dtos/update-seller-profile.dto';
 import { ChangeSellerPasswordDto } from '../dtos/change-seller-password.dto';
 import { SellerAuthGuard } from '../../auth/guards/seller-auth.guard';
@@ -58,6 +59,13 @@ export class SellerProfileController {
       nidFrontImage: files?.nidFrontImage?.[0],
       nidBackImage: files?.nidBackImage?.[0],
     });
+  }
+
+  // Switch selling on or off, and plan a break with a start and an end date.
+  @Patch('selling')
+  @RequireSellerAccess('profile')
+  setSelling(@CurrentSeller() seller: Seller, @Body() dto: SellingSwitchDto) {
+    return this.sellerProfileService.setSelling(seller, dto);
   }
 
   @Patch('password')

@@ -1,12 +1,14 @@
 import { userHttp } from './http';
 import { ENDPOINTS } from '../endpoints';
 import type {
+  BirdFilters,
   CategoryNode,
   SeeAllTarget,
   PageResult,
   ProductDetail,
   ProductQuery,
   SellerCard,
+  SellerDetails,
   StoreCategoryDetail,
   StoreCollection,
   StoreCollectionDetail,
@@ -23,6 +25,9 @@ export function getHomepage(device: StoreDevice, page: 'main' | 'slots' = 'main'
 
 export function listProducts(query: ProductQuery) {
   return userHttp.get<PageResult<StoreProduct>>(E.products.list, { ...query });
+}
+export function getBirdFilters() {
+  return userHttp.get<BirdFilters>(`${E.products.list}/bird-filters`);
 }
 export function getProduct(id: number) {
   return userHttp.get<ProductDetail>(E.products.detail(id));
@@ -46,7 +51,7 @@ export function listSellers(query: { search?: string; sort?: 'newest' | 'nameAsc
   return userHttp.get<PageResult<SellerCard>>(E.sellers.list, { ...query });
 }
 export function getSeller(id: number) {
-  return userHttp.get<SellerCard>(E.sellers.detail(id));
+  return userHttp.get<SellerDetails>(E.sellers.detail(id));
 }
 
 /** `/products/94-blue-bar-racing-homer`: the id picks the product, the slug is for people. */

@@ -7,7 +7,7 @@ See returns
 -----------
 `GET /returns` (filters: `status`, `scope`, `search` (return or order number),
 `sellerId`, `userId`, `orderId`; pages). `GET /returns/:id` has the items (with
-commission), the refund breakdown, the customer, the history with files, and
+system commission), the refund breakdown, the customer, the history with files, and
 `actions.adminTargets`.
 
 Open a return for a customer
@@ -25,10 +25,10 @@ Move a return to any status
 ---------------------------
 `POST /returns/:id/status` (multipart: `status`, `note` (required, 3+
 characters), `includeDeliveryCharge?`, `files?`). Any status to any other.
-- Moving to `returned` takes the returned items' commission off the seller, flags
+- Moving to `returned` takes the returned items' system commission off the seller, flags
   the items (and the order when all items are back) as returned, and writes the
   ledger and change-log rows. The screen shows how much first.
-- Moving out of `returned` puts the commission back, clears the flags and voids
+- Moving out of `returned` puts the system commission back, clears the flags and voids
   the return ledger rows.
 - The same status is refused, except to change the delivery choice of a return
   that is not finished.
@@ -45,8 +45,14 @@ Settings
 Settings > General settings > Returns and refunds: the return window in days and
 whether a whole-order return refunds delivery by default.
 
-Commission change log
+System commission change log
 ---------------------
-Commission > Balance changes (`GET /commission/changes`): every move of every
+System commission > Balance changes (`GET /commission/changes`): every move of every
 balance, before and after, with the reason and who. Also a tab on a seller's
-commission page.
+system commission page.
+
+Which bird
+----------
+Each return item carries `bird`: the order's copy of the pigeon as it was sold (ring number, hatch date,
+vaccination, breed, bloodline, sire and dam), or `null` for other items and older orders. The
+return pages show the ring, age and breed under the item so everyone knows which bird is meant.

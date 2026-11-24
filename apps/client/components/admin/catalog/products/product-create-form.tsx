@@ -7,7 +7,9 @@ import { listSellers } from '@/lib/api/sellers';
 import { adminProductPortal, type ProductPortal } from '@/lib/products/portal';
 import { flattenCategoryTree } from '@/lib/category-tree';
 import { ApiError } from '@/lib/api/http';
+import { Opt, Req, RequiredLegend } from '@/components/products/field-tag';
 import { useToast } from '@/components/ui/toast';
+import { BirdProductFields, birdCreateFields, emptyBirdForm, saveNewParents, type BirdForm } from '@/components/products/bird-fields';
 import {
   buildCreateSkus,
   emptySkuDraft,
@@ -59,6 +61,7 @@ export function ProductCreateForm({ portal = adminProductPortal }: { portal?: Pr
 
   const [form, setForm] = useState<FormState>(EMPTY);
   const [skus, setSkus] = useState<SkuDraft[]>(() => [emptySkuDraft(true)]);
+  const [bird, setBird] = useState<BirdForm>(emptyBirdForm);
   const [thumbnail, setThumbnail] = useState<File | null>(null);
   const [gallery, setGallery] = useState<File[]>([]);
 
@@ -133,9 +136,20 @@ export function ProductCreateForm({ portal = adminProductPortal }: { portal?: Pr
         activeStatus: form.activeStatus,
         seoTitle: form.seoTitle || undefined,
         seoDescription: form.seoDescription || undefined,
+        ...birdCreateFields(bird),
         skus: buildCreateSkus(skus),
       });
       createdId = product.id;
+
+      // Father and mother need the saved option, so they go up now. Options are saved in the order they were typed.
+      const typed = skus.filter((d) => !d.removed).map((d) => d.newParents);
+      const ids = [...(product.skus ?? [])].sort((a, b) => a.id - b.id).map((k) => k.id);
+      const failedParents = await saveNewParents(portal, product.id, ids, typed);
+      if (failedParents > 0) {
+        showToast('Product created, but a father or mother could not be saved. Add them from the edit page.', 'error');
+        router.push(portal.editPath(product.id));
+        return;
+      }
 
       if (thumbnail || gallery.length > 0) {
         await portal.updateMedia(product.id, {
@@ -178,11 +192,12 @@ export function ProductCreateForm({ portal = adminProductPortal }: { portal?: Pr
       )}
 
       <form onSubmit={handleSubmit} className="space-y-5">
+        <RequiredLegend />
         <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {isAdmin && (
             <label className="text-sm text-foreground">
-              Seller *
+              Seller <Req />
               <select
                 className={`${fieldClass} ${sellerError ? 'border-destructive' : ''}`}
                 value={form.sellerId}
@@ -200,7 +215,7 @@ export function ProductCreateForm({ portal = adminProductPortal }: { portal?: Pr
             )}
 
             <label className="text-sm text-foreground">
-              Category *
+              Category <Req />
               <select
                 className={fieldClass}
                 value={form.categoryId}
@@ -216,7 +231,7 @@ export function ProductCreateForm({ portal = adminProductPortal }: { portal?: Pr
             </label>
 
             <label className="text-sm text-foreground">
-              Name *
+              Name <Req />
               <input
                 className={`${fieldClass} ${nameError ? 'border-destructive' : ''}`}
                 value={form.name}
@@ -226,7 +241,7 @@ export function ProductCreateForm({ portal = adminProductPortal }: { portal?: Pr
             </label>
 
             <label className="text-sm text-foreground">
-              Collection
+              Collection <Opt />
               <select
                 className={fieldClass}
                 value={form.collectionId}
@@ -242,7 +257,7 @@ export function ProductCreateForm({ portal = adminProductPortal }: { portal?: Pr
             </label>
 
             <label className="text-sm text-foreground md:col-span-2">
-              Description
+              Description <Opt />
               <textarea
                 className={fieldClass}
                 rows={3}
@@ -258,12 +273,12 @@ export function ProductCreateForm({ portal = adminProductPortal }: { portal?: Pr
                   checked={form.isFeatured}
                   onChange={(event) => setForm((f) => ({ ...f, isFeatured: event.target.checked }))}
                 />
-                Featured
+                Featured <Opt />
               </label>
             )}
             {isAdmin && (
               <label className="text-sm text-foreground">
-                Review status
+                Review status <Opt />
                 <select
                   className={fieldClass}
                   value={form.status}
@@ -278,7 +293,7 @@ export function ProductCreateForm({ portal = adminProductPortal }: { portal?: Pr
               </label>
             )}
             <label className="text-sm text-foreground">
-              Activity
+              Activity <Opt />
               <select
                 className={fieldClass}
                 value={form.activeStatus}
@@ -293,7 +308,7 @@ export function ProductCreateForm({ portal = adminProductPortal }: { portal?: Pr
             </label>
             {isAdmin && needsReason && (
               <label className="text-sm text-foreground md:col-span-2">
-                Reason (required for reject / suspend)
+                Reason <Req /> <span className="text-xs text-muted-foreground">(needed to reject or suspend)</span>
                 <textarea
                   className={fieldClass}
                   rows={2}
@@ -305,7 +320,7 @@ export function ProductCreateForm({ portal = adminProductPortal }: { portal?: Pr
             )}
 
             <label className="text-sm text-foreground">
-              SEO title
+              SEO title <Opt />
               <input
                 className={fieldClass}
                 value={form.seoTitle}
@@ -313,7 +328,7 @@ export function ProductCreateForm({ portal = adminProductPortal }: { portal?: Pr
               />
             </label>
             <label className="text-sm text-foreground">
-              SEO description
+              SEO description <Opt />
               <input
                 className={fieldClass}
                 value={form.seoDescription}
@@ -324,15 +339,21 @@ export function ProductCreateForm({ portal = adminProductPortal }: { portal?: Pr
         </div>
 
         <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-          <h2 className="mb-3 font-semibold text-foreground">SKUs</h2>
+          <h2 className="mb-1 font-semibold text-foreground">About the birds <Opt /></h2>
+          <p className="mb-3 text-xs text-muted-foreground">True for every option of this product. Buyers see it on the product page.</p>
+          <BirdProductFields value={bird} onChange={setBird} />
+        </div>
+
+        <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+          <h2 className="mb-3 font-semibold text-foreground">{isAdmin ? 'SKUs' : 'Options you sell (each bird, colour or size)'} <Req /></h2>
           <ProductSkuEditor drafts={skus} onChange={setSkus} attributes={attributes} />
         </div>
 
         <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-          <h2 className="mb-3 font-semibold text-foreground">Media (optional)</h2>
+          <h2 className="mb-3 font-semibold text-foreground">Media <Opt /></h2>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <span className="text-sm font-medium text-foreground">Thumbnail</span>
+              <span className="text-sm font-semibold text-foreground">Thumbnail</span>
               <div className="mt-2 flex items-center gap-3">
                 {thumbnailPreview && (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -350,7 +371,7 @@ export function ProductCreateForm({ portal = adminProductPortal }: { portal?: Pr
               </div>
             </div>
             <div>
-              <span className="text-sm font-medium text-foreground">Gallery images / videos</span>
+              <span className="text-sm font-semibold text-foreground">Gallery images / videos</span>
               <div className="mt-2">
                 <label className="cursor-pointer rounded-md border border-border px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted">
                   Add files

@@ -9,6 +9,7 @@ import { SellerActiveStatus } from '../database/enums/seller-active-status.enum'
 import { SellerStatus } from '../database/enums/seller-status.enum';
 import { likeContains } from '../shared/utils/like.util';
 import { PageRequest } from '../shared/utils/page-paginate.util';
+import { sellerOpenSql } from '../shared/utils/shop-break.util';
 
 export enum ProductSort {
   NEWEST = 'newest',
@@ -26,6 +27,9 @@ export interface ProductFilters {
   featured?: boolean;
   minPrice?: number;
   maxPrice?: number;
+  breed?: string;
+  bloodline?: string;
+  vaccinated?: boolean;
   sort?: ProductSort;
 }
 
@@ -40,6 +44,10 @@ export interface ProductCard {
   ratingCount: number;
   seller: { id: number; name: string } | null;
   category: { id: number; name: string; slug: string } | null;
+  /** Bird facts the seller gave, for the card. */
+  breed: string | null;
+  bloodline: string | null;
+  vaccinated: boolean;
 }
 
 // What the customer pays for one SKU right now (live discount, else list price).
@@ -88,6 +96,7 @@ export class StorefrontProductService {
       .andWhere('s.status = :ss', { ss: SellerStatus.APPROVED })
       .andWhere('s.activeStatus = :sa', { sa: SellerActiveStatus.ACTIVE })
       .andWhere('s.deletedAt IS NULL')
+      .andWhere(sellerOpenSql('s'))
       .andWhere(
         `EXISTS (SELECT 1 FROM seller_product_sku k WHERE k."sellerProductId" = p.id AND k."isActive" = true AND k."deletedAt" IS NULL)`,
       );
@@ -112,7 +121,7 @@ export class StorefrontProductService {
     const qb = this.eligibleProducts();
 
     if (filters.search) {
-      qb.andWhere('(p.name ILIKE :q OR s.name ILIKE :q)', {
+      qb.andWhere('(p.name ILIKE :q OR s.name ILIKE :q OR p.breed ILIKE :q OR p.bloodline ILIKE :q)', {
         q: likeContains(filters.search),
       });
     }
@@ -135,6 +144,13 @@ export class StorefrontProductService {
     }
     if (filters.featured) {
       qb.andWhere('p.isFeatured = true');
+    }
+    if (filters.breed) qb.andWhere('LOWER(p.breed) = LOWER(:breed)', { breed: filters.breed });
+    if (filters.bloodline) qb.andWhere('LOWER(p.bloodline) = LOWER(:bloodline)', { bloodline: filters.bloodline });
+    if (filters.vaccinated) {
+      qb.andWhere(
+        `EXISTS (SELECT 1 FROM seller_product_sku kv WHERE kv."sellerProductId" = p.id AND kv."isActive" = true AND kv."deletedAt" IS NULL AND kv."vaccinatedOn" IS NOT NULL)`,
+      );
     }
     if (filters.minPrice !== undefined) {
       qb.andWhere(`${DISPLAY_PRICE_SQL} >= :minPrice`, {
@@ -182,6 +198,23 @@ export class StorefrontProductService {
     return { items: await this.toCards(ordered), total };
   }
 
+  /** The breeds and bloodlines buyers can filter by, with how many visible products each has. */
+  async birdFacets() {
+    const count = async (column: 'breed' | 'bloodline') => {
+      const rows = await this.eligibleProducts()
+        .select(`MIN(p.${column})`, 'name')
+        .addSelect('COUNT(*)', 'count')
+        .andWhere(`p.${column} IS NOT NULL AND p.${column} <> ''`)
+        .groupBy(`LOWER(p.${column})`)
+        .orderBy('COUNT(*)', 'DESC')
+        .addOrderBy(`LOWER(MIN(p.${column}))`, 'ASC')
+        .getRawMany<{ name: string; count: string }>();
+      return rows.map((r) => ({ name: r.name, count: Number(r.count) }));
+    };
+    const [breeds, bloodlines] = await Promise.all([count('breed'), count('bloodline')]);
+    return { breeds, bloodlines };
+  }
+
   /** How many storefront-visible products each of these sellers has. */
   async countBySeller(sellerIds: number[]): Promise<Map<number, number>> {
     if (sellerIds.length === 0) return new Map();
@@ -224,6 +257,9 @@ export class StorefrontProductService {
         category: p.category
           ? { id: p.category.id, name: p.category.name, slug: p.category.slug }
           : null,
+        breed: p.breed ?? null,
+        bloodline: p.bloodline ?? null,
+        vaccinated: own.some((k) => !!k.vaccinatedOn),
       };
     });
   }

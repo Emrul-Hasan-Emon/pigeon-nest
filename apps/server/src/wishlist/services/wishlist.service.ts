@@ -14,6 +14,7 @@ import { likeContains } from '../../shared/utils/like.util';
 import { tidy } from '../../shared/utils/money.util';
 import { DISPLAY_PRICE_SQL, LIVE_SKU, StorefrontProductService } from '../../storefront/storefront-product.service';
 import { ListWishlistQueryDto } from '../dtos/wishlist.dtos';
+import { isShopClosed, sellerOpenSql } from '../../shared/utils/shop-break.util';
 
 export const WISHLIST_LIMIT = 200;
 
@@ -27,6 +28,7 @@ export const LIVE_COLUMNS = `
   p."deletedAt" AS "pDeleted", p.status AS "pStatus", p."activeStatus" AS "pActive",
   s.id AS "sellerId", s.name AS "sellerName",
   s.status AS "sStatus", s."activeStatus" AS "sActive", s."deletedAt" AS "sDeleted",
+  s."isEnabledForSell" AS "sSelling", s."breakStartsOn" AS "sBreakStart", s."breakEndsOn" AS "sBreakEnd",
   ${DISPLAY_PRICE_SQL} AS "price",
   (SELECT COALESCE(SUM(k.quantity), 0)::int FROM seller_product_sku k WHERE ${LIVE_SKU('k')}) AS "stock",
   (SELECT COUNT(*)::int FROM seller_product_sku k WHERE ${LIVE_SKU('k')}) AS "skuCount"`;
@@ -38,6 +40,9 @@ export interface LiveRow {
   sStatus: string | null;
   sActive: string | null;
   sDeleted: Date | null;
+  sSelling: boolean | null;
+  sBreakStart: string | Date | null;
+  sBreakEnd: string | Date | null;
   price: number | string | null;
   stock: number | null;
   skuCount: number | null;
@@ -55,6 +60,7 @@ export function availabilityOf(r: LiveRow): { availability: Availability; reason
     r.pActive === ProductActiveStatus.ACTIVE &&
     r.sStatus === SellerStatus.APPROVED &&
     r.sActive === SellerActiveStatus.ACTIVE &&
+    !isShopClosed({ isEnabledForSell: r.sSelling !== false, breakStartsOn: r.sBreakStart, breakEndsOn: r.sBreakEnd }) &&
     !r.sDeleted &&
     (r.skuCount ?? 0) > 0;
   if (!live) return { availability: 'unavailable', reason: 'This product is not available right now' };
@@ -64,7 +70,7 @@ export function availabilityOf(r: LiveRow): { availability: Availability; reason
 
 /** The same rule in SQL, for the inStock filter. */
 const PURCHASABLE = `(p.id IS NOT NULL AND p."deletedAt" IS NULL AND p.status = $PS AND p."activeStatus" = $PA
-  AND s.status = $SS AND s."activeStatus" = $SA AND s."deletedAt" IS NULL
+  AND s.status = $SS AND s."activeStatus" = $SA AND s."deletedAt" IS NULL AND ${sellerOpenSql('s')}
   AND (SELECT COALESCE(SUM(k.quantity), 0) FROM seller_product_sku k WHERE ${LIVE_SKU('k')}) > 0)`;
 
 export function priceChange(now: number | null, saved: number) {

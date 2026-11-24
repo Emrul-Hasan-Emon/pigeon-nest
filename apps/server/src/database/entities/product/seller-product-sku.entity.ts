@@ -9,6 +9,7 @@ import {
 import { BaseEntity } from '../base.entity';
 import { SellerProduct } from './seller-product.entity';
 import { SellerProductSkuVariant } from './seller-product-sku-variant.entity';
+import { SellerProductSkuParent } from './seller-product-sku-parent.entity';
 import { DiscountType } from '../../enums/discount-type.enum';
 
 @Entity()
@@ -87,6 +88,22 @@ export class SellerProductSku extends BaseEntity {
   @Column({ type: 'double precision', nullable: true })
   minProposalPrice: number | null;
 
+  // About the bird this SKU sells. All optional.
+  @Column({ type: 'varchar', length: 60, nullable: true })
+  ringNumber: string | null;
+
+  @Column({ type: 'date', nullable: true })
+  hatchDate: string | null;
+
+  @Column({ type: 'varchar', length: 120, nullable: true })
+  vaccineName: string | null;
+
+  @Column({ type: 'date', nullable: true })
+  vaccinatedOn: string | null;
+
   @OneToMany(() => SellerProductSkuVariant, (variant) => variant.sku)
   variants: SellerProductSkuVariant[];
+
+  @OneToMany(() => SellerProductSkuParent, (parent) => parent.sku)
+  parents: SellerProductSkuParent[];
 }

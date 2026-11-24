@@ -7,12 +7,14 @@ import { getHomepageSlot } from '@/lib/api/homepage';
 import { useToast } from '@/components/ui/toast';
 import type { HomepageSectionDetail } from '@/types/homepage';
 import { LoadingBlock } from '@/components/ui/skeleton';
+import { useBreadcrumbTitle } from '@/components/ui/breadcrumbs';
 
 export default function EditHomepageSlotPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const { showToast } = useToast();
   const [section, setSection] = useState<HomepageSectionDetail | null>(null);
+  useBreadcrumbTitle(section?.title);
 
   useEffect(() => {
     getHomepageSlot(Number(params.id))

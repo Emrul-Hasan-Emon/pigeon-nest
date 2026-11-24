@@ -42,9 +42,18 @@ const CHIPS: { value: '' | ProposalStatus; label: string }[] = [
   { value: 'cancelled', label: 'Cancelled' },
 ];
 
-const EMPTY = { status: '', awaiting: '', search: '', buyerSearch: '', sellerSearch: '' };
+const EMPTY = { status: '', awaiting: '', search: '', buyerSearch: '', sellerSearch: '', skuSearch: '', from: '', to: '', minPrice: '', maxPrice: '' };
 
 // The list service types its params loosely; the API accepts the same keys.
+function Lbl({ text, children }: { text: string; children: React.ReactNode }) {
+  return (
+    <label className="block text-sm font-medium text-foreground">
+      {text}
+      <span className="mt-1 block font-normal">{children}</span>
+    </label>
+  );
+}
+
 const fetcher = (p: Record<string, string | number | boolean | undefined>) => listAdminProposals(p as ProposalListParams);
 
 /** Every proposal, filterable. `userId` / `sellerId` arrive from the query string and can be dropped here. */
@@ -57,6 +66,7 @@ export function AdminProposalList({ userId, sellerId }: { userId?: number; selle
 
   return (
     <div>
+      <p className="mb-1 text-sm font-medium text-foreground">Show offers that are</p>
       <div className="mb-3 flex flex-wrap gap-2" role="group" aria-label="Status">
         {CHIPS.map((c) => (
           <button
@@ -70,15 +80,24 @@ export function AdminProposalList({ userId, sellerId }: { userId?: number; selle
           </button>
         ))}
       </div>
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <input className={`${field} w-52`} placeholder="Product name" aria-label="Product name" value={f.search} onChange={set('search')} />
-        <input className={`${field} w-60`} placeholder="Buyer name, email or phone" aria-label="Buyer" value={f.buyerSearch} onChange={set('buyerSearch')} />
-        <input className={`${field} w-60`} placeholder="Seller name, email or phone" aria-label="Seller" value={f.sellerSearch} onChange={set('sellerSearch')} />
-        <select className={`${field} w-44`} aria-label="Waiting on" value={f.awaiting} onChange={set('awaiting')} disabled={f.status !== '' && f.status !== 'pending'}>
-          <option value="">Waiting on anyone</option>
-          <option value="buyer">Waiting on buyer</option>
-          <option value="seller">Waiting on seller</option>
-        </select>
+      <div className="mb-3 flex flex-wrap items-end gap-3">
+        <Lbl text="Product name"><input className={`${field} w-52`} placeholder="Part of the name" value={f.search} onChange={set('search')} /></Lbl>
+        <Lbl text="SKU code"><input className={`${field} w-40`} placeholder="Example: HOM-BB-M" value={f.skuSearch} onChange={set('skuSearch')} /></Lbl>
+        <Lbl text="Buyer (name, email or phone)"><input className={`${field} w-60`} placeholder="Who made the offer" value={f.buyerSearch} onChange={set('buyerSearch')} /></Lbl>
+        <Lbl text="Seller (name)"><input className={`${field} w-52`} placeholder="Whose product it is" value={f.sellerSearch} onChange={set('sellerSearch')} /></Lbl>
+        <Lbl text="Whose answer is awaited">
+          <select className={`${field} w-48`} value={f.awaiting} onChange={set('awaiting')} disabled={f.status !== '' && f.status !== 'pending'}>
+            <option value="">Anyone</option>
+            <option value="buyer">Waiting for the buyer</option>
+            <option value="seller">Waiting for the seller</option>
+          </select>
+        </Lbl>
+      </div>
+      <div className="mb-4 flex flex-wrap items-end gap-3">
+        <Lbl text="Offered from (date)"><input type="date" className={field} value={f.from} onChange={set('from')} /></Lbl>
+        <Lbl text="Offered until (date)"><input type="date" className={field} value={f.to} onChange={set('to')} /></Lbl>
+        <Lbl text="Offer at least (per item)"><input type="number" min={0} className={`${field} w-36`} placeholder="Lowest" value={f.minPrice} onChange={set('minPrice')} /></Lbl>
+        <Lbl text="Offer at most (per item)"><input type="number" min={0} className={`${field} w-36`} placeholder="Highest" value={f.maxPrice} onChange={set('maxPrice')} /></Lbl>
         {scope.userId !== undefined && (
           <button type="button" onClick={() => setScope((s) => ({ ...s, userId: undefined }))} className="rounded-full bg-muted px-3 py-1 text-sm text-foreground hover:bg-border" title="Remove this filter">
             Buyer #{scope.userId} ✕

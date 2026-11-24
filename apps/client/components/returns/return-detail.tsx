@@ -15,9 +15,11 @@ import {
 } from '@/lib/api/returns';
 import { formatDateTime } from '@/lib/datetime';
 import { NotFoundApiError } from '@/lib/api/http';
-import type { ReturnDetail, ReturnStatus } from '@/types/returns';
+import { ReturnMoney } from '@/components/refunds/return-money';
+import { returnReasonLabel, type ReturnDetail, type ReturnStatus } from '@/types/returns';
 import { OrderLink, RETURN_LABEL, ReturnBadge, ReturnItemsTable, ReturnTimeline, SCOPE_LABEL } from './parts';
 import { LoadingBlock } from '@/components/ui/skeleton';
+import { useBreadcrumbTitle } from '@/components/ui/breadcrumbs';
 
 const card = 'rounded-xl border border-border bg-card p-5 shadow-sm';
 
@@ -151,10 +153,10 @@ function AdminActions({ r, onChanged }: { r: ReturnDetail; onChanged: (r: Return
       </label>
       {enteringReturned && (
         <p className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-900">
-          Marking this returned takes {money(r.items.reduce((n, i) => n + (i.commissionAmount ?? 0), 0))} of commission off the seller and flags {r.scope === 'full_order' ? 'the items' : 'the item(s)'} as returned.
+          Marking this returned takes {money(r.items.reduce((n, i) => n + (i.commissionAmount ?? 0), 0))} of system commission off the seller and flags {r.scope === 'full_order' ? 'the items' : 'the item(s)'} as returned.
         </p>
       )}
-      {leavingReturned && <p className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-900">Moving this out of returned puts the commission back on the seller and clears the returned flags.</p>}
+      {leavingReturned && <p className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-900">Moving this out of returned puts the system commission back on the seller and clears the returned flags.</p>}
       {r.actions.canEditDelivery && (
         <label className="flex items-start gap-2 text-sm text-foreground">
           <input type="checkbox" className="mt-1" checked={delivery} onChange={(e) => setDelivery(e.target.checked)} />
@@ -174,6 +176,7 @@ function AdminActions({ r, onChanged }: { r: ReturnDetail; onChanged: (r: Return
 export function ReturnDetailView({ role, id }: { role: 'admin' | 'seller'; id: number }) {
   const errorMessage = useApiError(role);
   const [r, setR] = useState<ReturnDetail | null>(null);
+  useBreadcrumbTitle(r ? `Return #${r.id}` : null);
   const [error, setError] = useState<string | null>(null);
   const [missing, setMissing] = useState(false);
   const load = useCallback(() => {
@@ -204,6 +207,7 @@ export function ReturnDetailView({ role, id }: { role: 'admin' | 'seller'; id: n
         <div className="space-y-5 lg:col-span-2">
           <section className={card}>
             <h2 className="mb-3 font-semibold text-foreground">Why</h2>
+            <p className="mb-1 text-sm font-semibold text-foreground">{returnReasonLabel(r.reasonCode)}</p>
             <p className="whitespace-pre-wrap text-sm text-foreground">{r.reason}</p>
             {r.history[0]?.attachments.length > 0 && (
               <ul className="mt-3 flex flex-wrap gap-2">
@@ -222,6 +226,7 @@ export function ReturnDetailView({ role, id }: { role: 'admin' | 'seller'; id: n
             <h2 className="mb-3 font-semibold text-foreground">Items</h2>
             <ReturnItemsTable items={r.items} showCommission />
           </section>
+          <ReturnMoney ret={r} admin={role === 'admin'} onChanged={load} />
           <section className={card}>
             <h2 className="mb-3 font-semibold text-foreground">History</h2>
             <ReturnTimeline history={r.history} />
@@ -235,7 +240,7 @@ export function ReturnDetailView({ role, id }: { role: 'admin' | 'seller'; id: n
               <Fact label="Items">{money(r.itemsAmount)}</Fact>
               <Fact label="Delivery">{r.scope === 'full_order' ? (r.includeDeliveryCharge ? money(r.deliveryAmount) : 'Not refunded') : 'Not refunded'}</Fact>
               <Fact label="Total refund"><strong>{money(r.refundAmount)}</strong></Fact>
-              <Fact label="Commission back">{money(r.commissionAmount ?? 0)}</Fact>
+              <Fact label="System commission back">{money(r.commissionAmount ?? 0)}</Fact>
             </dl>
             {r.returnedAt && <p className="mt-3 text-xs text-muted-foreground">Returned {formatDateTime(r.returnedAt)}</p>}
           </section>

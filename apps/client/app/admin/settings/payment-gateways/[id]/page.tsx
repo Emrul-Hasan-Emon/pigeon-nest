@@ -7,12 +7,14 @@ import { getGateway } from '@/lib/api/payment-gateways';
 import { useToast } from '@/components/ui/toast';
 import type { PaymentGateway } from '@/types/payment-gateway';
 import { LoadingBlock } from '@/components/ui/skeleton';
+import { useBreadcrumbTitle } from '@/components/ui/breadcrumbs';
 
 export default function EditGatewayPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const { showToast } = useToast();
   const [gateway, setGateway] = useState<PaymentGateway | null>(null);
+  useBreadcrumbTitle(gateway?.name);
 
   useEffect(() => {
     getGateway(Number(params.id))

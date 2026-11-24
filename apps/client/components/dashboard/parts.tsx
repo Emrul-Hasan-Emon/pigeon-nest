@@ -120,7 +120,7 @@ export function StatStrip({ title, stats, className = '' }: { title?: string; st
       <div className={`grid grid-cols-2 gap-px ${cols}`}>
         {stats.map((s) => (
           <div key={s.label} className="bg-card px-5 py-4">
-            <p className="text-xs text-muted-foreground">{s.label}</p>
+            <p className="text-xs font-semibold text-muted-foreground">{s.label}</p>
             <p className={`mt-1.5 font-[family-name:var(--figure-font,var(--font-display))] text-[1.7rem] font-semibold tracking-tight ${s.tone ? STAT_TONE[s.tone] : 'text-foreground'}`}>{s.value}</p>
             <div className="mt-1 min-h-4 text-xs text-muted-foreground">{s.change !== undefined && s.change !== null ? <Change value={s.change} lowerIsBetter={s.lowerIsBetter} /> : s.hint}</div>
           </div>
@@ -136,7 +136,7 @@ export function HeroKpi({ label, value, change, support, note, spark }: { label:
     <div className="hero-kpi relative flex flex-col justify-between overflow-hidden rounded-2xl bg-topbar p-7 text-topbar-foreground shadow-md">
       <Feather aria-hidden="true" strokeWidth={0.6} className="hero-feather pointer-events-none absolute -bottom-10 -right-8 hidden h-64 w-64 -rotate-12 text-white/[0.07]" />
       <div className="relative">
-        <p className="text-sm text-topbar-foreground/60">{label}</p>
+        <p className="text-sm font-semibold text-topbar-foreground/70">{label}</p>
         <p className={`mt-3 ${FIG_HERO} text-[2.6rem] font-medium leading-none tracking-tight text-white xl:text-[3.4rem]`}>{value}</p>
         <div className="mt-3 min-h-5">{change === null ? <span className="text-xs text-topbar-foreground/50">{note}</span> : <Change value={change} dark />}</div>
       </div>

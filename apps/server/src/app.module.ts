@@ -18,8 +18,12 @@ import { CartModule } from './cart/cart.module';
 import { OrderModule } from './order/order.module';
 import { ProposalModule } from './proposal/proposal.module';
 import { WishlistModule } from './wishlist/wishlist.module';
+import { HelpModule } from './help/help.module';
 import { ReturnsModule } from './returns/returns.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { PaymentClaimModule } from './payment-claim/payment-claim.module';
+import { QuestionModule } from './question/question.module';
+import { ReportModule } from './report/report.module';
 import { ReviewModule } from './review/review.module';
 
 @Module({
@@ -42,9 +46,13 @@ import { ReviewModule } from './review/review.module';
     CartModule,
     OrderModule,
     WishlistModule,
+    HelpModule,
     ProposalModule,
     ReturnsModule,
     DashboardModule,
+    PaymentClaimModule,
+    QuestionModule,
+    ReportModule,
     ReviewModule,
   ],
   controllers: [AppController],

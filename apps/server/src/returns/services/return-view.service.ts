@@ -9,6 +9,7 @@ import { ReturnStatus } from '../../database/enums/return-status.enum';
 import { likeContains } from '../../shared/utils/like.util';
 import { pageResult, resolvePage } from '../../shared/utils/page-paginate.util';
 import { AdminListReturnsQueryDto } from '../dtos/returns.dtos';
+import { refundRecordView } from '../../order/utils/refund-view.util';
 
 /** Who is looking, and which returns they may see. */
 export interface ReturnScopeFilter {
@@ -78,7 +79,9 @@ export class ReturnViewService {
       .addOrderBy('ri.id', 'ASC')
       .getOne();
     if (!ret) throw new NotFoundException('Return not found');
-    return this.full(ret, filter.viewer);
+    // Money records for this return (an admin can add another when the buyer says the money never came).
+    const money = await this.db.orderRefund.find({ where: { orderReturnId: ret.id }, relations: { history: true }, order: { id: 'DESC' } });
+    return { ...this.full(ret, filter.viewer), moneyRecords: money.map((m) => refundRecordView(m)) };
   }
 
   /** Every return on one order, newest first. Used on the order screens. */
@@ -106,6 +109,7 @@ export class ReturnViewService {
       status: r.status,
       scope: r.scope,
       reason: r.reason,
+      reasonCode: r.reasonCode,
       order: this.orderRef(r),
       seller: r.order?.seller ? { id: r.order.seller.id, name: r.order.seller.name } : { id: r.sellerId, name: 'Seller' },
       itemCount: (r.items ?? []).length,
@@ -130,13 +134,15 @@ export class ReturnViewService {
 
   private item(ri: { id: number; orderItemId: number; quantity: number; refundAmount: number; commissionAmount: number; reason: string | null; orderItem?: OrderItem }, viewer: AuthUserType) {
     const oi = ri.orderItem;
-    const sku = (oi?.skuData ?? {}) as { label?: string; thumbnailUrl?: string; imageUrl?: string; slug?: string };
+    const sku = (oi?.skuData ?? {}) as { label?: string; thumbnailUrl?: string; imageUrl?: string; slug?: string; bird?: Record<string, unknown> };
     return {
       id: ri.id,
       orderItemId: ri.orderItemId,
       productName: oi?.productName ?? 'Item',
       productId: oi?.sellerProductId ?? null,
       skuLabel: sku.label ?? null,
+      // The bird as it was sold, so everyone knows which one is being returned. Null for other items and older orders.
+      bird: sku.bird ?? null,
       imageUrl: sku.thumbnailUrl ?? sku.imageUrl ?? null,
       quantity: ri.quantity,
       refundAmount: ri.refundAmount,

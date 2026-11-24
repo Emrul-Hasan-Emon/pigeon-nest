@@ -28,7 +28,7 @@ export function AdminDashboardView() {
     <div>
       <DashboardHeader
         title="Dashboard"
-        subtitle="Sales, returns and commission across the whole marketplace."
+        subtitle="Sales, returns and system commission across the whole marketplace."
         guideHref="/admin/dashboard/guide"
         period={data ? rangeLabel(data.from, data.to) : ' '}
         range={range}
@@ -50,7 +50,7 @@ export function AdminDashboardView() {
               support={[
                 { label: 'Sales', value: taka(t.grossSales) },
                 { label: 'Refunds', value: `${taka(t.refunds.amount)} (${t.refunds.count})` },
-                { label: 'Commission earned', value: taka(t.commission.net) },
+                { label: 'System commission earned', value: taka(t.commission.net) },
               ]}
             />
             <Panel title="Sales over time" note="Sales and refunds, day by day." className="lg:col-span-2">
@@ -70,7 +70,7 @@ export function AdminDashboardView() {
                 ]}
               />
               <StatStrip
-                title="Commission"
+                title="System commission"
                 stats={[
                   { label: 'Earned this period', value: taka(t.commission.net), change: t.change.netCommission },
                   { label: 'Owed by sellers', value: taka(data.balances.due), hint: `${data.balances.sellersOwing} ${data.balances.sellersOwing === 1 ? 'seller' : 'sellers'} owing` },
@@ -99,7 +99,7 @@ export function AdminDashboardView() {
             <Panel title="Top sellers" note="By sales in this period.">
               <Ranking
                 empty="No sales in this period."
-                rows={data.topSellers.map((s) => ({ key: s.id, name: s.name, detail: `${s.orders} paid ${s.orders === 1 ? 'order' : 'orders'} · commission ${taka(s.commission)}`, amount: s.grossSales, href: `/admin/sellers/${s.id}` }))}
+                rows={data.topSellers.map((s) => ({ key: s.id, name: s.name, detail: `${s.orders} paid ${s.orders === 1 ? 'order' : 'orders'} · system commission ${taka(s.commission)}`, amount: s.grossSales, href: `/admin/sellers/${s.id}` }))}
               />
             </Panel>
             <Panel title="Top products" note="By sales, returned items left out.">

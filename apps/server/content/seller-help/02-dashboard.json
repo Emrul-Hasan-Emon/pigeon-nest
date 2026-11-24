@@ -1,0 +1,464 @@
+{
+  "slug": "dashboard",
+  "title": "Dashboard",
+  "icon": "house",
+  "order": 20,
+  "summary": "Your home page. See how your shop is doing and what needs your attention today.",
+  "openPath": "/seller/dashboard",
+  "openLabel": "Open my dashboard",
+  "sections": [
+    {
+      "id": "what",
+      "title": "What the dashboard is for",
+      "intro": "The dashboard is the first page you see after you sign in. It answers three questions: What do I need to do now? How much did I sell? How are my products doing?",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "How to open it",
+          "steps": [
+            "Look at the menu on the left side of the screen.",
+            "Press \"Home\" (the first item). The dashboard opens.",
+            "You can also press the Pigeon Nest name at the top left from any page."
+          ]
+        },
+        {
+          "type": "points",
+          "title": "The page has these parts, from top to bottom",
+          "items": [
+            "A notice, if something needs you: your shop setup list, or a message that selling is switched off.",
+            "\"What to do now\": small boxes with numbers. Each number is work that is waiting for you.",
+            "The dark card \"You keep\" and the sales chart next to it.",
+            "Boxes for Orders and System commission.",
+            "Orders by status, Top products and Reviews.",
+            "\"Your products\": how many products you have and what state they are in.",
+            "Wishlist demand: how many people saved your products."
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "info",
+          "text": "Your account must be approved and active to see the numbers. If your account is new or waiting for approval, you will see a message instead. Read the message: it tells you what is happening."
+        }
+      ]
+    },
+    {
+      "id": "period",
+      "title": "Choose the time period",
+      "intro": "Most numbers on the dashboard are for a period of time. You choose the period at the top right.",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "How to change the period",
+          "steps": [
+            "Find the four buttons at the top right: 7 days, 30 days, 90 days, 12 months.",
+            "Press the one you want. All the numbers and the chart change at once.",
+            "The small line under the buttons shows the exact dates, for example \"26 Oct – 24 Nov\"."
+          ]
+        },
+        {
+          "type": "words",
+          "title": "Words you will see",
+          "items": [
+            {
+              "term": "30 days",
+              "means": "The last 30 days, counting today. This is the choice when you first open the page."
+            },
+            {
+              "term": "12 months",
+              "means": "The last 12 months. The chart then shows one bar for each month, not for each day."
+            },
+            {
+              "term": "▲ 12% or ▼ 5%",
+              "means": "The change compared with the same length of time just before. If you picked 30 days, it compares with the 30 days before those. Green is good news. Red is bad news."
+            },
+            {
+              "term": "No earlier figure to compare",
+              "means": "The time before had nothing in it, so a percentage would mean nothing."
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "info",
+          "text": "The \"What to do now\" boxes, \"You owe\" and \"Your products\" do not use the period. They always show how things are right now."
+        }
+      ]
+    },
+    {
+      "id": "todo",
+      "title": "What to do now",
+      "intro": "This is the most useful part of the page. Each box has a number. The number is how many things are waiting for you. A box only appears when its number is above zero. When there are no boxes, you have nothing waiting.",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "How to use the boxes",
+          "steps": [
+            "Read the number and the words in the box.",
+            "Press the box. It takes you straight to the right page.",
+            "Do the work there. Come back to the dashboard and the number is smaller."
+          ]
+        },
+        {
+          "type": "words",
+          "title": "Every box, and what to do",
+          "items": [
+            {
+              "term": "Orders to confirm",
+              "means": "New orders you have not accepted yet. Open each one, check the items, and press Confirm. Until you confirm, the buyer is waiting."
+            },
+            {
+              "term": "Orders to pack",
+              "means": "Orders you confirmed. Pack the birds or items, then mark the order as Packed."
+            },
+            {
+              "term": "Orders to ship",
+              "means": "Packed orders. Send them, then mark the order as Shipped."
+            },
+            {
+              "term": "Return requests (red)",
+              "means": "Buyers who want to send something back. Open each one and accept or reject it. If you reject, you must write a reason."
+            },
+            {
+              "term": "Returns in progress",
+              "means": "Returns you accepted. Keep moving them forward: processing, then money being returned."
+            },
+            {
+              "term": "Refunds to send back (red)",
+              "means": "Orders that were cancelled after the buyer had paid. You must send the money back and show proof. See the Refunds topic."
+            },
+            {
+              "term": "Mark as paid requests to check (red)",
+              "means": "A buyer says they already paid for a cash on delivery order. Check the proof and accept or reject."
+            },
+            {
+              "term": "Price offers to answer",
+              "means": "Buyers who suggested their own price. Accept, counter, or reject."
+            },
+            {
+              "term": "Questions to answer",
+              "means": "Buyers asked something about one of your birds. Your answer is public, so it helps other buyers too."
+            },
+            {
+              "term": "SKUs out of stock (red)",
+              "means": "Options of your products with none left. Buyers cannot buy them until you add stock. (A SKU is one option you sell: one bird, colour or size.)"
+            },
+            {
+              "term": "SKUs with 5 or fewer left",
+              "means": "Options that are almost sold out. Add stock before they run out."
+            },
+            {
+              "term": "Reviews without a reply",
+              "means": "Reviews you have not answered yet. A short thank-you or a helpful answer looks good to other buyers."
+            },
+            {
+              "term": "Products waiting for approval",
+              "means": "Products an admin put on hold (Pending). Buyers cannot see them until an admin approves them again."
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "info",
+          "text": "The bell at the top right of every page shows the same list. The small number on the bell is the total waiting for you."
+        }
+      ]
+    },
+    {
+      "id": "setup",
+      "title": "The \"Get your shop ready\" list",
+      "intro": "When your shop is new, a card called \"Get your shop ready\" shows at the top. It is a checklist with a progress bar.",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "How to finish it",
+          "steps": [
+            "Read the list. A circle with a tick means it is done. An empty circle means it is not done.",
+            "Press any item that is not done. It opens the right page.",
+            "Or press the green button at the top right of the card. It always takes you to the next step.",
+            "When every step is done, the card disappears."
+          ]
+        },
+        {
+          "type": "points",
+          "title": "The steps are",
+          "items": [
+            "Add a profile picture.",
+            "Write about your shop.",
+            "Add your email.",
+            "Upload your ID, front and back.",
+            "Add your first product.",
+            "Give a product a picture.",
+            "Add bird details to a product.",
+            "Have a product on sale (approved, switched on, and with stock)."
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "info",
+          "text": "The admin team can see how far each seller has got. A complete shop looks more trustworthy to buyers."
+        }
+      ]
+    },
+    {
+      "id": "money",
+      "title": "The money cards",
+      "intro": "These cards show how much you sold and what you keep. Read them from the dark card downwards.",
+      "blocks": [
+        {
+          "type": "words",
+          "title": "The dark card \"You keep\" and what is under it",
+          "items": [
+            {
+              "term": "You keep",
+              "means": "The money left for you after the marketplace takes its fee and after refunds. This is the most important number."
+            },
+            {
+              "term": "Sales",
+              "means": "The full value of your paid orders in the period, including delivery charge. Example: birds worth 3,200 plus 100 for delivery adds 3,300."
+            },
+            {
+              "term": "System commission",
+              "means": "The fee the marketplace charges you for your sales. Each item carries its own fee, worked out when the order was placed, from your rate. You can see your rate on the System commission page."
+            },
+            {
+              "term": "Refunds",
+              "means": "Money you gave back to buyers for returns that were finished in the period. The small number in brackets is how many returns."
+            }
+          ]
+        },
+        {
+          "type": "points",
+          "title": "A simple example",
+          "items": [
+            "You sold 10,000 in paid orders. Sales = 10,000.",
+            "Your rate is 10%. System commission = 1,000.",
+            "One return of 2,000 was finished. The marketplace gives its fee on that item back (200). Refunds = 2,000.",
+            "You keep: 10,000 − 1,000 − (2,000 − 200) = 7,200."
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "info",
+          "text": "What counts as a sale? An order that is fully paid and not cancelled. It is counted on the day the order was placed, not the day the money arrived. An order that is still waiting for payment is not a sale yet. It shows in \"Orders placed\" and \"Orders by status\"."
+        }
+      ]
+    },
+    {
+      "id": "chart",
+      "title": "The sales chart",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "How to read it",
+          "steps": [
+            "Each bar is one day (or one month when you choose 12 months).",
+            "The golden bar is your sales for that day. A taller bar means more sales.",
+            "A thin red bar next to it is money refunded that day.",
+            "Move your mouse over the chart. The line above it shows the exact figures for that day."
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "info",
+          "text": "Days with no sales still appear, with no bar. That is normal."
+        }
+      ]
+    },
+    {
+      "id": "boxes",
+      "title": "The Orders and System commission boxes",
+      "blocks": [
+        {
+          "type": "words",
+          "title": "Orders box",
+          "items": [
+            {
+              "term": "Orders placed",
+              "means": "Every order created for your shop in the period, even if it was cancelled or is not paid yet."
+            },
+            {
+              "term": "Paid orders",
+              "means": "Orders in the period that are fully paid and not cancelled."
+            },
+            {
+              "term": "Average order",
+              "means": "What a normal paid order is worth. It is Sales divided by Paid orders."
+            },
+            {
+              "term": "Return rate",
+              "means": "Out of your paid orders, what share had a return. A high number means buyers are not happy: read their reasons in the Reports page."
+            }
+          ]
+        },
+        {
+          "type": "words",
+          "title": "System commission box",
+          "items": [
+            {
+              "term": "On this period's sales",
+              "means": "The fee for sales in the period, after fees given back for returns. A small line under it shows your rate, for example \"Your rate: 10% of each item\"."
+            },
+            {
+              "term": "You owe",
+              "means": "What you still need to pay the marketplace right now. It is not a period number. It is your live balance."
+            },
+            {
+              "term": "Paid so far",
+              "means": "What you have already paid the marketplace. The line under it shows the total fee charged to you so far."
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "info",
+          "text": "If \"You owe\" is below zero, the marketplace owes you. That happens when a returned order had already been paid for. It is taken off the fee on your next orders."
+        }
+      ]
+    },
+    {
+      "id": "lists",
+      "title": "Orders by status, Top products, Reviews",
+      "blocks": [
+        {
+          "type": "words",
+          "title": "Orders by status",
+          "items": [
+            {
+              "term": "Pending",
+              "means": "Placed, not yet confirmed by you."
+            },
+            {
+              "term": "Confirmed",
+              "means": "You accepted it."
+            },
+            {
+              "term": "Packed",
+              "means": "Packed and ready to send."
+            },
+            {
+              "term": "Shipped",
+              "means": "On its way to the buyer."
+            },
+            {
+              "term": "Delivered",
+              "means": "The buyer has it."
+            },
+            {
+              "term": "Cancelled",
+              "means": "Stopped before delivery. It never counts as a sale."
+            }
+          ]
+        },
+        {
+          "type": "points",
+          "title": "Top products and Reviews",
+          "items": [
+            "Top products shows your five best products in the period and how many were sold. Returned items are left out. Press a name to open the product.",
+            "Reviews shows your average star rating and how many reviews you have. Hidden reviews are not counted."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "products",
+      "title": "Your products section",
+      "intro": "The lower half of the dashboard counts your products.",
+      "blocks": [
+        {
+          "type": "words",
+          "title": "What the numbers mean",
+          "items": [
+            {
+              "term": "Total products",
+              "means": "All your products. Products that were deleted are not counted."
+            },
+            {
+              "term": "Visible on storefront",
+              "means": "Products buyers can find and buy right now: approved, switched on by you, and with stock."
+            },
+            {
+              "term": "Locked by admin",
+              "means": "Products an admin rejected or suspended. You cannot change them until the admin changes them back."
+            },
+            {
+              "term": "Total SKUs",
+              "means": "All the options you sell (each bird, colour or size). The line under it says how many are out of stock."
+            },
+            {
+              "term": "Review status: Approved, Pending, Rejected",
+              "means": "Approved can be sold. Pending is waiting for the admin. Rejected was turned down."
+            },
+            {
+              "term": "Activity: Active, Inactive, Suspended",
+              "means": "Active is on sale. Inactive is switched off by you. Suspended is switched off by an admin."
+            },
+            {
+              "term": "Wishlist demand",
+              "means": "How many times buyers saved your products to come back to later, and which products are saved most. A save is interest, not an order."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "notices",
+      "title": "Notices at the top of the page",
+      "blocks": [
+        {
+          "type": "words",
+          "title": "What they mean",
+          "items": [
+            {
+              "term": "Selling is switched off",
+              "means": "Buyers cannot see you or your products. Press \"Switch selling on\" to open your shop again."
+            },
+            {
+              "term": "Your shop is on a planned break",
+              "means": "You set a break with a start and end date. Your shop comes back by itself after the last day."
+            },
+            {
+              "term": "A break is planned",
+              "means": "Your break has not started yet. It shows the dates."
+            },
+            {
+              "term": "Account notices",
+              "means": "If your account is waiting for approval, was rejected or was suspended, a box explains why and what to do."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "faq",
+      "title": "Questions people ask",
+      "blocks": [
+        {
+          "type": "faq",
+          "title": "Common questions",
+          "items": [
+            {
+              "q": "I have orders, but \"Sales\" shows 0. Why?",
+              "a": "Sales only counts orders that are fully paid and not cancelled. Orders that are waiting for payment show in \"Orders placed\" but not in Sales. Record the payment on the order, and it becomes a sale."
+            },
+            {
+              "q": "Why is my Sales number different on the Reports page?",
+              "a": "The dashboard and Reports use the same rules. If they look different, check that the dates are the same."
+            },
+            {
+              "q": "A box disappeared. Did I lose something?",
+              "a": "No. A box only shows when its number is above zero. It means you finished that work."
+            },
+            {
+              "q": "Why does \"Refunds\" go up later than the sale?",
+              "a": "A refund is counted on the day the return was finished, which can be days after the sale."
+            },
+            {
+              "q": "Where do I change my rate?",
+              "a": "You cannot. The marketplace sets it. You can see it on the System commission page."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

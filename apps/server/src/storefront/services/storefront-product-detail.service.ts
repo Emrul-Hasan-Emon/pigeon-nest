@@ -7,6 +7,15 @@ import {
   StorefrontProductService,
 } from '../storefront-product.service';
 
+type ParentRow = { role: string; name: string | null; ringNumber: string | null; imageUrl: string | null };
+
+/** The sire or dam of a bird as buyers see it, or null when the seller gave nothing. */
+function parentView(parents: ParentRow[] | undefined, role: string) {
+  const p = (parents ?? []).find((x) => x.role === role);
+  if (!p || (!p.name && !p.ringNumber && !p.imageUrl)) return null;
+  return { name: p.name ?? null, ringNumber: p.ringNumber ?? null, imageUrl: p.imageUrl ?? null };
+}
+
 @Injectable()
 export class StorefrontProductDetailService {
   constructor(
@@ -28,6 +37,7 @@ export class StorefrontProductDetailService {
         .leftJoinAndSelect('k.variants', 'v', 'v.isActive = true AND v.deletedAt IS NULL')
         .leftJoinAndSelect('v.attribute', 'a')
         .leftJoinAndSelect('v.attributeValue', 'av')
+        .leftJoinAndSelect('k.parents', 'par')
         .where('k.sellerProductId = :id', { id })
         .andWhere('k.isActive = true')
         .orderBy('k.isDefault', 'DESC')
@@ -63,6 +73,14 @@ export class StorefrontProductDetailService {
       lowStock: k.quantity > 0 && k.quantity <= k.lowStockThreshold,
       isDefault: k.isDefault,
       acceptProposals: k.acceptProposals,
+      bird: {
+        ringNumber: k.ringNumber ?? null,
+        hatchDate: k.hatchDate ?? null,
+        vaccineName: k.vaccineName ?? null,
+        vaccinatedOn: k.vaccinatedOn ?? null,
+        sire: parentView(k.parents, 'sire'),
+        dam: parentView(k.parents, 'dam'),
+      },
       variants: (k.variants ?? []).map((v) => ({
         attributeId: v.attributeId,
         valueId: v.attributeValueId,
@@ -108,6 +126,14 @@ export class StorefrontProductDetailService {
       isFeatured: product.isFeatured,
       ratingAverage: product.ratingAverage,
       ratingCount: product.ratingCount,
+      bird: {
+        breed: product.breed ?? null,
+        bloodline: product.bloodline ?? null,
+        bloodlineNote: product.bloodlineNote ?? null,
+        vaccinationNote: product.vaccinationNote ?? null,
+        healthNote: product.healthNote ?? null,
+        raceRecord: product.raceRecord ?? null,
+      },
       seoTitle: product.seoTitle ?? null,
       seoDescription: product.seoDescription ?? null,
       category: product.category

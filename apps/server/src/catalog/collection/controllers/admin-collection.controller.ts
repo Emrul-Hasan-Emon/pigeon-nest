@@ -68,9 +68,10 @@ export class AdminCollectionController {
     return this.adminCollectionService.update(id, dto, image);
   }
 
-  @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.adminCollectionService.remove(id);
-  }
+  // Delete is switched off for now. Remove these comment marks to bring it back.
+  // @Delete(':id')
+  // @HttpCode(HttpStatus.NO_CONTENT)
+  // remove(@Param('id', ParseIntPipe) id: number) {
+  //   return this.adminCollectionService.remove(id);
+  // }
 }

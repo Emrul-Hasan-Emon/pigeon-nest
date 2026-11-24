@@ -9,13 +9,14 @@ import { SellerStatus } from '../../database/enums/seller-status.enum';
 import { SkuPriceProposalStatus } from '../../database/enums/sku-price-proposal.enums';
 import { effectivePrice } from '../../storefront/storefront-product.service';
 import { tidy } from '../../shared/utils/money.util';
+import { isShopClosed } from '../../shared/utils/shop-break.util';
 
 export type CartLineStatus = 'ok' | 'unavailable' | 'out_of_stock' | 'insufficient_stock';
 
 export interface CartLineView {
   id: number;
   product: { id: number; name: string; slug: string; thumbnailUrl: string | null } | null;
-  sku: { id: number; code: string; imageUrl: string | null; label: string } | null;
+  sku: { id: number; code: string; imageUrl: string | null; label: string; bird: { ringNumber: string | null; hatchDate: string | null; breed: string | null } | null } | null;
   quantity: number;
   /** Right now, from the live SKU. */
   unitPrice: number;
@@ -78,7 +79,8 @@ export class CartViewService {
       !!seller &&
       !seller.deletedAt &&
       seller.status === SellerStatus.APPROVED &&
-      seller.activeStatus === SellerActiveStatus.ACTIVE;
+      seller.activeStatus === SellerActiveStatus.ACTIVE &&
+      !isShopClosed(seller);
 
     const lines = (cart.items ?? []).map((item) => this.line(item, sellerLive));
     const ok = lines.filter((l) => l.status === 'ok');
@@ -177,6 +179,11 @@ export class CartViewService {
               .filter((v) => v.attribute && v.attributeValue)
               .map((v) => `${v.attribute.name}: ${v.attributeValue.name}`)
               .join(' / '),
+            // The pigeon facts a buyer wants to see before ordering. Null for items that have none.
+            bird:
+              sku.ringNumber || sku.hatchDate || product?.breed
+                ? { ringNumber: sku.ringNumber ?? null, hatchDate: sku.hatchDate ?? null, breed: product?.breed ?? null }
+                : null,
           }
         : null,
       quantity: item.quantity,

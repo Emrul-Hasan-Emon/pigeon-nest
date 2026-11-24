@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import type { Seller, SellerActiveStatus } from '@/types/seller';
 import { Avatar } from '../initials-avatar';
+import { isShopClosed } from '@/lib/shop-break';
 
 const STATUS_STYLES: Record<Seller['status'], string> = {
   approved: 'bg-emerald-100 text-emerald-700',
@@ -32,7 +33,7 @@ export function SellerTable({
             <th className="px-4 py-3 text-left font-medium text-muted-foreground">Name</th>
             <th className="px-4 py-3 text-left font-medium text-muted-foreground">Email</th>
             <th className="px-4 py-3 text-left font-medium text-muted-foreground">Phone</th>
-            <th className="px-4 py-3 text-left font-medium text-muted-foreground">Commission</th>
+            <th className="px-4 py-3 text-left font-medium text-muted-foreground">System commission</th>
             <th className="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
             <th className="px-4 py-3 text-left font-medium text-muted-foreground">Activity</th>
             <th className="px-4 py-3 text-right font-medium text-muted-foreground">Actions</th>
@@ -51,7 +52,7 @@ export function SellerTable({
               <td className="px-4 py-3">
                 <Avatar name={seller.name} url={seller.avatarUrl} />
               </td>
-              <td className="px-4 py-3 font-medium text-foreground">{seller.name}</td>
+              <td className="px-4 py-3 font-medium text-foreground">{seller.name}{isShopClosed(seller) && <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">{seller.isEnabledForSell ? 'On a planned break' : 'Selling off'}</span>}</td>
               <td className="px-4 py-3 text-muted-foreground">{seller.email ?? '—'}</td>
               <td className="px-4 py-3 text-muted-foreground">{seller.phone ?? '—'}</td>
               <td className="px-4 py-3 text-muted-foreground">{seller.commission ? `${seller.commission.type === 'percentage' ? `${seller.commission.value}%` : `${seller.commission.value} / order`}${seller.commission.source === 'global' ? ' (global)' : ''}` : '—'}</td>

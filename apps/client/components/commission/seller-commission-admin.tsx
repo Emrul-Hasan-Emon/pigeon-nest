@@ -13,6 +13,7 @@ import { ChangeLog } from './change-log';
 import { LedgerList } from './ledger-list';
 import { SettingHistory } from './setting-history';
 import { LoadingBlock } from '@/components/ui/skeleton';
+import { useBreadcrumbTitle } from '@/components/ui/breadcrumbs';
 
 type Tab = 'ledger' | 'changes' | 'payments' | 'rule';
 
@@ -20,6 +21,7 @@ type Tab = 'ledger' | 'changes' | 'payments' | 'rule';
 export function SellerCommissionAdmin({ sellerId }: { sellerId: number }) {
   const { showToast } = useToast();
   const [b, setB] = useState<BalanceDetail | null>(null);
+  useBreadcrumbTitle(b?.sellerName);
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>('ledger');
   const [refresh, setRefresh] = useState(0);
@@ -56,11 +58,11 @@ export function SellerCommissionAdmin({ sellerId }: { sellerId: number }) {
     event.preventDefault();
     setPayError(null);
     if (!/^\d+(\.\d{1,2})?$/.test(amount.trim()) || Number(amount) <= 0) return setPayError('Enter an amount above 0 with at most 2 decimals.');
-    if (b && Number(amount) > b.dueCommission) return setPayError(`The amount cannot be more than the commission due (${money(b.dueCommission)}).`);
+    if (b && Number(amount) > b.dueCommission) return setPayError(`The amount cannot be more than the system commission due (${money(b.dueCommission)}).`);
     setPaying(true);
     try {
       await adminCommission.disburse(sellerId, { amount: amount.trim(), notes: notes.trim() || undefined }, files);
-      showToast('Commission payment recorded.', 'success');
+      showToast('System commission payment recorded.', 'success');
       setAmount('');
       setNotes('');
       setFiles([]);
@@ -83,7 +85,7 @@ export function SellerCommissionAdmin({ sellerId }: { sellerId: number }) {
     setSavingRule(true);
     try {
       await adminCommission.setRule(sellerId, ruleType, n, ruleNote.trim() || undefined);
-      showToast('Commission rate saved.', 'success');
+      showToast('System commission rate saved.', 'success');
       setRuleNote('');
       setRefresh((c) => c + 1);
       load();
@@ -100,14 +102,14 @@ export function SellerCommissionAdmin({ sellerId }: { sellerId: number }) {
 
   return (
     <div>
-      <Link href="/admin/commission" className="text-sm text-primary hover:underline">← Commission balances</Link>
+      <Link href="/admin/commission" className="text-sm text-primary hover:underline">← System commission balances</Link>
       <div className="mb-4 mt-2 flex flex-wrap items-baseline gap-x-4">
         <h1 className="text-2xl font-bold text-foreground">{b.sellerName}</h1>
         <Link href={`/admin/sellers/${sellerId}`} className="text-sm text-primary hover:underline">View seller</Link>
         <span className="text-sm text-muted-foreground">Rate: {ruleText(b.commission.effective)}</span>
       </div>
       <Cards items={[
-        { label: 'Total commission', value: money(b.totalCommission), hint: 'Earned from fully paid orders' },
+        { label: 'Total system commission', value: money(b.totalCommission), hint: 'Earned from fully paid orders' },
         { label: 'Due', value: money(b.dueCommission), tone: b.dueCommission > 0 ? 'warn' : undefined, hint: b.dueCommission < 0 ? 'Below zero: the platform owes this seller' : 'Not yet received from the seller' },
         { label: 'Paid', value: money(b.paidCommission), tone: 'good', hint: 'Received from the seller' },
       ]} />
@@ -126,13 +128,13 @@ export function SellerCommissionAdmin({ sellerId }: { sellerId: number }) {
         </form>
 
         <form onSubmit={saveRule} className="rounded-xl border border-border bg-card p-5 shadow-sm">
-          <h2 className="mb-1 font-semibold text-foreground">Commission rate</h2>
+          <h2 className="mb-1 font-semibold text-foreground">System commission rate</h2>
           <p className="mb-3 text-xs text-muted-foreground">
             {b.commission.setting ? 'This seller has their own rate.' : `No own rate: the global rate applies (${ruleText(b.commission.global)}).`} A change affects new orders only. It is worked out for each item and added up for the order.
           </p>
           {ruleError && <p role="alert" className="mb-3 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">{ruleError}</p>}
           <div className="space-y-3">
-            <select className={`${field} w-full`} value={ruleType} onChange={(e) => setRuleType(e.target.value as CommissionType)} aria-label="Commission type">
+            <select className={`${field} w-full`} value={ruleType} onChange={(e) => setRuleType(e.target.value as CommissionType)} aria-label="System commission type">
               <option value="percentage">Percentage of each item</option>
               <option value="fixed">Fixed amount per item</option>
             </select>

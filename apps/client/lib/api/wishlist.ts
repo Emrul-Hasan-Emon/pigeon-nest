@@ -29,8 +29,8 @@ export function removeFromWishlist(productId: number) {
 }
 
 // ---- seller ----
-export function getWishlistInsights(limit?: number) {
-  return sellerHttp.get<SellerWishlistInsights>(ENDPOINTS.seller.wishlist.insights, { limit });
+export function getWishlistInsights(limit?: number, search?: string) {
+  return sellerHttp.get<SellerWishlistInsights>(ENDPOINTS.seller.wishlist.insights, { limit, search });
 }
 
 // ---- admin ----

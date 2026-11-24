@@ -12,13 +12,18 @@ import {
   ProductStatusBadge,
 } from '@/components/products/status-badges';
 import { useDebouncedValue } from '@/lib/hooks/use-debounced-value';
-import { deleteMyProduct, listMyProducts, updateMyProduct } from '@/lib/api/seller-products';
+import { BulkProductBar } from '@/components/products/bulk-bar';
+import { QuickEdit } from '@/components/seller/quick-edit';
+import { bulkMyProducts, copyMyProduct, deleteMyProduct, listMyProducts, updateMyProduct } from '@/lib/api/seller-products';
 import { ApiError, NotFoundApiError } from '@/lib/api/http';
 import { clearSellerToken, getSellerToken } from '@/lib/auth/seller-token';
 import type { Product, ProductActiveStatus, ProductListSort, ProductStatus } from '@/types/product';
 import { LoadingBlock } from '@/components/ui/skeleton';
+import { DELETE_ENABLED } from '@/lib/features';
 
 const PAGE_SIZE = 20;
+
+// Sellers cannot delete a product from the list for now. Switch this on to bring the Delete button back.
 
 const selectClass =
   'rounded-md border border-input bg-card px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none';
@@ -34,11 +39,14 @@ export default function SellerProductsPage() {
   const [sort, setSort] = useState<ProductListSort>('newest');
 
   const [products, setProducts] = useState<Product[]>([]);
+  const [picked, setPicked] = useState<number[]>([]);
   const [nextCursor, setNextCursor] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [blocked, setBlocked] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<Product | null>(null);
+  const [quickEditId, setQuickEditId] = useState<number | null>(null);
+  const [copyingId, setCopyingId] = useState<number | null>(null);
 
   const filters = useCallback(
     () => ({
@@ -115,6 +123,20 @@ export default function SellerProductsPage() {
       // The row may have been rejected / suspended since the list loaded.
       fetchFirstPage();
       handleError(error, 'Failed to update the product.');
+    }
+  }
+
+  // A copy is a new product, switched off. The seller lands on its edit page to change what is different.
+  async function handleCopy(product: Product) {
+    setCopyingId(product.id);
+    try {
+      const copy = await copyMyProduct(product.id);
+      showToast('Copied. The copy is switched off until you turn it on.', 'success');
+      router.push(`/seller/products/${copy.id}/edit`);
+    } catch (error) {
+      handleError(error, 'Could not copy the product.');
+    } finally {
+      setCopyingId(null);
     }
   }
 
@@ -214,6 +236,7 @@ export default function SellerProductsPage() {
                 <table className="min-w-full divide-y divide-border text-sm">
                   <thead className="bg-muted">
                     <tr>
+                      <th className="w-10 px-4 py-3"><input type="checkbox" aria-label="Select every product on this page" checked={products.length > 0 && products.every((p) => picked.includes(p.id))} onChange={(e) => setPicked(e.target.checked ? products.map((p) => p.id) : [])} /></th>
                       <th className="px-4 py-3 text-left font-medium text-muted-foreground">Image</th>
                       <th className="px-4 py-3 text-left font-medium text-muted-foreground">Name</th>
                       <th className="px-4 py-3 text-left font-medium text-muted-foreground">Category</th>
@@ -227,7 +250,7 @@ export default function SellerProductsPage() {
                   <tbody className="divide-y divide-border">
                     {products.length === 0 && (
                       <tr>
-                        <td colSpan={7} className="px-4 py-6 text-center text-muted-foreground">
+                        <td colSpan={9} className="px-4 py-6 text-center text-muted-foreground">
                           No products found.
                         </td>
                       </tr>
@@ -235,7 +258,8 @@ export default function SellerProductsPage() {
                     {products.map((product) => {
                       const locked = isLocked(product);
                       return (
-                        <tr key={product.id} className="align-top">
+                        <tr key={product.id} className={`align-top ${picked.includes(product.id) ? 'bg-accent/40' : ''}`}>
+                          <td className="px-4 py-3"><input type="checkbox" aria-label={`Select ${product.name}`} checked={picked.includes(product.id)} onChange={() => setPicked((c) => (c.includes(product.id) ? c.filter((x) => x !== product.id) : [...c, product.id]))} /></td>
                           <td className="px-4 py-3">
                             {product.thumbnailUrl ? (
                               // eslint-disable-next-line @next/next/no-img-element
@@ -251,7 +275,7 @@ export default function SellerProductsPage() {
                             )}
                           </td>
                           <td className="px-4 py-3 font-medium text-foreground">
-                            {product.name}
+                            <Link href={`/seller/products/${product.id}`} className="hover:underline">{product.name}</Link>
                             {product.status === 'rejected' && product.rejectionReason && (
                               <p className="mt-0.5 text-xs font-normal text-red-700">
                                 Rejected: {product.rejectionReason}
@@ -287,14 +311,35 @@ export default function SellerProductsPage() {
                           <td className="px-4 py-3 text-right tabular-nums text-muted-foreground">{product.wishlistCount ?? 0}</td>
                           <td className="px-4 py-3 text-right tabular-nums text-muted-foreground">{product.ratingCount ? `${product.ratingAverage.toFixed(1)} (${product.ratingCount})` : '—'}</td>
                           <td className="px-4 py-3 text-right">
-                            <div className="flex justify-end gap-3">
+                            <div className="flex justify-end gap-3 whitespace-nowrap">
                               <Link
                                 href={`/seller/products/${product.id}`}
                                 className="font-medium text-primary hover:opacity-70"
                               >
-                                {locked ? 'View' : 'Edit'}
+                                View
                               </Link>
                               {!locked && (
+                                <Link
+                                  href={`/seller/products/${product.id}/edit`}
+                                  className="font-medium text-primary hover:opacity-70"
+                                >
+                                  Edit
+                                </Link>
+                              )}
+                              {!locked && (
+                                <button type="button" onClick={() => setQuickEditId(product.id)} className="font-medium text-primary hover:opacity-70">
+                                  Quick edit
+                                </button>
+                              )}
+                              <button
+                                type="button"
+                                disabled={copyingId === product.id}
+                                onClick={() => handleCopy(product)}
+                                className="font-medium text-primary hover:opacity-70 disabled:opacity-50"
+                              >
+                                {copyingId === product.id ? 'Copying…' : 'Copy'}
+                              </button>
+                              {!locked && DELETE_ENABLED && (
                                 <button
                                   type="button"
                                   onClick={() => setPendingDelete(product)}
@@ -327,6 +372,20 @@ export default function SellerProductsPage() {
             )}
           </>
         )}
+
+        {quickEditId !== null && (
+          <QuickEdit
+            productId={quickEditId}
+            onClose={() => setQuickEditId(null)}
+            onSaved={(updated) => {
+              setProducts((current) => current.map((row) => (row.id === updated.id ? { ...row, ...updated } : row)));
+              setQuickEditId(null);
+              showToast('Saved.', 'success');
+            }}
+          />
+        )}
+
+        {picked.length > 0 && <BulkProductBar selected={picked} admin={false} run={bulkMyProducts} onDone={fetchFirstPage} onClear={() => setPicked([])} />}
 
         {pendingDelete && (
           <ConfirmDialog

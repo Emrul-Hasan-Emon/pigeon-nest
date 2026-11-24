@@ -1,0 +1,251 @@
+{
+  "slug": "returns",
+  "title": "Returns",
+  "icon": "rotate-ccw",
+  "order": 80,
+  "summary": "A buyer received an order and wants to send something back. You decide, and if you say yes, you return the money.",
+  "openPath": "/seller/returns",
+  "openLabel": "Open returns",
+  "sections": [
+    {
+      "id": "what",
+      "title": "What is a return?",
+      "intro": "A return is when a buyer has already received their order and asks to send some of it, or all of it, back and get their money. For example: the bird is not as described, or something arrived wrong or damaged.",
+      "blocks": [
+        {
+          "type": "points",
+          "title": "In simple words",
+          "items": [
+            "The buyer asks. You answer yes or no.",
+            "If you say yes, the buyer sends the item back. You return their money.",
+            "A return is different from a refund. A refund is for an order that was cancelled before delivery. A return is for an order that was delivered."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "why",
+      "title": "Why does it matter to you?",
+      "blocks": [
+        {
+          "type": "points",
+          "items": [
+            "A quick, fair answer keeps buyers happy and brings them back.",
+            "You see the reason and the photos, so you can judge if the buyer is right.",
+            "The page keeps the whole story: request, your answer, the money and the dates. If there is an argument, an admin can read it.",
+            "When a return is finished, the system commission on that item is taken back off your balance. You do not pay a fee on a sale that was undone."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rules",
+      "title": "The rules buyers must follow",
+      "blocks": [
+        {
+          "type": "points",
+          "items": [
+            "The order must be delivered and fully paid.",
+            "The buyer must ask within the return window after delivery. The normal window is 7 days. The marketplace sets it. After that the website does not let them ask.",
+            "The buyer can ask once for each item, or once for the whole order. They cannot ask again for the same item.",
+            "The buyer must write a reason (at least 5 characters). They can add photos.",
+            "The buyer can cancel their own request until you answer it."
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "info",
+          "text": "You do not need to check the window. The website already stops late requests."
+        }
+      ]
+    },
+    {
+      "id": "when",
+      "title": "When will you see one?",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "How a return reaches you",
+          "steps": [
+            "The order is delivered and paid.",
+            "The buyer opens their order and presses \"Return items from this order\".",
+            "They choose the whole order or some items, give a reason and add photos.",
+            "The return appears in \"Returns\" with the status \"Return requested\".",
+            "A number shows on the \"Returns\" menu item. The dashboard box \"Return requests\" shows it in red, and the bell shows it too."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "status",
+      "title": "The steps of a return",
+      "blocks": [
+        {
+          "type": "words",
+          "title": "What each status means",
+          "items": [
+            {
+              "term": "Return requested",
+              "means": "The buyer asked. It is waiting for your answer."
+            },
+            {
+              "term": "Accepted",
+              "means": "You said yes. The buyer sends the item back to you."
+            },
+            {
+              "term": "Processing",
+              "means": "The item is back with you. You are working on the money."
+            },
+            {
+              "term": "Money is being returned",
+              "means": "You sent the money and wrote down how. An admin will confirm."
+            },
+            {
+              "term": "Returned",
+              "means": "An admin confirmed. The return is finished."
+            },
+            {
+              "term": "Rejected",
+              "means": "You said no and gave a reason."
+            },
+            {
+              "term": "Cancelled",
+              "means": "The buyer cancelled their own request before you answered."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "decide",
+      "title": "Step 1: answer the request",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "How to decide",
+          "steps": [
+            "Press \"Returns\" in the left menu. Open a return with the status \"Return requested\".",
+            "Read the order and customer, the items they want to return and the reason.",
+            "Look at the photos. Check the bird details (ring number, age, breed) so you know which bird it is.",
+            "Check the refund amount: items, and delivery if it is a whole-order return.",
+            "To say yes, press \"Accept return\". A note is optional.",
+            "On a whole-order return you also choose whether the delivery charge is refunded too. It is your choice.",
+            "To say no, press \"Reject\". Write a reason. A reason is required, and the buyer reads it."
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "warn",
+          "text": "A rejection cannot be undone, and the buyer cannot ask again for the same items. Be fair and write a clear reason. The buyer may contact support, and an admin can read your note."
+        },
+        {
+          "type": "note",
+          "tone": "info",
+          "text": "The delivery charge is never refunded when only some items are returned."
+        }
+      ]
+    },
+    {
+      "id": "process",
+      "title": "Step 2: when the item is back",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "How to",
+          "steps": [
+            "After you accept, the buyer sends the item back as you asked. Tell them how in a message if you need to.",
+            "When the item is back with you, open the return.",
+            "Check the item. Is it what they said?",
+            "Press \"Start processing\". The status becomes \"Processing\"."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "money",
+      "title": "Step 3: return the money",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "How to",
+          "steps": [
+            "Send the refund amount to the buyer from your bKash, Nagad or bank. The page shows the exact amount.",
+            "Take a screenshot of the transfer.",
+            "Open the return and press \"Money is being returned\".",
+            {
+              "text": "Write the note: how and when you sent it.",
+              "detail": "Example: \"Sent by bKash to 01799990001 today at 3 pm\"."
+            },
+            "Type the Transaction ID if you have one.",
+            "Add the proof file. It is optional, but add it always: it protects you.",
+            "Press Save. The status becomes \"Money is being returned\".",
+            "Wait. An admin checks it and sets the return to \"Returned\"."
+          ]
+        },
+        {
+          "type": "points",
+          "title": "What you see on the return page",
+          "items": [
+            "\"Refund\": the amount that goes back to the buyer.",
+            "\"System commission back\": the fee that comes off your balance when the return is finished.",
+            "\"Money records for this return\": every record of money sent, with proof.",
+            "\"History\": every step with the date."
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "info",
+          "text": "If you say you sent the money and the buyer says they did not get it, an admin adds another money record. You, the buyer and the admin can all see it."
+        }
+      ]
+    },
+    {
+      "id": "find",
+      "title": "Find a return",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "How to",
+          "steps": [
+            "On the Returns page, choose a status or \"Any status\".",
+            "Choose \"Whole order or items\" to filter by kind.",
+            "Type a return number, an order number, a name or a phone number in the search box.",
+            "Press \"Clear filters\" to start again."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "faq",
+      "title": "Questions people ask",
+      "blocks": [
+        {
+          "type": "faq",
+          "title": "Common questions",
+          "items": [
+            {
+              "q": "Do I have to accept every return?",
+              "a": "No. You can reject, but you must give a reason. Reject only when the request is not fair."
+            },
+            {
+              "q": "Why can a buyer not ask for a return on an old order?",
+              "a": "The return window ended. The website blocks it for you."
+            },
+            {
+              "q": "Who pays for sending the item back?",
+              "a": "Agree this with the buyer in your note. The website does not decide it."
+            },
+            {
+              "q": "Why can I not press the next button?",
+              "a": "Steps go in order: Accept, Start processing, Money is being returned. You cannot skip one."
+            },
+            {
+              "q": "Why does my dashboard show a Refund after a return?",
+              "a": "The return was finished and the money counts as refunded on the day it was finished."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

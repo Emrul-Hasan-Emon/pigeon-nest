@@ -20,6 +20,7 @@ import {
   MAX_INT32,
 } from '../../../shared/constants/limits';
 import { SkuVariantPairDto } from './sku-variant-pair.dto';
+import { BirdSkuFieldsDto } from './bird-fields.dto';
 
 const MONEY = { maxDecimalPlaces: 2, allowNaN: false, allowInfinity: false };
 
@@ -27,7 +28,7 @@ const MONEY = { maxDecimalPlaces: 2, allowNaN: false, allowInfinity: false };
 // - With `id`: updates that SKU (variants and the SKU code are immutable).
 // - Without `id`: creates a new SKU; `price` and `variants` are then required.
 // `null` is never accepted — omit a field to leave it alone.
-export class UpdateProductSkuDto {
+export class UpdateProductSkuDto extends BirdSkuFieldsDto {
   @IsDefinedWhenPresent()
   @IsInt()
   @Min(1)

@@ -8,12 +8,14 @@ import { findCategoryNode } from '@/lib/category-tree';
 import { useToast } from '@/components/ui/toast';
 import type { Category } from '@/types/category';
 import { LoadingBlock } from '@/components/ui/skeleton';
+import { useBreadcrumbTitle } from '@/components/ui/breadcrumbs';
 
 export default function EditCategoryPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const { showToast } = useToast();
   const [category, setCategory] = useState<Category | null>(null);
+  useBreadcrumbTitle(category?.name);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

@@ -7,12 +7,14 @@ import { listAttributes } from '@/lib/api/attributes';
 import { useToast } from '@/components/ui/toast';
 import type { Attribute } from '@/types/attribute';
 import { LoadingBlock } from '@/components/ui/skeleton';
+import { useBreadcrumbTitle } from '@/components/ui/breadcrumbs';
 
 export default function EditAttributePage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const { showToast } = useToast();
   const [attribute, setAttribute] = useState<Attribute | null>(null);
+  useBreadcrumbTitle(attribute?.name);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

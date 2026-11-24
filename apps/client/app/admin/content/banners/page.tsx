@@ -10,6 +10,7 @@ import { deleteBanner, listBanners, updateBanner } from '@/lib/api/banners';
 import { ApiError, ConflictApiError, NotFoundApiError } from '@/lib/api/http';
 import { BANNER_POSITIONS, type Banner, type BannerListParams } from '@/types/banner';
 import { LoadingBlock } from '@/components/ui/skeleton';
+import { DELETE_ENABLED } from '@/lib/features';
 
 const PAGE_SIZE = 20;
 const selectClass =
@@ -180,7 +181,7 @@ export default function AdminBannersPage() {
                   </td>
                   <td className="px-4 py-3 text-right">
                     <Link href={`/admin/content/banners/${b.id}`} className="mr-3 text-primary hover:underline">Edit</Link>
-                    <button type="button" onClick={() => setPendingDelete(b)} className="text-destructive hover:underline">Delete</button>
+                    {DELETE_ENABLED && <button type="button" onClick={() => setPendingDelete(b)} className="text-destructive hover:underline">Delete</button>}
                   </td>
                 </tr>
               ))}

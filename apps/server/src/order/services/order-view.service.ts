@@ -11,6 +11,10 @@ import { AuthUserType } from '../../database/enums/auth-user-type.enum';
 import { OrderStatus } from '../../database/enums/order-status.enum';
 import { allowedTargets } from '../utils/order-status-rules';
 import { tidy } from '../../shared/utils/money.util';
+import { PaymentClaim } from '../../database/entities/payment/payment-claim.entity';
+import { SellerPaymentAccount } from '../../database/entities/payment/seller-payment-account.entity';
+import { OrderRefund } from '../../database/entities/order/order-refund.entity';
+import { refundRecordView } from '../utils/refund-view.util';
 
 export interface SkuSnapshot {
   code?: string;
@@ -18,6 +22,7 @@ export interface SkuSnapshot {
   imageUrl?: string | null;
   thumbnailUrl?: string | null;
   slug?: string;
+  bird?: Record<string, unknown>;
 }
 
 /** How orders look in API responses. Seller and admin screens reuse these. */
@@ -40,7 +45,7 @@ export class OrderViewService {
 
   /** The order with everything around it: payments and their files, histories, updates. */
   async full(order: Order, viewer: AuthUserType) {
-    const [payments, attachments, paymentHistory, updates, returns] = await Promise.all([
+    const [payments, attachments, paymentHistory, updates, returns, accounts, claims, refunds] = await Promise.all([
       this.db.payment.find({ where: { orderId: order.id }, order: { id: 'ASC' } }),
       this.db.paymentAttachment.find({ where: { orderId: order.id }, order: { id: 'ASC' } }),
       this.db.paymentStatusHistory.find({ where: { orderId: order.id }, order: { id: 'ASC' } }),
@@ -50,8 +55,16 @@ export class OrderViewService {
         order: { id: 'ASC', attachments: { id: 'ASC' } },
       }),
       this.db.orderReturn.find({ where: { orderId: order.id }, relations: { items: true }, order: { id: 'DESC' } }),
+      // Where to pay: a customer sees only the accounts that are switched on; staff see them all.
+      this.db.sellerPaymentAccount.find({
+        where: { sellerId: order.sellerId, ...(viewer === AuthUserType.USER ? { isActive: true } : {}) },
+        order: { id: 'ASC' },
+      }),
+      this.db.paymentClaim.find({ where: { orderId: order.id }, order: { id: 'DESC' } }),
+      // Money back for a cancelled order (or an extra record on a return): everyone sees the same records.
+      this.db.orderRefund.find({ where: { orderId: order.id }, relations: { history: true }, order: { id: 'DESC' } }),
     ]);
-    return this.detail(order, { payments, attachments, paymentHistory, updates, returns }, viewer);
+    return this.detail(order, { payments, attachments, paymentHistory, updates, returns, accounts, claims, refunds }, viewer);
   }
 
   attachment(a: {
@@ -106,10 +119,13 @@ export class OrderViewService {
       paymentHistory: PaymentStatusHistory[];
       updates: OrderUpdate[];
       returns?: OrderReturn[];
+      accounts?: SellerPaymentAccount[];
+      claims?: PaymentClaim[];
+      refunds?: OrderRefund[];
     },
     viewer: AuthUserType,
   ) {
-    const { payments, attachments, paymentHistory, updates, returns = [] } = extras;
+    const { payments, attachments, paymentHistory, updates, returns = [], accounts = [], claims = [], refunds = [] } = extras;
     return {
       ...this.summary(order, viewer),
       cartId: order.cartId,
@@ -125,6 +141,24 @@ export class OrderViewService {
         createdAt: r.createdAt,
       })),
       totals: this.totals(order),
+      refunds: refunds.map((r) => refundRecordView(r)),
+      // Where the customer sends money, and the "I have paid" messages about this order.
+      payTo: accounts.map((a) => ({ id: a.id, kind: a.kind, provider: a.provider, accountName: a.accountName, accountNumber: a.accountNumber, branchName: a.branchName, note: a.note, isActive: a.isActive })),
+      paymentClaims: claims.map((c) => ({
+        id: c.id,
+        amount: c.amount,
+        transactionId: c.transactionId,
+        method: c.method,
+        senderNumber: c.senderNumber,
+        paidOn: c.paidOn,
+        note: c.note,
+        status: c.status,
+        decisionNote: c.decisionNote,
+        decidedAt: c.decidedAt,
+        decidedByName: c.decidedByName,
+        createdAt: c.createdAt,
+        attachments: (c.attachments ?? []).map((a) => ({ kind: a.kind, fileName: a.fileName, fileUrl: a.fileUrl })),
+      })),
       // The platform's cut is for staff only; customers never see it.
       ...(viewer === AuthUserType.USER ? {} : { commission: this.commission(order) }),
       delivery: {
@@ -185,6 +219,8 @@ export class OrderViewService {
     return {
       id: order.id,
       orderNumber: order.orderNumber,
+      // Money back for a cancelled order: needs_to_refund, processing, refunded, or empty.
+      refundStatus: order.refundStatus ?? null,
       status: order.status,
       paymentStatus: order.paymentStatus,
       seller: order.seller
@@ -251,6 +287,8 @@ export class OrderViewService {
       productName: item.productName,
       productSlug: sku.slug ?? null,
       sku: { id: item.sellerProductSkuId, code: sku.code ?? null, label: sku.label ?? '' },
+      // Pigeon facts as they were when the order was placed; null for other items and older orders.
+      bird: sku.bird ?? null,
       imageUrl: this.image(item),
       quantity: item.quantity,
       unitPrice: item.unitPrice,

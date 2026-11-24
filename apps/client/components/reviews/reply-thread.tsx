@@ -335,15 +335,17 @@ export function ReplyThread({
   canReply,
   count,
   onChanged,
+  defaultOpen = false,
 }: {
   api: ThreadApi;
   me: AuthorType | null;
   canReply: boolean;
   count: number;
   onChanged?: () => void;
+  defaultOpen?: boolean;
 }) {
   const [refresh, setRefresh] = useState(0);
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(defaultOpen && count > 0);
   const [composing, setComposing] = useState(false);
   const changed = useCallback(() => {
     setRefresh((n) => n + 1);

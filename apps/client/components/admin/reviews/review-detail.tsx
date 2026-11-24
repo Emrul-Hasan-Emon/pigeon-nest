@@ -24,6 +24,8 @@ import { formatDateTime } from '@/lib/datetime';
 import { reviewStatusBadge } from './review-list';
 import type { AdminReviewDetails } from '@/types/review';
 import { LoadingBlock } from '@/components/ui/skeleton';
+import { useBreadcrumbTitle } from '@/components/ui/breadcrumbs';
+import { DELETE_ENABLED } from '@/lib/features';
 
 const textarea = 'w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:border-foreground focus:outline-none';
 const section = 'rounded-xl border border-border bg-card p-4 shadow-sm';
@@ -82,6 +84,7 @@ function ReasonDialog({
 export function AdminReviewDetail({ id }: { id: number }) {
   const { showToast } = useToast();
   const [review, setReview] = useState<AdminReviewDetails | null>(null);
+  useBreadcrumbTitle(review ? `Review #${review.id}` : null);
   const [missing, setMissing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dialog, setDialog] = useState<'hide' | 'restore' | null>(null);
@@ -100,7 +103,7 @@ export function AdminReviewDetail({ id }: { id: number }) {
       load: (parentId, cursor) => listAdminThread(id, { parentId: parentId ?? undefined, cursor, limit: 20 }),
       create: (body, parentId) => replyAsAdmin(id, body, parentId),
       edit: (rid, body) => editReplyAsAdmin(rid, body),
-      remove: (rid) => deleteReplyAsAdmin(rid),
+      remove: DELETE_ENABLED ? (rid: number) => deleteReplyAsAdmin(rid) : undefined,
       hide: (rid, reason) => hideReply(rid, reason),
       restore: (rid) => restoreReply(rid),
     }),

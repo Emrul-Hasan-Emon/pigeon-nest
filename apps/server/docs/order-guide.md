@@ -129,8 +129,7 @@ There are five types, and each asks the customer for different details:
 Each gateway also shows the customer its instructions and account details (for
 example "Send the total to 01711111111, then enter the transaction ID").
 
-An admin can switch a gateway off (it disappears from checkout) but cannot
-delete one that any order or payment has used. One gateway, "Cash on Delivery",
+An admin can switch a gateway off (it disappears from checkout). Deleting a gateway is switched off for now (it was refused for one that any order or payment had used). One gateway, "Cash on Delivery",
 exists from the start.
 
 ### 3.2 Shipping zones ("what delivery costs")
@@ -278,7 +277,9 @@ The system does all of this in one go, or none of it:
   4. Creates the ORDER: status PENDING, payment status DUE, with a unique order
      number, the seller, the address, the delivery price and time as quoted,
      and the payment method (id, name and short name are saved).
-  5. Saves each item with the price it was sold at.
+  5. Saves each item with the price it was sold at, and, for a pigeon that has
+     them, a copy of its details (ring number, hatch date, vaccination, breed,
+     bloodline, sire and dam). Later edits to the bird do not change the order.
   6. Creates the PAYMENT record (status due) and saves anything the customer
      typed as proof (for example the transaction ID).
   7. Writes the first line of both histories ("Order placed").
@@ -672,8 +673,8 @@ All payments of all sellers, with the filters in section 7.6.
 Section 4.6.
 
 ### 14.4 Users > a user's page > Addresses
-The admin can add, edit, delete and set the default for a customer's addresses on
-their behalf (for example when helping someone by phone). Changes are recorded
+The admin can add, edit and set the default for a customer's addresses on
+their behalf (delete is switched off for now) (for example when helping someone by phone). Changes are recorded
 as made by the admin.
 
 ### 14.5 Settings
@@ -967,3 +968,9 @@ These do not exist yet, so they are not described above as features:
   History       The list of changes with who made them and when.
   Active / inactive cart  Active: still being filled. Inactive: became an order.
 ```
+
+---
+
+## Printing an invoice or a packing slip
+
+On an order page (seller and admin) press **Print invoice** or **Print packing slip**. The invoice lists items, unit prices, totals, what was paid and what is still due. The packing slip has no prices: a tick box per item, the bird's ring number, hatch date, vaccine and parents, the address, and what to collect on delivery. Menus are hidden when printing. Routes: `/seller/orders/:id/print` and `/admin/orders/:id/print` (`?type=invoice|slip`).

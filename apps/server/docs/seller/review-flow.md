@@ -27,8 +27,7 @@ Reply
   to the review or to any reply in its thread. Shown as the shop name with a
   "Seller" badge. As many replies as you like (a thread holds 200).
 - `PATCH /review-replies/:id` with `{ body }` edits your reply (30 days).
-- `DELETE /review-replies/:id` deletes your reply. Answers under it stay under a
-  "deleted" note.
+- `DELETE /review-replies/:id` deletes your reply. **Switched off for now** (404, and no Delete button): edit the reply instead.
 - 404 on a review of another seller's product. 403 on a hidden review. 403 for a
   suspended seller.
 
@@ -44,3 +43,7 @@ Screens
 `/seller/reviews`: three cards (average rating, reviews waiting for your reply,
 low ratings), filters for product, stars and "Not answered yet", and each review
 with its thread and a Reply box. Products table: a Rating column beside "Saved by".
+
+## Your public page
+
+Buyers see your overall rating and every review of your products on `/sellers/<your id>`. Write an "About your shop" text in My profile so buyers know who you are. Your phone and email are never shown there.

@@ -7,6 +7,7 @@ import { ApiError } from '@/lib/api/http';
 import { addressApi, type AddressOwner } from '@/lib/api/addresses';
 import { COUNTRIES } from '@/lib/countries';
 import type { AddressInput, AddressView } from '@/types/address';
+import { DELETE_ENABLED } from '@/lib/features';
 
 type Variant = 'store' | 'admin';
 
@@ -215,7 +216,7 @@ export function AddressBook({ owner, variant, onError }: { owner: AddressOwner; 
             <div className="mt-3 flex flex-wrap gap-3">
               <button type="button" className={st.link} onClick={() => setEditing(a)}>Edit</button>
               {!a.isDefault && <button type="button" className={st.link} onClick={() => makeDefault(a)}>Make default</button>}
-              <button type="button" className={`${st.link} hover:!text-destructive`} onClick={() => setRemoving(a)}>Delete</button>
+              {(variant === 'store' || DELETE_ENABLED) && <button type="button" className={`${st.link} hover:!text-destructive`} onClick={() => setRemoving(a)}>Delete</button>}
             </div>
           </li>
         ))}

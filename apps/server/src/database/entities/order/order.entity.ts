@@ -21,6 +21,7 @@ import { CommissionType } from '../../enums/commission-type.enum';
 import { OrderItem } from './order-item.entity';
 import { Cart } from '../cart/cart.entity';
 import { OrderStatusHistory } from './order-status-history.entity';
+import { RefundStatus } from '../../enums/refund-status.enum';
 
 @Entity()
 export class Order extends BaseEntity {
@@ -147,6 +148,10 @@ export class Order extends BaseEntity {
     default: 0,
   })
   amountPaid: number;
+
+  // Money back for a cancelled order that had money paid: needs_to_refund, processing or refunded. Empty otherwise.
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  refundStatus: RefundStatus | null;
 
   @Column({ type: 'text', nullable: true })
   note: string | null;

@@ -1,3 +1,5 @@
+import { ParentRole } from '../../../database/entities/product/seller-product-sku-parent.entity';
+import { SaveSkuParentDto } from '../dtos/save-sku-parent.dto';
 import { Injectable } from '@nestjs/common';
 import { Seller } from '../../../database/entities/seller/seller.entity';
 import { CursorPagination } from '../../../shared/decorators/cursor-pagination-params.decorator';
@@ -10,6 +12,7 @@ import {
   ProductMediaFiles,
 } from './admin-product.service';
 import { ProductStatusHistoryService } from './product-status-history.service';
+import { BulkProductDto } from '../dtos/bulk-product.dto';
 
 // Seller-facing wrapper around the shared product engine. Every call is scoped
 // to the calling seller (someone else's product is a 404) and the engine
@@ -59,6 +62,33 @@ export class SellerProductService {
     return this.productService.updateMediaFiles(id, dto, files, {
       sellerId: seller.id,
     });
+  }
+
+  saveParent(
+    seller: Seller,
+    id: number,
+    skuId: number,
+    role: ParentRole,
+    dto: SaveSkuParentDto,
+    file?: Express.Multer.File,
+  ) {
+    return this.productService.saveParent(id, skuId, role, dto, file, {
+      sellerId: seller.id,
+    });
+  }
+
+  removeParent(seller: Seller, id: number, skuId: number, role: ParentRole) {
+    return this.productService.removeParent(id, skuId, role, {
+      sellerId: seller.id,
+    });
+  }
+
+  bulk(seller: Seller, dto: BulkProductDto) {
+    return this.productService.bulkChange(dto, this.historyService.sellerActor(seller), { sellerId: seller.id });
+  }
+
+  copy(seller: Seller, id: number) {
+    return this.productService.copy(id, this.historyService.sellerActor(seller), { sellerId: seller.id });
   }
 
   remove(seller: Seller, id: number) {

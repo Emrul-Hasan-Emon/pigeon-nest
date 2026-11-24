@@ -48,6 +48,24 @@ export interface SkuVariant {
   attributeValue: { id: number; name: string; colorCode: string | null };
 }
 
+export interface SkuParent {
+  id: number;
+  role: 'sire' | 'dam';
+  name: string | null;
+  ringNumber: string | null;
+  imageUrl: string | null;
+}
+
+/** Facts about the birds, true for every SKU of a product. All optional. */
+export interface BirdProductFields {
+  breed: string | null;
+  bloodline: string | null;
+  bloodlineNote: string | null;
+  vaccinationNote: string | null;
+  healthNote: string | null;
+  raceRecord: string | null;
+}
+
 export interface Sku {
   id: number;
   sellerProductId: number;
@@ -67,10 +85,17 @@ export interface Sku {
   acceptProposals: boolean;
   /** Hidden from buyers. 0 or empty means no floor. */
   minProposalPrice: number | null;
+  /** The bird this option sells. All optional. Dates are YYYY-MM-DD. */
+  ringNumber: string | null;
+  hatchDate: string | null;
+  vaccineName: string | null;
+  vaccinatedOn: string | null;
+  /** Sire first, then dam. */
+  parents?: SkuParent[];
   variants: SkuVariant[];
 }
 
-export interface Product {
+export interface Product extends Partial<BirdProductFields> {
   id: number;
   sellerId: number;
   seller?: ProductSeller;
@@ -161,5 +186,43 @@ export interface ProductStatusHistoryParams {
 
 export interface ProductStatusHistoryResponse {
   results: ProductStatusHistoryEntry[];
+  nextCursor: number | null;
+}
+
+export type BulkProductAction = 'activate' | 'deactivate' | 'price' | 'approve' | 'reject' | 'suspend';
+
+export interface BulkProductPayload {
+  productIds: number[];
+  action: BulkProductAction;
+  mode?: 'percent' | 'amount';
+  direction?: 'increase' | 'decrease';
+  value?: number;
+  reason?: string;
+}
+
+export interface BulkProductResult {
+  action: BulkProductAction;
+  updated: number;
+  failed: number;
+  results: Array<{ id: number; name: string | null; ok: boolean; error?: string }>;
+}
+
+export type StockReason = 'initial' | 'edited' | 'order_placed' | 'order_cancelled' | 'order_reopened';
+
+/** One change to the stock of one option. */
+export interface StockMovement {
+  id: number;
+  sku: { id: number; label: string };
+  change: number;
+  quantityAfter: number;
+  reason: StockReason;
+  orderId: number | null;
+  note: string | null;
+  by: string | null;
+  createdAt: string;
+}
+
+export interface StockMovementPage {
+  results: StockMovement[];
   nextCursor: number | null;
 }

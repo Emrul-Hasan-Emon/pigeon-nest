@@ -8,6 +8,8 @@ screens.
 
 If you only have two minutes, read sections 1, 3 and 4.
 
+> **Delete is switched off for now** in the seller portal and the admin panel (no Delete button, and the delete routes are commented out). See `delete-switched-off.md`. The delete steps below describe how it works when it is switched back on.
+
 ---
 
 ## Contents
@@ -77,7 +79,7 @@ so anyone with admin access can later see who changed what, when, and why.
 
 | Person | What they are | What they do with products |
 |---|---|---|
-| **Admin** | A staff member who runs the marketplace. | Can see **every** product of **every** seller. Can create, edit, approve, reject, suspend, activate, deactivate and delete any product. Can read the history log. |
+| **Admin** | A staff member who runs the marketplace. | Can see **every** product of **every** seller. Can create, edit, approve, reject, suspend, activate, deactivate and (when delete is switched on) delete any product. Can read the history log. |
 | **Seller** | A shop owner who has an approved and active seller account. | Can see and manage **only their own** products, within the limits in this guide. Cannot see other sellers' products. Cannot read the history log. |
 | **Customer** | A shopper. | Can only see products that are **visible** (approved and active). Customers cannot create or change products. (The customer-facing shop is not part of this guide.) |
 
@@ -168,6 +170,66 @@ The system enforces these rules:
 
 Covered in section 12.
 
+### 3.5 Bird details (breed, ring number, parents and more)
+
+Pigeon Nest sells pigeons, and a pigeon buyer wants to know the bird, not just
+the price. These facts are all **optional**. A seller who leaves them empty
+loses nothing; buyers simply see "not given".
+
+The facts sit on two levels, depending on what they describe.
+
+**On the product (true for every SKU under it):**
+
+| Field | What it means | Limit |
+|---|---|---|
+| **Breed** | For example Homer or Roller. | 120 characters |
+| **Bloodline** | The family line, for example Janssen. | 120 characters |
+| **Bloodline note** | More about the line. | 5,000 characters |
+| **Vaccination note** | The vaccination programme in general, for example "PMV and paratyphoid every year". | 5,000 characters |
+| **Health note** | Health history and checks. | 5,000 characters |
+| **Race record** | Results and achievements. | 5,000 characters |
+
+**On the SKU (one SKU = one bird, or one batch):**
+
+| Field | What it means | Limit |
+|---|---|---|
+| **Ring number** | The number on the leg ring. It identifies one bird. | 60 characters |
+| **Hatch date** | The day the bird hatched. The age is worked out from it. | A real date, `YYYY-MM-DD`, not in the future |
+| **Vaccine name** | Which vaccine this bird had. | 120 characters |
+| **Vaccinated on** | The date of that vaccination. | A real date, not in the future, and not before the hatch date |
+| **Sire and dam** | The father and the mother. Each has a name, a ring number and one photo, all optional. | Name 120, ring 60, photo up to 10MB |
+
+Why two levels: a ring number or a hatch date describes one bird, so it cannot
+be shared by every SKU of a product. Breed and bloodline describe the whole
+listing, so typing them once is enough.
+
+Rules:
+
+- **One ring = one bird.** A ring number can be used only once per seller,
+  upper or lower case does not matter. Saving a second bird with the same ring
+  is refused. A bird that is deleted frees its ring.
+- A SKU has **at most one sire and one dam**. Adding one that already exists
+  changes it.
+- A blank value (or `null`) clears a field. Leaving a field out of a save
+  leaves it as it was.
+- A parent with no name, no ring number and no photo is not saved.
+- Removing a parent also removes its photo file. Replacing a photo removes the
+  old file.
+- A seller can change these only while the product is not locked (section 4.3).
+- Parent photos are not part of the product's gallery (section 12).
+
+**Orders keep a copy.** When an order is placed, each item stores the bird as it
+was sold: ring number, hatch date, vaccine name and date, breed, bloodline, and
+the names and ring numbers of the sire and dam (not the photos). If the seller
+edits the SKU later, the order still shows what the buyer bought. Orders placed
+before this feature have no copy (`bird` is `null`).
+
+Where it is shown: the admin and seller product responses carry the product
+fields and each SKU's `parents`. The shop's product response (`/user/products/:id`)
+carries a `bird` block on the product and on every SKU, with the parents' photos.
+Order responses carry `items[].bird`. See `admin/product-flow.md`,
+`seller/product-flow.md` and `user/product-flow.md` for the addresses.
+
 ---
 
 ## 4. The two states of a product: Status and Activity
@@ -184,7 +246,7 @@ but waiting for approval. Keep them apart in your mind.
 
 | Status | Plain meaning | What the seller can do | Who can set it |
 |---|---|---|---|
-| **Approved** | The marketplace is happy with this product. | Everything allowed to a seller (edit, switch active/inactive, delete, manage pictures). | Admin. Also the **automatic starting state** for every new product. |
+| **Approved** | The marketplace is happy with this product. | Everything allowed to a seller (edit, switch active/inactive, manage pictures; delete is switched off for now). | Admin. Also the **automatic starting state** for every new product. |
 | **Pending** | The admin has put the product "on hold" for a look. | **Still everything.** Pending does **not** lock the seller. | Admin only. |
 | **Rejected** | The admin turned the product down. | **Nothing at all except looking at it.** No editing, no changing activity, no deleting, no picture changes. The seller can read the reason. | Admin only. A reason is **mandatory**. |
 
@@ -282,7 +344,7 @@ approved and active (section 14) for any of the seller rows to work.
 | Switch Active / Inactive | Yes | Yes | **No** | No |
 | Suspend a product | **Yes** (reason required) | **No** | No | No |
 | Lift a suspension | **Yes** | **No** | No | No |
-| Delete a product | Yes | Yes | **No** | "Product not found" |
+| Delete a product (switched off for now) | Yes | Yes | **No** | "Product not found" |
 | See a product's status history | **Yes** | **No** | No | No |
 | See their dashboard numbers | n/a | Yes | Yes | n/a |
 
@@ -373,7 +435,7 @@ Each scenario says what the person does and exactly what the system does.
 | 5 | Seller tries to choose a different seller for the product. | **Refused.** The seller is always themselves. |
 | 6 | Seller tries to mark it Featured, or to write a reason. | **Refused.** Those are admin-only. |
 | 7 | Seller creates a product with no SKU. | **Refused.** At least one SKU is required. |
-| 8 | Seller creates a second product with the same name as one they already have. | **Refused.** "This seller already has a product with this name". (Two different sellers may use the same name.) |
+| 8 | Seller creates a second product with the same name as one they already have. | **Allowed.** A name does not have to be unique. Each product has its own id. |
 | 9 | Admin creates a product for an approved and active seller. | Created. Approved + Active by default. History: "Created by admin". |
 | 10 | Admin creates a product for a pending, inactive, rejected or suspended **seller**. | **Refused.** "Seller must be approved and active to receive products". |
 | 11 | Admin creates a product and sets Status Rejected or Activity Suspended but gives no reason. | **Refused.** A reason is required. |
@@ -528,9 +590,7 @@ list.
 - A name is required, up to 400 characters, and must contain at least one
   letter or number.
 - Spaces at the start and end are removed automatically.
-- Each **seller** can use a given name only **once**. The check ignores
-  capital letters: "Racing Homer" and "racing homer" count as the same.
-- Two different sellers may use the same name.
+- A name does not have to be unique. One seller may create many products with the same name.
 - Changing a product's name also updates its web address (slug).
 - A deleted product's name becomes free again.
 
@@ -562,6 +622,12 @@ list.
 - Two SKUs of one product cannot have the same variants.
 - Removing a SKU hides it (a "soft" delete, section 13).
 - You cannot update and remove the same SKU in one save.
+
+### 11.4a Bird detail rules
+
+See section 3.5. In short: every bird field is optional, ring numbers are unique
+per seller, dates must be real and not in the future, the vaccination date
+cannot be before the hatch date, and a blank value clears a field.
 
 ### 11.5 Numbers that look big
 
@@ -614,13 +680,13 @@ Sellers cannot change media on a locked (rejected or suspended) product.
 
 ## 13. Deleting a product
 
+**Switched off for now.** There is no Delete button, and `DELETE /admin/products/:id` and `DELETE /seller/products/:id` answer 404. Switch the product off (Inactive) instead. This section describes how delete works when it is switched back on.
+
 - An admin can delete any product. A seller can delete their own product, but
   **not** when it is Rejected or Suspended.
 - Delete is a **"soft" delete**: the product disappears from every list and
   can no longer be opened, but its record, and its history diary, are kept in
   the database.
-- The product's web name (slug) is freed, so the seller can create a new
-  product with the same name.
 - Deleting asks for confirmation first, and cannot be undone from the screen.
 - If a seller's whole account is later removed from the database, their products
   and their history go with it.
@@ -673,7 +739,7 @@ Columns: picture, name, seller, category, **Status**, **Activity**, actions.
     reason. The confirm button stays disabled until a reason is typed, and
     **nothing is saved before that**.
   - Cancelling the pop-up leaves the product unchanged.
-- Actions per row: **View**, **Edit**, **Delete**.
+- Actions per row: **View**, **Edit**, **Quick edit** and **Copy**. **Delete** is switched off for now.
 - Buttons at the top: **Status history** and **Add product**.
 - The list loads 20 at a time with **Load more**, newest products first.
 
@@ -725,7 +791,7 @@ After logging in, the seller always lands on the **Dashboard** (section 17).
 - Search by name. Filter by Status and by Activity.
 - **Activity** is a small drop-down offering **Active** and **Inactive**. If the
   product is locked, the drop-down is replaced by a plain badge.
-- Actions: **Edit** and **Delete** on normal products; **only View** on locked
+- Actions: **Edit**, **Quick edit** and **Copy** on normal products (**Delete** is switched off for now); **only View** on locked
   ones.
 - If a product is rejected or suspended, the admin's reason appears in red under
   the name.
@@ -783,7 +849,6 @@ instead of numbers.
 | "A reason is required when rejecting or suspending a product" | The admin tried to reject or suspend without writing a reason. |
 | "Only an admin can change status or suspend a product" | A seller tried to change Status or suspend. |
 | "Seller must be approved and active to receive products" | An admin tried to give a product to a seller whose account is not approved and active. |
-| "This seller already has a product with this name" | That seller already uses that name. |
 | "Product not found" | The product does not exist, was deleted, or belongs to another seller. |
 | "A product must keep at least one SKU" | An edit would have removed the last SKU. |
 | "Only one SKU can be the default" | Two SKUs were marked as default. |
@@ -793,6 +858,17 @@ instead of numbers.
 | "SKU variants cannot be changed; remove the SKU and add a new one" | Variants are locked once a SKU exists. |
 | "SKU code cannot be changed" | The SKU code is locked once a SKU exists. |
 | "Thumbnail must be 10MB or smaller" | The thumbnail is too large. |
+| "Ring number X is already on another of your birds" | Another SKU of the same seller already has that ring number. |
+| "Ring number X is used twice in this request" | Two SKUs in one save carry the same ring number. |
+| "Hatch date cannot be in the future" / "Vaccination date cannot be in the future" | The date is after today. |
+| "Hatch date is not a real date" | For example 2026-02-31. |
+| "The vaccination date cannot be before the hatch date" | The bird would have been vaccinated before it hatched. |
+| "hatchDate must be a date like 2026-03-14" | The date is not in `YYYY-MM-DD` form. |
+| "Give a name, a ring number or a photo for the parent" | A new parent was saved with nothing in it. |
+| "That parent is not on this bird" | Removing a sire or dam that was never added. |
+| "role must be sire or dam" | The address used another word. |
+| "The photo must be 10MB or smaller" | The parent photo is too large. |
+| "That option does not belong to this product" | The SKU id in a parent address is from another product. |
 | "Products are not available right now" (seller screen) | The seller's own account is not approved and active. |
 
 ---
@@ -875,9 +951,30 @@ Deleted products are only hidden. History lines are never erased.
 | **Featured** | An admin-only "highlight" marker. |
 | **Baseline** | The first history line written for products that already existed. |
 | **Dashboard** | The seller's landing page of summary numbers. |
+| **Ring number** | The number on a pigeon's leg ring. It identifies one bird. |
+| **Hatch date** | The day a bird hatched. Its age comes from this. |
+| **Bloodline** | The family line a bird comes from. |
+| **Sire / dam** | A bird's father / mother. |
+| **Bird snapshot** | The copy of a bird's details stored on an order item at the time of sale. |
 
 ---
 
 *Related documents:* `seller-account-guide.md` (how seller accounts work) and
 `testing/seller-account-testing.md` (how everything, including products, is
 tested).
+
+---
+
+## Breed and bloodline filters
+
+Shoppers can filter the product list by **breed**, **bloodline** and **Vaccinated only** (a vaccination date on a live option). `GET /user/products?breed=&bloodline=&vaccinated=true` (exact match, not case sensitive). The search box also matches breed and bloodline. `GET /user/products/bird-filters` lists the breeds and bloodlines that exist, with counts. Each product card shows its breed and bloodline and a Vaccinated badge.
+
+---
+
+## Bulk product actions
+
+`POST /seller/products/bulk` and `POST /admin/products/bulk` with `{ productIds: [1-100], action, ... }`. Actions: `activate`, `deactivate`, `price` (with `mode` percent or amount, `direction` increase or decrease, and `value`; offer prices move the same way and a price cannot drop below 1). Admin only: `approve`, `reject` and `suspend` (with `reason`). Each product goes through the normal update, so locks, history and checks apply: a rejected or suspended product cannot be changed by its seller, and one failing does not stop the others. The answer lists each product with `ok` or an `error`. Another seller's product is "Product not found".
+
+## Stock history
+
+Every change to the stock of an option is kept: starting stock, changes typed in by the seller or admin, stock taken by an order, and stock put back (or taken again) when an order is cancelled or reopened. **Admin only:** `GET /admin/products/:id/stock-history`, cursor paged (`cursor`, `limit`), newest first. Sellers do not see it. Each row has the option, the change, the stock after, the reason, the order and who did it (a customer's name is masked). Shown on the admin product details page.

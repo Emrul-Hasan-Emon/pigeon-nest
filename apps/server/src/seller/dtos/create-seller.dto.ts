@@ -14,7 +14,7 @@ import {
 import { CommissionType } from '../../database/enums/commission-type.enum';
 import { MAX_DECIMAL_12_2 } from '../../shared/constants/limits';
 import { IsInternationalPhone } from '../../shared/validators/international-phone.decorator';
-import { trimString } from '../../shared/utils/transform.util';
+import { emptyToNull, trimString } from '../../shared/utils/transform.util';
 
 // Multipart form (plus optional avatar / nidFrontImage / nidBackImage files).
 // Sellers created by an admin are always approved + active.
@@ -41,6 +41,13 @@ export class CreateSellerDto {
   @MinLength(6)
   @MaxLength(72)
   password: string;
+
+  // Shown on the public seller page. A blank value clears it.
+  @IsOptional()
+  @Transform(emptyToNull)
+  @IsString()
+  @MaxLength(1000)
+  description?: string | null;
 
   // The seller's own commission. Send both fields, or neither to use the global setting.
   @IsOptional()

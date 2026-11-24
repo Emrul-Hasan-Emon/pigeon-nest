@@ -133,7 +133,7 @@ export function UserForm({ user }: { user?: User }) {
             <input type="email" className={INPUT} value={email} onChange={(e) => setEmail(e.target.value)} />
           </label>
           <div className="text-sm text-foreground">
-            <span className="mb-1 block">Phone * (used to sign in)</span>
+            <span className="mb-1 block font-semibold">Phone * (used to sign in)</span>
             <PhoneInput defaultValue={initial.phone} onChange={setPhone} />
           </div>
           <label className="text-sm text-foreground">
@@ -177,7 +177,7 @@ export function UserForm({ user }: { user?: User }) {
         </div>
 
         <div className="mt-5">
-          <span className="text-sm font-medium text-foreground">Profile picture</span>
+          <span className="text-sm font-semibold text-foreground">Profile picture</span>
           <div className="mt-2 flex items-center gap-4 rounded-lg border border-dashed border-border p-4">
             {avatarPreview && (
               // eslint-disable-next-line @next/next/no-img-element

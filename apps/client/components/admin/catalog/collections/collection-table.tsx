@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import type { Collection } from '@/types/collection';
+import { DELETE_ENABLED } from '@/lib/features';
 
 export function CollectionTable({
   collections,
@@ -87,13 +88,15 @@ export function CollectionTable({
                   >
                     Edit
                   </Link>
-                  <button
-                    type="button"
-                    onClick={() => onDelete(collection)}
-                    className="font-medium text-destructive hover:opacity-70"
-                  >
-                    Delete
-                  </button>
+                  {DELETE_ENABLED && (
+                    <button
+                      type="button"
+                      onClick={() => onDelete(collection)}
+                      className="font-medium text-destructive hover:opacity-70"
+                    >
+                      Delete
+                    </button>
+                  )}
                 </div>
               </td>
             </tr>

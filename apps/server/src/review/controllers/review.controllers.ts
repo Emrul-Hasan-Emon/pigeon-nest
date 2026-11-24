@@ -83,6 +83,15 @@ export class PublicReviewController {
     return this.reviews.list(productId, query, pagination);
   }
 
+  @Get('sellers/:sellerId/reviews')
+  sellerReviews(
+    @Param('sellerId', ParseIdPipe) sellerId: number,
+    @Query() query: ListProductReviewsQueryDto,
+    @CursorPaginationParams() pagination: CursorPagination,
+  ) {
+    return this.reviews.listForSeller(sellerId, query, pagination);
+  }
+
   // Replies straight under the review, or the answers to one reply with ?parentId=
   @Get('reviews/:reviewId/replies')
   thread(
@@ -251,10 +260,11 @@ export class SellerReviewReplyController {
     return this.replies.update(sellerActor(seller), id, dto.body);
   }
 
-  @Delete(':id')
-  remove(@CurrentSeller() seller: Seller, @Param('id', ParseIdPipe) id: number) {
-    return this.replies.remove(sellerActor(seller), id);
-  }
+  // Delete is switched off for now. Remove these comment marks to bring it back.
+  // @Delete(':id')
+  // remove(@CurrentSeller() seller: Seller, @Param('id', ParseIdPipe) id: number) {
+  //   return this.replies.remove(sellerActor(seller), id);
+  // }
 
   @Post(':id/report')
   report(@CurrentSeller() seller: Seller, @Param('id', ParseIdPipe) id: number, @Body() dto: ReportDto) {
@@ -325,10 +335,11 @@ export class AdminReviewReplyController {
     return this.replies.update(await this.actors.resolve(jwt), id, dto.body);
   }
 
-  @Delete(':id')
-  async remove(@CurrentUser() jwt: JwtPayload, @Param('id', ParseIdPipe) id: number) {
-    return this.replies.remove(await this.actors.resolve(jwt), id);
-  }
+  // Delete is switched off for now. Remove these comment marks to bring it back.
+  // @Delete(':id')
+  // async remove(@CurrentUser() jwt: JwtPayload, @Param('id', ParseIdPipe) id: number) {
+  //   return this.replies.remove(await this.actors.resolve(jwt), id);
+  // }
 
   @Post(':id/hide')
   async hide(@CurrentUser() jwt: JwtPayload, @Param('id', ParseIdPipe) id: number, @Body() dto: ModerateDto) {

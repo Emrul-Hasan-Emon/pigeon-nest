@@ -11,6 +11,9 @@ import { CommissionService } from '../../commission/services/commission.service'
 import { PaymentStatus } from '../../database/enums/payment-status.enum';
 import { assertNoLiveReturns } from '../../returns/utils/return-guard.util';
 import { transitionDenied } from '../utils/order-status-rules';
+import { StockReason } from '../../database/enums/stock-movement.enum';
+import { recordStockMovements } from '../../shared/utils/stock-movement.util';
+import { OrderRefundService } from './order-refund.service';
 
 /** Who is changing the status. A guest customer has no id. */
 export interface StatusActor {
@@ -42,6 +45,7 @@ export class OrderStatusService {
   constructor(
     private readonly db: DatabaseService,
     private readonly commission: CommissionService,
+    private readonly refunds: OrderRefundService,
   ) {}
 
   async change(
@@ -71,8 +75,15 @@ export class OrderStatusService {
       // A return that is open or finished already depends on this order staying as it is.
       if (to === OrderStatus.CANCELLED) await assertNoLiveReturns(manager, order.id, 'Cancelling the order');
       const items = await manager.find(OrderItem, { where: { orderId: order.id } });
-      if (to === OrderStatus.CANCELLED) await this.giveBack(manager, items);
-      else if (from === OrderStatus.CANCELLED) await this.takeAgain(manager, items);
+      if (to === OrderStatus.CANCELLED) {
+        await this.giveBack(manager, items);
+        await this.logStock(manager, items, order, StockReason.ORDER_CANCELLED, 1, actor);
+      } else if (from === OrderStatus.CANCELLED) {
+        // Money already being sent back (or sent back) blocks a reopen; an untouched refund is voided.
+        await this.refunds.closeOnReopen(manager, order, actor);
+        await this.takeAgain(manager, items);
+        await this.logStock(manager, items, order, StockReason.ORDER_REOPENED, -1, actor);
+      }
 
       await manager.update(Order, order.id, {
         status: to,
@@ -80,6 +91,8 @@ export class OrderStatusService {
         updaterType: actor.type,
         updaterName: actor.name,
       });
+      // A cancelled order that had money paid needs that money sent back.
+      if (to === OrderStatus.CANCELLED) await this.refunds.openOnCancel(manager, order, actor);
       // A cancelled order earns no commission; reopening a paid one earns it again.
       if (order.paymentStatus === PaymentStatus.PAID) {
         if (to === OrderStatus.CANCELLED) {
@@ -127,6 +140,15 @@ export class OrderStatusService {
         throw new ConflictException(`Not enough stock to reopen this order: ${name}`);
       }
     }
+  }
+
+  /** Writes the stock history for what a cancel or a reopen just moved. */
+  private logStock(manager: EntityManager, items: OrderItem[], order: Order, reason: StockReason, sign: 1 | -1, actor: StatusActor) {
+    return recordStockMovements(
+      manager,
+      this.bySku(items).map(([skuId, quantity]) => ({ skuId, change: sign * quantity, reason, orderId: order.id, note: `Order ${order.orderNumber}` })),
+      actor,
+    );
   }
 
   /** Quantities per SKU in id order, so concurrent updates lock rows in one order. */

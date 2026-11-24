@@ -1,0 +1,419 @@
+{
+  "slug": "orders",
+  "title": "Orders",
+  "icon": "receipt-text",
+  "order": 30,
+  "summary": "Everything buyers order from you. Accept it, pack it, send it, and keep track of the money.",
+  "openPath": "/seller/orders",
+  "openLabel": "Open my orders",
+  "sections": [
+    {
+      "id": "what",
+      "title": "What is this page?",
+      "intro": "An order is made when a buyer buys from your shop. This page lists all your orders. It is the centre of your work: you accept each order, pack it, send it, and write down the payment.",
+      "blocks": [
+        {
+          "type": "points",
+          "title": "In simple words",
+          "items": [
+            "You only see your own orders. No other seller can see them, and you cannot see theirs.",
+            "Your shop must be approved and active to work with orders.",
+            "Each order has two separate things: its step (Pending, Confirmed ...) and its payment (Not paid, Part paid, Paid). They change separately.",
+            "Every change is written in the order history with your shop name and the time."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "steps",
+      "title": "The life of an order",
+      "blocks": [
+        {
+          "type": "words",
+          "title": "The steps, in order",
+          "items": [
+            {
+              "term": "Pending",
+              "means": "A buyer placed the order. It waits for you to confirm or cancel it."
+            },
+            {
+              "term": "Confirmed",
+              "means": "You accepted it. The buyer sees you are working on it."
+            },
+            {
+              "term": "Packed",
+              "means": "The birds or items are packed and ready."
+            },
+            {
+              "term": "Shipped",
+              "means": "You sent the order. It is on its way."
+            },
+            {
+              "term": "Delivered",
+              "means": "The buyer has it. The order is complete."
+            },
+            {
+              "term": "Cancelled",
+              "means": "The order was stopped. It can never be delivered."
+            }
+          ]
+        },
+        {
+          "type": "words",
+          "title": "The payment states",
+          "items": [
+            {
+              "term": "Due (Not paid yet)",
+              "means": "No money received yet."
+            },
+            {
+              "term": "Partially paid (Part paid)",
+              "means": "Some money received. Some is still due."
+            },
+            {
+              "term": "Paid",
+              "means": "The full amount was received."
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "warn",
+          "text": "You can cancel an order only while it is Pending. After you confirm it, it can only go forward. You cannot go back a step, skip a step, or reopen a cancelled order. If something goes wrong later, ask an admin."
+        },
+        {
+          "type": "note",
+          "tone": "info",
+          "text": "Stock leaves your shelf when the order is placed. If the order is cancelled, the stock comes back."
+        }
+      ]
+    },
+    {
+      "id": "find",
+      "title": "Find an order",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "How to",
+          "steps": [
+            "Press \"Orders\" in the left menu. The newest orders are first.",
+            "Use the boxes at the top: \"Any order status\", \"Any payment status\", \"Any payment method\", \"Any delivery type\".",
+            "Type an order number, or a customer name, phone or email, to find one order fast.",
+            "You can also choose \"Accounts and guests\", \"Accounts only\" or \"Guests and walk-ins\". A guest is a buyer without an account.",
+            "Use the total and date boxes to look at orders of a certain size or day.",
+            "Press \"Clear\" to remove all filters.",
+            "Press an order to open it."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "read",
+      "title": "Read an order",
+      "intro": "Open an order to see everything about it.",
+      "blocks": [
+        {
+          "type": "words",
+          "title": "What you will see",
+          "items": [
+            {
+              "term": "Items",
+              "means": "Each bird or item, the option, the price paid and the quantity. For birds you also see the ring number, age, breed and the parents, as they were when the order was placed. Use this to pack the right bird."
+            },
+            {
+              "term": "Customer and Deliver to",
+              "means": "Who ordered, their phone, and the full address."
+            },
+            {
+              "term": "Customer note",
+              "means": "A message the buyer wrote. Read it before packing."
+            },
+            {
+              "term": "Delivery",
+              "means": "The kind of delivery and the expected days."
+            },
+            {
+              "term": "Payable",
+              "means": "The total the buyer must pay: items plus delivery."
+            },
+            {
+              "term": "Received / Balance due",
+              "means": "How much money was received, and how much is still missing."
+            },
+            {
+              "term": "Seller amount",
+              "means": "Your share: what is payable minus the system commission. The buyer never sees this."
+            },
+            {
+              "term": "Payments",
+              "means": "Each payment recorded, with its proof files, who recorded it, and when."
+            },
+            {
+              "term": "Order history",
+              "means": "Every status change, who did it, when, and any note."
+            },
+            {
+              "term": "Returns",
+              "means": "Any return the buyer asked for on this order."
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "info",
+          "text": "If the buyer typed a transaction ID or a bank reference when ordering, it is shown on the order. Check it against your own bKash, Nagad or bank before you record a payment."
+        }
+      ]
+    },
+    {
+      "id": "move",
+      "title": "Move an order forward",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "How to change the step",
+          "steps": [
+            "Open the order.",
+            "Find the box \"Change order status\".",
+            "Open the list \"Choose a status\". It shows only the steps you are allowed to choose right now.",
+            "Choose the next step. Write a short note if you want. The buyer can read it.",
+            "Press \"Update status\"."
+          ]
+        },
+        {
+          "type": "words",
+          "title": "What you can choose",
+          "items": [
+            {
+              "term": "From Pending",
+              "means": "Confirmed, or Cancelled."
+            },
+            {
+              "term": "From Confirmed",
+              "means": "Packed."
+            },
+            {
+              "term": "From Packed",
+              "means": "Shipped."
+            },
+            {
+              "term": "From Shipped",
+              "means": "Delivered."
+            },
+            {
+              "term": "From Delivered or Cancelled",
+              "means": "Nothing more."
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "warn",
+          "text": "When you choose Cancelled, the website asks \"Cancel this order?\". Cancelling cannot be undone by you. If the buyer had already paid, the money must go back to them: the order then appears on the Refunds page."
+        }
+      ]
+    },
+    {
+      "id": "bulk",
+      "title": "Update many orders at once",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "How to",
+          "steps": [
+            "On the Orders list, tick the box next to each order you want to move.",
+            "All ticked orders must be waiting for the same step. For example, all Pending.",
+            "A bar appears at the bottom. Open \"Choose a step\" and pick the next step.",
+            "Write a note if you want. Each buyer can read it.",
+            "Press the update button. All ticked orders move together.",
+            "Press \"Clear\" to untick everything."
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "info",
+          "text": "Use this to confirm or pack many orders in one go. It follows the same rules as one order: you cannot skip a step."
+        }
+      ]
+    },
+    {
+      "id": "pay",
+      "title": "Record a payment (\"Mark as paid\")",
+      "intro": "Buyers pay you outside the website: bKash, Nagad, bank or cash. The website does not know until you write it on the order. This is how an order becomes Paid.",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "How to",
+          "steps": [
+            "Open the order and find the section \"Mark as paid\".",
+            "Check that the money really arrived in your bKash, Nagad or bank.",
+            {
+              "text": "Write how it was paid.",
+              "detail": "Example: \"bKash to the shop number\" or \"cash at pickup\". At least 3 characters."
+            },
+            "Add the Transaction ID if you have one. It is optional.",
+            "Choose \"When it was paid\" if it was not today. It cannot be in the future.",
+            {
+              "text": "Add at least one proof file.",
+              "detail": "A screenshot, photo or PDF. Up to 10 files, 10 MB each. This is required."
+            },
+            {
+              "text": "Type the amount only if the buyer paid part.",
+              "detail": "Leave it empty to record the whole balance. It cannot be more than the balance."
+            },
+            "Press \"Record payment\"."
+          ]
+        },
+        {
+          "type": "points",
+          "title": "Part payments",
+          "items": [
+            "The order stays \"Part paid\" until the payments add up to the total payable. Then it becomes \"Paid\".",
+            "Example: an order of 6,440. Record 1,000: part paid. Record 500.50: part paid, 1,500.50 received. Record the rest with no amount: paid.",
+            "You cannot record a payment on a cancelled order or on an order that is already fully paid."
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "warn",
+          "text": "Only record money you really received. A payment marks the order as Paid, adds it to your sales, and adds system commission that you must pay."
+        }
+      ]
+    },
+    {
+      "id": "reverse",
+      "title": "Cancel a payment you recorded by mistake",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "How to",
+          "steps": [
+            "In the \"Payments\" list on the order, find the payment.",
+            "Press \"Reverse payment\".",
+            "Write why. Example: \"the transfer never arrived\". At least 3 characters.",
+            "Confirm. The order goes back to unpaid or part paid."
+          ]
+        },
+        {
+          "type": "points",
+          "items": [
+            "The payment stays in the list with a red \"Reversed\" mark, who did it, when and why. Its files stay too.",
+            "When the buyer pays again, record a new payment. The old one stays visible.",
+            "You can only reverse a payment that you recorded. A payment recorded by an admin can only be reversed by an admin."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "updates",
+      "title": "Add an update with files",
+      "intro": "Updates are messages on the order. The buyer, you and the admin can all read them.",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "How to",
+          "steps": [
+            "Open the order and find \"Updates\".",
+            "Click in the box: \"Write an update, or attach a file\".",
+            "Type a message, add files (up to 10), or both.",
+            "Send it."
+          ]
+        },
+        {
+          "type": "points",
+          "title": "Good things to post",
+          "items": [
+            "A courier tracking number.",
+            "A photo of the packed birds.",
+            "A health certificate or vaccine paper.",
+            "A short note about a delay."
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "info",
+          "text": "An update cannot be edited or deleted after you send it. Check it before sending."
+        }
+      ]
+    },
+    {
+      "id": "create",
+      "title": "Create an order yourself",
+      "intro": "Use this when a buyer orders by phone, message or in person.",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "How to",
+          "steps": [
+            "On the Orders page, press \"Create order\".",
+            "Find the customer: type their exact email or mobile number, then press \"Use this customer\".",
+            "If they have no account, press \"Enter a walk-in customer instead\" and fill in their details. They can still track the order with the order number and phone.",
+            "Choose the products and options, and the quantity. Prices and stock are the live ones.",
+            "Choose a saved address of the customer, or type a new address.",
+            "Choose the country and the delivery type to see the delivery price.",
+            "Choose the \"Payment method\".",
+            "Check the total and press \"Create order\"."
+          ]
+        },
+        {
+          "type": "points",
+          "title": "Good to know",
+          "items": [
+            "The order is always for your own shop.",
+            "You never type prices. The website uses the live price and the delivery price.",
+            "Each option can be added once. Raise its quantity instead.",
+            "The order starts as Pending with payment Due, and stock is taken.",
+            "Orders you create get system commission in the same way as orders buyers place."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "print",
+      "title": "Print an invoice or a packing slip",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "How to",
+          "steps": [
+            "Open the order.",
+            "Press \"Print invoice\" for a paper for the buyer, or \"Print packing slip\" for yourself when you pack.",
+            "Press Print on the page that opens."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "faq",
+      "title": "Questions people ask",
+      "blocks": [
+        {
+          "type": "faq",
+          "title": "Common questions",
+          "items": [
+            {
+              "q": "Why can I not cancel this order?",
+              "a": "You already confirmed it. After that only an admin can cancel it."
+            },
+            {
+              "q": "Why is the stock lower than before?",
+              "a": "Stock goes down when an order is placed. It comes back if the order is cancelled."
+            },
+            {
+              "q": "The buyer says they paid. What do I do?",
+              "a": "Check your bKash, Nagad or bank. If the money came, record the payment with proof. For cash on delivery, the buyer may send a \"mark as paid\" request: see the Paid requests topic."
+            },
+            {
+              "q": "I recorded the wrong amount.",
+              "a": "Reverse the payment, then record it again with the right amount."
+            },
+            {
+              "q": "Can I see the buyer's other orders?",
+              "a": "You only see the orders placed in your shop."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

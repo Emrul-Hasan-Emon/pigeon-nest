@@ -1,5 +1,6 @@
 'use client';
 
+import { orderBirdText } from '@/components/products/bird-fields';
 import { useState } from 'react';
 import Link from 'next/link';
 import { removeCartItem, setCartItemQuantity } from '@/lib/api/cart';
@@ -94,6 +95,7 @@ function Line({
               <span className="text-sm font-medium text-st-slate">Removed product</span>
             )}
             {line.sku?.label && <p className="text-xs text-st-slate">{line.sku.label}</p>}
+            {orderBirdText(line.sku?.bird).length > 0 && <p className="text-xs text-st-slate">{orderBirdText(line.sku?.bird).join(' · ')}</p>}
           </div>
           <div className="shrink-0 text-right">
             <p className="text-sm font-semibold text-st-ink">{blocked ? '—' : money(line.linePayable)}</p>

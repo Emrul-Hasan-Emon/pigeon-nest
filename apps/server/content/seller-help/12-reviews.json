@@ -1,0 +1,167 @@
+{
+  "slug": "reviews",
+  "title": "Reviews",
+  "icon": "star",
+  "order": 120,
+  "summary": "What buyers say about your birds. Read every review and reply, because everyone can see your replies.",
+  "openPath": "/seller/reviews",
+  "openLabel": "Open reviews",
+  "sections": [
+    {
+      "id": "what",
+      "title": "What is this page?",
+      "intro": "After a buyer receives an order, they can give a star rating (1 to 5) and write a review about the product. This page lists the reviews of your products. You can read them and reply.",
+      "blocks": [
+        {
+          "type": "points",
+          "title": "In simple words",
+          "items": [
+            "You only see reviews of your own products.",
+            "A buyer shows with a short name such as \"Rahim K.\". You never see their phone, email or id.",
+            "Reviews and your replies are public. They show on the product page and on your public shop page.",
+            "You cannot hide or delete a review. If a review breaks the rules, you can report it (see below)."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "why",
+      "title": "Why does it matter to you?",
+      "blocks": [
+        {
+          "type": "points",
+          "items": [
+            "Stars and reviews are the first thing a new buyer reads. A good rating brings more orders.",
+            "Your replies show that you care. Even a bad review can help you, if you answer politely and fix the problem.",
+            "Reviews tell you what to improve: the pictures, the packing, the delivery time or the bird itself."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "read",
+      "title": "Read the Reviews page",
+      "blocks": [
+        {
+          "type": "words",
+          "title": "The three cards at the top",
+          "items": [
+            {
+              "term": "Average rating",
+              "means": "The average of all your published reviews, out of 5."
+            },
+            {
+              "term": "Waiting for your reply",
+              "means": "How many reviews you have not answered yet."
+            },
+            {
+              "term": "Low ratings",
+              "means": "How many reviews have a low number of stars. Read these first."
+            }
+          ]
+        },
+        {
+          "type": "steps",
+          "title": "How to find a review",
+          "steps": [
+            "Use the product filter to see reviews of one product.",
+            "Use the stars filter to see only 1-star, or only 5-star, and so on.",
+            "Choose \"Not answered yet\" to see only the ones without your reply."
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "info",
+          "text": "A review that an admin hid is not shown to anyone, and it leaves your list."
+        }
+      ]
+    },
+    {
+      "id": "reply",
+      "title": "Reply to a review",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "How to",
+          "steps": [
+            "Press \"Reviews\" in the left menu.",
+            "Choose \"Not answered yet\".",
+            "Open a review. Read the stars, the title and the comment. Look at the pictures.",
+            "Click in the Reply box and write your reply. It must be between 1 and 1000 characters.",
+            "Send it. It shows with your shop name and a \"Seller\" badge."
+          ]
+        },
+        {
+          "type": "points",
+          "title": "Good to know",
+          "items": [
+            "You can reply to the review, or to any reply in its thread. You can write as many replies as you like.",
+            "You can edit your own reply for 30 days.",
+            "You cannot delete a reply. Deleting is switched off. Edit it instead."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "write",
+      "title": "How to write a good reply",
+      "blocks": [
+        {
+          "type": "points",
+          "items": [
+            "Say thank you first, even for a bad review.",
+            "Be calm and polite. Never argue. Other buyers are reading.",
+            "Say what you will do: \"I am sorry. Please message me with your order number and I will fix this.\"",
+            "Keep it short and honest.",
+            "For a 5-star review, a short \"Thank you, I hope your birds do well\" is enough."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "report",
+      "title": "Report a review that breaks the rules",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "How to",
+          "steps": [
+            "Open the review (or the reply).",
+            "Press the report button.",
+            "Choose a reason: spam, abusive, fake, irrelevant or other. Add a note if you want.",
+            "Send it. A moderator decides."
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "warn",
+          "text": "Only report reviews that are really wrong. You cannot report the same review twice while a report is open. A bad rating that is honest is not a reason to report."
+        }
+      ]
+    },
+    {
+      "id": "faq",
+      "title": "Questions people ask",
+      "blocks": [
+        {
+          "type": "faq",
+          "title": "Common questions",
+          "items": [
+            {
+              "q": "A buyer gave a wrong review. Can I delete it?",
+              "a": "No. Reply politely, or report it if it breaks the rules. A moderator decides."
+            },
+            {
+              "q": "Can I answer if my account is suspended?",
+              "a": "No. You can read reviews but only an active seller can reply or report."
+            },
+            {
+              "q": "Where does my rating show?",
+              "a": "On every product page, in your products list, and on your public shop page."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

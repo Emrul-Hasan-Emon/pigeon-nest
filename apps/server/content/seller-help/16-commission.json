@@ -1,0 +1,199 @@
+{
+  "slug": "commission",
+  "title": "System commission",
+  "icon": "coins",
+  "order": 160,
+  "summary": "The fee the marketplace keeps from each sale. See your rate, what you owe and what you paid.",
+  "openPath": "/seller/commission",
+  "openLabel": "Open system commission",
+  "sections": [
+    {
+      "id": "what",
+      "title": "What is system commission?",
+      "intro": "The marketplace gives you a place to sell. In return, it keeps a small share of each item you sell. This share is the system commission. You pay it to the marketplace, and an admin writes down each payment.",
+      "blocks": [
+        {
+          "type": "points",
+          "title": "In simple words",
+          "items": [
+            "It is worked out when an order is placed and shown on the order.",
+            "It only counts once the order is fully paid.",
+            "If an order is cancelled or its payment is reversed, its fee is taken back.",
+            "If an item is returned and refunded, its fee comes back off your balance.",
+            "You cannot change your rate. You only read it."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rate",
+      "title": "How much do you pay?",
+      "blocks": [
+        {
+          "type": "points",
+          "items": [
+            "Your rate is either your own rate (if the admin gave you one) or the marketplace rate for everyone.",
+            "The page tells you in a sentence, for example \"The platform takes 10% of each item on an order.\"",
+            "A percentage is taken from each item, after the item discount. Delivery is not included.",
+            "A fixed rate is the same amount on every item line.",
+            "An item's fee is never more than what the buyer pays for that item.",
+            "A new rate only affects new orders. Old orders keep their rate."
+          ]
+        },
+        {
+          "type": "steps",
+          "title": "An example",
+          "steps": [
+            "Your rate is 10%. A buyer orders 2 birds at 3,200 each, with delivery 100.",
+            "The items add to 6,400. The buyer pays 6,500 in all.",
+            "The system commission is 10% of 6,400 = 640.",
+            "Your share (Seller amount) is 6,500 − 640 = 5,860."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "when",
+      "title": "When does it count?",
+      "blocks": [
+        {
+          "type": "words",
+          "title": "What happens to your balance",
+          "items": [
+            {
+              "term": "Order placed",
+              "means": "The fee is worked out and shown. It is not counted yet."
+            },
+            {
+              "term": "Part of the price received",
+              "means": "Still not counted."
+            },
+            {
+              "term": "Fully paid",
+              "means": "Counted. \"Total\" and \"Due\" go up."
+            },
+            {
+              "term": "Payment reversed, or order cancelled",
+              "means": "Taken back. \"Total\" and \"Due\" go down."
+            },
+            {
+              "term": "Cancelled order reopened and still paid",
+              "means": "Counted again."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cards",
+      "title": "The three cards",
+      "blocks": [
+        {
+          "type": "words",
+          "title": "What they mean",
+          "items": [
+            {
+              "term": "Total system commission",
+              "means": "All the fee from your fully paid orders."
+            },
+            {
+              "term": "Due",
+              "means": "What you still owe. It shows in amber when it is above zero."
+            },
+            {
+              "term": "Paid",
+              "means": "What you already paid the marketplace."
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "info",
+          "text": "Total = Due + Paid. If Due is below zero, you have a credit: you paid fee on an order that was cancelled or reversed later. The credit is used up by your next fee."
+        }
+      ]
+    },
+    {
+      "id": "tabs",
+      "title": "The three tabs",
+      "blocks": [
+        {
+          "type": "words",
+          "title": "What each tab shows",
+          "items": [
+            {
+              "term": "System commission records",
+              "means": "One line for each event: \"System commission earned\" when an order was fully paid, and \"Paid to the platform\" when you made a payment. Each line shows the order, the amount and your Due and Paid after it. A \"Voided\" grey line was taken back."
+            },
+            {
+              "term": "My payments",
+              "means": "Every payment you made to the marketplace: number, date, amount and totals. Press \"View\" to see the admin notes and any receipt files."
+            },
+            {
+              "term": "Rate history",
+              "means": "Every change of your rate: when, the value before and after, who changed it and the note. Use it to check which rate applied when."
+            }
+          ]
+        },
+        {
+          "type": "points",
+          "title": "Good to know",
+          "items": [
+            "The records list shows 20 lines at a time. Press \"Load more\".",
+            "You can filter by order, type, date and more.",
+            "The page also works if your account is suspended, because you may still owe money."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pay",
+      "title": "How do you pay the marketplace?",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "How to",
+          "steps": [
+            "Open \"System commission\" and read the amount in \"Due\".",
+            "Pay the marketplace in the way the admin team told you.",
+            "Tell the admin team that you paid, and give the proof.",
+            "The admin records your payment. \"Due\" goes down, \"Paid\" goes up, and a line appears in \"My payments\"."
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "warn",
+          "text": "You cannot record a payment to the marketplace yourself. Only an admin can. Keep your receipt."
+        }
+      ]
+    },
+    {
+      "id": "faq",
+      "title": "Questions people ask",
+      "blocks": [
+        {
+          "type": "faq",
+          "title": "Common questions",
+          "items": [
+            {
+              "q": "Why is my Due 0 even though I sold a lot?",
+              "a": "Only fully paid orders count. Record the payment on each order."
+            },
+            {
+              "q": "Why did my Due go down without a payment?",
+              "a": "An order was cancelled, a payment was reversed, or a return was finished. The fee came back."
+            },
+            {
+              "q": "Can I change my rate?",
+              "a": "No. Only the admin team can. A new rate only affects new orders."
+            },
+            {
+              "q": "Does the buyer see the fee?",
+              "a": "No. Buyers never see the system commission or your share."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

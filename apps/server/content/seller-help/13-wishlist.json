@@ -1,0 +1,85 @@
+{
+  "slug": "wishlist",
+  "title": "Wishlist",
+  "icon": "heart",
+  "order": 130,
+  "summary": "Buyers can save a product to buy later. This page shows how many people saved yours.",
+  "openPath": "/seller/wishlist",
+  "openLabel": "Open wishlist",
+  "sections": [
+    {
+      "id": "what",
+      "title": "What is a wishlist?",
+      "intro": "A buyer can press a heart on a product to save it and come back later. That saved list is their wishlist. A save is a sign of interest. It is not an order.",
+      "blocks": [
+        {
+          "type": "points",
+          "title": "In simple words",
+          "items": [
+            "This page shows which of your products are saved most, and the total number of saves.",
+            "You see how many people saved a product. You never see who.",
+            "You cannot change anything here. It is only for reading."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "why",
+      "title": "Why does it help you?",
+      "blocks": [
+        {
+          "type": "points",
+          "items": [
+            "You learn which birds buyers like most.",
+            "A product that is saved often but never bought may have a price that is too high, or pictures that are not good enough. Check it.",
+            "It helps you decide what to breed or buy next.",
+            "It is free information: buyers tell you what they want without a word."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "read",
+      "title": "Where to see it",
+      "blocks": [
+        {
+          "type": "words",
+          "title": "Places in the portal",
+          "items": [
+            {
+              "term": "The Wishlist page",
+              "means": "Your 50 most saved products with the total saves."
+            },
+            {
+              "term": "The dashboard",
+              "means": "The \"Wishlist demand\" section: total saves, how many products were saved, and your top five."
+            },
+            {
+              "term": "The products list",
+              "means": "A \"Saved by\" column on each product, and the sort \"Most saved first\"."
+            },
+            {
+              "term": "A product page",
+              "means": "\"Saved by N customers\" next to the status."
+            }
+          ]
+        },
+        {
+          "type": "steps",
+          "title": "How to use it",
+          "steps": [
+            "Press \"Wishlist\" in the left menu.",
+            "Look at the top of the list. These are your most wanted products.",
+            "Open a popular product. Check the price, the pictures and the stock.",
+            "If you have little stock, add more before buyers come back."
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "info",
+          "text": "A product that is switched off or out of stock can still be saved. Buyers may be waiting for it to come back."
+        }
+      ]
+    }
+  ]
+}

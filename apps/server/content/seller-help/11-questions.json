@@ -1,0 +1,216 @@
+{
+  "slug": "questions",
+  "title": "Questions",
+  "icon": "message-circle-question",
+  "order": 110,
+  "summary": "Buyers ask about your birds on the product page. Your answer is public, so every buyer can read it.",
+  "openPath": "/seller/questions",
+  "openLabel": "Open questions",
+  "sections": [
+    {
+      "id": "what",
+      "title": "What is this page?",
+      "intro": "On every product page, buyers can ask a question to the seller before they buy. For example: \"How old is the bird?\", \"Is it vaccinated?\" or \"Can I see the parents?\". This page lists those questions for your products. You write the answers here.",
+      "blocks": [
+        {
+          "type": "points",
+          "title": "In simple words",
+          "items": [
+            "The question and your answer show on the product page, for everyone to read.",
+            "The buyer's name is hidden a little, for example \"Rahim K.\".",
+            "You only see questions about your own products.",
+            "Nobody can answer for you. Admins do not answer for a seller."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "why",
+      "title": "Why does it matter to you?",
+      "blocks": [
+        {
+          "type": "points",
+          "items": [
+            "A quick, clear answer can turn a worried buyer into a customer.",
+            "You answer one time and many buyers read it. You do not need to repeat the same thing in messages.",
+            "Good answers show you know your birds. This builds trust in your shop.",
+            "Buyers who find the answer on the page buy with fewer doubts, so you get fewer returns and fewer arguments."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "when",
+      "title": "When will you see a question?",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "How a question reaches you",
+          "steps": [
+            "A signed-in buyer opens your product page.",
+            "They type a question in \"Questions and answers\". It must be between 10 and 1000 characters.",
+            "The question appears in \"Questions\" with \"Needs your answer\".",
+            "A number appears on the dashboard box \"Questions to answer\" and on the bell."
+          ]
+        },
+        {
+          "type": "points",
+          "title": "Rules for buyers",
+          "items": [
+            "A buyer must sign in to ask.",
+            "A buyer can have at most 3 questions waiting for an answer on the same product. This stops spam."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tabs",
+      "title": "Read the Questions page",
+      "blocks": [
+        {
+          "type": "words",
+          "title": "The tabs",
+          "items": [
+            {
+              "term": "Needs your answer",
+              "means": "Nobody answered yet. Do these first."
+            },
+            {
+              "term": "Answered",
+              "means": "You already answered. You can still change the answer."
+            },
+            {
+              "term": "All",
+              "means": "Every question together."
+            }
+          ]
+        },
+        {
+          "type": "points",
+          "title": "Also on this page",
+          "items": [
+            "Use the search box to find a question or a product name.",
+            "Each question shows which product it is about, and what the buyer is asking."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "answer",
+      "title": "How to answer a question",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "Step by step",
+          "steps": [
+            "Press \"Questions\" in the left menu.",
+            "Open the \"Needs your answer\" tab.",
+            "Read \"What the buyer is asking\". Look at which product it is for.",
+            "Click in the answer box. It says: \"Write a clear answer. Everyone who visits the product page can read it.\"",
+            "Type your answer. It must be between 2 and 2000 characters.",
+            "Press \"Send answer\".",
+            "The answer shows on the product page at once."
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "warn",
+          "text": "Everyone can read your answer, not only the buyer. Do not write phone numbers, home addresses or private details."
+        }
+      ]
+    },
+    {
+      "id": "change",
+      "title": "Change an answer later",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "How to",
+          "steps": [
+            "Open the \"Answered\" tab and find the question.",
+            "Press \"Change answer\".",
+            "Fix the words, then press \"Save the new answer\".",
+            "The product page shows the new answer."
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "info",
+          "text": "Use this when a fact changes, for example when the bird is sold or you got the vaccine date wrong."
+        }
+      ]
+    },
+    {
+      "id": "write",
+      "title": "How to write a good answer",
+      "blocks": [
+        {
+          "type": "points",
+          "items": [
+            "Answer the question first, in the first sentence. Example: \"Yes, it is vaccinated.\"",
+            "Add one useful fact. Example: \"The vaccine was given on 10 October.\"",
+            "Use short, plain words. Not everyone knows pigeon terms.",
+            "Be honest. A wrong answer causes a return and a bad review.",
+            "Be polite, even if the question seems silly.",
+            "If the answer is in the product details, say it again anyway. A buyer who asked did not find it."
+          ]
+        },
+        {
+          "type": "steps",
+          "title": "An example",
+          "steps": [
+            "Question: \"How old is this bird and can it fly far?\"",
+            "Good answer: \"It is 8 months old. It has flown 50 km in training. I can send a video if you message me.\""
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hidden",
+      "title": "Hidden questions",
+      "blocks": [
+        {
+          "type": "points",
+          "items": [
+            "An admin can hide a question that breaks the rules, for example rude words.",
+            "A hidden question is not shown to buyers or to you, and you cannot answer it.",
+            "An admin can bring it back.",
+            "You cannot delete questions. Deleting is switched off."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "faq",
+      "title": "Questions people ask",
+      "blocks": [
+        {
+          "type": "faq",
+          "title": "Common questions",
+          "items": [
+            {
+              "q": "Do I have to answer every question?",
+              "a": "No, but you should. An unanswered question looks like you are not interested."
+            },
+            {
+              "q": "Can the buyer see my answer only?",
+              "a": "No. Every visitor of the product page can read the question and the answer."
+            },
+            {
+              "q": "A question has bad words. What do I do?",
+              "a": "Do not answer it. Tell the admin team, who can hide it."
+            },
+            {
+              "q": "Can I answer if my account is suspended?",
+              "a": "No. You can read questions, but only an active seller can answer."
+            },
+            {
+              "q": "Is this the same as a price offer?",
+              "a": "No. A question is a public chat about the product. A price offer is a private deal about the price between you and one buyer."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

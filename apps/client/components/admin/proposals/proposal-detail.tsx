@@ -11,6 +11,7 @@ import { formatDateTime } from '@/lib/datetime';
 import type { ProposalDetail, ProposalHistoryAction, ProposalHistoryEntry } from '@/types/proposal';
 import { ProposalStatusBadge } from './proposal-list';
 import { LoadingBlock } from '@/components/ui/skeleton';
+import { useBreadcrumbTitle } from '@/components/ui/breadcrumbs';
 
 const section = 'rounded-xl border border-border bg-card p-4 shadow-sm';
 const textarea = 'w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:border-foreground focus:outline-none';
@@ -115,6 +116,7 @@ function Timeline({ history }: { history: ProposalHistoryEntry[] }) {
 export function AdminProposalDetail({ id }: { id: number }) {
   const { showToast } = useToast();
   const [p, setP] = useState<ProposalDetail | null>(null);
+  useBreadcrumbTitle(p ? `Offer #${p.id}` : null);
   const [missing, setMissing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dialog, setDialog] = useState<'reject' | 'cancel' | null>(null);

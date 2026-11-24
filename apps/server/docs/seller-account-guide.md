@@ -122,7 +122,7 @@ There are exactly two ways.
     - Name (required)
     - Phone number with country (required)
     - Password (required, at least 6 characters)
-    - Email, commission rate, payout info, photos (optional)
+    - Email, system commission rate, payout info, photos (optional)
 
   What the system does
     - Creates the account as  APPROVED + ACTIVE straight away.
@@ -192,7 +192,7 @@ pending list directly; the seller must resubmit first.
 Where: admin panel -> Sellers -> Edit.
 
 The admin controls everything about any seller:
-  - name, email, phone, password, commission rate, payout info, photos
+  - name, email, phone, password, system commission rate, payout info, photos
   - approval status (pending / approved / rejected)
   - activity status (active / inactive / suspended)
   - a note explaining the change (required to reject or suspend, see section 15)
@@ -241,7 +241,7 @@ The seller may change ONLY these things:
   - password (needs the current password; new one must differ and be 8-72
     characters)
 
-The seller can NEVER change: approval status, activity status, commission rate,
+The seller can NEVER change: approval status, activity status, system commission rate,
 payout info, rejection reason. If someone tries to send those, the system
 refuses the whole request.
 
@@ -546,3 +546,31 @@ Where the admin sees it
              NO  -> Profile and password changes only.
                     If they are rejected and change real profile details,
                     they go back to pending for another review.
+
+## About text and the public seller page
+
+- `PATCH /seller/profile` accepts an optional `description` (multipart, up to 1000 characters). A blank value clears it.
+- Anyone can read the public page data without signing in:
+  - `GET /user/sellers/:id` returns name, avatar, join date, product count, `description`, `ratingAverage`, `ratingCount` and a 1-5 `breakdown`. It never returns phone, email, ID images or payout details.
+  - `GET /user/sellers/:id/reviews` returns published reviews across all the seller's products, newest first. Query: `rating` (1-5), `limit`, `cursor`. Each review has the product name and slug and a masked reviewer name.
+- Both return 404 unless the seller is approved and active.
+- The client page is `/sellers/:id`. It has a Share button (share sheet, or copies the link). The seller profile page has a "See my public page" link.
+
+### Admin and the about text
+
+`POST /admin/sellers` and `PATCH /admin/sellers/:id` also accept `description` (up to 1000 characters, blank clears it). The admin seller form has an "About the shop" box with a link to the public page.
+
+## Seller setup checklist
+
+`GET /seller/onboarding` returns the seller's checklist: profile picture, about text, email, ID front and back, first product, a product picture, bird details, and a product on sale (with stock). Each step has `done`, a plain `label`, a `hint` and the page to fix it. `percent` is steps done out of 8. The seller dashboard shows it as "Get your shop ready" until everything is done.
+
+Admins see every approved seller: `GET /admin/seller-onboarding?show=all|incomplete|complete&search=&page=` (summary, progress and the steps still to do), and one seller at `GET /admin/seller-onboarding/:sellerId`. Screen: **Sellers > Seller setup**.
+
+## Selling switch and planned break
+
+`isEnabledForSell` on the seller is on by default. `PATCH /seller/profile/selling` with `{ isEnabledForSell, breakStartsOn?, breakEndsOn?, note? }`.
+
+- **Off:** the seller is hidden from buyers until it is switched on again.
+- **Planned break:** set `breakStartsOn` and `breakEndsOn` (both days included; set both or neither; the end cannot be before the start or in the past). The seller is hidden only between those days and comes back by itself.
+- **What "hidden" means:** the seller's public page and reviews return 404, the seller is left out of the seller list and the homepage, every product of theirs returns 404 and drops out of the store, search, wishlist, cart and checkout, and their product questions and reviews are unreachable. Orders already placed carry on as usual, and the buyer's order history still shows them.
+- The seller sets it on **My profile > Selling** (an on/off switch and the planned break); the dashboard shows a banner while hidden or when a break is planned. The admin seller list shows "Selling off" or "On a planned break".

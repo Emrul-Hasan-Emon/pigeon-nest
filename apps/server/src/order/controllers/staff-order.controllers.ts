@@ -13,6 +13,7 @@ import {
 import { ParseIdPipe } from '../../shared/pipes/parse-id.pipe';
 import { ActorResolverService } from '../../shared/services/actor-resolver.service';
 import {
+  BulkChangeOrderStatusDto,
   ChangeOrderStatusDto,
   CreateStaffOrderDto,
   CustomerSearchQueryDto,
@@ -62,6 +63,12 @@ export class AdminOrderController {
   @Post()
   async create(@CurrentUser() user: JwtPayload, @Body() dto: CreateStaffOrderDto) {
     return this.orders.create(dto, await this.actors.resolve(user), {});
+  }
+
+  // Moves several orders to one new status. They must all be in the same status now (50 at most).
+  @Post('bulk-status')
+  async bulkStatus(@CurrentUser() user: JwtPayload, @Body() dto: BulkChangeOrderStatusDto) {
+    return this.orders.bulkChangeStatus(dto, await this.actors.resolve(user), {});
   }
 
   @Get(':id')
@@ -141,6 +148,12 @@ export class SellerOrderController {
   @Post()
   create(@CurrentSeller() seller: Seller, @Body() dto: CreateStaffOrderDto) {
     return this.orders.create(dto, this.actor(seller), { sellerId: seller.id });
+  }
+
+  // Moves several orders to one new status. They must all be in the same status now (50 at most).
+  @Post('bulk-status')
+  bulkStatus(@CurrentSeller() seller: Seller, @Body() dto: BulkChangeOrderStatusDto) {
+    return this.orders.bulkChangeStatus(dto, this.actor(seller), { sellerId: seller.id });
   }
 
   @Get(':id')

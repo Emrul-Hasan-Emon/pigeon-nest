@@ -120,6 +120,8 @@ from storage first. Unknown id → `404`.
 
 ## 5. Delete — `DELETE /categories/{id}`
 
+> **Switched off for now:** this route answers `404 Cannot DELETE`. Set the category inactive instead. The rules below apply when it is switched back on.
+
 `204`, no body. Also deletes the image file from storage, if one was uploaded.
 
 - Unknown id → `404`.

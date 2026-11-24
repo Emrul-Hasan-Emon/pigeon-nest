@@ -1,7 +1,11 @@
 'use client';
 
+import { orderBirdText } from '@/components/products/bird-fields';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { Printer } from 'lucide-react';
+import { OrderRefundPanel } from '@/components/refunds/order-refund-panel';
+import { OrderClaimsPanel } from '@/components/payments/order-claims-panel';
 import { ReturnBadge } from '@/components/returns/parts';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Modal } from '@/components/ui/modal';
@@ -26,6 +30,7 @@ import {
   useApiError,
 } from './ui';
 import { LoadingBlock } from '@/components/ui/skeleton';
+import { useBreadcrumbTitle } from '@/components/ui/breadcrumbs';
 
 const card = 'rounded-xl border border-border bg-card p-5 shadow-sm';
 
@@ -34,6 +39,7 @@ export function OrderDetailView({ role, id }: { role: StaffRole; id: number }) {
   const errorMessage = useApiError(role);
   const { showToast } = useToast();
   const [order, setOrder] = useState<OrderDetail | null>(null);
+  useBreadcrumbTitle(order?.orderNumber);
   const [state, setState] = useState<'loading' | 'missing' | 'error' | 'ready'>('loading');
   const root = base(role);
 
@@ -74,6 +80,16 @@ export function OrderDetailView({ role, id }: { role: StaffRole; id: number }) {
           {order.isReturned && <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-700">Fully returned</span>}
         </div>
         <p className="text-sm text-muted-foreground">Placed {formatDateTime(order.createdAt)}</p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <Link href={`${root}/orders/${order.id}/print?type=invoice`} className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground hover:bg-muted">
+            <Printer aria-hidden="true" className="h-4 w-4" />
+            Print invoice
+          </Link>
+          <Link href={`${root}/orders/${order.id}/print?type=slip`} className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground hover:bg-muted">
+            <Printer aria-hidden="true" className="h-4 w-4" />
+            Print packing slip
+          </Link>
+        </div>
       </div>
 
       <StatusPanel role={role} order={order} onChanged={(o) => { setOrder(o); showToast(`Order is now ${ORDER_STATUS_LABEL[o.status].toLowerCase()}.`, 'success'); }} onError={fail} />
@@ -81,7 +97,11 @@ export function OrderDetailView({ role, id }: { role: StaffRole; id: number }) {
       <div className="grid gap-4 md:grid-cols-3">
         <div className={card}>
           <h2 className="mb-2 text-sm font-semibold text-foreground">Customer</h2>
-          <p className="font-medium text-foreground">{order.customer.name}</p>
+          <p className="font-medium text-foreground">
+            {role === 'admin' && (order.customer.userId ?? order.account?.id)
+              ? <Link className="font-medium text-primary underline underline-offset-2 hover:opacity-70" href={`/admin/users/${order.customer.userId ?? order.account?.id}`}>{order.customer.name}</Link>
+              : order.customer.name}
+          </p>
           <p className="text-sm text-muted-foreground">{order.customer.phone}</p>
           {order.customer.email && <p className="text-sm text-muted-foreground">{order.customer.email}</p>}
           <p className="mt-2 text-xs text-muted-foreground">
@@ -103,7 +123,7 @@ export function OrderDetailView({ role, id }: { role: StaffRole; id: number }) {
           <h2 className="mb-2 text-sm font-semibold text-foreground">Delivery and seller</h2>
           <p className="text-sm capitalize text-foreground">{order.delivery.type}{order.delivery.estimatedDays ? `, about ${order.delivery.estimatedDays} days` : ''}</p>
           {order.delivery.zoneName && <p className="text-xs text-muted-foreground">Zone: {order.delivery.zoneName}</p>}
-          <p className="mt-2 text-sm text-muted-foreground">Seller: {order.seller.name}</p>
+          <p className="mt-2 text-sm text-muted-foreground">Seller: {role === 'admin' ? <Link className="font-medium text-primary underline underline-offset-2 hover:opacity-70" href={`/admin/sellers/${order.seller.id}`}>{order.seller.name}</Link> : order.seller.name}</p>
           <p className="text-sm text-muted-foreground">Pays by: {order.gateway.name}</p>
           {order.cartId && role === 'admin' && <Link className="text-xs text-primary hover:underline" href={`/admin/carts/${order.cartId}`}>Cart #{order.cartId}</Link>}
         </div>
@@ -118,7 +138,7 @@ export function OrderDetailView({ role, id }: { role: StaffRole; id: number }) {
       <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
         <table className="min-w-full divide-y divide-border text-sm">
           <thead className="bg-muted">
-            <tr>{['Product', 'Variant', 'Qty', 'Unit price', 'Line total', ...(order.commission ? ['Commission'] : [])].map((h) => <th key={h} className="px-4 py-3 text-left font-medium text-muted-foreground">{h}</th>)}</tr>
+            <tr>{['Product', 'Variant', 'Qty', 'Unit price', 'Line total', ...(order.commission ? ['System commission'] : [])].map((h) => <th key={h} className="px-4 py-3 text-left font-medium text-muted-foreground">{h}</th>)}</tr>
           </thead>
           <tbody className="divide-y divide-border">
             {order.items.map((i) => (
@@ -129,9 +149,12 @@ export function OrderDetailView({ role, id }: { role: StaffRole; id: number }) {
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={i.imageUrl} alt="" className="h-10 w-10 rounded object-cover" />
                     )}
-                    <span className="font-medium text-foreground">{i.productName}</span>
+                    {role === 'admin'
+                      ? <Link className="font-medium text-primary underline underline-offset-2 hover:opacity-70" href={`/admin/catalog/products/${i.productId}`}>{i.productName}</Link>
+                      : <span className="font-medium text-foreground">{i.productName}</span>}
                     {i.isReturned && <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs text-emerald-700">Returned</span>}
                   </div>
+                  {orderBirdText(i.bird).length > 0 && <p className="mt-1 text-xs text-muted-foreground">{orderBirdText(i.bird).join(' · ')}</p>}
                 </td>
                 <td className="px-4 py-3 text-muted-foreground">{i.sku.label || i.sku.code}<span className="block text-xs">{i.sku.code}</span></td>
                 <td className="px-4 py-3 text-muted-foreground">{i.quantity}</td>
@@ -163,13 +186,17 @@ export function OrderDetailView({ role, id }: { role: StaffRole; id: number }) {
         <div className="flex justify-between font-medium text-foreground"><dt>Balance due</dt><dd>{money(order.totals.balanceDue)}</dd></div>
         {order.commission && (
           <>
-            <div className="flex justify-between border-t border-border pt-1 text-muted-foreground"><dt>Platform commission{order.commission.type && ` (${order.commission.type === 'percentage' ? `${order.commission.value}% of items` : 'fixed per item'})`}</dt><dd>{money(order.commission.systemCommission)}</dd></div>
+            <div className="flex justify-between border-t border-border pt-1 text-muted-foreground"><dt>System commission{order.commission.type && ` (${order.commission.type === 'percentage' ? `${order.commission.value}% of items` : 'fixed per item'})`}</dt><dd>{money(order.commission.systemCommission)}</dd></div>
             <div className="flex justify-between text-muted-foreground"><dt>Seller amount</dt><dd>{money(order.commission.sellerAmount)}</dd></div>
           </>
         )}
       </dl>
 
       <ReturnsPanel role={role} order={order} />
+
+      <OrderRefundPanel role={role} order={order} onChanged={load} />
+
+      <OrderClaimsPanel role={role} order={order} onChanged={load} />
 
       <PaymentPanel role={role} order={order} onChanged={() => { showToast('Payment recorded.', 'success'); load(); }} onError={fail} />
 

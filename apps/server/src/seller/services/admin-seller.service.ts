@@ -110,6 +110,7 @@ export class AdminSellerService {
       name: dto.name,
       email: dto.email,
       phone: dto.phone,
+      description: dto.description ?? null,
       passwordHash: await bcrypt.hash(dto.password, 10),
       payoutAccountInfo: dto.payoutAccountInfo ?? null,
       status: SellerStatus.APPROVED,
@@ -161,6 +162,9 @@ export class AdminSellerService {
     if (dto.phone !== undefined && dto.phone !== seller.phone) {
       await this.commonSellerService.assertPhoneIsUnique(dto.phone, id);
       seller.phone = dto.phone;
+    }
+    if (dto.description !== undefined) {
+      seller.description = dto.description;
     }
     if (dto.password !== undefined) {
       seller.passwordHash = await bcrypt.hash(dto.password, 10);

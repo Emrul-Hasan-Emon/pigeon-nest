@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Heart, ShoppingBag } from 'lucide-react';
@@ -149,6 +149,11 @@ export function StoreHeader() {
   );
 }
 
+/** The current year. Kept apart so Next can render the rest of the page ahead of time. */
+function Year() {
+  return <>{new Date().getFullYear()}</>;
+}
+
 export function StoreFooter() {
   return (
     <footer className="mt-12 bg-st-ink text-white/70">
@@ -174,7 +179,7 @@ export function StoreFooter() {
         </ul>
       </div>
       <div className="border-t border-white/10 py-5 text-center text-xs text-white/45">
-        © {new Date().getFullYear()} Pigeon Nest
+        © <Suspense fallback={null}><Year /></Suspense> Pigeon Nest
       </div>
     </footer>
   );

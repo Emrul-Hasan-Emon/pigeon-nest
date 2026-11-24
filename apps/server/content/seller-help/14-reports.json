@@ -1,0 +1,190 @@
+{
+  "slug": "reports",
+  "title": "Reports",
+  "icon": "line-chart",
+  "order": 140,
+  "summary": "Numbers about your shop for the days you choose. Read them on the screen or download them for Excel.",
+  "openPath": "/seller/reports",
+  "openLabel": "Open reports",
+  "sections": [
+    {
+      "id": "what",
+      "title": "What is this page?",
+      "intro": "Reports answer questions like: How much did I sell this month? Which birds sell best? Which are slow? What am I about to run out of? Why do birds come back? Each report is one table with a short summary at the top.",
+      "blocks": [
+        {
+          "type": "points",
+          "title": "In simple words",
+          "items": [
+            "Reports use the same rules as your dashboard. A sale is an order that is fully paid and not cancelled, counted on the day it was placed.",
+            "A refund is a return that was finished, counted on the day it was confirmed.",
+            "You only see your own numbers."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "use",
+      "title": "Make a report",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "How to",
+          "steps": [
+            "Press \"Reports\" in the left menu.",
+            "Press the card of the report you want.",
+            "Choose the dates: \"Last 7 days\", \"Last 30 days\", \"This month\", \"Last month\", \"This year\", or type your own From and To.",
+            "Choose the options of that report (see below).",
+            "Read the summary and the table on the screen.",
+            "Press \"Download CSV\" to open it in Excel or Google Sheets."
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "info",
+          "text": "You can choose at most 366 days at one time. If you choose \"Low stock\", the dates do not matter, because it shows your stock right now."
+        }
+      ]
+    },
+    {
+      "id": "sales",
+      "title": "Sales",
+      "blocks": [
+        {
+          "type": "points",
+          "items": [
+            "It shows money coming in: orders placed, paid orders, sales, refunds, and sales after refunds.",
+            "Choose to group by day or by month.",
+            "Use it to see which days or months are strong."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "products",
+      "title": "My products",
+      "blocks": [
+        {
+          "type": "words",
+          "title": "Choose one",
+          "items": [
+            {
+              "term": "Best sellers",
+              "means": "The products that earned the most. Returned items are left out."
+            },
+            {
+              "term": "Slow sellers",
+              "means": "Products on sale that sold least. It also shows when each last sold."
+            },
+            {
+              "term": "Low stock",
+              "means": "Active options with 5 or fewer left, or none. Add stock for these."
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "info",
+          "text": "The list shows up to 100 rows."
+        }
+      ]
+    },
+    {
+      "id": "orders",
+      "title": "Orders",
+      "blocks": [
+        {
+          "type": "points",
+          "items": [
+            "It shows how many orders are in each step, and their share.",
+            "It shows how many were cancelled or returned.",
+            "It shows the average hours from \"Confirmed\" to \"Delivered\". A smaller number means you deliver faster."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "earnings",
+      "title": "What I earn",
+      "blocks": [
+        {
+          "type": "points",
+          "items": [
+            "Sales, then the system commission, then refunds, then the system commission that came back from returns.",
+            "The last line is what you keep: your share of the sales, minus refunds, plus the commission given back.",
+            "Choose to group by day or by month."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "returns",
+      "title": "Returns",
+      "blocks": [
+        {
+          "type": "words",
+          "title": "Choose how to group",
+          "items": [
+            {
+              "term": "By reason",
+              "means": "Why birds come back: not as described, damaged, wrong item and so on."
+            },
+            {
+              "term": "By product",
+              "means": "Which products come back most."
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "info",
+          "text": "A high number for one reason is a clue. For example, many \"not as described\" means your description or pictures need work."
+        }
+      ]
+    },
+    {
+      "id": "csv",
+      "title": "Download to Excel",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "How to",
+          "steps": [
+            "Make the report you want.",
+            "Press \"Download CSV\".",
+            "Open the file in Excel or Google Sheets."
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "info",
+          "text": "The file has exactly what you see on the screen."
+        }
+      ]
+    },
+    {
+      "id": "faq",
+      "title": "Questions people ask",
+      "blocks": [
+        {
+          "type": "faq",
+          "title": "Common questions",
+          "items": [
+            {
+              "q": "Why is a sale missing from my report?",
+              "a": "It may not be fully paid yet. Record the payment on the order."
+            },
+            {
+              "q": "Why is a day missing in Sales?",
+              "a": "Days with no sales are left out when you group by day."
+            },
+            {
+              "q": "Is the report the same as my dashboard?",
+              "a": "Yes, with the same rules. If numbers look different, check that the dates are the same."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

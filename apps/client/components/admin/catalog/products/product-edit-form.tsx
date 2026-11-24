@@ -5,7 +5,9 @@ import type { UpdateProductPayload } from '@/lib/api/products';
 import { adminProductPortal, type ProductPortal } from '@/lib/products/portal';
 import { flattenCategoryTree } from '@/lib/category-tree';
 import { ApiError } from '@/lib/api/http';
+import { Opt, Req, RequiredLegend } from '@/components/products/field-tag';
 import { useToast } from '@/components/ui/toast';
+import { BirdProductFields, birdChanges, birdFormFrom, saveNewParents, type BirdForm } from '@/components/products/bird-fields';
 import {
   buildSkuChanges,
   ProductSkuEditor,
@@ -65,6 +67,8 @@ export function ProductEditForm({
   const initial = useMemo(() => toFormState(current), [current]);
   const [form, setForm] = useState<FormState>(initial);
   const [skus, setSkus] = useState<SkuDraft[]>(() => (product.skus ?? []).map(skuToDraft));
+  const initialBird = useMemo(() => birdFormFrom(current), [current]);
+  const [bird, setBird] = useState<BirdForm>(initialBird);
 
   const [tree, setTree] = useState<CategoryTreeNode[]>([]);
   const [collections, setCollections] = useState<Collection[]>([]);
@@ -95,6 +99,11 @@ export function ProductEditForm({
       .catch(() => showToast('Failed to load attributes.', 'error'));
   }, [portal, showToast]);
 
+  // A father or mother saves on its own. Only the parents of the rows change; whatever else is typed stays.
+  function handleParentsSaved(updated: Product) {
+    setSkus((rows) => rows.map((row) => (row.id === undefined ? row : { ...row, parents: updated.skus?.find((k) => k.id === row.id)?.parents })));
+  }
+
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setNameError(null);
@@ -122,6 +131,7 @@ export function ProductEditForm({
     }
     if (form.seoTitle !== initial.seoTitle) payload.seoTitle = form.seoTitle;
     if (form.seoDescription !== initial.seoDescription) payload.seoDescription = form.seoDescription;
+    Object.assign(payload, birdChanges(initialBird, bird));
 
     const changes = buildSkuChanges(skus);
     payload.skus = changes.skus;
@@ -129,11 +139,21 @@ export function ProductEditForm({
 
     setSubmitting(true);
     try {
-      const updated = await portal.update(current.id, payload);
+      const knownIds = new Set((current.skus ?? []).map((k) => k.id));
+      const typedNew = skus.filter((d) => d.id === undefined && !d.removed).map((d) => d.newParents);
+      let updated = await portal.update(current.id, payload);
+      // New options got their ids just now. Their typed father and mother go up in the order the options were added.
+      const addedIds = (updated.skus ?? []).filter((k) => !knownIds.has(k.id)).sort((a, b) => a.id - b.id).map((k) => k.id);
+      if (addedIds.length > 0 && typedNew.length > 0) {
+        const failed = await saveNewParents(portal, current.id, addedIds, typedNew);
+        updated = await portal.get(current.id);
+        if (failed > 0) showToast('Saved, but a father or mother could not be saved. Add them again below.', 'error');
+      }
       setCurrent(updated);
       onSaved?.(updated);
       setForm(toFormState(updated));
       setSkus((updated.skus ?? []).map(skuToDraft));
+      setBird(birdFormFrom(updated));
       showToast('Product updated.', 'success');
     } catch (error) {
       if (error instanceof ApiError) {
@@ -149,6 +169,7 @@ export function ProductEditForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
+      <RequiredLegend />
       {generalError && (
         <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">{generalError}</p>
       )}
@@ -160,7 +181,7 @@ export function ProductEditForm({
         </p>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <label className="text-sm text-foreground">
-            Name *
+            Name <Req />
             <input
               className={`${fieldClass} ${nameError ? 'border-destructive' : ''}`}
               value={form.name}
@@ -170,7 +191,7 @@ export function ProductEditForm({
           </label>
 
           <label className="text-sm text-foreground">
-            Category
+            Category <Req />
             <select
               className={fieldClass}
               value={form.categoryId}
@@ -185,7 +206,7 @@ export function ProductEditForm({
           </label>
 
           <label className="text-sm text-foreground">
-            Collection
+            Collection <Opt />
             <select
               className={fieldClass}
               value={form.collectionId}
@@ -201,7 +222,7 @@ export function ProductEditForm({
           </label>
 
           <label className="text-sm text-foreground md:col-span-2">
-            Description
+            Description <Opt />
             <textarea
               className={fieldClass}
               rows={3}
@@ -217,12 +238,12 @@ export function ProductEditForm({
                 checked={form.isFeatured}
                 onChange={(event) => setForm((f) => ({ ...f, isFeatured: event.target.checked }))}
               />
-              Featured
+              Featured <Opt />
             </label>
           )}
           {isAdmin && (
             <label className="text-sm text-foreground">
-              Review status
+              Review status <Opt />
               <select
                 className={fieldClass}
                 value={form.status}
@@ -237,7 +258,7 @@ export function ProductEditForm({
             </label>
           )}
           <label className="text-sm text-foreground">
-            Activity
+            Activity <Opt />
             <select
               className={fieldClass}
               value={form.activeStatus}
@@ -256,7 +277,7 @@ export function ProductEditForm({
           </label>
           {isAdmin && statusChanged && (
             <label className="text-sm text-foreground md:col-span-2">
-              Reason {needsReason ? '(required for reject / suspend)' : '(optional)'}
+              Reason {needsReason ? <Req /> : <Opt />}
               <textarea
                 className={fieldClass}
                 rows={2}
@@ -271,7 +292,7 @@ export function ProductEditForm({
           )}
 
           <label className="text-sm text-foreground">
-            SEO title
+            SEO title <Opt />
             <input
               className={fieldClass}
               value={form.seoTitle}
@@ -279,7 +300,7 @@ export function ProductEditForm({
             />
           </label>
           <label className="text-sm text-foreground">
-            SEO description
+            SEO description <Opt />
             <input
               className={fieldClass}
               value={form.seoDescription}
@@ -290,11 +311,17 @@ export function ProductEditForm({
       </div>
 
       <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-        <h2 className="mb-1 font-semibold text-foreground">SKUs</h2>
+        <h2 className="mb-1 font-semibold text-foreground">About the birds <Opt /></h2>
+        <p className="mb-3 text-xs text-muted-foreground">True for every option of this product. Buyers see it on the product page.</p>
+        <BirdProductFields value={bird} onChange={setBird} />
+      </div>
+
+      <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+        <h2 className="mb-1 font-semibold text-foreground">{isAdmin ? 'SKUs' : 'Options you sell (each bird, colour or size)'} <Req /></h2>
         <p className="mb-3 text-xs text-muted-foreground">
           Variants and SKU codes are fixed once created. To change them, remove the SKU and add a new one.
         </p>
-        <ProductSkuEditor drafts={skus} onChange={setSkus} attributes={attributes} />
+        <ProductSkuEditor drafts={skus} onChange={setSkus} attributes={attributes} productId={current.id} portal={portal} onProduct={handleParentsSaved} />
       </div>
 
       <button

@@ -3,27 +3,55 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { getWishlistInsights } from '@/lib/api/wishlist';
+import { useDebouncedValue } from '@/lib/hooks/use-debounced-value';
 import type { SellerWishlistInsights } from '@/types/wishlist';
 import { LoadingBlock } from '@/components/ui/skeleton';
 
 /** How often this seller's products are saved. Counts only: customers are never shown. */
-export function SellerWishlistInsightsPanel({ limit = 5, title = 'Wishlist demand' }: { limit?: number; title?: string }) {
+export function SellerWishlistInsightsPanel({ limit = 5, title = 'Wishlist demand', searchable = false }: { limit?: number; title?: string; searchable?: boolean }) {
   const [data, setData] = useState<SellerWishlistInsights | null>(null);
   const [failed, setFailed] = useState(false);
+  const [search, setSearch] = useState('');
+  const q = useDebouncedValue(search.trim());
 
   useEffect(() => {
-    getWishlistInsights(limit)
-      .then(setData)
+    getWishlistInsights(limit, q || undefined)
+      .then((d) => {
+        setData(d);
+        setFailed(false);
+      })
       .catch(() => setFailed(true));
-  }, [limit]);
+  }, [limit, q]);
 
   if (failed) return <p role="alert" className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">Could not load wishlist numbers.</p>;
   if (!data) return <LoadingBlock />;
-  return <WishlistInsightsView data={data} title={title} />;
+  return (
+    <>
+      {searchable && (
+        <div className="mb-4 flex flex-wrap items-end gap-4">
+          <label className="block text-base font-semibold text-foreground">
+            Product name
+            <input
+              className="mt-1 block w-72 rounded-md border border-border bg-background px-3 py-2 text-base font-normal"
+              placeholder="Type part of the name"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </label>
+          {search && (
+            <button type="button" onClick={() => setSearch('')} className="rounded-md border border-border px-4 py-2 text-base font-medium text-foreground hover:bg-muted">
+              Clear
+            </button>
+          )}
+        </div>
+      )}
+      <WishlistInsightsView data={data} title={title} searching={Boolean(q)} />
+    </>
+  );
 }
 
 /** The wishlist numbers and table, for data already in hand. The dashboard passes the figures it fetched with everything else. */
-export function WishlistInsightsView({ data, title = 'Wishlist demand' }: { data: SellerWishlistInsights; title?: string }) {
+export function WishlistInsightsView({ data, title = 'Wishlist demand', searching = false }: { data: SellerWishlistInsights; title?: string; searching?: boolean }) {
   return (
     <section className="mb-6" aria-label="Wishlist demand">
       <h2 className="mb-1 font-semibold text-foreground">{title}</h2>
@@ -31,11 +59,11 @@ export function WishlistInsightsView({ data, title = 'Wishlist demand' }: { data
       <div className="mb-4 overflow-hidden rounded-xl border border-border bg-border shadow-sm">
         <div className="grid grid-cols-2 gap-px">
           <div className="bg-card px-5 py-4">
-            <p className="text-xs text-muted-foreground">Total saves</p>
+            <p className="text-xs font-semibold text-muted-foreground">Total saves</p>
             <p className="mt-1 font-[family-name:var(--font-display)] text-2xl font-semibold tracking-tight text-foreground">{data.totalSaves}</p>
           </div>
           <div className="bg-card px-5 py-4">
-            <p className="text-xs text-muted-foreground">Products saved</p>
+            <p className="text-xs font-semibold text-muted-foreground">Products saved</p>
             <p className="mt-1 font-[family-name:var(--font-display)] text-2xl font-semibold tracking-tight text-foreground">
               {data.productsSaved}
               <span className="text-base font-normal text-muted-foreground"> of {data.products}</span>
@@ -45,7 +73,7 @@ export function WishlistInsightsView({ data, title = 'Wishlist demand' }: { data
       </div>
       {data.top.length === 0 ? (
         <p className="rounded-xl border border-dashed border-border px-4 py-6 text-center text-sm text-muted-foreground">
-          No one has saved your products yet.
+          {searching ? 'No saved product has that name.' : 'No one has saved your products yet.'}
         </p>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-sm">

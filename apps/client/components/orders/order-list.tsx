@@ -10,8 +10,10 @@ import {
   DELIVERY_TYPES,
   ORDER_STATUSES,
   PAYMENT_STATUSES,
+  SELLER_NEXT,
   type GatewayOption,
   type OrderListParams,
+  type OrderStatus,
   type OrderSummary,
   type StaffRole,
 } from '@/types/order';
@@ -28,6 +30,7 @@ import {
   useApiError,
 } from './ui';
 import { LoadingBlock } from '@/components/ui/skeleton';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { FilterField, FilterPanel } from '@/components/ui/filter-panel';
 
 const PAGE_SIZE = 20;
@@ -64,6 +67,56 @@ export function OrderList({ role }: { role: StaffRole }) {
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [gateways, setGateways] = useState<GatewayOption[]>([]);
+
+  // Bulk update: tick orders that are all in the same status, then move them together. A seller follows the usual
+  // steps; an admin may move them to any other status.
+  const bulk = true;
+  const [picked, setPicked] = useState<number[]>([]);
+  const [moveTo, setMoveTo] = useState<OrderStatus | ''>('');
+  const [note, setNote] = useState('');
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const [confirmCancel, setConfirmCancel] = useState(false);
+  const pickedStatus = rows.find((r) => r.id === picked[0])?.status ?? null;
+  const stepsFrom = (status: OrderStatus): OrderStatus[] => (role === 'admin' ? ORDER_STATUSES.filter((s) => s !== status) : SELLER_NEXT[status] ?? []);
+  const canMove = (o: OrderSummary) => stepsFrom(o.status).length > 0;
+  const nextSteps = pickedStatus ? stepsFrom(pickedStatus) : [];
+  // The status a header tick selects: the one already picked, else the filter, else the first order that can move.
+  const headerStatus = pickedStatus ?? ((filters.status as OrderStatus) || rows.find(canMove)?.status) ?? null;
+  const selectable = (o: OrderSummary) => canMove(o) && (pickedStatus === null || o.status === pickedStatus);
+  const headerRows = headerStatus ? rows.filter((r) => r.status === headerStatus && canMove(r)) : [];
+  const allHeaderPicked = headerRows.length > 0 && headerRows.every((r) => picked.includes(r.id));
+
+  function toggle(id: number) {
+    setPicked((p) => {
+      const next = p.includes(id) ? p.filter((x) => x !== id) : [...p, id];
+      if (next.length === 0 || next.length === 1) setMoveTo('');
+      return next;
+    });
+  }
+
+  async function runBulk() {
+    if (!moveTo || picked.length === 0) return;
+    setBulkBusy(true);
+    try {
+      const r = await api.bulkStatus(picked, moveTo, note.trim() || undefined);
+      const bad = r.results.filter((x) => !x.ok);
+      showToast(
+        bad.length === 0
+          ? `${r.updated} ${r.updated === 1 ? 'order' : 'orders'} updated.`
+          : `${r.updated} updated, ${bad.length} failed: ${bad.map((x) => `${x.orderNumber} (${x.error})`).join('; ')}`,
+        bad.length === 0 ? 'success' : 'error',
+      );
+      setPicked([]);
+      setMoveTo('');
+      setNote('');
+      fetchFirst();
+    } catch (e) {
+      showToast(errorMessage(e, 'Could not update the orders.'), 'error');
+    } finally {
+      setBulkBusy(false);
+      setConfirmCancel(false);
+    }
+  }
 
   useEffect(() => {
     api.options().then((o) => setGateways(o.paymentGateways)).catch(() => undefined);
@@ -203,6 +256,10 @@ export function OrderList({ role }: { role: StaffRole }) {
 
       {error && <p role="alert" className="mb-3 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p>}
 
+      {bulk && !loading && rows.some(canMove) && picked.length === 0 && (
+        <p className="mb-2 text-sm text-muted-foreground">Tick the orders you want to move together. They must all be waiting for the same step.</p>
+      )}
+
       {loading ? (
         <LoadingBlock />
       ) : (
@@ -210,6 +267,18 @@ export function OrderList({ role }: { role: StaffRole }) {
           <table className="min-w-full divide-y divide-border text-sm">
             <thead className="bg-muted">
               <tr>
+                {bulk && (
+                  <th className="w-10 px-4 py-3">
+                    <input
+                      type="checkbox"
+                      aria-label={headerStatus ? `Select every ${ORDER_STATUS_LABEL[headerStatus].toLowerCase()} order on this page` : 'Select orders'}
+                      title={headerStatus ? `Select every ${ORDER_STATUS_LABEL[headerStatus].toLowerCase()} order on this page` : undefined}
+                      disabled={headerRows.length === 0}
+                      checked={allHeaderPicked}
+                      onChange={() => setPicked(allHeaderPicked ? [] : headerRows.map((r) => r.id))}
+                    />
+                  </th>
+                )}
                 {['Order', 'Customer', ...(role === 'admin' ? ['Seller'] : []), 'Items', 'Payable', 'Status', 'Payment', 'Placed'].map((h) => (
                   <th key={h} className="px-4 py-3 text-left font-medium text-muted-foreground">{h}</th>
                 ))}
@@ -218,20 +287,34 @@ export function OrderList({ role }: { role: StaffRole }) {
             </thead>
             <tbody className="divide-y divide-border">
               {rows.length === 0 && (
-                <tr><td colSpan={role === 'admin' ? 10 : 9} className="px-4 py-6 text-center text-muted-foreground">No orders found.</td></tr>
+                <tr><td colSpan={role === 'admin' ? 10 : bulk ? 10 : 9} className="px-4 py-6 text-center text-muted-foreground">No orders found.</td></tr>
               )}
               {rows.map((o) => (
-                <tr key={o.id}>
+                <tr key={o.id} className={picked.includes(o.id) ? 'bg-accent/40' : undefined}>
+                  {bulk && (
+                    <td className="px-4 py-3">
+                      <input
+                        type="checkbox"
+                        aria-label={`Select order ${o.orderNumber}`}
+                        title={!canMove(o) ? 'Nothing more to do on this order' : !selectable(o) ? 'This order is at a different step' : undefined}
+                        disabled={!selectable(o)}
+                        checked={picked.includes(o.id)}
+                        onChange={() => toggle(o.id)}
+                      />
+                    </td>
+                  )}
                   <td className="whitespace-nowrap px-4 py-3 font-medium text-foreground">
                     {o.orderNumber}
                     <span className="block text-xs font-normal text-muted-foreground">{o.gateway.name} · {o.deliveryType}</span>
                   </td>
                   <td className="px-4 py-3">
-                    <span className="text-foreground">{o.customer.name}</span>
+                    {role === 'admin' && o.customer.userId
+                      ? <Link href={`/admin/users/${o.customer.userId}`} className="font-medium text-primary underline underline-offset-2 hover:opacity-70">{o.customer.name}</Link>
+                      : <span className="text-foreground">{o.customer.name}</span>}
                     {o.customer.isGuest && <span className="ml-2 rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">Guest</span>}
                     <span className="block text-xs text-muted-foreground">{o.customer.phone} · {o.countryName}</span>
                   </td>
-                  {role === 'admin' && <td className="px-4 py-3 text-muted-foreground">{o.seller.name}</td>}
+                  {role === 'admin' && <td className="px-4 py-3"><Link href={`/admin/sellers/${o.seller.id}`} className="font-medium text-primary underline underline-offset-2 hover:opacity-70">{o.seller.name}</Link></td>}
                   <td className="px-4 py-3 text-muted-foreground">{o.itemCount}</td>
                   <td className="px-4 py-3 font-medium text-foreground">
                     {money(o.payable)}
@@ -248,6 +331,45 @@ export function OrderList({ role }: { role: StaffRole }) {
             </tbody>
           </table>
         </div>
+      )}
+
+      {bulk && picked.length > 0 && pickedStatus && (
+        <div className="sticky bottom-4 z-10 mt-4 flex flex-wrap items-end gap-3 rounded-xl border border-border bg-card p-4 shadow-lg">
+          <p className="mr-auto text-base font-medium text-foreground">
+            {picked.length} {picked.length === 1 ? 'order' : 'orders'} selected
+            <span className="block text-sm font-normal text-muted-foreground">All {ORDER_STATUS_LABEL[pickedStatus].toLowerCase()}</span>
+          </p>
+          <label className="text-sm font-medium text-foreground">
+            Move to
+            <select className={`${field} mt-1 block`} value={moveTo} onChange={(e) => setMoveTo(e.target.value as OrderStatus)}>
+              <option value="">Choose a step</option>
+              {nextSteps.map((s) => <option key={s} value={s}>{ORDER_STATUS_LABEL[s]}</option>)}
+            </select>
+          </label>
+          <label className="min-w-48 flex-1 text-sm font-medium text-foreground">
+            Note (optional, everyone on the order sees it)
+            <input className={`${field} mt-1 block w-full`} maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} />
+          </label>
+          <button type="button" className={outlineButton} onClick={() => { setPicked([]); setMoveTo(''); }}>Clear</button>
+          <button
+            type="button"
+            className={primaryButton}
+            disabled={!moveTo || bulkBusy}
+            onClick={() => (moveTo === 'cancelled' ? setConfirmCancel(true) : runBulk())}
+          >
+            {bulkBusy ? 'Updating…' : `Update ${picked.length} ${picked.length === 1 ? 'order' : 'orders'}`}
+          </button>
+        </div>
+      )}
+
+      {confirmCancel && (
+        <ConfirmDialog
+          title="Cancel these orders?"
+          description={`${picked.length} ${picked.length === 1 ? 'order' : 'orders'} will be cancelled and the stock put back.${role === 'seller' ? ' Only an admin can reopen a cancelled order.' : ''}`}
+          confirmLabel="Cancel the orders"
+          onConfirm={runBulk}
+          onClose={() => setConfirmCancel(false)}
+        />
       )}
 
       {!loading && nextCursor !== null && (

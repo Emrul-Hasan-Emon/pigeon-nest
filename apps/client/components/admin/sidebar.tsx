@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Bird, ChevronDown, CircleHelp, LayoutDashboard, Banknote, HandCoins, RotateCcw, ArrowRightLeft, Coins, Flag, Heart, Star, ClipboardCheck, ReceiptText, Wallet, ShoppingCart, ShoppingBag, CreditCard, Globe2, Settings2, History, Image as ImageIcon, LayoutTemplate, Layers, Rows3, Package, SlidersHorizontal, Store, Tags, Users } from 'lucide-react';
+import { Bird, ChevronDown, CircleHelp, FileText, LayoutDashboard, LineChart, ListChecks, MailCheck, MessageCircleQuestion, Banknote, HandCoins, RotateCcw, ArrowRightLeft, Coins, Flag, Heart, Star, ClipboardCheck, ReceiptText, Wallet, ShoppingCart, ShoppingBag, CreditCard, Globe2, Settings2, History, Image as ImageIcon, LayoutTemplate, Layers, Rows3, Package, SlidersHorizontal, Store, Tags, Users } from 'lucide-react';
 
 const NAV_GROUPS = [
   {
@@ -11,6 +11,7 @@ const NAV_GROUPS = [
     items: [
       { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
       { href: '/admin/dashboard/guide', label: 'Dashboard guide', icon: CircleHelp },
+      { href: '/admin/reports', label: 'Reports', icon: LineChart },
     ],
   },
   {
@@ -36,22 +37,26 @@ const NAV_GROUPS = [
     items: [
       { href: '/admin/orders', label: 'Orders', icon: ReceiptText },
       { href: '/admin/payments', label: 'Payments', icon: Wallet },
+      { href: '/admin/payment-claims', label: 'Mark-paid requests', icon: MailCheck },
       { href: '/admin/carts/active', label: 'Active carts', icon: ShoppingCart },
       { href: '/admin/carts/inactive', label: 'Inactive carts', icon: ShoppingBag },
       { href: '/admin/wishlist', label: 'Wishlists', icon: Heart },
       { href: '/admin/returns', label: 'Returns', icon: RotateCcw },
+      { href: '/admin/refunds', label: 'Refunds', icon: Banknote },
       { href: '/admin/proposals', label: 'Price proposals', icon: HandCoins },
+      { href: '/admin/questions', label: 'Buyer questions', icon: MessageCircleQuestion },
       { href: '/admin/reviews', label: 'Reviews', icon: Star },
       { href: '/admin/reviews/reports', label: 'Review reports', icon: Flag },
     ],
   },
   {
-    label: 'Commission',
+    label: 'System commission',
     items: [
       { href: '/admin/commission', label: 'Balances', icon: Coins },
-      { href: '/admin/commission/history', label: 'Commission ledger', icon: History },
+      { href: '/admin/commission/history', label: 'System commission ledger', icon: History },
       { href: '/admin/commission/changes', label: 'Balance changes', icon: ArrowRightLeft },
-      { href: '/admin/commission/disbursements', label: 'Commission payments', icon: Banknote },
+      { href: '/admin/commission/disbursements', label: 'System commission payments', icon: Banknote },
+      { href: '/admin/statements', label: 'Seller statements', icon: FileText },
     ],
   },
   {
@@ -67,6 +72,7 @@ const NAV_GROUPS = [
     items: [
       { href: '/admin/sellers', label: 'Sellers', icon: Store },
       { href: '/admin/sellers/requests', label: 'Pending requests', icon: ClipboardCheck },
+      { href: '/admin/sellers/onboarding', label: 'Seller setup', icon: ListChecks },
       { href: '/admin/sellers/status-history', label: 'Status history', icon: History },
     ],
   },

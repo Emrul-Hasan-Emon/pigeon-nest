@@ -1,0 +1,206 @@
+{
+  "slug": "start",
+  "title": "Getting started",
+  "icon": "rocket",
+  "order": 10,
+  "summary": "New here? Start with this page. It shows the first steps, a simple daily routine, and what every menu item is for.",
+  "openPath": "/seller/dashboard",
+  "openLabel": "Go to my dashboard",
+  "sections": [
+    {
+      "id": "what",
+      "title": "How Pigeon Nest works for a seller",
+      "intro": "Pigeon Nest is a marketplace for pigeons and pigeon items. You put your birds on the website. Buyers find them, order them, and pay you directly. You pack and send the order, and you pay the marketplace a small fee (the system commission) for each sale.",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "The whole path of one sale",
+          "steps": [
+            "You add a product with pictures, a price and stock.",
+            "A buyer finds it and places an order. They may ask a question or offer a price first.",
+            "You confirm the order, pack it and ship it.",
+            "The buyer pays you (bKash, Nagad, bank or cash). You write the payment on the order, with proof.",
+            "The buyer gets the order. The order is Delivered.",
+            "The buyer may write a review. You reply.",
+            "If the buyer returns the item, or the order is cancelled after payment, you give the money back."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "first",
+      "title": "Your first day",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "Do these in order",
+          "steps": [
+            "Open \"My profile\". Add your picture, write about your shop, add your email, and upload your ID, front and back.",
+            "Open \"Payment accounts\". Add the bKash, Nagad or bank account where buyers send money.",
+            "Open \"My products\". Add your first product with pictures, a price and stock.",
+            "Add the bird details: ring number, age, vaccine and parents. Buyers trust birds with clear details.",
+            "Check that the product has stock above zero and is switched on. Then buyers can see it.",
+            "When your first order comes, open \"Orders\" and confirm it."
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "info",
+          "text": "Your account must be approved and active before you can sell. If it is not, a notice on your pages tells you why. The \"Get your shop ready\" card on your dashboard shows which steps are left."
+        }
+      ]
+    },
+    {
+      "id": "daily",
+      "title": "Every day",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "A simple daily routine",
+          "steps": [
+            "Open \"Home\". Read \"What to do now\".",
+            "Press each box and finish the work. Start with the red ones.",
+            "Confirm new orders. Pack and send the ones that are ready.",
+            "Answer questions, price offers and reviews. Fast answers sell.",
+            "Check your stock. Add more when it is low.",
+            "Record the payments that arrived in your bKash, Nagad or bank."
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "info",
+          "text": "The bell at the top right shows the same list. The small number is how many things wait for you."
+        }
+      ]
+    },
+    {
+      "id": "menu",
+      "title": "What every menu item is for",
+      "blocks": [
+        {
+          "type": "words",
+          "title": "The left menu",
+          "items": [
+            {
+              "term": "Home (Dashboard)",
+              "means": "Your sales, your money, and what to do now."
+            },
+            {
+              "term": "Orders",
+              "means": "Every order: confirm, pack, ship, record payment, print."
+            },
+            {
+              "term": "My products",
+              "means": "Add and change your birds and items, prices and stock."
+            },
+            {
+              "term": "Payments",
+              "means": "The list of money received on your orders."
+            },
+            {
+              "term": "Paid requests",
+              "means": "Cash on delivery buyers who say they already paid. You check and decide."
+            },
+            {
+              "term": "Payment accounts",
+              "means": "Your bKash, Nagad, Rocket, Upay or bank accounts for buyers to pay."
+            },
+            {
+              "term": "Returns",
+              "means": "Buyers who want to send an item back after delivery."
+            },
+            {
+              "term": "Refunds",
+              "means": "Money to send back for an order cancelled after payment."
+            },
+            {
+              "term": "Price offers",
+              "means": "Buyers who suggest their own price."
+            },
+            {
+              "term": "Questions",
+              "means": "Questions about your birds. Your answer is public."
+            },
+            {
+              "term": "Reviews",
+              "means": "What buyers say about you. Reply to them."
+            },
+            {
+              "term": "Wishlist",
+              "means": "How many buyers saved your products."
+            },
+            {
+              "term": "Reports",
+              "means": "Sales, products, orders, earnings and returns for the dates you choose."
+            },
+            {
+              "term": "Statements",
+              "means": "A monthly sheet: what you sold, what you paid and what you owe."
+            },
+            {
+              "term": "System commission",
+              "means": "Your fee rate, what you owe and what you paid the marketplace."
+            },
+            {
+              "term": "My profile",
+              "means": "Your details, documents, password, and the switch to close your shop."
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "info",
+          "text": "A small orange number on a menu item means work is waiting for you there."
+        }
+      ]
+    },
+    {
+      "id": "money",
+      "title": "How the money works",
+      "blocks": [
+        {
+          "type": "points",
+          "items": [
+            "The website does not take money from buyers. Buyers pay you directly, so the money goes to your own account.",
+            "You write each payment on the order, with proof. Only then is the order Paid.",
+            "A fully paid order counts as a sale, and its system commission is added to what you owe the marketplace.",
+            "You pay the marketplace what you owe, and the admin writes down your payment.",
+            "If an order is cancelled after payment, or a return is finished, you send the money back and write it down with proof."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tips",
+      "title": "Tips to sell more",
+      "blocks": [
+        {
+          "type": "points",
+          "items": [
+            "Use clear pictures: the whole bird, the eye, the wings and the ring.",
+            "Fill in the bird details. Buyers trust what they can check.",
+            "Answer questions in the same day.",
+            "Reply to every review, kindly.",
+            "Keep stock numbers true. Do not let a buyer order a bird you no longer have.",
+            "Ship fast. Reports show your average delivery time."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "help",
+      "title": "How to use this Help",
+      "blocks": [
+        {
+          "type": "points",
+          "items": [
+            "Press a topic in the left menu to read it. Each topic matches one part of the portal.",
+            "Every topic has steps in simple words, and a Q&A at the end.",
+            "The \"Open …\" button at the top of a topic takes you to the real page.",
+            "Press \"Back to my shop\" to leave Help."
+          ]
+        }
+      ]
+    }
+  ]
+}

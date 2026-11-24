@@ -1,0 +1,305 @@
+{
+  "slug": "offers",
+  "title": "Price offers",
+  "icon": "hand-coins",
+  "order": 100,
+  "summary": "A buyer says \"I will pay this price.\" You can say yes, suggest another price, or say no.",
+  "openPath": "/seller/offers",
+  "openLabel": "Open price offers",
+  "sections": [
+    {
+      "id": "what",
+      "title": "What is a price offer?",
+      "intro": "Some buyers like to bargain, like in a real market. A price offer lets a buyer write the price they want to pay for one of your birds or items. You can agree, answer with your own price, or refuse. You and the buyer can go back and forth until one of you says yes or no.",
+      "blocks": [
+        {
+          "type": "points",
+          "title": "In simple words",
+          "items": [
+            "An offer is for one option (SKU) of one product. It has a price for each one and a number of items.",
+            "Only you and that buyer can see the offer. Nobody else can.",
+            "A buyer can have only one open offer for each option at a time.",
+            "You choose which options take offers. If you do not turn it on, buyers cannot offer."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "why",
+      "title": "Why would you use it?",
+      "blocks": [
+        {
+          "type": "points",
+          "items": [
+            "You can win a sale from a buyer who thought your price was a little too high.",
+            "You stay in control. Nothing is sold at a price you did not agree to.",
+            "You can protect yourself with a lowest price. Offers below it are refused for you without you doing anything.",
+            "Everything is written down. The price, the number of items and every message are saved, so there is no argument later about what was agreed.",
+            "It sells slow birds. A fair offer can sell a bird that has been waiting for a long time."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "setup",
+      "title": "Step 1: turn offers on for a product",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "How to",
+          "steps": [
+            "Press \"My products\" in the left menu. Open the product and press \"Edit\".",
+            "Find the option (SKU) you want to take offers on.",
+            "Tick \"Accept price proposals\". It is off at the start.",
+            {
+              "text": "Type \"Lowest price I will consider\".",
+              "detail": "This is the smallest price you would ever accept. It is optional. Leave it empty or 0 for no lowest price."
+            },
+            "Press Save.",
+            "The buyer now sees a \"Make an offer\" button on that option on the product page."
+          ]
+        },
+        {
+          "type": "points",
+          "title": "About the lowest price",
+          "items": [
+            "It is private. Buyers never see it.",
+            "If a buyer offers less than this, the offer is refused at once and you never see it.",
+            "To remove it, empty the box and save."
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "info",
+          "text": "Set a lowest price you are really happy with. If a buyer offers exactly that and you say yes, you must sell at that price."
+        }
+      ]
+    },
+    {
+      "id": "when",
+      "title": "When will you see an offer?",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "How an offer reaches you",
+          "steps": [
+            "A buyer opens your product and presses \"Make an offer\".",
+            "They type the price for one item, the number of items, and a short message if they want.",
+            "The offer appears in \"Price offers\" with \"Needs your answer\".",
+            "A number shows on the \"Price offers\" menu item. The dashboard box \"Price offers to answer\" and the bell show it too."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tabs",
+      "title": "Read the Price offers page",
+      "blocks": [
+        {
+          "type": "words",
+          "title": "The tabs",
+          "items": [
+            {
+              "term": "Needs your answer",
+              "means": "It is your turn. Do these first."
+            },
+            {
+              "term": "Waiting for buyer",
+              "means": "You suggested another price. Now the buyer must answer."
+            },
+            {
+              "term": "Accepted",
+              "means": "You or the buyer said yes. The price is locked."
+            },
+            {
+              "term": "Used",
+              "means": "The buyer bought at the agreed price."
+            },
+            {
+              "term": "Closed",
+              "means": "Said no to, or cancelled by the buyer. Nothing more can happen."
+            },
+            {
+              "term": "All",
+              "means": "Every offer together."
+            }
+          ]
+        },
+        {
+          "type": "points",
+          "title": "Also on this page",
+          "items": [
+            "The small boxes at the top count your open offers, offers that need your answer, accepted and used offers.",
+            "Use the search box to find an offer by product name or buyer.",
+            "Press \"Load more\" to see older offers."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "open",
+      "title": "What an offer shows",
+      "blocks": [
+        {
+          "type": "words",
+          "title": "Open an offer to see",
+          "items": [
+            {
+              "term": "Buyer",
+              "means": "Who made the offer."
+            },
+            {
+              "term": "Product",
+              "means": "The bird or item, and the option."
+            },
+            {
+              "term": "Buyer offers (each)",
+              "means": "The price the buyer wants to pay for one item."
+            },
+            {
+              "term": "How many they want",
+              "means": "The number of items."
+            },
+            {
+              "term": "They would pay in all",
+              "means": "The price for one multiplied by the number of items."
+            },
+            {
+              "term": "Your selling price (each)",
+              "means": "The price you have on the product now, so you can compare."
+            },
+            {
+              "term": "What happened so far",
+              "means": "Every step in order: who sent what price, and the message, with the time."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "answer",
+      "title": "Step 2: answer an offer",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "How to",
+          "steps": [
+            "Press \"Price offers\" in the left menu. Open the \"Needs your answer\" tab.",
+            "Open an offer. Read the price, the number of items and any message.",
+            "Compare the price with what you ask and with your costs.",
+            "Choose one of the three buttons below."
+          ]
+        },
+        {
+          "type": "words",
+          "title": "The three buttons",
+          "items": [
+            {
+              "term": "Say yes",
+              "means": "You agree to the price and the number as they are. The price is locked. The buyer can now order at it."
+            },
+            {
+              "term": "Suggest another price",
+              "means": "You are not happy, but you want to keep talking. Type your price. You may change the number of items and add a note. Then press \"Send my price\". Now it is the buyer's turn."
+            },
+            {
+              "term": "Say no",
+              "means": "You do not want this deal. You may write a note. Press \"Say no to this offer\". The offer is closed."
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "warn",
+          "text": "After you say yes, you cannot take it back. Only an admin can cancel an accepted offer. Be sure before you press \"Say yes\"."
+        }
+      ]
+    },
+    {
+      "id": "back",
+      "title": "Going back and forth",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "An example",
+          "steps": [
+            "Your bird costs 5,000. A buyer offers 3,500.",
+            "You press \"Suggest another price\" and send 4,500, with the note \"This is a young, vaccinated bird\".",
+            "The buyer sees your price. They can say yes, send another price, say no, or cancel.",
+            "The buyer sends 4,200. It is your turn again.",
+            "You press \"Say yes\". The price 4,200 is locked."
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "info",
+          "text": "You can only answer when it is your turn. If the buyer answered first, the page shows the new state and the buttons change."
+        }
+      ]
+    },
+    {
+      "id": "after",
+      "title": "After you say yes",
+      "blocks": [
+        {
+          "type": "points",
+          "items": [
+            "The offer is \"Accepted\". The price and the number of items are locked.",
+            "The buyer has no time limit. They can buy now or later. It does not run out.",
+            "When the buyer adds it to their cart, they pay the agreed price for the agreed number.",
+            "When the buyer places the order, the offer becomes \"Used\". The order shows your normal price and the agreed price.",
+            "If you later lower your normal price below the agreed price, the buyer pays the lower price. The offer page shows a notice.",
+            "If an admin cancels an accepted offer, it goes back to your normal price."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tips",
+      "title": "Tips for good answers",
+      "blocks": [
+        {
+          "type": "points",
+          "items": [
+            "Answer fast. A buyer who waits a long time may buy from someone else.",
+            "Use the note to explain your price. A reason like \"ring and vaccine papers included\" helps.",
+            "Check your stock first. Do not say yes to ten items if you only have five.",
+            "Be polite. The note is saved and an admin can read it."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "faq",
+      "title": "Questions people ask",
+      "blocks": [
+        {
+          "type": "faq",
+          "title": "Common questions",
+          "items": [
+            {
+              "q": "Why do I not get any offers?",
+              "a": "Check that \"Accept price proposals\" is ticked on the option. Also check that the product is on sale and has stock."
+            },
+            {
+              "q": "A buyer offered a very low price and I never saw it. Why?",
+              "a": "It was under your lowest price, so it was refused for you."
+            },
+            {
+              "q": "Can a buyer send two offers for the same option?",
+              "a": "No. Only one open offer at a time for each option. After yes, no or cancel they can make a new one."
+            },
+            {
+              "q": "Can I change my mind after saying yes?",
+              "a": "No. Only an admin can cancel it. Think before you press \"Say yes\"."
+            },
+            {
+              "q": "Does the buyer have to buy after I say yes?",
+              "a": "No. The offer stays open and has no time limit. The buyer decides when to buy."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

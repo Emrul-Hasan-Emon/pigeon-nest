@@ -7,12 +7,14 @@ import { listCollections } from '@/lib/api/collections';
 import { useToast } from '@/components/ui/toast';
 import type { Collection } from '@/types/collection';
 import { LoadingBlock } from '@/components/ui/skeleton';
+import { useBreadcrumbTitle } from '@/components/ui/breadcrumbs';
 
 export default function EditCollectionPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const { showToast } = useToast();
   const [collection, setCollection] = useState<Collection | null>(null);
+  useBreadcrumbTitle(collection?.name);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

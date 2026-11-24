@@ -61,6 +61,11 @@ export interface ProposalListParams {
   search?: string;
   buyerSearch?: string;
   sellerSearch?: string;
+  skuSearch?: string;
+  from?: string;
+  to?: string;
+  minPrice?: number | string;
+  maxPrice?: number | string;
   userId?: number;
   sellerId?: number;
   cursor?: number;

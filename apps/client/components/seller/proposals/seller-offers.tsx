@@ -49,14 +49,31 @@ export function SellerOffers() {
   const [closedKind, setClosedKind] = useState('rejected');
   const [search, setSearch] = useState('');
   const [buyer, setBuyer] = useState('');
+  const [sku, setSku] = useState('');
+  const [from, setFrom] = useState('');
+  const [to, setTo] = useState('');
+  const [minP, setMinP] = useState('');
+  const [maxP, setMaxP] = useState('');
   const [summary, setSummary] = useState<SellerProposalSummary | null>(null);
   const [openId, setOpenId] = useState<number | null>(null);
   const q = useDebouncedValue(search.trim());
   const b = useDebouncedValue(buyer.trim());
+  const k = useDebouncedValue(sku.trim());
+  const lo = useDebouncedValue(minP.trim());
+  const hi = useDebouncedValue(maxP.trim());
 
   const filters = useMemo(
-    () => ({ ...filtersFor(tab, closedKind), search: q || undefined, buyerSearch: b || undefined }),
-    [tab, closedKind, q, b],
+    () => ({
+      ...filtersFor(tab, closedKind),
+      search: q || undefined,
+      buyerSearch: b || undefined,
+      skuSearch: k || undefined,
+      from: from || undefined,
+      to: to || undefined,
+      minPrice: lo || undefined,
+      maxPrice: hi || undefined,
+    }),
+    [tab, closedKind, q, b, k, from, to, lo, hi],
   );
   const list = useCursorList<Proposal>(fetchPage, filters, 10);
 
@@ -74,7 +91,7 @@ export function SellerOffers() {
     loadSummary();
   }
 
-  const dirty = Boolean(search || buyer);
+  const dirty = Boolean(search || buyer || sku || from || to || minP || maxP);
   return (
     <div>
       <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-5">
@@ -86,7 +103,7 @@ export function SellerOffers() {
           { label: 'Closed', value: summary?.closed },
         ].map((c) => (
           <div key={c.label} className="rounded-xl border border-border bg-card p-4 shadow-sm">
-            <p className="text-xs text-muted-foreground">{c.label}</p>
+            <p className="text-xs font-semibold text-muted-foreground">{c.label}</p>
             <p className={`mt-1 text-2xl font-bold ${c.warn && summary && summary.awaitingYou > 0 ? 'text-amber-700' : 'text-foreground'}`}>{c.value ?? '—'}</p>
           </div>
         ))}
@@ -106,16 +123,47 @@ export function SellerOffers() {
         ))}
       </div>
 
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <input className={`${field} w-56`} placeholder="Search product" aria-label="Search product" value={search} onChange={(e) => setSearch(e.target.value)} />
-        <input className={`${field} w-56`} placeholder="Search buyer" aria-label="Search buyer" value={buyer} onChange={(e) => setBuyer(e.target.value)} />
+      <div className="mb-4 flex flex-wrap items-end gap-4">
+        <label className="block text-base text-foreground">
+          Product name
+          <input className={`${field} mt-1 block w-64`} placeholder="Type part of the name" value={search} onChange={(e) => setSearch(e.target.value)} />
+        </label>
+        <label className="block text-base text-foreground">
+          Buyer name
+          <input className={`${field} mt-1 block w-64`} placeholder="Type part of the name" value={buyer} onChange={(e) => setBuyer(e.target.value)} />
+        </label>
+        <label className="block text-base text-foreground">
+          Option or SKU code
+          <input className={`${field} mt-1 block w-48`} placeholder="Example: HOM-BB-M" value={sku} onChange={(e) => setSku(e.target.value)} />
+        </label>
         {tab === 'closed' && (
-          <select className={`${field} w-36`} aria-label="Closed kind" value={closedKind} onChange={(e) => setClosedKind(e.target.value)}>
-            <option value="rejected">Rejected</option>
-            <option value="cancelled">Cancelled</option>
-          </select>
+          <label className="block text-base text-foreground">
+            Show closed offers that were
+            <select className={`${field} mt-1 block w-44`} value={closedKind} onChange={(e) => setClosedKind(e.target.value)}>
+              <option value="rejected">Said no to</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+          </label>
         )}
-        {dirty && <button type="button" className={outlineButton} onClick={() => { setSearch(''); setBuyer(''); }}>Clear</button>}
+      </div>
+      <div className="mb-4 flex flex-wrap items-end gap-4">
+        <label className="block text-base text-foreground">
+          Offered from (date)
+          <input type="date" className={`${field} mt-1 block w-44`} value={from} onChange={(e) => setFrom(e.target.value)} />
+        </label>
+        <label className="block text-base text-foreground">
+          Offered until (date)
+          <input type="date" className={`${field} mt-1 block w-44`} value={to} onChange={(e) => setTo(e.target.value)} />
+        </label>
+        <label className="block text-base text-foreground">
+          Buyer offers at least (৳)
+          <input type="number" min={0} className={`${field} mt-1 block w-44`} placeholder="Lowest" value={minP} onChange={(e) => setMinP(e.target.value)} />
+        </label>
+        <label className="block text-base text-foreground">
+          Buyer offers at most (৳)
+          <input type="number" min={0} className={`${field} mt-1 block w-44`} placeholder="Highest" value={maxP} onChange={(e) => setMaxP(e.target.value)} />
+        </label>
+        {dirty && <button type="button" className={outlineButton} onClick={() => { setSearch(''); setBuyer(''); setSku(''); setFrom(''); setTo(''); setMinP(''); setMaxP(''); }}>Clear all filters</button>}
       </div>
 
       {list.error && <p role="alert" className="mb-3 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">{list.error}</p>}

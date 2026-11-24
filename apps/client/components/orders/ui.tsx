@@ -23,8 +23,8 @@ export const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {
   delivered: 'Delivered',
 };
 export const PAYMENT_STATUS_LABEL: Record<PaymentStatus, string> = {
-  due: 'Due',
-  partially_paid: 'Partially paid',
+  due: 'Not paid yet',
+  partially_paid: 'Part paid',
   paid: 'Paid',
 };
 
@@ -46,7 +46,7 @@ export function OrderStatusBadge({ status }: { status: OrderStatus }) {
   return <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${ORDER_TONE[status]}`}>{ORDER_STATUS_LABEL[status]}</span>;
 }
 export function PaymentStatusBadge({ status }: { status: PaymentStatus }) {
-  return <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${PAYMENT_TONE[status]}`}>{PAYMENT_STATUS_LABEL[status]}</span>;
+  return <span className={`whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-medium ${PAYMENT_TONE[status]}`}>{PAYMENT_STATUS_LABEL[status]}</span>;
 }
 
 export const money = (n: number) => n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 });

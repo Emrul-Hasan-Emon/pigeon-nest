@@ -3,6 +3,9 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { getSellerOverview } from '@/lib/api/dashboard';
+import { OnboardingCard } from '@/components/onboarding/onboarding-card';
+import { sellerCommission } from '@/lib/api/commission';
+import { ruleLabel } from '@/components/commission/parts';
 import { ApiError } from '@/lib/api/http';
 import { WishlistInsightsView } from '@/components/wishlist/seller-wishlist-insights';
 import type { DashboardRange, SellerOverview as Data } from '@/types/dashboard';
@@ -15,6 +18,19 @@ export function SellerOverviewView({ title = 'Dashboard' }: { title?: string }) 
   const [range, setRange] = useState<DashboardRange>('30d');
   const [data, setData] = useState<Data | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // The current rate, for a note on the commission card. If it cannot be loaded the note is simply left out.
+  const [rate, setRate] = useState<string | null>(null);
+
+  useEffect(() => {
+    let live = true;
+    sellerCommission
+      .balance()
+      .then((b) => live && setRate(`${ruleLabel(b.commission.effective)}${b.commission.effective.type === 'percentage' ? ' of each item' : ''}`))
+      .catch(() => undefined);
+    return () => {
+      live = false;
+    };
+  }, []);
 
   useEffect(() => {
     let live = true;
@@ -32,7 +48,7 @@ export function SellerOverviewView({ title = 'Dashboard' }: { title?: string }) 
       <DashboardHeader
         title={title}
         subtitle="Your sales, what needs doing, and a summary of your products."
-        guideHref="/seller/dashboard/guide"
+        guideHref="/seller/help/dashboard"
         period={data ? rangeLabel(data.from, data.to) : ' '}
         range={range}
         onRange={setRange}
@@ -42,17 +58,18 @@ export function SellerOverviewView({ title = 'Dashboard' }: { title?: string }) 
 
       {data && t && (
         <div className="space-y-6">
+          <OnboardingCard />
           <ActionTiles items={sellerTodoItems(data.attention)} />
           <div className="grid gap-5 lg:grid-cols-3">
             <HeroKpi
               label="You keep"
               value={taka(t.sellerEarnings)}
               change={t.change.sellerEarnings}
-              note="After commission and refunds"
+              note="After system commission and refunds"
               spark={data.series.map((p) => p.grossSales - p.refunds)}
               support={[
                 { label: 'Sales', value: taka(t.grossSales) },
-                { label: 'Commission', value: taka(t.commission.net) },
+                { label: 'System commission', value: taka(t.commission.net) },
                 { label: 'Refunds', value: `${taka(t.refunds.amount)} (${t.refunds.count})` },
               ]}
             />
@@ -73,9 +90,9 @@ export function SellerOverviewView({ title = 'Dashboard' }: { title?: string }) 
                 ]}
               />
               <StatStrip
-                title="Commission"
+                title="System commission"
                 stats={[
-                  { label: "On this period's sales", value: taka(t.commission.net), change: t.change.netCommission },
+                  { label: "On this period's sales", value: taka(t.commission.net), change: t.change.netCommission, hint: rate ? `Your rate: ${rate}` : undefined },
                   { label: 'You owe', value: taka(data.balance.due), hint: 'The marketplace, right now' },
                   { label: 'Paid so far', value: taka(data.balance.paid), hint: `${taka(data.balance.total)} charged in total` },
                 ]}

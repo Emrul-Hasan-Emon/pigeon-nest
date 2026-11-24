@@ -10,12 +10,14 @@ import { NotFoundApiError } from '@/lib/api/http';
 import { useToast } from '@/components/ui/toast';
 import type { Product } from '@/types/product';
 import { LoadingBlock } from '@/components/ui/skeleton';
+import { useBreadcrumbTitle } from '@/components/ui/breadcrumbs';
 
 export default function EditProductPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const { showToast } = useToast();
   const [product, setProduct] = useState<Product | null>(null);
+  useBreadcrumbTitle(product?.name);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

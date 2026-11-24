@@ -5,6 +5,7 @@ import { ProductActiveStatus } from '../../../database/enums/product-active-stat
 import { SellerStatus } from '../../../database/enums/seller-status.enum';
 import { SellerActiveStatus } from '../../../database/enums/seller-active-status.enum';
 import { EntityKind } from '../registry/section-registry';
+import { isShopClosed } from '../../../shared/utils/shop-break.util';
 
 export interface LookupEntity {
   id: number;
@@ -84,7 +85,8 @@ export class HomepageLookupService {
             imageUrl: r.avatarUrl ?? null,
             eligible:
               r.status === SellerStatus.APPROVED &&
-              r.activeStatus === SellerActiveStatus.ACTIVE,
+              r.activeStatus === SellerActiveStatus.ACTIVE &&
+              !isShopClosed(r),
           }),
         );
         break;
@@ -110,6 +112,7 @@ export class HomepageLookupService {
               !r.seller.deletedAt &&
               r.seller.status === SellerStatus.APPROVED &&
               r.seller.activeStatus === SellerActiveStatus.ACTIVE &&
+              !isShopClosed(r.seller) &&
               withSku.has(r.id),
           }),
         );

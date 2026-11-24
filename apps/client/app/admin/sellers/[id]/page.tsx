@@ -9,6 +9,7 @@ import { NotFoundApiError } from '@/lib/api/http';
 import { useToast } from '@/components/ui/toast';
 import type { Seller } from '@/types/seller';
 import { LoadingBlock } from '@/components/ui/skeleton';
+import { PaymentAccounts } from '@/components/payments/payment-accounts';
 
 export default function EditSellerPage() {
   const params = useParams<{ id: string }>();
@@ -39,6 +40,9 @@ export default function EditSellerPage() {
   return (
     <>
       <SellerForm seller={seller} key={seller.id} />
+      <div className="mt-6 max-w-5xl">
+        <PaymentAccounts role="admin" sellerId={seller.id} />
+      </div>
       <SellerStatusHistoryPanel sellerId={seller.id} />
     </>
   );

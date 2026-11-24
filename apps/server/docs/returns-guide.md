@@ -3,11 +3,11 @@ RETURNS AND REFUNDS
 
 A customer asks to send back a whole order or some of its items. The seller
 accepts or rejects, walks the return through processing and the refund, and an
-admin confirms it as returned. Confirming takes the returned items' commission
+admin confirms it as returned. Confirming takes the returned items' system commission
 back off the seller.
 
 Per-role details: `user/returns-flow.md`, `seller/returns-flow.md`,
-`admin/returns-flow.md`. Commission side: `commission-guide.md` (section 12).
+`admin/returns-flow.md`. System commission side: `commission-guide.md` (section 12).
 
 Rules
 -----
@@ -43,8 +43,8 @@ Status flow
 - Seller: accept, or reject (a note is required), then processing, then
   returning money (a description is required; files are optional proof).
 - Admin: confirms `returned`, and can move a return to ANY status with a note
-  (and optional files). Moving into `returned` takes the commission back; moving
-  out of it puts the commission back.
+  (and optional files). Moving into `returned` takes the system commission back; moving
+  out of it puts the system commission back.
 - Every move is a row in `order_return_status_history` (from, to, note, who,
   files).
 
@@ -54,7 +54,7 @@ In one transaction, under a lock on the order and the seller's balance row:
 - the returned order items get `order_item.isReturned = true`;
 - the order gets `order.isReturned = true` when every item is returned (a
   full-order return, or the last item);
-- each returned item's commission comes off `system_commission` total and due;
+- each returned item's system commission comes off `system_commission` total and due;
 - a ledger row is written in `system_commission_history`: one per item for an
   item return (with `orderItemId`), one for a whole-order return (order id, no
   item id), type `order_return`, status `order_returned_to_customer`;
@@ -62,11 +62,11 @@ In one transaction, under a lock on the order and the seller's balance row:
 Moving a return out of `returned` reverses all of this (the return ledger rows
 are voided, never deleted, and a change row says `return_undone`).
 
-Commission is worked out per item
+System commission is worked out per item
 ---------------------------------
 Each order item stores its own `systemCommission` and `sellerAmount`; the order's
-commission is the sum. See `commission-guide.md` section 3. Fixed commission is
-per item line. Orders from before this change had their commission shared over
+system commission is the sum. See `commission-guide.md` section 3. Fixed system commission is
+per item line. Orders from before this change had their system commission shared over
 their items by amount (migration), so returns work on them too.
 
 Data
@@ -89,10 +89,17 @@ Data
 
 Tests
 -----
-`testing/returns_test.py` (266 checks): settings, per-item commission (percentage,
+`testing/returns_test.py` (266 checks): settings, per-item system commission (percentage,
 fixed, caps), ledger and change log, eligibility, validation and access, the
 one-request rules, every seller step and who may do it, money and the delivery
 choice, partial then full returns, admin any-status (including undo), cancel and
 payment-reversal guards, concurrency, the window, guest orders, lists and views,
 and consistency checks (balances, change chain, flags, refunds). `KEEP=1` leaves
 the data in place for looking at the screens.
+
+
+---
+
+## Return window and money records
+
+The return window (days after delivery) is enforced for buyers on the server and shown on their order page, and an admin can add extra money records on a return when the buyer says the refund never arrived. See `refund-guide.md`.

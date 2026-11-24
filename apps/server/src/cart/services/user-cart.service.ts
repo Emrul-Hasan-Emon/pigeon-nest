@@ -21,6 +21,7 @@ import { effectivePrice } from '../../storefront/storefront-product.service';
 import { AddCartItemDto, MAX_LINE_QUANTITY } from '../dtos/cart.dtos';
 import { CartView, CartViewService } from './cart-view.service';
 import { tidy } from '../../shared/utils/money.util';
+import { isShopClosed } from '../../shared/utils/shop-break.util';
 
 const round2 = tidy;
 
@@ -77,7 +78,7 @@ export class UserCartService {
   /** My active cart for one seller (null when I have none yet). */
   async forSeller(owner: CartOwner, sellerId: number) {
     const seller = await this.db.seller.findOne({ where: { id: sellerId } });
-    if (!seller || seller.status !== SellerStatus.APPROVED || seller.activeStatus !== SellerActiveStatus.ACTIVE) {
+    if (!seller || seller.status !== SellerStatus.APPROVED || seller.activeStatus !== SellerActiveStatus.ACTIVE || isShopClosed(seller)) {
       throw new NotFoundException('Seller not found');
     }
     const sellerView = { id: seller.id, name: seller.name, avatarUrl: seller.avatarUrl ?? null };
@@ -344,7 +345,8 @@ export class UserCartService {
       !!seller &&
       !seller.deletedAt &&
       seller.status === SellerStatus.APPROVED &&
-      seller.activeStatus === SellerActiveStatus.ACTIVE
+      seller.activeStatus === SellerActiveStatus.ACTIVE &&
+      !isShopClosed(seller)
     );
   }
 

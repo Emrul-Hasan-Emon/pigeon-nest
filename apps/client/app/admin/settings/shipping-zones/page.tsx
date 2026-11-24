@@ -10,6 +10,7 @@ import { deleteZone, listCountries, listZones, updateZone } from '@/lib/api/ship
 import { ApiError, ConflictApiError, NotFoundApiError } from '@/lib/api/http';
 import { DELIVERY_TYPES, type Country, type ShippingZone, type ZoneListParams } from '@/types/shipping';
 import { LoadingBlock } from '@/components/ui/skeleton';
+import { DELETE_ENABLED } from '@/lib/features';
 
 const PAGE_SIZE = 20;
 const selectClass =
@@ -174,7 +175,7 @@ export default function ShippingZonesPage() {
                   </td>
                   <td className="px-4 py-3 text-right">
                     <Link href={`/admin/settings/shipping-zones/${z.id}`} className="mr-3 text-primary hover:underline">Edit</Link>
-                    <button type="button" onClick={() => setPendingDelete(z)} className="text-destructive hover:underline">Delete</button>
+                    {DELETE_ENABLED && <button type="button" onClick={() => setPendingDelete(z)} className="text-destructive hover:underline">Delete</button>}
                   </td>
                 </tr>
               ))}

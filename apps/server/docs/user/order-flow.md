@@ -241,7 +241,7 @@ GET /orders/{id}
 ```
 
 Someone else's order is `404`. The reply holds: `status`, `paymentStatus`, `canCancel`, `seller`,
-`items` (price paid, variant, picture; for a proposal line also `skuUnitPrice`, the SKU price at that time, and `proposal` with `id`, `unitPrice`, `lineTotal`), `totals` (`subtotal`, `deliveryCharge`, `payable`,
+`items` (price paid, variant, picture, and `bird`: the pigeon's ring number, hatch date, vaccination, breed, bloodline, sire and dam as they were when you ordered, or `null`; for a proposal line also `skuUnitPrice`, the SKU price at that time, and `proposal` with `id`, `unitPrice`, `lineTotal`), `totals` (`subtotal`, `deliveryCharge`, `payable`,
 `amountPaid`, `balanceDue`, `savings`), `delivery` (type, expected days), `address`, `payments` (each
 with its proof files and, if staff undid it, a `reversal` with the reason), `paymentHistory` (every
 payment change with the money, who and when; a reversal shows as a negative amount),

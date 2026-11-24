@@ -1,5 +1,6 @@
 'use client';
 
+import { orderBirdText } from '@/components/products/bird-fields';
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { money, ReturnStateBadge, ReturnSteps } from './return-parts';
@@ -7,7 +8,8 @@ import { cancelMyReturn, getMyReturn } from '@/lib/api/returns';
 import { ApiError, NotFoundApiError } from '@/lib/api/http';
 import { loginUrlFor } from '@/lib/auth/next-path';
 import { formatDateTime } from '@/lib/datetime';
-import type { ReturnDetail } from '@/types/returns';
+import { ReturnMoney } from '@/components/refunds/return-money';
+import { returnReasonLabel, type ReturnDetail } from '@/types/returns';
 
 const card = 'rounded-xl border border-st-line bg-white p-4 sm:p-5';
 
@@ -103,7 +105,7 @@ export function MyReturnDetail({ id, justOpened }: { id: number; justOpened?: bo
         <ul className="divide-y divide-st-line">
           {r.items.map((i) => (
             <li key={i.id} className="flex justify-between gap-3 py-2 text-sm">
-              <span className="text-st-ink">{i.productName}{i.skuLabel && <span className="block text-xs text-st-slate">{i.skuLabel}</span>}</span>
+              <span className="text-st-ink">{i.productName}{i.skuLabel && <span className="block text-xs text-st-slate">{i.skuLabel}</span>}{orderBirdText(i.bird).length > 0 && <span className="block text-xs text-st-slate">{orderBirdText(i.bird).join(' · ')}</span>}</span>
               <span className="shrink-0 font-medium text-st-ink">{money(i.refundAmount)}</span>
             </li>
           ))}
@@ -113,7 +115,7 @@ export function MyReturnDetail({ id, justOpened }: { id: number; justOpened?: bo
           <div className="flex justify-between text-st-slate"><dt>Delivery</dt><dd>{r.scope === 'full_order' && r.includeDeliveryCharge ? money(r.deliveryAmount) : 'Not refunded'}</dd></div>
           <div className="flex justify-between text-base font-semibold text-st-ink"><dt>Refund</dt><dd>{money(r.refundAmount)}</dd></div>
         </dl>
-        <p className="mt-3 text-sm text-st-slate">Why: <span className="whitespace-pre-wrap text-st-ink">{r.reason}</span></p>
+        <p className="mt-3 text-sm text-st-slate">Why: <span className="font-medium text-st-ink">{returnReasonLabel(r.reasonCode)}.</span> <span className="whitespace-pre-wrap text-st-ink">{r.reason}</span></p>
         {first && first.attachments.length > 0 && (
           <ul className="mt-2 flex flex-wrap gap-2">
             {first.attachments.map((a) => (
@@ -127,6 +129,8 @@ export function MyReturnDetail({ id, justOpened }: { id: number; justOpened?: bo
           </ul>
         )}
       </section>
+
+      <ReturnMoney ret={r} tone="store" />
 
       <section className={card}>
         <h2 className="font-display mb-3 text-lg font-semibold text-st-ink">Progress</h2>

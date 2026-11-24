@@ -10,6 +10,25 @@ import { LoadingBlock } from '@/components/ui/skeleton';
 export const th = 'px-4 py-3 text-left font-medium text-muted-foreground';
 export const td = 'px-4 py-3';
 
+/** A filter field with its name always visible above it. */
+export function Lbl({ text, children }: { text: string; children: React.ReactNode }) {
+  return (
+    <label className="block text-sm font-medium text-foreground">
+      {text}
+      <span className="mt-1 block font-normal">{children}</span>
+    </label>
+  );
+}
+
+/** A column heading; hover or long-press shows what the column means. */
+export function Th({ children, hint, right }: { children: React.ReactNode; hint?: string; right?: boolean }) {
+  return (
+    <th className={`${th} ${right ? 'text-right' : ''}`} title={hint}>
+      {children}
+    </th>
+  );
+}
+
 /** "10%" or "50 per item". */
 export function ruleLabel(rule: { type: string | null; value: number | null }) {
   if (rule.type === null || rule.value === null) return '—';
@@ -25,7 +44,7 @@ export function Cards({ items }: { items: { label: string; value: string; hint?:
     <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
       {items.map((c) => (
         <div key={c.label} className="rounded-xl border border-border bg-card p-4 shadow-sm">
-          <p className="text-xs text-muted-foreground">{c.label}</p>
+          <p className="text-xs font-semibold text-muted-foreground">{c.label}</p>
           <p className={`mt-1 text-2xl font-bold ${c.tone === 'warn' ? 'text-amber-700' : c.tone === 'good' ? 'text-emerald-700' : 'text-foreground'}`}>{c.value}</p>
           {c.hint && <p className="mt-1 text-xs text-muted-foreground">{c.hint}</p>}
         </div>

@@ -20,6 +20,13 @@ export interface Seller {
   name: string;
   email: string | null;
   phone: string | null;
+  description: string | null;
+  /** Selling switch. Off: the seller and their products are hidden from buyers. */
+  isEnabledForSell: boolean;
+  /** A planned break, first and last day (YYYY-MM-DD, both included). */
+  breakStartsOn: string | null;
+  breakEndsOn: string | null;
+  breakNote: string | null;
   avatarUrl: string | null;
   avatarPath: string | null;
   nidFrontImageUrl: string | null;

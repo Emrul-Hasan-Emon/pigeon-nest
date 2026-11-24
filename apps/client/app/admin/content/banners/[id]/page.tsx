@@ -7,12 +7,14 @@ import { getBanner } from '@/lib/api/banners';
 import { useToast } from '@/components/ui/toast';
 import type { Banner } from '@/types/banner';
 import { LoadingBlock } from '@/components/ui/skeleton';
+import { useBreadcrumbTitle } from '@/components/ui/breadcrumbs';
 
 export default function EditBannerPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const { showToast } = useToast();
   const [banner, setBanner] = useState<Banner | null>(null);
+  useBreadcrumbTitle(banner?.title);
 
   useEffect(() => {
     getBanner(Number(params.id))

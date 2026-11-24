@@ -13,6 +13,7 @@ import type {
   PaymentListParams,
   PaymentListResponse,
   StaffRole,
+  BulkStatusResult,
 } from '@/types/order';
 
 /** The same calls for the admin and a seller: the server limits a seller to their own orders. */
@@ -24,6 +25,9 @@ export function orderApi(role: StaffRole) {
     detail: (id: number) => client.get<OrderDetail>(e.orders.detail(id)),
     changeStatus: (id: number, status: OrderStatus, note?: string) =>
       client.patch<OrderDetail>(e.orders.status(id), { status, ...(note ? { note } : {}) }),
+    /** Moves several orders, all in the same status now, to one new status. */
+    bulkStatus: (orderIds: number[], status: OrderStatus, note?: string) =>
+      client.post<BulkStatusResult>('/orders/bulk-status', { orderIds, status, ...(note ? { note } : {}) }),
     create: (input: CreateOrderInput) => client.post<OrderDetail>(e.orders.list, input),
     findCustomers: (q: string) => client.get<{ results: CustomerHit[] }>(e.orders.customers, { q }),
     catalog: (params: { sellerId?: number; search?: string }) =>

@@ -1,0 +1,220 @@
+{
+  "slug": "refunds",
+  "title": "Refunds",
+  "icon": "banknote",
+  "order": 90,
+  "summary": "When an order that was already paid is cancelled, the buyer must get their money back. This page is where you do it and prove it.",
+  "openPath": "/seller/refunds",
+  "openLabel": "Open refunds",
+  "sections": [
+    {
+      "id": "what",
+      "title": "What is this page?",
+      "intro": "Sometimes a buyer pays and then the order is cancelled before it arrives. The buyer paid for something they will never get, so the money has to go back. This page lists every cancelled order that still has money to send back.",
+      "blocks": [
+        {
+          "type": "points",
+          "title": "In simple words",
+          "items": [
+            "Refunds is only for cancelled orders. A buyer sending an item back after delivery is a \"return\", which has its own page.",
+            "An order appears here by itself when it is cancelled and the buyer had paid all or part of it. You do not add it.",
+            "You send the money yourself, from your own bKash, Nagad or bank. Then you tell the website, with proof.",
+            "The buyer, you and the admin can all see the same refund record."
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "info",
+          "text": "An order with no payment received never appears here. There is no money to give back."
+        }
+      ]
+    },
+    {
+      "id": "why",
+      "title": "Why do you need it?",
+      "blocks": [
+        {
+          "type": "points",
+          "items": [
+            "It is the one place that shows who is still waiting for money. You will not forget a buyer.",
+            "It protects you. If a buyer says \"I did not get my money\", your proof and the amount are saved and visible to the admin.",
+            "It protects the buyer, so they trust your shop. Trust brings more orders.",
+            "It keeps the books right. A cancelled order with money paid must be closed properly, with the exact amount."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "when",
+      "title": "When will you see one?",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "How an order gets here",
+          "steps": [
+            "A buyer pays for an order (fully or partly).",
+            "The order is cancelled. You, the buyer or an admin may cancel it.",
+            "The order appears at once in \"Refunds\" with the status \"Needs to refund\".",
+            "A number appears on the \"Refunds\" item in your menu. The dashboard box \"Refunds to send back\" shows it too."
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "info",
+          "text": "Older cancelled orders that already had money paid were added to this list too."
+        }
+      ]
+    },
+    {
+      "id": "status",
+      "title": "The steps of a refund",
+      "blocks": [
+        {
+          "type": "words",
+          "title": "What each status means",
+          "items": [
+            {
+              "term": "Needs to refund",
+              "means": "The money has not been sent back. It is waiting for you."
+            },
+            {
+              "term": "Processing",
+              "means": "You started. You are sending the money now."
+            },
+            {
+              "term": "Refunded",
+              "means": "The money was sent, with the amount, a note and proof. This is the end."
+            }
+          ]
+        },
+        {
+          "type": "words",
+          "title": "The tabs on the page",
+          "items": [
+            {
+              "term": "To refund",
+              "means": "Orders where you must start."
+            },
+            {
+              "term": "Being refunded",
+              "means": "You started. Finish them."
+            },
+            {
+              "term": "Refunded",
+              "means": "Done."
+            },
+            {
+              "term": "All",
+              "means": "Everything together."
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "info",
+          "text": "You move one step at a time: first \"Start the refund\", then \"Mark as refunded\". An admin can change the status to any step if something went wrong."
+        }
+      ]
+    },
+    {
+      "id": "send",
+      "title": "How to send a refund",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "Step by step",
+          "steps": [
+            "Press \"Refunds\" in the left menu. Open an order in the \"To refund\" tab.",
+            "Read how much the buyer paid. This is the amount you must send back.",
+            "Press \"Start the refund\". The status becomes \"Processing\".",
+            "Open your bKash, Nagad or bank app. Send the money to the buyer. Use the number or account the buyer gave you.",
+            "Take a screenshot of the transfer. It must show the amount.",
+            "Back on the website, press \"Mark as refunded\".",
+            {
+              "text": "Type \"Amount you sent back\".",
+              "detail": "It must be exactly the amount the buyer paid, to the last digit."
+            },
+            {
+              "text": "Write the note: how and when you sent it.",
+              "detail": "Example: \"Sent by bKash to 01799990001 today at 3 pm\"."
+            },
+            "Type the Transaction ID if you have one. This is optional but helps.",
+            "Add the proof file: your screenshot or a PDF. This is required for sellers.",
+            "Press Save. The order is now \"Refunded\"."
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "warn",
+          "text": "If the amount is not exactly what the buyer paid, the website refuses it and shows an error such as \"The refund amount must be exactly what the buyer paid (450). You entered 400.\" Fix the number and press Save again. Do not send a different amount."
+        }
+      ]
+    },
+    {
+      "id": "dispute",
+      "title": "If the buyer says \"I did not get it\"",
+      "blocks": [
+        {
+          "type": "points",
+          "items": [
+            "The buyer can see your record and your proof on their order page.",
+            "If they still say the money did not arrive, they tell the admin team.",
+            "An admin looks at your proof. The admin can add another record on the order, for example a second \"Refunded\" record with its own amount, note and proof, or change the status.",
+            "An order can have more than one refund record. All of them stay visible to you, the buyer and the admin."
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "warn",
+          "text": "Send the money to the right person and keep your screenshot. Good proof ends most disputes fast."
+        }
+      ]
+    },
+    {
+      "id": "reopen",
+      "title": "Good to know",
+      "blocks": [
+        {
+          "type": "points",
+          "items": [
+            "If a cancelled order is reopened before you started its refund, the refund record is cancelled for you.",
+            "You cannot reopen a cancelled order after its refund is Processing or Refunded. An admin must change the refund first.",
+            "The buyer gets back what they paid."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "faq",
+      "title": "Questions people ask",
+      "blocks": [
+        {
+          "type": "faq",
+          "title": "Common questions",
+          "items": [
+            {
+              "q": "An order is cancelled but not on this list. Why?",
+              "a": "Nothing was paid on it, so there is no money to return."
+            },
+            {
+              "q": "The buyer paid half. How much do I refund?",
+              "a": "Only what they paid. The page shows the exact amount."
+            },
+            {
+              "q": "Can I refund less, for example I keep a fee?",
+              "a": "No. The website only accepts the exact amount paid. Talk to an admin if there is a special case."
+            },
+            {
+              "q": "I pressed \"Start the refund\" by mistake.",
+              "a": "Ask an admin to change the status back. Only an admin can go backwards."
+            },
+            {
+              "q": "What is the difference between a refund and a return?",
+              "a": "A refund is for a cancelled order, before delivery. A return is for a delivered order that the buyer wants to send back. See the Returns topic."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

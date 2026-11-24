@@ -88,6 +88,9 @@ export class SellerOverviewService {
       lowStockAt: LOW_STOCK_AT,
       productsPending,
       reviewsUnanswered: work.reviewsUnanswered,
+      questionsToAnswer: work.questionsToAnswer,
+      paymentClaims: work.paymentClaims,
+      refundsToSend: work.refundsToSend,
     };
   }
 
@@ -104,7 +107,10 @@ export class SellerOverviewService {
     const [x] = await this.dataSource.query<Record<string, string>[]>(
       `select (select count(*) from sku_price_proposal where "deletedAt" is null and "sellerId" = $1 and status = 'pending' and "awaitingParty" = 'seller') offers_waiting,
               (select count(*) from review r join seller_product p on p.id = r."sellerProductId"
-                where r."deletedAt" is null and r.status = 'published' and p."sellerId" = $1 and r."replyCount" = 0) reviews_unanswered`,
+                where r."deletedAt" is null and r.status = 'published' and p."sellerId" = $1 and r."replyCount" = 0) reviews_unanswered,
+              (select count(*) from product_question q where q."deletedAt" is null and q.status = 'published' and q."sellerId" = $1 and q.answer is null) questions_to_answer,
+              (select count(*) from payment_claim c where c."deletedAt" is null and c.status = 'pending' and c."sellerId" = $1) payment_claims,
+              (select count(*) from order_refund f where f."deletedAt" is null and f.kind = 'cancelled_order' and f.status in ('needs_to_refund', 'processing') and f."sellerId" = $1) refunds_to_send`,
       [sellerId],
     );
     return {
@@ -114,6 +120,9 @@ export class SellerOverviewService {
       onTheWay: Number(o.on_the_way),
       offersWaiting: Number(x.offers_waiting),
       reviewsUnanswered: Number(x.reviews_unanswered),
+      questionsToAnswer: Number(x.questions_to_answer),
+      paymentClaims: Number(x.payment_claims),
+      refundsToSend: Number(x.refunds_to_send),
     };
   }
 

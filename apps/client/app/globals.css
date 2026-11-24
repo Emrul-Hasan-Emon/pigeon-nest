@@ -84,6 +84,9 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* The app has one light theme. Declaring it stops a browser or phone in dark mode from restyling form controls with light text. */
+html { color-scheme: light; }
+
 body {
   background: hsl(var(--background));
   color: hsl(var(--foreground));
@@ -161,7 +164,7 @@ body {
   padding-right: 2.2rem;
 }
 /* A field inside a label sits on its own line under the label text. */
-:is(.admin-main, .seller-main) label > :is(input:not([type='checkbox'], [type='radio']), select, textarea) { display: block; }
+:is(.admin-main, .seller-main) label > :is(input:not([type='checkbox'], [type='radio'], .hidden), select, textarea) { display: block; }
 :is(.admin-main, .seller-main) input[type='checkbox'], :is(.admin-main, .seller-main) input[type='radio'] { accent-color: hsl(var(--brass-ink)); }
 
 /* Buttons: the dark primary gets a soft highlight and a press; every control gets a brass keyboard focus ring. */
@@ -222,6 +225,13 @@ aside nav { scrollbar-width: thin; scrollbar-color: rgb(255 255 255 / 0.16) tran
   font-family: var(--font-sans);
 }
 
+:is(.admin-shell, .seller-shell) { color: hsl(var(--foreground)); }
+/* Fields, filters and their placeholders always use dark text on their white box, whatever the browser's own theme. */
+:is(.admin-shell, .seller-shell) :is(input, select, textarea, option) { color: hsl(var(--foreground)); }
+:is(.admin-shell, .seller-shell) option { background-color: #fff; }
+:is(.admin-shell, .seller-shell) :is(input, textarea)::placeholder { color: hsl(var(--muted-foreground)); opacity: 1; }
+:is(.admin-shell, .seller-shell) label { color: hsl(var(--foreground)); }
+
 /* The lead card on a dashboard. Brass glow by default; the admin re-points --hero-glow to the plumage sheen. */
 .hero-kpi { background-image: var(--hero-glow, radial-gradient(120% 90% at 100% 0%, hsl(var(--brass) / 0.22), transparent 55%)); }
 :is(.admin-shell, .seller-shell) .hero-feather { display: block; }
@@ -232,6 +242,7 @@ aside nav { scrollbar-width: thin; scrollbar-color: rgb(255 255 255 / 0.16) tran
   font-weight: 560;
   letter-spacing: -0.015em;
   font-variation-settings: "opsz" 48;
+  color: hsl(var(--foreground));
 }
 :is(.admin-shell, .seller-shell) :is(.admin-main, .seller-main) h2 { letter-spacing: -0.005em; }
 
@@ -322,16 +333,16 @@ aside nav { scrollbar-width: thin; scrollbar-color: rgb(255 255 255 / 0.16) tran
    spacing step inside .seller-shell, so no page needs its own sizes. Plain words and clear icons do the rest. */
 .seller-shell {
   --spacing: 0.28rem;
-  --text-xs: 0.9375rem;
-  --text-sm: 1.0625rem;
-  --text-base: 1.125rem;
-  --text-lg: 1.25rem;
-  --text-xl: 1.4rem;
-  --text-2xl: 1.7rem;
-  --text-3xl: 2.05rem;
-  --text-4xl: 2.5rem;
+  --text-xs: 0.875rem;
+  --text-sm: 0.96875rem;
+  --text-base: 1.03rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.85rem;
+  --text-4xl: 2.25rem;
 }
-.seller-shell .seller-main thead th { font-size: 0.9375rem; }
+.seller-shell .seller-main thead th { font-size: 0.875rem; }
 .seller-shell .seller-main :is(td, th) { padding-left: 0.8rem; padding-right: 0.8rem; }
 /* A table wider than the screen scrolls sideways inside its card instead of being cut off. */
 .seller-shell .seller-main div:has(> table) { overflow-x: auto; }
@@ -339,11 +350,14 @@ aside nav { scrollbar-width: thin; scrollbar-color: rgb(255 255 255 / 0.16) tran
 .seller-shell .seller-main tbody td[colspan] { padding-top: 3rem; padding-bottom: 3rem; }
 .seller-shell :is(input:not([type='checkbox'], [type='radio'], [type='file'], [type='range'], [type='color']), select:not(.rounded-full)) { min-height: 3rem; font-size: 1rem; background-color: #fff; border-radius: 0.75rem; }
 .seller-shell .seller-main textarea { font-size: 1rem; }
-.seller-shell .seller-main :is(button, a).bg-primary { min-height: 3rem; font-size: 1.0625rem; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; }
+.seller-shell .seller-main :is(button, a).bg-primary { min-height: 3rem; font-size: 1rem; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; }
 .seller-shell .seller-main input[type='checkbox'], .seller-shell .seller-main input[type='radio'] { width: 1.25rem; height: 1.25rem; }
 .seller-shell .seller-main :is(a, button, summary, [role='tab']):focus-visible { outline-width: 3px; }
 .seller-shell .seller-main button:not(.bg-primary):not([role='tab']) { min-height: 2.5rem; }
-.seller-shell .seller-main h1 { font-size: 2.1rem; line-height: 1.15; }
+.seller-shell .seller-main h1 { font-size: 1.875rem; line-height: 1.15; }
+/* Field names are bold so each box is easy to tell apart; what is typed inside stays regular. */
+.seller-shell .seller-main label { font-weight: 600; color: hsl(var(--foreground)); }
+.seller-shell .seller-main label :is(input, select, textarea) { font-weight: 400; }
 
 /* ---------- Storefront ---------- */
 .store {
@@ -398,3 +412,74 @@ aside nav { scrollbar-width: thin; scrollbar-color: rgb(255 255 255 / 0.16) tran
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ---------- Names stand out from values (seller portal and admin panel) ----------
+   Table column names, form labels and the names on detail pages are bold and dark; the values under or beside them
+   stay regular, so it is always clear which is the name and which is the value. */
+:is(.admin-shell, .seller-shell) :is(.admin-main, .seller-main) thead th {
+  font-weight: 700;
+  color: hsl(var(--foreground));
+}
+:is(.admin-shell, .seller-shell) :is(.admin-main, .seller-main) :is(label, dt) {
+  font-weight: 600;
+  color: hsl(var(--foreground));
+}
+:is(.admin-shell, .seller-shell) :is(.admin-main, .seller-main) :is(label :is(input, select, textarea), dd) { font-weight: 400; }
+/* Help text and Optional tags inside a label stay light so only the name is bold. */
+:is(.admin-shell, .seller-shell) :is(.admin-main, .seller-main) label .text-muted-foreground:not(.font-medium, .font-semibold) { font-weight: 400; }
+
+
+/* ---------- Row actions as buttons (seller portal and admin panel) ----------
+   View, Edit, Quick edit, Copy, Delete and similar links in the last column of a list are drawn as small buttons.
+   Anything that already has its own background or border (a real button style) is left alone. */
+:is(.admin-shell, .seller-shell) :is(.admin-main, .seller-main) tbody td:last-child :is(a, button):is(.text-primary, .text-destructive, .text-foreground, .text-muted-foreground):not([class*='bg-'], [class*='border'], :disabled, .rounded-full) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.15rem;
+  padding: 0.3rem 0.8rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.5rem;
+  background: hsl(var(--card));
+  color: hsl(var(--foreground));
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background-color 0.12s ease, border-color 0.12s ease;
+}
+:is(.admin-shell, .seller-shell) :is(.admin-main, .seller-main) tbody td:last-child :is(a, button).text-primary:not([class*='bg-'], [class*='border'], :disabled, .rounded-full) {
+  color: hsl(var(--primary));
+  border-color: hsl(var(--primary) / 0.35);
+}
+:is(.admin-shell, .seller-shell) :is(.admin-main, .seller-main) tbody td:last-child :is(a, button).text-destructive:not([class*='bg-'], [class*='border'], :disabled, .rounded-full) {
+  color: hsl(var(--destructive));
+  border-color: hsl(var(--destructive) / 0.35);
+}
+:is(.admin-shell, .seller-shell) :is(.admin-main, .seller-main) tbody td:last-child :is(a, button):is(.text-primary, .text-foreground, .text-muted-foreground):not([class*='bg-'], [class*='border'], :disabled, .rounded-full):hover {
+  background: hsl(var(--secondary));
+  border-color: hsl(var(--foreground) / 0.3);
+}
+:is(.admin-shell, .seller-shell) :is(.admin-main, .seller-main) tbody td:last-child :is(a, button).text-destructive:not([class*='bg-'], [class*='border'], :disabled, .rounded-full):hover {
+  background: hsl(var(--destructive) / 0.08);
+  border-color: hsl(var(--destructive) / 0.6);
+}
+.seller-shell .seller-main tbody td:last-child :is(a, button):is(.text-primary, .text-destructive, .text-foreground, .text-muted-foreground):not([class*='bg-'], [class*='border'], :disabled, .rounded-full) {
+  min-height: 2.4rem;
+  padding: 0.3rem 0.85rem;
+}
+
+
+
+/* ---------- Printing an invoice or packing slip ----------
+   The page adds `print-doc` to the body while an order print view is open. Menus and bars are hidden and the sheet
+   fills the paper. */
+@media print {
+  body.print-doc :is(aside, header, nav, .print-hide) { display: none !important; }
+  body.print-doc :is(.admin-main, .seller-main) { margin: 0 !important; padding: 0 !important; }
+  body.print-doc :is(.admin-main, .seller-main) > div { max-width: none !important; padding: 0 !important; }
+  body.print-doc .print-sheet { border: 0 !important; box-shadow: none !important; padding: 0 !important; }
+  body.print-doc, body.print-doc .bg-background { background: #fff !important; }
+}
+
+

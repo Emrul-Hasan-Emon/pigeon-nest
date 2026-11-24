@@ -7,7 +7,7 @@ import { ProductStatusHistoryService } from '../services/product-status-history.
 import { ListProductStatusHistoryQueryDto } from '../dtos/list-product-status-history-query.dto';
 import { AdminAuthGuard } from '../../../auth/guards/admin-auth.guard';
 
-// Admin-only, read-only. Sellers never see this log.
+// Admin-only, read-only. A seller reads only their own products' log, at api/seller/products/:id/status-history.
 @UseGuards(AdminAuthGuard)
 @Controller({ path: 'api/admin/product-status-history', version: '1' })
 export class AdminProductStatusHistoryController {

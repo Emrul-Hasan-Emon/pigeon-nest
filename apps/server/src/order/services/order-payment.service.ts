@@ -10,7 +10,7 @@ import { OrderStatus } from '../../database/enums/order-status.enum';
 import { PaymentStatus } from '../../database/enums/payment-status.enum';
 import { RecordPaymentDto, ReversePaymentDto } from '../dtos/order-staff.dtos';
 import { CommissionService } from '../../commission/services/commission.service';
-import { OrderFileService } from './order-file.service';
+import { OrderFileService, StoredAttachment } from './order-file.service';
 import { OrderScope, StatusActor } from './order-status.service';
 import { moneyGreater, tidy } from '../../shared/utils/money.util';
 import { assertNoLiveReturns } from '../../returns/utils/return-guard.util';
@@ -54,95 +54,126 @@ export class OrderPaymentService {
 
     const stored = await this.files.store(list, FOLDER);
     try {
-      const paymentId = await this.db.order.manager.transaction(async (manager) => {
-        const qb = manager
-          .createQueryBuilder(Order, 'o')
-          .setLock('pessimistic_write')
-          .where('o.id = :orderId', { orderId });
-        if (scope.sellerId !== undefined) qb.andWhere('o.sellerId = :sellerId', { sellerId: scope.sellerId });
-        const order = await qb.getOne();
-        if (!order) throw new NotFoundException('Order not found');
-        if (order.status === OrderStatus.CANCELLED) {
-          throw new ConflictException('A cancelled order cannot take a payment');
-        }
-        const balance = round2(order.payableAmount - order.amountPaid);
-        if (balance <= 0) throw new ConflictException('This order is already fully paid');
-        const amount = dto.amount ?? balance;
-        if (moneyGreater(amount, balance)) {
-          throw new BadRequestException(`amount cannot be more than the balance due (${balance})`);
-        }
-
-        const paidTotal = round2(order.amountPaid + amount);
-        const status = paidTotal >= order.payableAmount ? PaymentStatus.PAID : PaymentStatus.PARTIALLY_PAID;
-        const stamp = { updatedBy: actor.id, updaterType: actor.type, updaterName: actor.name };
-
-        // The row made at checkout (status due) becomes the first receipt.
-        const open = await manager.findOne(Payment, {
-          where: { orderId, status: PaymentStatus.DUE, reversedAt: IsNull() },
-          order: { id: 'ASC' },
-        });
-        let payment: Payment;
-        if (open) {
-          await manager.update(Payment, open.id, {
-            ...stamp,
-            status,
-            amount,
-            paidAt,
-            description: dto.description,
-            transactionId: dto.transactionId ?? open.transactionId,
-          });
-          payment = { ...open, status, amount };
-        } else {
-          payment = await manager.save(Payment, {
-            createdBy: actor.id,
-            creatorType: actor.type,
-            creatorName: actor.name,
-            orderId,
-            userId: order.userId,
-            paymentGatewayId: order.paymentGatewayId,
-            paymentGatewayName: order.paymentGatewayName,
-            paymentGatewaySlug: order.paymentGatewaySlug,
-            status,
-            amount,
-            paidAt,
-            description: dto.description,
-            transactionId: dto.transactionId ?? null,
-          });
-        }
-
-        await manager.save(
-          PaymentAttachment,
-          stored.map((s) => ({
-            ...s,
-            paymentId: payment.id,
-            orderId,
-            createdBy: actor.id,
-            creatorType: actor.type,
-            creatorName: actor.name,
-          })),
-        );
-        await manager.update(Order, orderId, { ...stamp, amountPaid: paidTotal, paymentStatus: status });
-        await manager.save(PaymentStatusHistory, {
-          orderId,
-          paymentId: payment.id,
-          fromStatus: order.paymentStatus,
-          status,
-          amount,
-          amountPaidAfter: paidTotal,
-          note: dto.description,
-          createdBy: actor.id,
-          creatorType: actor.type,
-          creatorName: actor.name,
-        });
-        // Fully paid: the platform's commission on this order is now earned.
-        if (status === PaymentStatus.PAID) await this.commission.earnFromOrder(manager, order, actor);
-        return payment.id;
-      });
+      const paymentId = await this.apply(orderId, dto, stored, paidAt, actor, scope);
       return { orderId, paymentId };
     } catch (error) {
       await this.files.discard(stored);
       throw error;
     }
+  }
+
+  /**
+   * Record a payment whose proof files are already stored (a buyer's "I have paid" message). No new upload is needed:
+   * the staff member has checked the claim. Same rules and the same history as a normal receipt.
+   */
+  async recordWithStored(
+    orderId: number,
+    dto: RecordPaymentDto,
+    stored: StoredAttachment[],
+    actor: StatusActor,
+    scope: OrderScope = {},
+  ) {
+    const paidAt = dto.paidAt ? new Date(dto.paidAt) : new Date();
+    if (paidAt.getTime() > Date.now() + 5 * 60 * 1000) throw new BadRequestException('paidAt cannot be in the future');
+    const paymentId = await this.apply(orderId, dto, stored, paidAt, actor, scope);
+    return { orderId, paymentId };
+  }
+
+  /** The receipt itself, in one transaction. Returns the payment's id. */
+  private apply(
+    orderId: number,
+    dto: RecordPaymentDto,
+    stored: StoredAttachment[],
+    paidAt: Date,
+    actor: StatusActor,
+    scope: OrderScope,
+  ): Promise<number> {
+    return this.db.order.manager.transaction(async (manager) => {
+
+      const qb = manager
+        .createQueryBuilder(Order, 'o')
+        .setLock('pessimistic_write')
+        .where('o.id = :orderId', { orderId });
+      if (scope.sellerId !== undefined) qb.andWhere('o.sellerId = :sellerId', { sellerId: scope.sellerId });
+      const order = await qb.getOne();
+      if (!order) throw new NotFoundException('Order not found');
+      if (order.status === OrderStatus.CANCELLED) {
+        throw new ConflictException('A cancelled order cannot take a payment');
+      }
+      const balance = round2(order.payableAmount - order.amountPaid);
+      if (balance <= 0) throw new ConflictException('This order is already fully paid');
+      const amount = dto.amount ?? balance;
+      if (moneyGreater(amount, balance)) {
+        throw new BadRequestException(`amount cannot be more than the balance due (${balance})`);
+      }
+
+      const paidTotal = round2(order.amountPaid + amount);
+      const status = paidTotal >= order.payableAmount ? PaymentStatus.PAID : PaymentStatus.PARTIALLY_PAID;
+      const stamp = { updatedBy: actor.id, updaterType: actor.type, updaterName: actor.name };
+
+      // The row made at checkout (status due) becomes the first receipt.
+      const open = await manager.findOne(Payment, {
+        where: { orderId, status: PaymentStatus.DUE, reversedAt: IsNull() },
+        order: { id: 'ASC' },
+      });
+      let payment: Payment;
+      if (open) {
+        await manager.update(Payment, open.id, {
+          ...stamp,
+          status,
+          amount,
+          paidAt,
+          description: dto.description,
+          transactionId: dto.transactionId ?? open.transactionId,
+        });
+        payment = { ...open, status, amount };
+      } else {
+        payment = await manager.save(Payment, {
+          createdBy: actor.id,
+          creatorType: actor.type,
+          creatorName: actor.name,
+          orderId,
+          userId: order.userId,
+          paymentGatewayId: order.paymentGatewayId,
+          paymentGatewayName: order.paymentGatewayName,
+          paymentGatewaySlug: order.paymentGatewaySlug,
+          status,
+          amount,
+          paidAt,
+          description: dto.description,
+          transactionId: dto.transactionId ?? null,
+        });
+      }
+
+      await manager.save(
+        PaymentAttachment,
+        stored.map((s) => ({
+          ...s,
+          paymentId: payment.id,
+          orderId,
+          createdBy: actor.id,
+          creatorType: actor.type,
+          creatorName: actor.name,
+        })),
+      );
+      await manager.update(Order, orderId, { ...stamp, amountPaid: paidTotal, paymentStatus: status });
+      await manager.save(PaymentStatusHistory, {
+        orderId,
+        paymentId: payment.id,
+        fromStatus: order.paymentStatus,
+        status,
+        amount,
+        amountPaidAfter: paidTotal,
+        note: dto.description,
+        createdBy: actor.id,
+        creatorType: actor.type,
+        creatorName: actor.name,
+      });
+      // Fully paid: the platform's commission on this order is now earned.
+      if (status === PaymentStatus.PAID) await this.commission.earnFromOrder(manager, order, actor);
+      return payment.id;
+    
+    });
   }
 
   /**

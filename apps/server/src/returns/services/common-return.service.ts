@@ -13,6 +13,7 @@ import { OrderReturnStatusHistory } from '../../database/entities/order-return/o
 import { AuthUserType } from '../../database/enums/auth-user-type.enum';
 import { OrderStatus } from '../../database/enums/order-status.enum';
 import { PaymentStatus } from '../../database/enums/payment-status.enum';
+import { ReturnReasonCode } from '../../database/enums/return-reason-code.enum';
 import { ReturnScope } from '../../database/enums/return-scope.enum';
 import { OPEN_RETURN_STATUSES, ReturnStatus } from '../../database/enums/return-status.enum';
 import { OrderFileService, StoredAttachment } from '../../order/services/order-file.service';
@@ -193,6 +194,7 @@ export class CommonReturnService {
           status: ReturnStatus.RETURN_REQUESTED,
           scope: dto.scope,
           reason: dto.reason,
+          reasonCode: dto.reasonCode ?? ReturnReasonCode.OTHER,
           includeDeliveryCharge: includeDelivery,
           itemsAmount,
           deliveryAmount,

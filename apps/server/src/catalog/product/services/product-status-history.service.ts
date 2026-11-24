@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { EntityManager } from 'typeorm';
 import { DatabaseService } from '../../../database/database.service';
 import { SellerProductStatusChangeHistory } from '../../../database/entities/product/seller-product-status-change-history.entity';
@@ -111,5 +111,44 @@ export class ProductStatusHistoryService {
     }
 
     return getCursorPaginateData(await qb.getMany(), pagination.limit);
+  }
+
+  // One of the seller's own products. Admin names are not shown to sellers.
+  async listForSeller(
+    seller: Pick<Seller, 'id'>,
+    productId: number,
+    pagination: CursorPagination,
+  ) {
+    const owned = await this.databaseService.sellerProduct.findOne({
+      where: { id: productId, sellerId: seller.id },
+      select: { id: true },
+      withDeleted: true,
+    });
+    if (!owned) throw new NotFoundException('Product not found');
+
+    const qb = this.databaseService.sellerProductStatusChangeHistory
+      .createQueryBuilder('history')
+      .where('history.sellerProductId = :productId', { productId })
+      .orderBy('history.id', 'DESC')
+      .take(pagination.limit);
+    if (pagination.cursor > 0) {
+      qb.andWhere('history.id < :cursor', { cursor: pagination.cursor });
+    }
+    const rows = await qb.getMany();
+    const results = rows.map((row) => ({
+      id: row.id,
+      sellerProductId: row.sellerProductId,
+      fromStatus: row.fromStatus,
+      toStatus: row.toStatus,
+      fromActiveStatus: row.fromActiveStatus,
+      toActiveStatus: row.toActiveStatus,
+      action: row.action,
+      reason: row.reason,
+      creatorType: row.creatorType,
+      creatorName:
+        row.creatorType === AuthUserType.ADMIN ? 'Admin team' : row.creatorName,
+      createdAt: row.createdAt,
+    }));
+    return getCursorPaginateData(results, pagination.limit);
   }
 }

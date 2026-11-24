@@ -5,13 +5,18 @@ import {
   Get,
   Param,
   Patch,
+  Put,
   Post,
   Query,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { FileFieldsInterceptor, FileInterceptor } from '@nestjs/platform-express';
+import { UploadedFile } from '@nestjs/common';
+import { SaveSkuParentDto } from '../dtos/save-sku-parent.dto';
+import { ParentRole } from '../../../database/entities/product/seller-product-sku-parent.entity';
+import { BadRequestException, ParseEnumPipe } from '@nestjs/common';
 import {
   CursorPaginationParams,
   CursorPagination,
@@ -19,6 +24,7 @@ import {
 import { ParseIdPipe } from '../../../shared/pipes/parse-id.pipe';
 import { CurrentUser } from '../../../auth/decorators/current-user.decorator';
 import { JwtPayload } from '../../../auth/interfaces/jwt-payload.interface';
+import { StockHistoryService } from '../services/stock-history.service';
 import { ProductStatusHistoryService } from '../services/product-status-history.service';
 import { AdminProductService } from '../services/admin-product.service';
 import { CreateProductDto } from '../dtos/create-product.dto';
@@ -26,6 +32,7 @@ import { UpdateProductDto } from '../dtos/update-product.dto';
 import { ListProductQueryDto } from '../dtos/list-product-query.dto';
 import { UpdateProductMediaFilesDto } from '../dtos/update-product-media-files.dto';
 import { AdminAuthGuard } from '../../../auth/guards/admin-auth.guard';
+import { BulkProductDto } from '../dtos/bulk-product.dto';
 
 // Per-file cap enforced by multer (413 when exceeded); at most 21 files.
 const MEDIA_FILE_FIELDS = FileFieldsInterceptor(
@@ -35,6 +42,8 @@ const MEDIA_FILE_FIELDS = FileFieldsInterceptor(
   ],
   { limits: { fileSize: 50 * 1024 * 1024, files: 21 } },
 );
+
+const PARENT_IMAGE = FileInterceptor('image', { limits: { fileSize: 10 * 1024 * 1024 } });
 
 interface ProductUploadedFiles {
   thumbnailImage?: Express.Multer.File[];
@@ -47,6 +56,7 @@ export class AdminProductController {
   constructor(
     private readonly adminProductService: AdminProductService,
     private readonly historyService: ProductStatusHistoryService,
+    private readonly stockHistoryService: StockHistoryService,
   ) {}
 
   @Get()
@@ -55,6 +65,12 @@ export class AdminProductController {
     @CursorPaginationParams() pagination: CursorPagination,
   ) {
     return this.adminProductService.list(query, pagination);
+  }
+
+  // Every change to the stock of one product.
+  @Get(':id/stock-history')
+  stockHistory(@Param('id', ParseIdPipe) id: number, @CursorPaginationParams() pagination: CursorPagination) {
+    return this.stockHistoryService.listForProduct(id, pagination);
   }
 
   @Get(':id')
@@ -69,6 +85,18 @@ export class AdminProductController {
       dto,
       await this.historyService.adminActor(user),
     );
+  }
+
+  // Change many products at once: on or off, price, approve, reject, suspend (100 at most).
+  @Post('bulk')
+  async bulk(@Body() dto: BulkProductDto, @CurrentUser() user: JwtPayload) {
+    return this.adminProductService.bulkChange(dto, await this.historyService.adminActor(user));
+  }
+
+  // A switched-off copy of a product (same seller), to edit before it goes on sale.
+  @Post(':id/copy')
+  async copy(@Param('id', ParseIdPipe) id: number, @CurrentUser() user: JwtPayload) {
+    return this.adminProductService.copy(id, await this.historyService.adminActor(user));
   }
 
   // JSON body; updates product fields and updates/creates/removes SKUs.
@@ -99,8 +127,32 @@ export class AdminProductController {
     });
   }
 
-  @Delete(':id')
-  remove(@Param('id', ParseIdPipe) id: number) {
-    return this.adminProductService.remove(id);
+  // Multipart: name, ringNumber, removeImage, image. Adds or changes the sire / dam of one option.
+  @Put(':id/skus/:skuId/parents/:role')
+  @UseInterceptors(PARENT_IMAGE)
+  saveParent(
+    @Param('id', ParseIdPipe) id: number,
+    @Param('skuId', ParseIdPipe) skuId: number,
+    @Param('role', new ParseEnumPipe(ParentRole, { exceptionFactory: () => new BadRequestException('role must be sire or dam') })) role: ParentRole,
+    @Body() dto: SaveSkuParentDto,
+    @UploadedFile() image?: Express.Multer.File,
+  ) {
+    return this.adminProductService.saveParent(id, skuId, role, dto, image);
   }
+
+  // Delete is switched off for now. Remove these comment marks to bring it back.
+  // @Delete(':id/skus/:skuId/parents/:role')
+  // removeParent(
+  //   @Param('id', ParseIdPipe) id: number,
+  //   @Param('skuId', ParseIdPipe) skuId: number,
+  //   @Param('role', new ParseEnumPipe(ParentRole, { exceptionFactory: () => new BadRequestException('role must be sire or dam') })) role: ParentRole,
+  // ) {
+  //   return this.adminProductService.removeParent(id, skuId, role);
+  // }
+
+  // Delete is switched off for now. Remove these comment marks to bring it back.
+  // @Delete(':id')
+  // remove(@Param('id', ParseIdPipe) id: number) {
+  //   return this.adminProductService.remove(id);
+  // }
 }

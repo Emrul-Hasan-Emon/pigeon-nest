@@ -36,11 +36,20 @@ export class StorefrontProductController {
         featured: query.featured,
         minPrice: query.minPrice,
         maxPrice: query.maxPrice,
+        breed: query.breed,
+        bloodline: query.bloodline,
+        vaccinated: query.vaccinated,
         sort: query.sort,
       },
       page,
     );
     return pageResult(items, total, page);
+  }
+
+  // The breeds and bloodlines to offer as filters.
+  @Get('bird-filters')
+  birdFilters() {
+    return this.products.birdFacets();
   }
 
   @Get(':id')

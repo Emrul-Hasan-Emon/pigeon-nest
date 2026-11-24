@@ -16,7 +16,7 @@ import { SellerStatus } from '../../database/enums/seller-status.enum';
 import { CommissionType } from '../../database/enums/commission-type.enum';
 import { MAX_DECIMAL_12_2 } from '../../shared/constants/limits';
 import { IsInternationalPhone } from '../../shared/validators/international-phone.decorator';
-import { trimString } from '../../shared/utils/transform.util';
+import { emptyToNull, trimString } from '../../shared/utils/transform.util';
 
 // Multipart form (plus optional avatar / nidFrontImage / nidBackImage files).
 // Admin has full control: status and activeStatus are independent here. Use
@@ -46,6 +46,13 @@ export class UpdateSellerDto {
   @MinLength(6)
   @MaxLength(72)
   password?: string;
+
+  // Shown on the public seller page. A blank value clears it.
+  @IsOptional()
+  @Transform(emptyToNull)
+  @IsString()
+  @MaxLength(1000)
+  description?: string | null;
 
   // The seller's own commission. Send both fields to set or change it; send neither to leave it as it is.
   @IsOptional()

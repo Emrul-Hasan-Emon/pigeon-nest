@@ -18,6 +18,8 @@ import { countryName } from '../../settings/utils/countries';
 import { CommissionService } from '../../commission/services/commission.service';
 import { newOrderNumber } from '../utils/order-number.util';
 import { tidy } from '../../shared/utils/money.util';
+import { StockReason } from '../../database/enums/stock-movement.enum';
+import { recordStockMovements } from '../../shared/utils/stock-movement.util';
 
 export const round2 = tidy;
 const PROOF_VALUE_MAX = 200;
@@ -268,6 +270,14 @@ export class OrderPlacementService {
       shippingZoneName: p.quote.zone?.name ?? null,
     });
 
+    // The stock history: what each line took, tied to this order.
+    await recordStockMovements(
+      manager,
+      p.lines.map((l) => ({ skuId: l.skuId, change: -l.quantity, reason: StockReason.ORDER_PLACED, orderId: order.id, note: `Order ${orderNumber}` })),
+      p.placedBy,
+    );
+
+    const birds = await this.birdSnapshots(manager, p.lines.map((l) => l.skuId));
     await manager.save(
       OrderItem,
       p.lines.map((l, index) => ({
@@ -282,6 +292,8 @@ export class OrderPlacementService {
           imageUrl: l.skuImageUrl,
           thumbnailUrl: l.thumbnailUrl,
           slug: l.productSlug,
+          // The bird as it was sold. Later edits to the SKU must not change what the buyer bought.
+          ...(birds.get(l.skuId) ? { bird: birds.get(l.skuId) } : {}),
         },
         quantity: l.quantity,
         unitPrice: l.unitPrice,
@@ -328,5 +340,33 @@ export class OrderPlacementService {
       note: p.historyNote,
     });
     return order.id;
+  }
+
+  /** The pigeon facts of each SKU, for the order line. Only SKUs that have any are returned. */
+  private async birdSnapshots(manager: EntityManager, skuIds: number[]) {
+    const out = new Map<number, Record<string, unknown>>();
+    if (skuIds.length === 0) return out;
+    const skus = await manager.find(SellerProductSku, {
+      where: skuIds.map((id) => ({ id })),
+      relations: { product: true, parents: true },
+    });
+    for (const k of skus) {
+      const parent = (role: string) => {
+        const x = (k.parents ?? []).find((q) => q.role === role);
+        return x && (x.name || x.ringNumber) ? { name: x.name, ringNumber: x.ringNumber } : null;
+      };
+      const bird = {
+        ringNumber: k.ringNumber,
+        hatchDate: k.hatchDate,
+        vaccineName: k.vaccineName,
+        vaccinatedOn: k.vaccinatedOn,
+        breed: k.product?.breed ?? null,
+        bloodline: k.product?.bloodline ?? null,
+        sire: parent('sire'),
+        dam: parent('dam'),
+      };
+      if (Object.values(bird).some((v) => v !== null && v !== undefined)) out.set(k.id, bird);
+    }
+    return out;
   }
 }

@@ -26,9 +26,10 @@ export class AdminAttributeValueController {
     return this.adminAttributeService.updateValue(id, dto);
   }
 
-  @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.adminAttributeService.removeValue(id);
-  }
+  // Delete is switched off for now. Remove these comment marks to bring it back.
+  // @Delete(':id')
+  // @HttpCode(HttpStatus.NO_CONTENT)
+  // remove(@Param('id', ParseIntPipe) id: number) {
+  //   return this.adminAttributeService.removeValue(id);
+  // }
 }

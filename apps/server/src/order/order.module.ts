@@ -10,6 +10,10 @@ import { AdminOrderController, SellerOrderController } from './controllers/staff
 import { StaffOrderService } from './services/staff-order.service';
 import { SellerOrderActionController } from './controllers/seller-order-action.controller';
 import { OrderFileService } from './services/order-file.service';
+import { AdminRefundController } from './controllers/admin-refund.controller';
+import { SellerRefundController } from './controllers/seller-refund.controller';
+import { OrderRefundService } from './services/order-refund.service';
+import { StaffOrderRefundService } from './services/staff-order-refund.service';
 import { OrderPaymentService } from './services/order-payment.service';
 import { OrderUpdateService } from './services/order-update.service';
 import { PaymentQueryService } from './services/payment-query.service';
@@ -32,6 +36,8 @@ import { UserOrderService } from './services/user-order.service';
     SellerOrderActionController,
     AdminPaymentController,
     SellerPaymentController,
+    SellerRefundController,
+    AdminRefundController,
   ],
   providers: [
     CheckoutService,
@@ -42,10 +48,12 @@ import { UserOrderService } from './services/user-order.service';
     OrderViewService,
     OrderFileService,
     OrderPaymentService,
+    OrderRefundService,
+    StaffOrderRefundService,
     OrderUpdateService,
     PaymentQueryService,
     ActorResolverService,
   ],
-  exports: [OrderStatusService, OrderViewService],
+  exports: [OrderStatusService, OrderViewService, OrderPaymentService, OrderFileService, OrderRefundService, StaffOrderRefundService],
 })
 export class OrderModule {}

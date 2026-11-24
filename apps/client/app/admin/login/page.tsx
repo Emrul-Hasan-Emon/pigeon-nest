@@ -44,7 +44,7 @@ export default function AdminLoginPage() {
             Run the loft,<br />from one desk.
           </h2>
           <p className="mt-4 max-w-sm text-[15px] leading-relaxed text-topbar-foreground/65">
-            Manage sellers, listings, orders and commission across the marketplace.
+            Manage sellers, listings, orders and system commission across the marketplace.
           </p>
         </div>
         <span className="relative text-xs text-topbar-foreground/45">&copy; {new Date().getFullYear()} Pigeon Nest</span>
