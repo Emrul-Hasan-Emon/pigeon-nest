@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { getSellerOverview } from '@/lib/api/dashboard';
+import { OnboardingCard } from '@/components/onboarding/onboarding-card';
 import { sellerCommission } from '@/lib/api/commission';
 import { ruleLabel } from '@/components/commission/parts';
 import { ApiError } from '@/lib/api/http';
@@ -47,7 +48,7 @@ export function SellerOverviewView({ title = 'Dashboard' }: { title?: string }) 
       <DashboardHeader
         title={title}
         subtitle="Your sales, what needs doing, and a summary of your products."
-        guideHref="/seller/dashboard/guide"
+        guideHref="/seller/help/dashboard"
         period={data ? rangeLabel(data.from, data.to) : ' '}
         range={range}
         onRange={setRange}
@@ -57,6 +58,7 @@ export function SellerOverviewView({ title = 'Dashboard' }: { title?: string }) 
 
       {data && t && (
         <div className="space-y-6">
+          <OnboardingCard />
           <ActionTiles items={sellerTodoItems(data.attention)} />
           <div className="grid gap-5 lg:grid-cols-3">
             <HeroKpi
