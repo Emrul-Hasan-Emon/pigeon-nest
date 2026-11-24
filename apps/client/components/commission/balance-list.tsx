@@ -18,14 +18,14 @@ export function BalanceList() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Commission balances</h1>
-        <p className="text-sm text-muted-foreground">Commission is earned when an order is fully paid. Open a seller to record a payment they made.</p>
+        <h1 className="text-2xl font-bold text-foreground">System commission balances</h1>
+        <p className="text-sm text-muted-foreground">System commission is earned when an order is fully paid. Open a seller to record a payment they made.</p>
       </div>
       <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-4">
         <input className={field} placeholder="Seller name, email or phone" value={f.search} onChange={(e) => setF((c) => ({ ...c, search: e.target.value }))} />
         <select className={field} value={f.status} onChange={(e) => setF((c) => ({ ...c, status: e.target.value }))} aria-label="Status">
           <option value="">Any status</option>
-          <option value="due">Commission due</option>
+          <option value="due">System commission due</option>
           <option value="cleared">Nothing due</option>
         </select>
         {dirty && <button type="button" onClick={() => setF(EMPTY)} className={outlineButton}>Clear filters</button>}
@@ -35,7 +35,7 @@ export function BalanceList() {
           <thead className="bg-muted">
             <tr>
               <th className={th}>Seller</th>
-              <th className={th}>Total commission</th>
+              <th className={th}>Total system commission</th>
               <th className={th}>Due</th>
               <th className={th}>Paid</th>
               <th className={th}>Updated</th>
@@ -43,7 +43,7 @@ export function BalanceList() {
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
-            {list.rows.length === 0 && <tr><td colSpan={6} className="px-4 py-6 text-center text-muted-foreground">No commission yet. It starts once an order is fully paid.</td></tr>}
+            {list.rows.length === 0 && <tr><td colSpan={6} className="px-4 py-6 text-center text-muted-foreground">No system commission yet. It starts once an order is fully paid.</td></tr>}
             {list.rows.map((b) => (
               <tr key={b.id}>
                 <td className={td}><span className="font-medium text-foreground">{b.sellerName}</span><span className="block text-xs text-muted-foreground">{b.sellerPhone}</span></td>

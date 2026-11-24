@@ -7,13 +7,13 @@ import { commissionApi } from '@/lib/api/commission';
 import { formatDateTime } from '@/lib/datetime';
 import type { CommissionRole } from '@/types/commission';
 import type { CommissionChangeRow } from '@/types/returns';
-import { ListFrame, td, th, usePagedList } from './parts';
+import { Lbl, ListFrame, td, Th, usePagedList } from './parts';
 
 export const CHANGE_LABEL: Record<string, string> = {
   for_system: 'Earned from an order',
   order_returned_to_customer: 'Taken back: returned to the customer',
   commission_payment: 'Paid to the platform',
-  commission_voided: 'Voided (order cancelled or payment reversed)',
+  commission_voided: 'Cancelled out (order cancelled or payment reversed)',
   return_undone: 'Return undone: earned again',
 };
 
@@ -45,27 +45,32 @@ export function ChangeLog({ role, sellerId }: { role: CommissionRole; sellerId?:
 
   return (
     <div>
+      <p className="mb-3 text-base text-muted-foreground">
+        Every time the three numbers (total system commission, still to pay, already paid) moved, with the number before and after.
+      </p>
       <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-4">
-        {showSeller && <input className={field} inputMode="numeric" placeholder="Seller ID" value={f.sellerId} onChange={set('sellerId')} />}
-        <select className={field} value={f.status} onChange={set('status')} aria-label="Reason">
-          <option value="">Any reason</option>
-          {Object.entries(CHANGE_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-        </select>
-        <label className="text-xs text-muted-foreground">From<input type="date" className={`${field} mt-0.5 w-full`} value={f.from} onChange={set('from')} /></label>
-        <label className="text-xs text-muted-foreground">To<input type="date" className={`${field} mt-0.5 w-full`} value={f.to} onChange={set('to')} /></label>
-        {dirty && <button type="button" onClick={() => setF(EMPTY)} className={`${outlineButton} self-end`}>Clear filters</button>}
+        {showSeller && <Lbl text="Seller ID"><input className={`${field} w-full`} inputMode="numeric" placeholder="Seller number" value={f.sellerId} onChange={set('sellerId')} /></Lbl>}
+        <Lbl text="What happened">
+          <select className={`${field} w-full`} value={f.status} onChange={set('status')}>
+            <option value="">Anything</option>
+            {Object.entries(CHANGE_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+          </select>
+        </Lbl>
+        <Lbl text="Date from"><input type="date" className={`${field} w-full`} value={f.from} onChange={set('from')} /></Lbl>
+        <Lbl text="Date until"><input type="date" className={`${field} w-full`} value={f.to} onChange={set('to')} /></Lbl>
+        {dirty && <button type="button" onClick={() => setF(EMPTY)} className={`${outlineButton} self-end`}>Clear all filters</button>}
       </div>
       <ListFrame {...list}>
         <table className="min-w-full divide-y divide-border text-sm">
           <thead className="bg-muted">
             <tr>
-              <th className={th}>When</th>
-              {showSeller && <th className={th}>Seller</th>}
-              <th className={th}>Why</th>
-              <th className={th}>Total</th>
-              <th className={th}>Due</th>
-              <th className={th}>Paid</th>
-              <th className={th}>By</th>
+              <Th>Date</Th>
+              {showSeller && <Th>Seller</Th>}
+              <Th hint="Why the numbers moved">What happened</Th>
+              <Th hint="All system commission on fully paid orders, before → after (৳)">Total system commission (৳)</Th>
+              <Th hint="System commission not paid yet, before → after (৳)">Still to pay (৳)</Th>
+              <Th hint="System commission already paid, before → after (৳)">Already paid (৳)</Th>
+              <Th hint="Who caused the change">Done by</Th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">

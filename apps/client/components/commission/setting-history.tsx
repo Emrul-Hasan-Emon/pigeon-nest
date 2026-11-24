@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import { formatDateTime } from '@/lib/datetime';
 import { commissionApi } from '@/lib/api/commission';
 import type { CommissionRole, SettingHistoryRow } from '@/types/commission';
-import { ListFrame, ruleLabel, td, th, usePagedList } from './parts';
+import { ListFrame, ruleLabel, td, Th, usePagedList } from './parts';
 
 /** Every change to a seller's settings: what changed, from what, to what, who and when. */
 export function SettingHistory({ role, sellerId }: { role: CommissionRole; sellerId?: number }) {
@@ -16,13 +16,13 @@ export function SettingHistory({ role, sellerId }: { role: CommissionRole; selle
       <table className="min-w-full divide-y divide-border text-sm">
         <thead className="bg-muted">
           <tr>
-            <th className={th}>When</th>
-            {showSeller && <th className={th}>Seller</th>}
-            <th className={th}>Setting</th>
-            <th className={th}>Before</th>
-            <th className={th}>After</th>
-            <th className={th}>Changed by</th>
-            <th className={th}>Note</th>
+            <Th>Date</Th>
+            {showSeller && <Th>Seller</Th>}
+            <Th hint="What kind of setting changed">What changed</Th>
+            <Th hint="The system commission rate before the change">Rate before</Th>
+            <Th hint="The system commission rate after the change">Rate now</Th>
+            <Th>Changed by</Th>
+            <Th>Note</Th>
           </tr>
         </thead>
         <tbody className="divide-y divide-border">
@@ -31,8 +31,8 @@ export function SettingHistory({ role, sellerId }: { role: CommissionRole; selle
             <tr key={h.id}>
               <td className={`${td} text-muted-foreground`}>{formatDateTime(h.changedAt)}</td>
               {showSeller && <td className={td}>{h.sellerName}</td>}
-              <td className={td}>Commission</td>
-              <td className={`${td} text-muted-foreground`}>{h.fromValue ? ruleLabel({ type: h.fromValue.commissionType, value: h.fromValue.commissionAmount }) : 'Not set (global rate)'}</td>
+              <td className={td}>System commission rate</td>
+              <td className={`${td} text-muted-foreground`}>{h.fromValue ? ruleLabel({ type: h.fromValue.commissionType, value: h.fromValue.commissionAmount }) : 'Not set (the shared rate was used)'}</td>
               <td className={`${td} font-medium text-foreground`}>{ruleLabel({ type: h.toValue.commissionType, value: h.toValue.commissionAmount })}</td>
               <td className={`${td} text-muted-foreground`}>{h.changedByName ?? '—'}{h.changedByType ? ` (${h.changedByType})` : ''}</td>
               <td className={`${td} text-muted-foreground`}>{h.note ?? '—'}</td>

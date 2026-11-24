@@ -21,7 +21,7 @@ export function DisburseDetailView({ role, id }: { role: CommissionRole; id: num
   if (!d) return <LoadingBlock />;
   const rows: [string, string][] = [
     ['Amount received', money(d.amount)],
-    ['Total commission at that time', money(d.totalAmount)],
+    ['Total system commission at that time', money(d.totalAmount)],
     ['Still due after this payment', money(d.dueAmount)],
     ['Paid in total after this payment', money(d.paidAmount)],
     ['Date', formatDateTime(d.createdAt)],
@@ -29,8 +29,8 @@ export function DisburseDetailView({ role, id }: { role: CommissionRole; id: num
   ];
   return (
     <div className="max-w-2xl">
-      <Link href={role === 'admin' ? '/admin/commission/disbursements' : '/seller/commission'} className="text-sm text-primary hover:underline">← {role === 'admin' ? 'Commission payments' : 'Commission'}</Link>
-      <h1 className="mb-4 mt-2 text-2xl font-bold text-foreground">Commission payment #{d.id}</h1>
+      <Link href={role === 'admin' ? '/admin/commission/disbursements' : '/seller/commission'} className="text-sm text-primary hover:underline">← {role === 'admin' ? 'System commission payments' : 'System commission'}</Link>
+      <h1 className="mb-4 mt-2 text-2xl font-bold text-foreground">System commission payment #{d.id}</h1>
       <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
         <dl className="space-y-2 text-sm">
           {rows.map(([k, v]) => <div key={k} className="flex justify-between"><dt className="text-muted-foreground">{k}</dt><dd className="font-medium text-foreground">{v}</dd></div>)}

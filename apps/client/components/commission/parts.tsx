@@ -10,6 +10,25 @@ import { LoadingBlock } from '@/components/ui/skeleton';
 export const th = 'px-4 py-3 text-left font-medium text-muted-foreground';
 export const td = 'px-4 py-3';
 
+/** A filter field with its name always visible above it. */
+export function Lbl({ text, children }: { text: string; children: React.ReactNode }) {
+  return (
+    <label className="block text-sm font-medium text-foreground">
+      {text}
+      <span className="mt-1 block font-normal">{children}</span>
+    </label>
+  );
+}
+
+/** A column heading; hover or long-press shows what the column means. */
+export function Th({ children, hint, right }: { children: React.ReactNode; hint?: string; right?: boolean }) {
+  return (
+    <th className={`${th} ${right ? 'text-right' : ''}`} title={hint}>
+      {children}
+    </th>
+  );
+}
+
 /** "10%" or "50 per item". */
 export function ruleLabel(rule: { type: string | null; value: number | null }) {
   if (rule.type === null || rule.value === null) return '—';
