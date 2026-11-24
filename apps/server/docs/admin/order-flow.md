@@ -62,7 +62,7 @@ payments afterwards (section 6).
 | `GET` | `/payment-gateways/{id}` | One gateway |
 | `POST` | `/payment-gateways` | Create (multipart, optional `icon` file up to 2 MB) |
 | `PATCH` | `/payment-gateways/{id}` | Update (multipart; `removeIcon=true` clears the icon) |
-| `DELETE` | `/payment-gateways/{id}` | Delete. `409` if any order or payment used it. Switch it off instead |
+| `DELETE` | `/payment-gateways/{id}` | **Switched off for now** (404). Switch the gateway off instead |
 
 Types: `cod`, `mfs` (mobile banking), `bank`, `card`, `manual`.
 
@@ -96,7 +96,7 @@ Delivery is priced by country. A zone = delivery type + a set of countries + cha
 | `GET` | `/shipping-zones/{id}` | One zone, with country names |
 | `POST` | `/shipping-zones` | Create |
 | `PATCH` | `/shipping-zones/{id}` | Update |
-| `DELETE` | `/shipping-zones/{id}` | Delete |
+| `DELETE` | `/shipping-zones/{id}` | **Switched off for now** (404) |
 | `GET` | `/shipping-zones/quote?country=BD&deliveryType=express` | What a customer would pay (zone or global default). Use it to test your setup |
 
 ```json
@@ -318,7 +318,7 @@ Same rules as the customer's own address book (see `docs/user/order-flow.md` sec
 | `POST` | `/users/{userId}/addresses` |
 | `GET` | `/users/{userId}/addresses/{id}` |
 | `PATCH` | `/users/{userId}/addresses/{id}` |
-| `DELETE` | `/users/{userId}/addresses/{id}` (`204`) |
+| `DELETE` | `/users/{userId}/addresses/{id}` (`204`) | **Switched off for now** (404) |
 
 An address of another user is `404` through this user's path. Changes are recorded as made by the
 admin. An admin can manage a suspended customer's addresses.
@@ -331,11 +331,11 @@ All under `/v1/api/admin`.
 |---|---|---|
 | GET | `/payment-gateways/types` | Gateway type rules |
 | GET/POST | `/payment-gateways` | List / create |
-| GET/PATCH/DELETE | `/payment-gateways/{id}` | One |
+| GET/PATCH | `/payment-gateways/{id}` | One (DELETE is switched off) |
 | GET | `/countries` | Country list |
 | GET/POST | `/shipping-zones` | List / create |
 | GET | `/shipping-zones/quote` | Price check |
-| GET/PATCH/DELETE | `/shipping-zones/{id}` | One |
+| GET/PATCH | `/shipping-zones/{id}` | One (DELETE is switched off) |
 | GET/PATCH | `/settings` | Global defaults |
 | GET | `/carts`, `/carts/{id}` | Carts |
 | GET | `/orders` | Order list |
@@ -350,7 +350,7 @@ All under `/v1/api/admin`.
 | POST | `/orders/{id}/updates` | Post an update |
 | GET | `/payments`, `/payments/{id}` | Payments |
 | GET/POST | `/users/{userId}/addresses` | A customer's addresses |
-| GET/PATCH/DELETE | `/users/{userId}/addresses/{id}` | One address |
+| GET/PATCH | `/users/{userId}/addresses/{id}` | One address (DELETE is switched off) |
 
 ## 12. Errors
 
