@@ -1,5 +1,6 @@
 import { http, sellerHttp, userHttp } from './http';
 import { ENDPOINTS } from '../endpoints';
+import type { SellerPublicReview } from '@/types/storefront';
 import type {
   AdminReview,
   AdminReviewDetails,
@@ -39,6 +40,8 @@ function reviewForm(fields: ReviewFields & { orderItemId?: number; removeImageId
 export const getRatingSummary = (productId: number) => userHttp.get<RatingSummary>(U.productSummary(productId));
 export const listProductReviews = (productId: number, params: Params) =>
   userHttp.get<CursorPage<PublicReview>>(U.productList(productId), { ...params });
+export const listPublicSellerReviews = (sellerId: number, params: Params) =>
+  userHttp.get<CursorPage<SellerPublicReview>>(U.sellerList(sellerId), { ...params });
 export const listThread = (reviewId: number, params: Params) => userHttp.get<CursorPage<ReviewReply>>(U.thread(reviewId), { ...params });
 
 // ---- customer ----

@@ -85,4 +85,50 @@ export class ReviewPublicService {
     const nextCursor = !hasNext ? null : helpful ? offset + pageSize : last.id;
     return { results, nextCursor };
   }
+
+  /** Published reviews across all of one shop's products, newest first. Only for a shop customers can see. */
+  async listForSeller(sellerId: number, query: ListProductReviewsQueryDto, pagination: CursorPagination) {
+    const visible = await this.repo.query(
+      `SELECT 1 FROM seller WHERE id = $1 AND status = 'approved' AND "activeStatus" = 'active' AND "deletedAt" IS NULL`,
+      [sellerId],
+    );
+    if (visible.length === 0) throw new NotFoundException('Seller not found');
+    const params: unknown[] = [sellerId];
+    const add = (v: unknown) => {
+      params.push(v);
+      return `$${params.length}`;
+    };
+    const where = [`p."sellerId" = $1`, `r.status = 'published'`, `r."deletedAt" IS NULL`];
+    if (query.rating !== undefined) where.push(`r.rating = ${add(query.rating)}`);
+    if (pagination.cursor > 0) where.push(`r.id < ${add(pagination.cursor)}`);
+    const rows: any[] = await this.repo.query(
+      `SELECT r.id, r."sellerProductId" AS "productId", p.name AS "productName", p.slug AS "productSlug",
+              r.rating, r.title, r.comment, r."helpfulCount", r."createdAt", u.name AS "userName"
+         FROM review r
+         JOIN seller_product p ON p.id = r."sellerProductId"
+         JOIN "user" u ON u.id = r."userId"
+        WHERE ${where.join(' AND ')}
+        ORDER BY r.id DESC LIMIT ${add(pagination.limit)}`,
+      params,
+    );
+    const pageSize = pagination.limit - 1;
+    const slice = rows.slice(0, pageSize);
+    const images = await this.core.imagesFor(this.repo.manager, slice.map((r) => r.id));
+    return {
+      results: slice.map((r) => ({
+        id: r.id,
+        productId: r.productId,
+        productName: r.productName,
+        productSlug: r.productSlug,
+        rating: r.rating,
+        title: r.title,
+        comment: r.comment,
+        images: images.get(r.id) ?? [],
+        reviewerName: this.core.maskName(r.userName),
+        helpfulCount: r.helpfulCount,
+        createdAt: r.createdAt,
+      })),
+      nextCursor: rows.length > pageSize ? slice[slice.length - 1].id : null,
+    };
+  }
 }

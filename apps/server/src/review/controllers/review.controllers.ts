@@ -83,6 +83,15 @@ export class PublicReviewController {
     return this.reviews.list(productId, query, pagination);
   }
 
+  @Get('sellers/:sellerId/reviews')
+  sellerReviews(
+    @Param('sellerId', ParseIdPipe) sellerId: number,
+    @Query() query: ListProductReviewsQueryDto,
+    @CursorPaginationParams() pagination: CursorPagination,
+  ) {
+    return this.reviews.listForSeller(sellerId, query, pagination);
+  }
+
   // Replies straight under the review, or the answers to one reply with ?parentId=
   @Get('reviews/:reviewId/replies')
   thread(
