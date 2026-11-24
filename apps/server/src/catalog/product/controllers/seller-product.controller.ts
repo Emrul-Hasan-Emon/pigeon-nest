@@ -5,13 +5,18 @@ import {
   Get,
   Param,
   Patch,
+  Put,
   Post,
   Query,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { FileFieldsInterceptor, FileInterceptor } from '@nestjs/platform-express';
+import { UploadedFile } from '@nestjs/common';
+import { SaveSkuParentDto } from '../dtos/save-sku-parent.dto';
+import { ParentRole } from '../../../database/entities/product/seller-product-sku-parent.entity';
+import { BadRequestException, ParseEnumPipe } from '@nestjs/common';
 import { SellerAccessGuard } from '../../../auth/guards/seller-access.guard';
 import { RequireSellerAccess } from '../../../auth/decorators/require-seller-access.decorator';
 import { CurrentSeller } from '../../../auth/decorators/current-seller.decorator';
@@ -21,6 +26,7 @@ import {
   CursorPagination,
 } from '../../../shared/decorators/cursor-pagination-params.decorator';
 import { ParseIdPipe } from '../../../shared/pipes/parse-id.pipe';
+import { ProductStatusHistoryService } from '../services/product-status-history.service';
 import { SellerProductService } from '../services/seller-product.service';
 import { CreateSellerProductDto } from '../dtos/create-seller-product.dto';
 import { UpdateSellerProductDto } from '../dtos/update-seller-product.dto';
@@ -36,6 +42,8 @@ const MEDIA_FILE_FIELDS = FileFieldsInterceptor(
   { limits: { fileSize: 50 * 1024 * 1024, files: 21 } },
 );
 
+const PARENT_IMAGE = FileInterceptor('image', { limits: { fileSize: 10 * 1024 * 1024 } });
+
 interface ProductUploadedFiles {
   thumbnailImage?: Express.Multer.File[];
   mediaFiles?: Express.Multer.File[];
@@ -48,7 +56,10 @@ interface ProductUploadedFiles {
 @RequireSellerAccess('full')
 @Controller({ path: 'api/seller/products', version: '1' })
 export class SellerProductController {
-  constructor(private readonly sellerProductService: SellerProductService) {}
+  constructor(
+    private readonly sellerProductService: SellerProductService,
+    private readonly historyService: ProductStatusHistoryService,
+  ) {}
 
   @Get()
   list(
@@ -59,12 +70,28 @@ export class SellerProductController {
     return this.sellerProductService.list(seller, query, pagination);
   }
 
+  // The status log of one of the seller's own products.
+  @Get(':id/status-history')
+  statusHistory(
+    @CurrentSeller() seller: Seller,
+    @Param('id', ParseIdPipe) id: number,
+    @CursorPaginationParams() pagination: CursorPagination,
+  ) {
+    return this.historyService.listForSeller(seller, id, pagination);
+  }
+
   @Get(':id')
   details(
     @CurrentSeller() seller: Seller,
     @Param('id', ParseIdPipe) id: number,
   ) {
     return this.sellerProductService.details(seller, id);
+  }
+
+  // A new product made from this one, switched off, so the seller can edit it before selling.
+  @Post(':id/copy')
+  copy(@CurrentSeller() seller: Seller, @Param('id', ParseIdPipe) id: number) {
+    return this.sellerProductService.copy(seller, id);
   }
 
   @Post()
@@ -94,6 +121,30 @@ export class SellerProductController {
       thumbnailImage: files?.thumbnailImage?.[0],
       mediaFiles: files?.mediaFiles,
     });
+  }
+
+  // Multipart: name, ringNumber, removeImage, image. Adds or changes the sire / dam of one option.
+  @Put(':id/skus/:skuId/parents/:role')
+  @UseInterceptors(PARENT_IMAGE)
+  saveParent(
+    @CurrentSeller() seller: Seller,
+    @Param('id', ParseIdPipe) id: number,
+    @Param('skuId', ParseIdPipe) skuId: number,
+    @Param('role', new ParseEnumPipe(ParentRole, { exceptionFactory: () => new BadRequestException('role must be sire or dam') })) role: ParentRole,
+    @Body() dto: SaveSkuParentDto,
+    @UploadedFile() image?: Express.Multer.File,
+  ) {
+    return this.sellerProductService.saveParent(seller, id, skuId, role, dto, image);
+  }
+
+  @Delete(':id/skus/:skuId/parents/:role')
+  removeParent(
+    @CurrentSeller() seller: Seller,
+    @Param('id', ParseIdPipe) id: number,
+    @Param('skuId', ParseIdPipe) skuId: number,
+    @Param('role', new ParseEnumPipe(ParentRole, { exceptionFactory: () => new BadRequestException('role must be sire or dam') })) role: ParentRole,
+  ) {
+    return this.sellerProductService.removeParent(seller, id, skuId, role);
   }
 
   @Delete(':id')

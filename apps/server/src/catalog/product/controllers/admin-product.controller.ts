@@ -5,13 +5,18 @@ import {
   Get,
   Param,
   Patch,
+  Put,
   Post,
   Query,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { FileFieldsInterceptor, FileInterceptor } from '@nestjs/platform-express';
+import { UploadedFile } from '@nestjs/common';
+import { SaveSkuParentDto } from '../dtos/save-sku-parent.dto';
+import { ParentRole } from '../../../database/entities/product/seller-product-sku-parent.entity';
+import { BadRequestException, ParseEnumPipe } from '@nestjs/common';
 import {
   CursorPaginationParams,
   CursorPagination,
@@ -35,6 +40,8 @@ const MEDIA_FILE_FIELDS = FileFieldsInterceptor(
   ],
   { limits: { fileSize: 50 * 1024 * 1024, files: 21 } },
 );
+
+const PARENT_IMAGE = FileInterceptor('image', { limits: { fileSize: 10 * 1024 * 1024 } });
 
 interface ProductUploadedFiles {
   thumbnailImage?: Express.Multer.File[];
@@ -71,6 +78,12 @@ export class AdminProductController {
     );
   }
 
+  // A switched-off copy of a product (same seller), to edit before it goes on sale.
+  @Post(':id/copy')
+  async copy(@Param('id', ParseIdPipe) id: number, @CurrentUser() user: JwtPayload) {
+    return this.adminProductService.copy(id, await this.historyService.adminActor(user));
+  }
+
   // JSON body; updates product fields and updates/creates/removes SKUs.
   @Patch(':id')
   async update(
@@ -97,6 +110,28 @@ export class AdminProductController {
       thumbnailImage: files?.thumbnailImage?.[0],
       mediaFiles: files?.mediaFiles,
     });
+  }
+
+  // Multipart: name, ringNumber, removeImage, image. Adds or changes the sire / dam of one option.
+  @Put(':id/skus/:skuId/parents/:role')
+  @UseInterceptors(PARENT_IMAGE)
+  saveParent(
+    @Param('id', ParseIdPipe) id: number,
+    @Param('skuId', ParseIdPipe) skuId: number,
+    @Param('role', new ParseEnumPipe(ParentRole, { exceptionFactory: () => new BadRequestException('role must be sire or dam') })) role: ParentRole,
+    @Body() dto: SaveSkuParentDto,
+    @UploadedFile() image?: Express.Multer.File,
+  ) {
+    return this.adminProductService.saveParent(id, skuId, role, dto, image);
+  }
+
+  @Delete(':id/skus/:skuId/parents/:role')
+  removeParent(
+    @Param('id', ParseIdPipe) id: number,
+    @Param('skuId', ParseIdPipe) skuId: number,
+    @Param('role', new ParseEnumPipe(ParentRole, { exceptionFactory: () => new BadRequestException('role must be sire or dam') })) role: ParentRole,
+  ) {
+    return this.adminProductService.removeParent(id, skuId, role);
   }
 
   @Delete(':id')
