@@ -19,7 +19,10 @@ import { CursorPagination } from '../../shared/decorators/cursor-pagination-para
 import { getCursorPaginateData } from '../../shared/utils/cursor-paginate.util';
 import { likeContains } from '../../shared/utils/like.util';
 import { effectivePrice } from '../../storefront/storefront-product.service';
+import { In } from 'typeorm';
+import { transitionDenied } from '../utils/order-status-rules';
 import {
+  BulkChangeOrderStatusDto,
   ChangeOrderStatusDto,
   CreateStaffOrderDto,
   ListStaffOrderQueryDto,
@@ -122,6 +125,35 @@ export class StaffOrderService {
   async changeStatus(id: number, dto: ChangeOrderStatusDto, actor: StatusActor, viewer: AuthUserType, scope: OrderScope = {}) {
     await this.status.change(id, dto.status, actor, { note: dto.note, scope });
     return this.detail(id, viewer, scope);
+  }
+
+  /**
+   * Moves several of the seller's orders to one new status. The orders must all be in the same status now, and the
+   * move must be allowed from it. Each order is moved on its own, so one failing does not undo the others.
+   */
+  async bulkChangeStatus(dto: BulkChangeOrderStatusDto, actor: StatusActor, scope: OrderScope) {
+    const orders = await this.db.order.find({
+      where: { id: In(dto.orderIds), ...(scope.sellerId !== undefined ? { sellerId: scope.sellerId } : {}) },
+      select: { id: true, orderNumber: true, status: true },
+    });
+    if (orders.length !== dto.orderIds.length) throw new NotFoundException('Some of these orders were not found');
+    const from = orders[0].status;
+    if (orders.some((o) => o.status !== from)) {
+      throw new BadRequestException('All the orders must be in the same status. Pick orders that are all waiting for the same step.');
+    }
+    const denied = transitionDenied(actor.type, from, dto.status);
+    if (denied) throw new BadRequestException(denied);
+
+    const results: Array<{ id: number; orderNumber: string; ok: boolean; error?: string }> = [];
+    for (const o of [...orders].sort((a, b) => a.id - b.id)) {
+      try {
+        await this.status.change(o.id, dto.status, actor, { note: dto.note, scope });
+        results.push({ id: o.id, orderNumber: o.orderNumber, ok: true });
+      } catch (e) {
+        results.push({ id: o.id, orderNumber: o.orderNumber, ok: false, error: e instanceof Error ? e.message : 'Could not change this order' });
+      }
+    }
+    return { status: dto.status, updated: results.filter((r) => r.ok).length, failed: results.filter((r) => !r.ok).length, results };
   }
 
   /** Find a customer account by exact email or by mobile number (any common format). */

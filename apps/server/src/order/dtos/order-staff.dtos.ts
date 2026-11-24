@@ -2,6 +2,7 @@ import { Transform, Type } from 'class-transformer';
 import {
   ArrayMaxSize,
   ArrayMinSize,
+  ArrayUnique,
   IsArray,
   ValidateNested,
   Length,
@@ -270,6 +271,27 @@ export class ListStaffOrderQueryDto {
 }
 
 export class ChangeOrderStatusDto {
+  @IsEnum(OrderStatus)
+  status: OrderStatus;
+
+  @IsOptional()
+  @Transform(emptyToUndefined)
+  @IsString()
+  @MaxLength(500)
+  note?: string;
+}
+
+/** Move several orders to one new status at once. They must all be in the same status now. */
+export class BulkChangeOrderStatusDto {
+  @IsArray()
+  @ArrayMinSize(1)
+  @ArrayMaxSize(50)
+  @ArrayUnique()
+  @IsInt({ each: true })
+  @Min(1, { each: true })
+  @Max(MAX_INT32, { each: true })
+  orderIds: number[];
+
   @IsEnum(OrderStatus)
   status: OrderStatus;
 
