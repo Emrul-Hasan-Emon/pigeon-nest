@@ -16,7 +16,7 @@ import { PaymentStatus } from '../../database/enums/payment-status.enum';
 import { ReturnReasonCode } from '../../database/enums/return-reason-code.enum';
 import { ReturnScope } from '../../database/enums/return-scope.enum';
 import { OPEN_RETURN_STATUSES, ReturnStatus } from '../../database/enums/return-status.enum';
-import { OrderFileService, StoredAttachment } from '../../order/services/order-file.service';
+import { AttachmentFileService, StoredAttachment } from '../../shared/services/attachment-file.service';
 import { SystemSettingsService } from '../../settings/services/system-settings.service';
 import { Actor } from '../../shared/types/actor.type';
 import { tidy } from '../../shared/utils/money.util';
@@ -45,7 +45,7 @@ export class CommonReturnService {
     private readonly db: DatabaseService,
     private readonly commission: CommonCommissionService,
     private readonly settings: SystemSettingsService,
-    private readonly files: OrderFileService,
+    private readonly files: AttachmentFileService,
   ) {}
 
   // ---------------------------------------------------------------- rules

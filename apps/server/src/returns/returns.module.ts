@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { CommissionModule } from '../commission/commission.module';
 import { FileManagementModule } from '../file-management/file-management.module';
-import { OrderFileService } from '../order/services/order-file.service';
+import { AttachmentFileService } from '../shared/services/attachment-file.service';
 import { SettingsModule } from '../settings/settings.module';
 import { ActorResolverService } from '../shared/services/actor-resolver.service';
 import { AdminReturnController } from './controllers/admin-return.controller';
@@ -22,7 +22,7 @@ import { UserReturnService } from './services/user-return.service';
     SellerReturnService,
     AdminReturnService,
     ReturnViewService,
-    OrderFileService,
+    AttachmentFileService,
     ActorResolverService,
   ],
   exports: [ReturnViewService],

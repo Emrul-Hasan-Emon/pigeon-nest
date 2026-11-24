@@ -10,7 +10,7 @@ import { SystemCommissionHistory } from '../../database/entities/commission/syst
 import { CommissionStatus } from '../../database/enums/commission-status.enum';
 import { CommissionHistoryType } from '../../database/enums/commission-history-type.enum';
 import { PaymentStatus } from '../../database/enums/payment-status.enum';
-import { OrderFileService } from '../../order/services/order-file.service';
+import { AttachmentFileService } from '../../shared/services/attachment-file.service';
 import { Actor } from '../../shared/types/actor.type';
 import { moneyGreater, tidy } from '../../shared/utils/money.util';
 import { DisburseCommissionDto } from '../dtos/commission.dtos';
@@ -22,7 +22,7 @@ const FOLDER = 'commission-disbursements';
 export class AdminCommissionDisburseService {
   constructor(
     private readonly commission: CommonCommissionService,
-    private readonly files: OrderFileService,
+    private readonly files: AttachmentFileService,
     @InjectRepository(SystemCommission) private readonly balances: Repository<SystemCommission>,
     @InjectRepository(Seller) private readonly sellers: Repository<Seller>,
   ) {}

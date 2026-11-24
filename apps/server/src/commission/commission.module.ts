@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { FileManagementModule } from '../file-management/file-management.module';
-import { OrderFileService } from '../order/services/order-file.service';
+import { AttachmentFileService } from '../shared/services/attachment-file.service';
 import { SettingsModule } from '../settings/settings.module';
 import { ActorResolverService } from '../shared/services/actor-resolver.service';
 import { AdminCommissionController } from './controllers/admin-commission.controller';
@@ -18,7 +18,7 @@ import { CommonCommissionService } from './services/common-commission.service';
     SellerCommissionService,
     CommonCommissionService,
     AdminCommissionDisburseService,
-    OrderFileService,
+    AttachmentFileService,
     ActorResolverService,
   ],
   exports: [CommonCommissionService],

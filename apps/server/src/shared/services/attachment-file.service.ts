@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { FileUploadService } from '../../file-management/file-upload.service';
-import { assertAttachmentAllowed, AttachmentKind } from '../../shared/utils/attachment-validation.util';
+import { assertAttachmentAllowed, AttachmentKind } from '../utils/attachment-validation.util';
 
 export const MAX_ATTACHMENTS = 10;
 
@@ -13,9 +13,9 @@ export interface StoredAttachment {
   size: number;
 }
 
-/** Validates and stores the files that come with a payment or an order update. */
+/** Validates and stores the files that come with a request: a payment, an order update, a refund, a return or a commission payment. */
 @Injectable()
-export class OrderFileService {
+export class AttachmentFileService {
   constructor(private readonly uploads: FileUploadService) {}
 
   /** Checks every file first, so nothing is stored when one is bad. */

@@ -3,7 +3,7 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { AdminAuthGuard } from '../../auth/guards/admin-auth.guard';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { JwtPayload } from '../../auth/interfaces/jwt-payload.interface';
-import { MAX_ATTACHMENTS } from '../../order/services/order-file.service';
+import { MAX_ATTACHMENTS } from '../../shared/services/attachment-file.service';
 import { CursorPagination, CursorPaginationParams } from '../../shared/decorators/cursor-pagination-params.decorator';
 import { ParseIdPipe } from '../../shared/pipes/parse-id.pipe';
 import { ActorResolverService } from '../../shared/services/actor-resolver.service';

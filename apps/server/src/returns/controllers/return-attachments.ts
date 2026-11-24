@@ -1,5 +1,5 @@
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { MAX_ATTACHMENTS } from '../../order/services/order-file.service';
+import { MAX_ATTACHMENTS } from '../../shared/services/attachment-file.service';
 
 /** Up to 10 files of 10 MB in the multipart field `files`. */
 export const ATTACHMENTS = FilesInterceptor('files', MAX_ATTACHMENTS, {

@@ -4,7 +4,7 @@ import { User } from '../../database/entities/person/user.entity';
 import { AuthUserType } from '../../database/enums/auth-user-type.enum';
 import { OrderStatus } from '../../database/enums/order-status.enum';
 import { PaymentClaimStatus } from '../../database/enums/payment-claim.enum';
-import { OrderFileService } from '../../order/services/order-file.service';
+import { AttachmentFileService } from '../../shared/services/attachment-file.service';
 import { moneyGreater, tidy } from '../../shared/utils/money.util';
 import { CreatePaymentClaimDto } from '../dtos/payment-claim.dtos';
 
@@ -14,7 +14,7 @@ const FOLDER = 'payment-claims';
 export class UserPaymentClaimService {
   constructor(
     private readonly db: DatabaseService,
-    private readonly files: OrderFileService,
+    private readonly files: AttachmentFileService,
   ) {}
 
   async create(user: User, orderId: number, dto: CreatePaymentClaimDto, uploads?: Express.Multer.File[]) {
