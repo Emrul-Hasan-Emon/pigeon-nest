@@ -23,6 +23,12 @@ import { Shop } from './entities/shop/shop.entity';
 import { SellerProduct } from './entities/product/seller-product.entity';
 import { SellerProductSku } from './entities/product/seller-product-sku.entity';
 import { SellerProductSkuVariant } from './entities/product/seller-product-sku-variant.entity';
+import { ProductQuestion } from './entities/product/product-question.entity';
+import { StockMovement } from './entities/product/stock-movement.entity';
+import { OrderRefund } from './entities/order/order-refund.entity';
+import { OrderRefundStatusHistory } from './entities/order/order-refund-status-history.entity';
+import { PaymentClaim } from './entities/payment/payment-claim.entity';
+import { SellerPaymentAccount } from './entities/payment/seller-payment-account.entity';
 import { SellerProductSkuParent } from './entities/product/seller-product-sku-parent.entity';
 import { SellerProductMedia } from './entities/product-media/seller-product-media.entity';
 import { Order } from './entities/order/order.entity';
@@ -77,6 +83,12 @@ export class DatabaseService implements OnApplicationBootstrap {
   sellerProductSku: Repository<SellerProductSku>;
   sellerProductSkuVariant: Repository<SellerProductSkuVariant>;
   sellerProductSkuParent: Repository<SellerProductSkuParent>;
+  productQuestion: Repository<ProductQuestion>;
+  stockMovement: Repository<StockMovement>;
+  paymentClaim: Repository<PaymentClaim>;
+  orderRefund: Repository<OrderRefund>;
+  orderRefundStatusHistory: Repository<OrderRefundStatusHistory>;
+  sellerPaymentAccount: Repository<SellerPaymentAccount>;
   sellerProductMedia: Repository<SellerProductMedia>;
   order: Repository<Order>;
   orderItem: Repository<OrderItem>;
@@ -146,6 +158,12 @@ export class DatabaseService implements OnApplicationBootstrap {
     private sellerProductSkuVariantRepository: Repository<SellerProductSkuVariant>,
     @InjectRepository(SellerProductSkuParent)
     private sellerProductSkuParentRepository: Repository<SellerProductSkuParent>,
+    @InjectRepository(ProductQuestion) private productQuestionRepository: Repository<ProductQuestion>,
+    @InjectRepository(StockMovement) private stockMovementRepository: Repository<StockMovement>,
+    @InjectRepository(PaymentClaim) private paymentClaimRepository: Repository<PaymentClaim>,
+    @InjectRepository(OrderRefund) private orderRefundRepository: Repository<OrderRefund>,
+    @InjectRepository(OrderRefundStatusHistory) private orderRefundStatusHistoryRepository: Repository<OrderRefundStatusHistory>,
+    @InjectRepository(SellerPaymentAccount) private sellerPaymentAccountRepository: Repository<SellerPaymentAccount>,
     @InjectRepository(SellerProductMedia)
     private sellerProductMediaRepository: Repository<SellerProductMedia>,
     @InjectRepository(Order) private orderRepository: Repository<Order>,
@@ -221,6 +239,12 @@ export class DatabaseService implements OnApplicationBootstrap {
     this.sellerProductSku = this.sellerProductSkuRepository;
     this.sellerProductSkuVariant = this.sellerProductSkuVariantRepository;
     this.sellerProductSkuParent = this.sellerProductSkuParentRepository;
+    this.productQuestion = this.productQuestionRepository;
+    this.stockMovement = this.stockMovementRepository;
+    this.paymentClaim = this.paymentClaimRepository;
+    this.orderRefund = this.orderRefundRepository;
+    this.orderRefundStatusHistory = this.orderRefundStatusHistoryRepository;
+    this.sellerPaymentAccount = this.sellerPaymentAccountRepository;
     this.sellerProductMedia = this.sellerProductMediaRepository;
     this.order = this.orderRepository;
     this.orderItem = this.orderItemRepository;
