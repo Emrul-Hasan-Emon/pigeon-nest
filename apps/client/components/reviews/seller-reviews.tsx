@@ -23,6 +23,7 @@ import { formatDate } from '@/lib/datetime';
 import { useCursorList } from '@/lib/hooks/use-cursor-list';
 import type { SellerReview, SellerReviewSummary } from '@/types/review';
 import { LoadingBlock } from '@/components/ui/skeleton';
+import { DELETE_ENABLED } from '@/lib/features';
 
 function ReviewCard({ review, onChanged }: { review: SellerReview; onChanged: () => void }) {
   const { showToast } = useToast();
@@ -33,7 +34,7 @@ function ReviewCard({ review, onChanged }: { review: SellerReview; onChanged: ()
       load: (parentId, cursor) => listThread(review.id, { parentId: parentId ?? undefined, cursor, limit: 10 }),
       create: (body, parentId) => replyAsSeller(review.id, body, parentId),
       edit: (id, body) => editReplyAsSeller(id, body),
-      remove: (id) => deleteReplyAsSeller(id),
+      remove: DELETE_ENABLED ? (id: number) => deleteReplyAsSeller(id) : undefined,
       report: (id, reason, note) => reportReplyAsSeller(id, reason, note),
     }),
     [review.id],

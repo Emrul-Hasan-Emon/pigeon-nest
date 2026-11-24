@@ -20,6 +20,7 @@ import {
 import { formatDate } from '@/lib/datetime';
 import { useCursorList } from '@/lib/hooks/use-cursor-list';
 import type { PublicReview, RatingSummary } from '@/types/review';
+import { DELETE_ENABLED } from '@/lib/features';
 
 const chip = (on: boolean) =>
   `rounded-full border px-4 py-1.5 text-base font-medium transition-colors ${
@@ -65,7 +66,7 @@ function ReviewItem({ review }: { review: PublicReview }) {
       load: (parentId, cursor) => listThread(review.id, { parentId: parentId ?? undefined, cursor, limit: 10 }),
       create: (body, parentId) => replyAsSeller(review.id, body, parentId),
       edit: (id, body) => editReplyAsSeller(id, body),
-      remove: (id) => deleteReplyAsSeller(id),
+      remove: DELETE_ENABLED ? (id: number) => deleteReplyAsSeller(id) : undefined,
       report: (id, reason, note) => reportReplyAsSeller(id, reason, note),
     }),
     [review.id],
