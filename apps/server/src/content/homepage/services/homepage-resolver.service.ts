@@ -9,6 +9,7 @@ import { SectionConfig } from './homepage-config.service';
 import { SelectQueryBuilder } from 'typeorm';
 import { StorefrontProductService } from '../../../storefront/storefront-product.service';
 import { SellerProduct } from '../../../database/entities/product/seller-product.entity';
+import { sellerOpenSql } from '../../../shared/utils/shop-break.util';
 
 export type Device = 'mobile' | 'web';
 
@@ -202,7 +203,8 @@ export class HomepageResolverService {
       .where('s.status = :status', { status: SellerStatus.APPROVED })
       .andWhere('s.activeStatus = :active', {
         active: SellerActiveStatus.ACTIVE,
-      });
+      })
+      .andWhere(sellerOpenSql('s'));
     if (ids?.length) {
       qb.andWhere('s.id IN (:...ids)', { ids });
     } else {
