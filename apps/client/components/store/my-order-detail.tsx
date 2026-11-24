@@ -8,6 +8,8 @@ import { ApiError, NotFoundApiError } from '@/lib/api/http';
 import { formatDateTime } from '@/lib/datetime';
 import { ReturnRequest } from './return-request';
 import { Files, money, OrderBadge, ORDER_TEXT, actorText, PAYMENT_TEXT, PaymentBadge, Progress } from './order-parts';
+import { OrderPay } from './order-pay';
+import { OrderRefund } from './order-refund';
 
 const card = 'rounded-xl border border-st-line bg-white p-4 sm:p-5';
 
@@ -149,6 +151,10 @@ export function MyOrderDetail({ id, placed, initial }: { id: number; placed?: bo
       </section>
 
       {!initial && <ReturnRequest order={order} />}
+
+      <OrderRefund order={order} />
+
+      <OrderPay order={order} onChanged={load} />
 
       <div className="grid gap-4 md:grid-cols-2">
         <section className={card}>
