@@ -63,6 +63,9 @@ export function ProductCard({ product, layout = 'grid' }: { product: StoreProduc
         ) : (
           <div className="flex h-full items-center justify-center font-display text-4xl text-white/30">{product.name.charAt(0)}</div>
         )}
+        {product.vaccinated && (
+          <span className="absolute bottom-2 left-2 rounded-full bg-st-teal px-2 py-0.5 text-[11px] font-semibold text-white">Vaccinated</span>
+        )}
         {off !== null && (
           <span className="absolute left-2 top-2 rounded-full bg-white px-2 py-0.5 text-[11px] font-semibold text-st-teal">
             {off}% off
@@ -71,6 +74,9 @@ export function ProductCard({ product, layout = 'grid' }: { product: StoreProduc
       </div>
       <div className="mt-2 flex flex-1 flex-col">
         <h3 className="line-clamp-2 text-[13px] font-medium leading-snug text-st-ink">{product.name}</h3>
+        {(product.breed || product.bloodline) && (
+          <p className="truncate text-xs font-medium text-st-ink">{[product.breed, product.bloodline].filter(Boolean).join(' · ')}</p>
+        )}
         {product.seller && <p className="truncate text-xs text-st-slate">{product.seller.name}</p>}
         {product.ratingCount > 0 && (
           <p className="mt-0.5 flex items-center gap-1 text-xs text-st-slate">
