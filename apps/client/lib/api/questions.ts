@@ -3,8 +3,8 @@ import type { AnsweredFilter, PublicQuestion, QuestionPage, StaffQuestion } from
 
 // Buyer
 export const listProductQuestions = (productId: number, page = 1, pageSize = 5) =>
-  userHttp.get<QuestionPage<PublicQuestion>>(`/products/${productId}/questions`, { page, pageSize });
-export const askQuestion = (productId: number, question: string) => userHttp.post<PublicQuestion>(`/products/${productId}/questions`, { question });
+  userHttp.get<QuestionPage<PublicQuestion>>(`/questions/product/${productId}`, { page, pageSize });
+export const askQuestion = (productId: number, question: string) => userHttp.post<PublicQuestion>(`/questions/product/${productId}`, { question });
 
 // Seller
 export const listSellerQuestions = (params: { show?: AnsweredFilter; search?: string; page?: number; pageSize?: number }) =>

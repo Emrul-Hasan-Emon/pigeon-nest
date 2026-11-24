@@ -14,8 +14,8 @@ A shopper asks a seller about a bird on the product page. The seller answers, an
 
 | Role | Route | What |
 |---|---|---|
-| Public | `GET /user/products/:productId/questions?page=&pageSize=` | Published questions, newest first |
-| Customer | `POST /user/products/:productId/questions` `{ question }` | Ask |
+| Public | `GET /user/questions/product/:productId?page=&pageSize=` | Published questions, newest first |
+| Customer | `POST /user/questions/product/:productId` `{ question }` | Ask |
 | Customer | `GET /user/questions` | My questions |
 | Seller | `GET /seller/questions?show=unanswered\|answered\|all&search=` | Own product questions |
 | Seller | `GET /seller/questions/summary` | `{ unanswered, answered }` |
