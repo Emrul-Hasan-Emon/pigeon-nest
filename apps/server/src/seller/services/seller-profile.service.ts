@@ -7,6 +7,7 @@ import { Seller } from '../../database/entities/seller/seller.entity';
 import { SellerStatus } from '../../database/enums/seller-status.enum';
 import { SellerStatusChangeAction } from '../../database/enums/seller-status-change-action.enum';
 import { ChangeSellerPasswordDto } from '../dtos/change-seller-password.dto';
+import { SellingSwitchDto } from '../dtos/shop-break.dto';
 import { UpdateSellerProfileDto } from '../dtos/update-seller-profile.dto';
 import { CommonSellerService, SellerImages } from './common-seller.service';
 import { SellerStatusHistoryService } from './seller-status-history.service';
@@ -19,6 +20,40 @@ export class SellerProfileService {
     private readonly sellerStatusHistoryService: SellerStatusHistoryService,
     private readonly tokens: TokenService,
   ) {}
+
+  /**
+   * The selling switch and the planned break. While selling is off, or today is inside the planned break, the seller
+   * and all their products are hidden from buyers. Orders already placed carry on as usual.
+   */
+  async setSelling(seller: Seller, dto: SellingSwitchDto) {
+    const today = new Date();
+    const key = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    const real = (value: string, field: string) => {
+      const [y, m, d] = value.split('-').map(Number);
+      const date = new Date(y, m - 1, d);
+      if (date.getFullYear() !== y || date.getMonth() !== m - 1 || date.getDate() !== d) throw new BadRequestException(`${field} is not a real date`);
+    };
+    const start = dto.breakStartsOn ?? null;
+    const end = dto.breakEndsOn ?? null;
+    if ((start === null) !== (end === null)) throw new BadRequestException('Set both the first and the last day of the break, or neither');
+    if (start && end) {
+      real(start, 'breakStartsOn');
+      real(end, 'breakEndsOn');
+      if (end < start) throw new BadRequestException('The break cannot end before it starts');
+      if (end < key) throw new BadRequestException('The last day of the break cannot be in the past');
+    }
+    seller.isEnabledForSell = dto.isEnabledForSell;
+    seller.breakStartsOn = start;
+    seller.breakEndsOn = end;
+    seller.breakNote = dto.note ?? null;
+    await this.databaseService.seller.update(seller.id, {
+      isEnabledForSell: seller.isEnabledForSell,
+      breakStartsOn: seller.breakStartsOn,
+      breakEndsOn: seller.breakEndsOn,
+      breakNote: seller.breakNote,
+    });
+    return this.commonSellerService.toSellerView(seller);
+  }
 
   getProfile(seller: Seller) {
     return this.commonSellerService.toSellerView(seller);
