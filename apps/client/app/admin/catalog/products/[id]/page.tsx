@@ -7,6 +7,7 @@ import { getProduct } from '@/lib/api/products';
 import { NotFoundApiError } from '@/lib/api/http';
 import { useToast } from '@/components/ui/toast';
 import { ProductReviewsPanel } from '@/components/admin/reviews/product-reviews-panel';
+import { StockHistoryPanel } from '@/components/products/stock-history';
 import { ProductStatusHistoryPanel } from '@/components/admin/catalog/products/product-status-history-panel';
 import {
   isProductVisible,
@@ -281,6 +282,8 @@ export default function ProductDetailsPage() {
           </table>
         </div>
       </div>
+
+      <StockHistoryPanel productId={product.id} />
 
       <ProductStatusHistoryPanel productId={product.id} />
 
