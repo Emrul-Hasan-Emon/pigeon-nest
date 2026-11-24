@@ -1,3 +1,4 @@
+import { orderBirdText } from '@/components/products/bird-fields';
 import Link from 'next/link';
 import { AttachmentList, money } from '@/components/orders/ui';
 import { formatDateTime } from '@/lib/datetime';
@@ -65,7 +66,7 @@ export function ReturnItemsTable({ items, showCommission }: { items: ReturnItemV
             <th className="px-3 py-2 text-left font-medium text-muted-foreground">Item</th>
             <th className="px-3 py-2 text-left font-medium text-muted-foreground">Qty</th>
             <th className="px-3 py-2 text-left font-medium text-muted-foreground">Refund</th>
-            {showCommission && <th className="px-3 py-2 text-left font-medium text-muted-foreground">Commission back</th>}
+            {showCommission && <th className="px-3 py-2 text-left font-medium text-muted-foreground">System commission back</th>}
             <th className="px-3 py-2 text-left font-medium text-muted-foreground">Returned</th>
           </tr>
         </thead>
@@ -75,6 +76,7 @@ export function ReturnItemsTable({ items, showCommission }: { items: ReturnItemV
               <td className="px-3 py-2">
                 <span className="text-foreground">{i.productName}</span>
                 {i.skuLabel && <span className="block text-xs text-muted-foreground">{i.skuLabel}</span>}
+                {orderBirdText(i.bird).length > 0 && <span className="block text-xs text-muted-foreground">{orderBirdText(i.bird).join(' · ')}</span>}
               </td>
               <td className="px-3 py-2 text-muted-foreground">{i.quantity}</td>
               <td className="px-3 py-2 font-medium text-foreground">{money(i.refundAmount)}</td>

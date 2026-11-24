@@ -1,5 +1,6 @@
 'use client';
 
+import { orderBirdText } from '@/components/products/bird-fields';
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { money, ReturnStateBadge, ReturnSteps } from './return-parts';
@@ -103,7 +104,7 @@ export function MyReturnDetail({ id, justOpened }: { id: number; justOpened?: bo
         <ul className="divide-y divide-st-line">
           {r.items.map((i) => (
             <li key={i.id} className="flex justify-between gap-3 py-2 text-sm">
-              <span className="text-st-ink">{i.productName}{i.skuLabel && <span className="block text-xs text-st-slate">{i.skuLabel}</span>}</span>
+              <span className="text-st-ink">{i.productName}{i.skuLabel && <span className="block text-xs text-st-slate">{i.skuLabel}</span>}{orderBirdText(i.bird).length > 0 && <span className="block text-xs text-st-slate">{orderBirdText(i.bird).join(' · ')}</span>}</span>
               <span className="shrink-0 font-medium text-st-ink">{money(i.refundAmount)}</span>
             </li>
           ))}

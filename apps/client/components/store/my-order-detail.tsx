@@ -1,5 +1,6 @@
 'use client';
 
+import { orderBirdText } from '@/components/products/bird-fields';
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { cancelMyOrder, getMyOrder, type MyOrder } from '@/lib/api/customer-orders';
@@ -119,6 +120,7 @@ export function MyOrderDetail({ id, placed, initial }: { id: number; placed?: bo
               <div className="min-w-0 flex-1">
                 <p className="line-clamp-2 text-sm font-medium text-st-ink">{i.productName}</p>
                 {i.sku.label && <p className="text-xs text-st-slate">{i.sku.label}</p>}
+                {orderBirdText(i.bird).length > 0 && <p className="text-xs text-st-slate">{orderBirdText(i.bird).join(' · ')}</p>}
                 <p className="text-xs text-st-slate">{money(i.unitPayable)} × {i.quantity}{i.isReturned && <span className="ml-2 rounded-full bg-emerald-100 px-2 py-0.5 text-emerald-700">Returned</span>}</p>
                 {i.proposal && (
                   <p className="text-xs text-st-slate">
