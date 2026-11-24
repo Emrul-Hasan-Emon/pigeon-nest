@@ -3,6 +3,9 @@
 import { orderBirdText } from '@/components/products/bird-fields';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { Printer } from 'lucide-react';
+import { OrderRefundPanel } from '@/components/refunds/order-refund-panel';
+import { OrderClaimsPanel } from '@/components/payments/order-claims-panel';
 import { ReturnBadge } from '@/components/returns/parts';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Modal } from '@/components/ui/modal';
@@ -77,6 +80,16 @@ export function OrderDetailView({ role, id }: { role: StaffRole; id: number }) {
           {order.isReturned && <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-700">Fully returned</span>}
         </div>
         <p className="text-sm text-muted-foreground">Placed {formatDateTime(order.createdAt)}</p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <Link href={`${root}/orders/${order.id}/print?type=invoice`} className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground hover:bg-muted">
+            <Printer aria-hidden="true" className="h-4 w-4" />
+            Print invoice
+          </Link>
+          <Link href={`${root}/orders/${order.id}/print?type=slip`} className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground hover:bg-muted">
+            <Printer aria-hidden="true" className="h-4 w-4" />
+            Print packing slip
+          </Link>
+        </div>
       </div>
 
       <StatusPanel role={role} order={order} onChanged={(o) => { setOrder(o); showToast(`Order is now ${ORDER_STATUS_LABEL[o.status].toLowerCase()}.`, 'success'); }} onError={fail} />
@@ -180,6 +193,10 @@ export function OrderDetailView({ role, id }: { role: StaffRole; id: number }) {
       </dl>
 
       <ReturnsPanel role={role} order={order} />
+
+      <OrderRefundPanel role={role} order={order} onChanged={load} />
+
+      <OrderClaimsPanel role={role} order={order} onChanged={load} />
 
       <PaymentPanel role={role} order={order} onChanged={() => { showToast('Payment recorded.', 'success'); load(); }} onError={fail} />
 
