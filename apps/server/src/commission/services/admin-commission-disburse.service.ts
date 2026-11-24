@@ -1,7 +1,7 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CommissionService } from './commission.service';
+import { CommonCommissionService } from './common-commission.service';
 import { Seller } from '../../database/entities/seller/seller.entity';
 import { SystemCommission } from '../../database/entities/commission/system-commission.entity';
 import { SystemCommissionDisburse } from '../../database/entities/commission/system-commission-disburse.entity';
@@ -19,9 +19,9 @@ const FOLDER = 'commission-disbursements';
 
 /** Admin records money a seller handed over for commission. */
 @Injectable()
-export class CommissionDisburseService {
+export class AdminCommissionDisburseService {
   constructor(
-    private readonly commission: CommissionService,
+    private readonly commission: CommonCommissionService,
     private readonly files: OrderFileService,
     @InjectRepository(SystemCommission) private readonly balances: Repository<SystemCommission>,
     @InjectRepository(Seller) private readonly sellers: Repository<Seller>,
