@@ -46,6 +46,8 @@ export interface ReturnItemView {
   productName: string;
   productId: number | null;
   skuLabel: string | null;
+  /** The bird as it was sold. Null for other items and for older orders. */
+  bird?: import('./order').OrderItemBird | null;
   imageUrl: string | null;
   quantity: number;
   refundAmount: number;

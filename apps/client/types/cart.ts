@@ -5,7 +5,7 @@ export type CartLineStatus = 'ok' | 'unavailable' | 'out_of_stock' | 'insufficie
 export interface CartLine {
   id: number;
   product: { id: number; name: string; slug: string; thumbnailUrl: string | null } | null;
-  sku: { id: number; code: string; imageUrl: string | null; label: string } | null;
+  sku: { id: number; code: string; imageUrl: string | null; label: string; bird?: { ringNumber: string | null; hatchDate: string | null; breed: string | null } | null } | null;
   quantity: number;
   unitPrice: number;
   unitPayable: number;
