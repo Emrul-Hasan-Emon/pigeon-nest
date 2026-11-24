@@ -15,18 +15,18 @@ const resource = (base: string) => ({
 /** Orders and payments are the same shape for the admin and a seller (the server scopes a seller's). */
 const staffOrders = {
   orders: {
-    list: '/orders',
-    detail: (id: Id) => `/orders/${id}`,
-    status: (id: Id) => `/orders/${id}/status`,
-    payments: (id: Id) => `/orders/${id}/payments`,
-    reversePayment: (id: Id, paymentId: Id) => `/orders/${id}/payments/${paymentId}/reverse`,
-    updates: (id: Id) => `/orders/${id}/updates`,
-    customers: '/orders/customers',
-    customerAddresses: (userId: Id) => `/orders/customers/${userId}/addresses`,
-    catalog: '/orders/catalog',
-    options: '/orders/options',
+    list: '/order',
+    detail: (id: Id) => `/order/${id}`,
+    status: (id: Id) => `/order/${id}/status`,
+    payments: (id: Id) => `/order/${id}/payments`,
+    reversePayment: (id: Id, paymentId: Id) => `/order/${id}/payments/${paymentId}/reverse`,
+    updates: (id: Id) => `/order/${id}/updates`,
+    customers: '/order/customers',
+    customerAddresses: (userId: Id) => `/order/customers/${userId}/addresses`,
+    catalog: '/order/catalog',
+    options: '/order/options',
   },
-  payments: resource('/payments'),
+  payments: resource('/order/payments'),
 } as const;
 
 export const ENDPOINTS = {
@@ -225,14 +225,14 @@ export const ENDPOINTS = {
     sellers: resource('/sellers'),
     addresses: resource('/addresses'),
     checkout: {
-      options: (cartId: Id) => `/checkout/${cartId}`,
-      place: (cartId: Id) => `/checkout/${cartId}/place`,
+      options: (cartId: Id) => `/order/checkout/${cartId}`,
+      place: (cartId: Id) => `/order/checkout/${cartId}/place`,
     },
     orders: {
-      list: '/orders',
-      track: '/orders/track',
-      detail: (id: Id) => `/orders/${id}`,
-      cancel: (id: Id) => `/orders/${id}/cancel`,
+      list: '/order',
+      track: '/order/track',
+      detail: (id: Id) => `/order/${id}`,
+      cancel: (id: Id) => `/order/${id}/cancel`,
     },
     returns: {
       list: '/returns',

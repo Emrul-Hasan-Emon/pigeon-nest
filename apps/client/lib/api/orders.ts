@@ -27,7 +27,7 @@ export function orderApi(role: StaffRole) {
       client.patch<OrderDetail>(e.orders.status(id), { status, ...(note ? { note } : {}) }),
     /** Moves several orders, all in the same status now, to one new status. */
     bulkStatus: (orderIds: number[], status: OrderStatus, note?: string) =>
-      client.post<BulkStatusResult>('/orders/bulk-status', { orderIds, status, ...(note ? { note } : {}) }),
+      client.post<BulkStatusResult>('/order/bulk-status', { orderIds, status, ...(note ? { note } : {}) }),
     create: (input: CreateOrderInput) => client.post<OrderDetail>(e.orders.list, input),
     findCustomers: (q: string) => client.get<{ results: CustomerHit[] }>(e.orders.customers, { q }),
     catalog: (params: { sellerId?: number; search?: string }) =>
