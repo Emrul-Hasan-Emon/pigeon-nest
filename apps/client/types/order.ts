@@ -3,6 +3,21 @@ export type PaymentStatus = 'due' | 'paid' | 'partially_paid';
 export type DeliveryType = 'standard' | 'express' | 'pickup';
 export type StaffRole = 'admin' | 'seller';
 
+/** What a seller may do with an order next, by its status now. The server enforces the same rules. */
+export const SELLER_NEXT: Partial<Record<OrderStatus, OrderStatus[]>> = {
+  pending: ['confirmed', 'cancelled'],
+  confirmed: ['packed'],
+  packed: ['shipped'],
+  shipped: ['delivered'],
+};
+
+export interface BulkStatusResult {
+  status: OrderStatus;
+  updated: number;
+  failed: number;
+  results: Array<{ id: number; orderNumber: string; ok: boolean; error?: string }>;
+}
+
 export const ORDER_STATUSES: OrderStatus[] = ['pending', 'confirmed', 'packed', 'shipped', 'delivered', 'cancelled'];
 export const PAYMENT_STATUSES: PaymentStatus[] = ['due', 'partially_paid', 'paid'];
 export const DELIVERY_TYPES: DeliveryType[] = ['standard', 'express', 'pickup'];
@@ -53,12 +68,25 @@ export interface Attachment {
   createdAt: string;
 }
 
+/** The pigeon as it was sold. Null for other items and for orders placed before bird details existed. */
+export interface OrderItemBird {
+  ringNumber: string | null;
+  hatchDate: string | null;
+  vaccineName: string | null;
+  vaccinatedOn: string | null;
+  breed: string | null;
+  bloodline: string | null;
+  sire: { name: string | null; ringNumber: string | null } | null;
+  dam: { name: string | null; ringNumber: string | null } | null;
+}
+
 export interface OrderItemView {
   id: number;
   productId: number;
   productName: string;
   productSlug: string | null;
   sku: { id: number; code: string | null; label: string };
+  bird?: OrderItemBird | null;
   imageUrl: string | null;
   quantity: number;
   unitPrice: number;
