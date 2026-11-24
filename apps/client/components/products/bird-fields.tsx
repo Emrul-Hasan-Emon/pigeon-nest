@@ -7,6 +7,7 @@ import { ageText, todayInput } from '@/lib/bird';
 import type { BirdProductPayload } from '@/lib/api/products';
 import type { ProductPortal } from '@/lib/products/portal';
 import type { Product, Sku, SkuParent } from '@/types/product';
+import { DELETE_ENABLED } from '@/lib/features';
 
 const inputClass = 'mt-1 w-full rounded-md border border-input px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none';
 
@@ -222,7 +223,7 @@ function ParentBox({
         >
           {busy ? 'Saving…' : parent ? 'Save changes' : `Save ${role === 'sire' ? 'father' : 'mother'}`}
         </button>
-        {parent && (
+        {DELETE_ENABLED && parent && (
           <button
             type="button"
             disabled={busy}
