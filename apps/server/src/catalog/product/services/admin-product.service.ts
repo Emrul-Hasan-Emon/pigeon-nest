@@ -10,7 +10,6 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import {
   DataSource,
   EntityManager,
-  ILike,
   In,
   Not,
   QueryFailedError,
@@ -31,6 +30,7 @@ import { Seller } from '../../../database/entities/seller/seller.entity';
 import { SellerStatus } from '../../../database/enums/seller-status.enum';
 import { SellerActiveStatus } from '../../../database/enums/seller-active-status.enum';
 import { ProductStatus } from '../../../database/enums/product-status.enum';
+import { BulkProductAction, BulkProductDto } from '../dtos/bulk-product.dto';
 import { ProductActiveStatus } from '../../../database/enums/product-active-status.enum';
 import { ProductStatusChangeAction } from '../../../database/enums/product-status-change-action.enum';
 import { AuthUserType } from '../../../database/enums/auth-user-type.enum';
@@ -49,6 +49,8 @@ import { likeContains } from '../../../shared/utils/like.util';
 import { assertUploadAllowed } from '../../../shared/utils/upload-validation.util';
 import { CursorPagination } from '../../../shared/decorators/cursor-pagination-params.decorator';
 import { getCursorPaginateData } from '../../../shared/utils/cursor-paginate.util';
+import { StockReason } from '../../../database/enums/stock-movement.enum';
+import { recordStockMovements } from '../../../shared/utils/stock-movement.util';
 
 const MEDIA_FOLDER = 'products/media';
 const THUMBNAIL_FOLDER = 'products';
@@ -193,7 +195,6 @@ export class AdminProductService {
     }
 
     const slug = this.buildSlug(dto.name);
-    await this.assertSlugIsUnique(dto.sellerId, slug);
 
     for (const sku of dto.skus) {
       await this.assertVariantsAreValid(sku.variants);
@@ -237,7 +238,7 @@ export class AdminProductService {
       );
 
       for (const [index, sku] of dto.skus.entries()) {
-        await this.insertSku(manager, product.id, sku, index === defaultIndex);
+        await this.insertSku(manager, product.id, sku, index === defaultIndex, actor);
       }
       await this.historyService.record(manager, {
         sellerProductId: product.id,
@@ -281,7 +282,6 @@ export class AdminProductService {
     }
     if (dto.name !== undefined && dto.name !== product.name) {
       const slug = this.buildSlug(dto.name);
-      await this.assertSlugIsUnique(product.sellerId, slug, id);
       patch.name = dto.name;
       patch.slug = slug;
     }
@@ -323,7 +323,7 @@ export class AdminProductService {
         await manager.update(SellerProduct, id, patch);
       }
       if (plan) {
-        await this.applySkuChanges(manager, id, plan);
+        await this.applySkuChanges(manager, id, plan, actor);
       }
       if (change) {
         await this.historyService.record(manager, {
@@ -361,8 +361,6 @@ export class AdminProductService {
         }
         this.assertSellerCanTouch(locked);
       }
-      // Free the slug so the seller can reuse the name; the DB unique
-      // constraint on (sellerId, slug) also covers soft-deleted rows.
       await manager.update(SellerProduct, id, {
         slug: `${product.slug}-deleted-${id}`,
       });
@@ -843,6 +841,7 @@ export class AdminProductService {
     productId: number,
     dto: CreateProductSkuDto,
     isDefault: boolean,
+    actor: Actor,
   ) {
     const {
       variants,
@@ -865,6 +864,8 @@ export class AdminProductService {
         isActive: dto.isActive ?? true,
       }),
     );
+
+    await recordStockMovements(manager, [{ skuId: saved.id, change: saved.quantity ?? 0, reason: StockReason.INITIAL, note: 'Added with this stock' }], actor);
 
     for (const pair of variants) {
       await manager.save(
@@ -983,6 +984,7 @@ export class AdminProductService {
     manager: EntityManager,
     productId: number,
     plan: SkuChangePlan,
+    actor: Actor,
   ) {
     if (plan.removeIds.length > 0) {
       await manager.softDelete(SellerProductSkuVariant, {
@@ -1019,11 +1021,18 @@ export class AdminProductService {
       if (Object.keys(patch).length > 0) {
         await manager.update(SellerProductSku, existing.id, patch);
       }
+      if (dto.quantity !== undefined && dto.quantity !== existing.quantity) {
+        await recordStockMovements(
+          manager,
+          [{ skuId: existing.id, change: dto.quantity - existing.quantity, reason: StockReason.EDITED, note: actor.type === AuthUserType.ADMIN ? 'Changed by an admin' : 'Changed by the seller' }],
+          actor,
+        );
+      }
     }
 
     let newDefaultId: number | undefined;
     for (const dto of plan.creates) {
-      const saved = await this.insertSku(manager, productId, dto, false);
+      const saved = await this.insertSku(manager, productId, dto, false, actor);
       if (dto.isDefault) {
         newDefaultId = saved.id;
       }
@@ -1298,26 +1307,6 @@ export class AdminProductService {
     }
   }
 
-  private async assertSlugIsUnique(
-    sellerId: number,
-    slug: string,
-    excludeId?: number,
-  ) {
-    const existing = await this.databaseService.sellerProduct.findOne({
-      where: {
-        sellerId,
-        slug: ILike(slug),
-        ...(excludeId ? { id: Not(excludeId) } : {}),
-      },
-      withDeleted: true,
-    });
-    if (existing) {
-      throw new BadRequestException(
-        'This seller already has a product with this name',
-      );
-    }
-  }
-
   private async assertVariantsAreValid(variants: SkuVariantPairDto[]) {
     const attributeIds = new Set(variants.map((pair) => pair.attributeId));
     if (attributeIds.size !== variants.length) {
@@ -1361,6 +1350,62 @@ export class AdminProductService {
       throw new BadRequestException(
         'discountedPriceEndDate must be after discountedPriceStartDate',
       );
+    }
+  }
+
+  /**
+   * Switch many products on or off, or change all their prices at once. Admins can also approve, reject and suspend.
+   * Each product goes through the normal update, so locks, history and checks apply, and one failing does not
+   * stop the others.
+   */
+  async bulkChange(dto: BulkProductDto, actor: Actor, scope?: SellerScope) {
+    if (scope && [BulkProductAction.APPROVE, BulkProductAction.REJECT, BulkProductAction.SUSPEND].includes(dto.action)) {
+      throw new BadRequestException('Only an admin can approve, reject or suspend products');
+    }
+    const results: Array<{ id: number; name: string | null; ok: boolean; error?: string }> = [];
+    for (const id of [...dto.productIds].sort((a, b) => a - b)) {
+      let name: string | null = null;
+      try {
+        const product = await this.findOrThrow(id, scope);
+        name = product.name;
+        await this.update(id, this.bulkPatch(dto, product), actor, scope);
+        results.push({ id, name, ok: true });
+      } catch (e) {
+        results.push({ id, name, ok: false, error: e instanceof Error ? e.message : 'Could not change this product' });
+      }
+    }
+    return { action: dto.action, updated: results.filter((r) => r.ok).length, failed: results.filter((r) => !r.ok).length, results };
+  }
+
+  private bulkPatch(dto: BulkProductDto, product: { skus?: SellerProductSku[] }): UpdateProductDto {
+    switch (dto.action) {
+      case BulkProductAction.ACTIVATE:
+        return { activeStatus: ProductActiveStatus.ACTIVE } as UpdateProductDto;
+      case BulkProductAction.DEACTIVATE:
+        return { activeStatus: ProductActiveStatus.INACTIVE } as UpdateProductDto;
+      case BulkProductAction.APPROVE:
+        return { status: ProductStatus.APPROVED } as UpdateProductDto;
+      case BulkProductAction.REJECT:
+        return { status: ProductStatus.REJECTED, reason: dto.reason } as UpdateProductDto;
+      case BulkProductAction.SUSPEND:
+        return { activeStatus: ProductActiveStatus.SUSPENDED, reason: dto.reason } as UpdateProductDto;
+      default: {
+        const factor = (dto.direction === 'decrease' ? -1 : 1) * (dto.value ?? 0);
+        const change = (n: number) => {
+          const next = dto.mode === 'percent' ? n * (1 + factor / 100) : n + factor;
+          if (next < 1) throw new BadRequestException('A price would drop below 1. Lower it by less.');
+          return Math.round((next + Number.EPSILON) * 100) / 100;
+        };
+        const skus = (product.skus ?? []).filter((k) => !k.deletedAt);
+        if (skus.length === 0) throw new BadRequestException('This product has no options to change');
+        return {
+          skus: skus.map((k) => {
+            const price = change(Number(k.price));
+            const offer = k.discountedPrice != null && Number(k.discountedPrice) < Number(k.price) ? Math.min(change(Number(k.discountedPrice)), price) : price;
+            return { id: k.id, price, discountedPrice: offer };
+          }),
+        } as UpdateProductDto;
+      }
     }
   }
 }
