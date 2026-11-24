@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { LOW_STOCK_AT } from '../../dashboard/services/seller-overview.service';
 import { tidy } from '../../shared/utils/money.util';
-import { ProductReportKind, ReportGroup } from '../dtos/report.dtos';
+import { RETURN_REASON_LABEL, ReturnReasonCode } from '../../database/enums/return-reason-code.enum';
+import { ProductReportKind, ReportGroup, ReturnReportBy } from '../dtos/report.dtos';
 import { bucketFormat, ReportWindow, windowBuckets } from '../utils/report-range.util';
 import { Report } from '../utils/report.types';
 
@@ -299,6 +300,125 @@ export class CommonReportService {
         { key: 'keep', label: keepLabel, kind: 'money' },
       ],
       rows,
+    };
+  }
+
+  /**
+   * Why birds come back. Counts returns asked for in the dates (a return the customer cancelled is left out),
+   * grouped by the reason the customer picked, by product, or (admin) by seller.
+   */
+  async returnReasons(sellerId: number | null, w: ReportWindow, by: ReturnReportBy): Promise<Report> {
+    const base = { from: w.fromDay, to: w.toDay };
+    const where = `r."deletedAt" is null and r.status <> 'cancelled' and r."createdAt" >= $2 and r."createdAt" < $3 and ($1::int is null or r."sellerId" = $1)`;
+    const [tot] = await this.q<Record<string, string>>(
+      `select count(*) n, coalesce(sum((select sum(ri.quantity) from order_return_item ri where ri."orderReturnId" = r.id)), 0) items,
+              coalesce(sum(r."refundAmount") filter (where r.status = 'returned'), 0) refunded
+         from order_return r where ${where}`,
+      [sellerId, w.from, w.to],
+    );
+    const [paid] = await this.q<{ n: string }>(
+      `select count(*) n from "order" o where o."deletedAt" is null and ${PAID} and o."createdAt" >= $2 and o."createdAt" < $3 and ($1::int is null or o."sellerId" = $1)`,
+      [sellerId, w.from, w.to],
+    );
+    const returns = Number(tot.n);
+    const paidOrders = Number(paid.n);
+    const per100 = paidOrders ? Math.round((returns / paidOrders) * 1000) / 10 : 0;
+    const summary = [
+      { label: 'Returns asked for', value: returns, kind: 'number' as const },
+      { label: 'Items in those returns', value: Number(tot.items), kind: 'number' as const },
+      { label: 'Refunded so far', value: tidy(Number(tot.refunded)), kind: 'money' as const },
+      { label: 'Returns for every 100 paid orders', value: per100, kind: 'number' as const },
+    ];
+
+    if (by === ReturnReportBy.PRODUCT) {
+      const rows = await this.q<Record<string, string | number | null>>(
+        `select p.id, p.name product, s.name seller, count(distinct r.id)::int returns, sum(ri.quantity)::int items,
+                (select r2."reasonCode" from order_return r2 join order_return_item ri2 on ri2."orderReturnId" = r2.id
+                   join order_item oi2 on oi2.id = ri2."orderItemId"
+                  where oi2."sellerProductId" = p.id and ${where.replaceAll('r.', 'r2.')} group by r2."reasonCode" order by count(*) desc, r2."reasonCode" limit 1) "topReason",
+                round(coalesce(sum(ri."refundAmount") filter (where r.status = 'returned'), 0)::numeric, 2)::float refunded
+           from order_return r
+           join order_return_item ri on ri."orderReturnId" = r.id
+           join order_item oi on oi.id = ri."orderItemId"
+           join seller_product p on p.id = oi."sellerProductId"
+           join seller s on s.id = p."sellerId"
+          where ${where}
+          group by p.id, p.name, s.name order by returns desc, items desc, p.id limit ${MAX_ROWS}`,
+        [sellerId, w.from, w.to],
+      );
+      const out = rows.map((r) => ({ ...r, topReason: RETURN_REASON_LABEL[r.topReason as ReturnReasonCode] ?? 'Other' }));
+      return {
+        title: 'Returns by product',
+        note: 'Products that came back most, with the reason given most often. A return the customer cancelled is left out.',
+        ...base,
+        summary,
+        columns: [
+          { key: 'product', label: 'Product', kind: 'text' },
+          ...(sellerId === null ? [{ key: 'seller', label: 'Seller', kind: 'text' as const }] : []),
+          { key: 'returns', label: 'Returns', kind: 'number' },
+          { key: 'items', label: 'Items', kind: 'number' },
+          { key: 'topReason', label: 'Most common reason', kind: 'text' },
+          { key: 'refunded', label: 'Refunded so far', kind: 'money' },
+        ],
+        rows: out,
+      };
+    }
+
+    if (by === ReturnReportBy.SELLER) {
+      const rows = await this.q<Record<string, string | number | null>>(
+        `select s.id, s.name seller, count(r.id)::int returns,
+                (select count(*) from "order" o where o."sellerId" = s.id and o."deletedAt" is null and ${PAID} and o."createdAt" >= $2 and o."createdAt" < $3)::int "paidOrders",
+                round(coalesce(sum(r."refundAmount") filter (where r.status = 'returned'), 0)::numeric, 2)::float refunded
+           from order_return r join seller s on s.id = r."sellerId"
+          where ${where}
+          group by s.id, s.name order by returns desc, s.id limit ${MAX_ROWS}`,
+        [sellerId, w.from, w.to],
+      );
+      const out = rows.map((r) => ({ ...r, rate: Number(r.paidOrders) ? Math.round((Number(r.returns) / Number(r.paidOrders)) * 1000) / 10 : 0 }));
+      return {
+        title: 'Returns by seller',
+        note: 'Sellers with the most returns in these dates, and how many returns that is for every 100 paid orders.',
+        ...base,
+        summary,
+        columns: [
+          { key: 'seller', label: 'Seller', kind: 'text' },
+          { key: 'returns', label: 'Returns', kind: 'number' },
+          { key: 'paidOrders', label: 'Paid orders', kind: 'number' },
+          { key: 'rate', label: 'Returns per 100 paid orders', kind: 'number' },
+          { key: 'refunded', label: 'Refunded so far', kind: 'money' },
+        ],
+        rows: out,
+      };
+    }
+
+    const rows = await this.q<{ code: string; returns: number; items: number; refunded: number }>(
+      `select r."reasonCode" code, count(*)::int returns,
+              coalesce(sum((select sum(ri.quantity) from order_return_item ri where ri."orderReturnId" = r.id)), 0)::int items,
+              round(coalesce(sum(r."refundAmount") filter (where r.status = 'returned'), 0)::numeric, 2)::float refunded
+         from order_return r where ${where} group by r."reasonCode"`,
+      [sellerId, w.from, w.to],
+    );
+    const byCode = new Map(rows.map((r) => [r.code, r]));
+    const table = (Object.values(ReturnReasonCode) as ReturnReasonCode[])
+      .map((code) => {
+        const r = byCode.get(code);
+        const n = r?.returns ?? 0;
+        return { reason: RETURN_REASON_LABEL[code], returns: n, share: returns ? Math.round((n / returns) * 1000) / 10 : 0, items: r?.items ?? 0, refunded: r?.refunded ?? 0 };
+      })
+      .sort((a, b) => b.returns - a.returns);
+    return {
+      title: 'Why birds come back',
+      note: 'Returns asked for in these dates, grouped by the reason the customer picked. Returns made before reasons were collected count as Other. A return the customer cancelled is left out.',
+      ...base,
+      summary,
+      columns: [
+        { key: 'reason', label: 'Reason', kind: 'text' },
+        { key: 'returns', label: 'Returns', kind: 'number' },
+        { key: 'share', label: 'Share of all returns', kind: 'percent' },
+        { key: 'items', label: 'Items', kind: 'number' },
+        { key: 'refunded', label: 'Refunded so far', kind: 'money' },
+      ],
+      rows: table,
     };
   }
 }
