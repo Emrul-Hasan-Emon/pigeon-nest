@@ -15,7 +15,8 @@ import {
 } from '@/lib/api/returns';
 import { formatDateTime } from '@/lib/datetime';
 import { NotFoundApiError } from '@/lib/api/http';
-import type { ReturnDetail, ReturnStatus } from '@/types/returns';
+import { ReturnMoney } from '@/components/refunds/return-money';
+import { returnReasonLabel, type ReturnDetail, type ReturnStatus } from '@/types/returns';
 import { OrderLink, RETURN_LABEL, ReturnBadge, ReturnItemsTable, ReturnTimeline, SCOPE_LABEL } from './parts';
 import { LoadingBlock } from '@/components/ui/skeleton';
 import { useBreadcrumbTitle } from '@/components/ui/breadcrumbs';
@@ -206,6 +207,7 @@ export function ReturnDetailView({ role, id }: { role: 'admin' | 'seller'; id: n
         <div className="space-y-5 lg:col-span-2">
           <section className={card}>
             <h2 className="mb-3 font-semibold text-foreground">Why</h2>
+            <p className="mb-1 text-sm font-semibold text-foreground">{returnReasonLabel(r.reasonCode)}</p>
             <p className="whitespace-pre-wrap text-sm text-foreground">{r.reason}</p>
             {r.history[0]?.attachments.length > 0 && (
               <ul className="mt-3 flex flex-wrap gap-2">
@@ -224,6 +226,7 @@ export function ReturnDetailView({ role, id }: { role: 'admin' | 'seller'; id: n
             <h2 className="mb-3 font-semibold text-foreground">Items</h2>
             <ReturnItemsTable items={r.items} showCommission />
           </section>
+          <ReturnMoney ret={r} admin={role === 'admin'} onChanged={load} />
           <section className={card}>
             <h2 className="mb-3 font-semibold text-foreground">History</h2>
             <ReturnTimeline history={r.history} />
