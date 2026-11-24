@@ -59,7 +59,7 @@ export function SkuBirdBlock({ sku }: { sku: Sku }) {
                   <span className="grid h-16 w-16 place-items-center rounded-lg border border-dashed border-border text-xs text-muted-foreground">No photo</span>
                 )}
                 <span>
-                  <span className="block text-sm text-muted-foreground">{label}</span>
+                  <span className="block text-sm font-semibold text-foreground">{label}</span>
                   <span className="text-base font-medium text-foreground">{[p.name, p.ringNumber].filter(Boolean).join(' · ') || '—'}</span>
                 </span>
               </div>

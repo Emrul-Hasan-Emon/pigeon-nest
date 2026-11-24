@@ -11,7 +11,7 @@ const taka = (n: number | string) => `৳${Number(n).toLocaleString(undefined, {
 function Figure({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
   return (
     <div className="rounded-lg bg-muted/60 px-4 py-3">
-      <p className="text-sm font-medium text-muted-foreground">{label}</p>
+      <p className="text-sm font-semibold text-foreground">{label}</p>
       <p className="mt-1 font-[family-name:var(--font-serif)] text-2xl font-semibold tracking-tight text-foreground">{children}</p>
       {hint && <p className="mt-1 text-sm text-muted-foreground">{hint}</p>}
     </div>

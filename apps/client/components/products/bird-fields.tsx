@@ -416,7 +416,7 @@ export function SkuBirdLine({ sku }: { sku: Sku }) {
                   <img src={p.imageUrl} alt={`${label}${p.name ? `: ${p.name}` : ''}`} className="h-12 w-12 rounded-md border border-border object-cover" />
                 )}
                 <span>
-                  <span className="block text-xs text-muted-foreground">{label}</span>
+                  <span className="block text-xs font-semibold text-muted-foreground">{label}</span>
                   <span className="text-foreground">{[p.name, p.ringNumber].filter(Boolean).join(' · ') || '—'}</span>
                 </span>
               </div>

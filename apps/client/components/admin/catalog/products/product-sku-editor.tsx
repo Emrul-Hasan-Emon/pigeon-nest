@@ -253,7 +253,7 @@ export function ProductSkuEditor({
           className={`rounded-lg border border-border p-3 ${draft.removed ? 'bg-muted opacity-60' : ''}`}
         >
           <div className="mb-2 flex items-center justify-between gap-3">
-            <div className="text-sm font-medium text-foreground">
+            <div className="text-sm font-semibold text-foreground">
               {draft.id !== undefined ? (
                 <>
                   {draft.sku || `SKU #${draft.id}`}

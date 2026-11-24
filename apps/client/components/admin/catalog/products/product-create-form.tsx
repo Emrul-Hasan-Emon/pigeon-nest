@@ -353,7 +353,7 @@ export function ProductCreateForm({ portal = adminProductPortal }: { portal?: Pr
           <h2 className="mb-3 font-semibold text-foreground">Media <Opt /></h2>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <span className="text-sm font-medium text-foreground">Thumbnail</span>
+              <span className="text-sm font-semibold text-foreground">Thumbnail</span>
               <div className="mt-2 flex items-center gap-3">
                 {thumbnailPreview && (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -371,7 +371,7 @@ export function ProductCreateForm({ portal = adminProductPortal }: { portal?: Pr
               </div>
             </div>
             <div>
-              <span className="text-sm font-medium text-foreground">Gallery images / videos</span>
+              <span className="text-sm font-semibold text-foreground">Gallery images / videos</span>
               <div className="mt-2">
                 <label className="cursor-pointer rounded-md border border-border px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted">
                   Add files

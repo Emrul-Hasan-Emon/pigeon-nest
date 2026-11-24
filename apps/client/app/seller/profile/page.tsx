@@ -173,7 +173,7 @@ export default function SellerProfilePage() {
               <input type="email" className={inputClass} disabled={!canEdit} value={email} onChange={(e) => setEmail(e.target.value)} />
             </label>
             <div className="text-sm text-foreground md:col-span-2">
-              <span className="mb-1 block">Phone number (used to sign in)</span>
+              <span className="mb-1 block font-semibold">Phone number (used to sign in)</span>
               <PhoneInput defaultValue={seller.phone ?? ''} onChange={setPhone} disabled={!canEdit} />
             </div>
           </div>
@@ -203,7 +203,7 @@ export default function SellerProfilePage() {
               ] as const
             ).map(([label, url, setFile, file]) => (
               <div key={label} className="text-sm text-foreground">
-                <span className="block">{label}</span>
+                <span className="block font-semibold">{label}</span>
                 {url && (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={url} alt="" className="mt-2 h-24 w-full rounded-md border border-border object-cover" />

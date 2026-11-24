@@ -84,7 +84,7 @@ export function ProductMediaManager({
       </div>
 
       <div className="mb-5">
-        <span className="text-sm font-medium text-foreground">Thumbnail <Opt /></span>
+        <span className="text-sm font-semibold text-foreground">Thumbnail <Opt /></span>
         <div className="mt-2 flex items-center gap-4">
           {shownThumbnail ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -129,7 +129,7 @@ export function ProductMediaManager({
 
       <div>
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-foreground">Gallery ({media.length}) <Opt /></span>
+          <span className="text-sm font-semibold text-foreground">Gallery ({media.length}) <Opt /></span>
           <label className="cursor-pointer rounded-md border border-border px-3.5 py-2 text-sm font-semibold text-foreground hover:bg-muted">
             Add files
             <input

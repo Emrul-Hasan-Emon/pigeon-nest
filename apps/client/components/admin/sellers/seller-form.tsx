@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { createSeller, updateSeller } from '@/lib/api/sellers';
 import { ApiError, NotFoundApiError } from '@/lib/api/http';
 import { useToast } from '@/components/ui/toast';
+import { useBreadcrumbTitle } from '@/components/ui/breadcrumbs';
 import { PhoneInput } from '@/components/phone-input';
 import type { Seller, SellerActiveStatus, SellerStatus } from '@/types/seller';
 
@@ -48,6 +49,7 @@ export function SellerForm({ seller }: { seller?: Seller }) {
   const router = useRouter();
   const { showToast } = useToast();
   const isEdit = seller !== undefined;
+  useBreadcrumbTitle(seller?.name);
 
   const initial = useMemo(() => toFormState(seller), [seller]);
   const [form, setForm] = useState<FormState>(initial);
@@ -229,7 +231,7 @@ export function SellerForm({ seller }: { seller?: Seller }) {
           </label>
 
           <div className="text-sm text-foreground">
-            <span className="block">System commission</span>
+            <span className="block font-semibold">System commission</span>
             <div className="mt-1 flex gap-2">
               <select
                 className="w-1/2 rounded-md border border-input px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none"
@@ -272,7 +274,7 @@ export function SellerForm({ seller }: { seller?: Seller }) {
           </label>
 
           <div className="text-sm text-foreground">
-            <span className="mb-1 block">Phone *</span>
+            <span className="mb-1 block font-semibold">Phone *</span>
             <PhoneInput
               defaultValue={initial.phone}
               onChange={(phone) => setForm((f) => ({ ...f, phone }))}
@@ -374,7 +376,7 @@ export function SellerForm({ seller }: { seller?: Seller }) {
         </div>
 
         <div className="mt-5">
-          <span className="text-sm font-medium text-foreground">Profile picture</span>
+          <span className="text-sm font-semibold text-foreground">Profile picture</span>
           <div className="mt-2 flex items-center gap-4 rounded-lg border border-dashed border-border p-4">
             {avatarPreview ? (
               <>
@@ -412,7 +414,7 @@ export function SellerForm({ seller }: { seller?: Seller }) {
 
         <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
-            <span className="text-sm font-medium text-foreground">NID front</span>
+            <span className="text-sm font-semibold text-foreground">NID front</span>
             <div className="mt-2 flex items-start gap-4 rounded-lg border border-dashed border-border p-4">
               {frontPreview ? (
                 <>
@@ -437,7 +439,7 @@ export function SellerForm({ seller }: { seller?: Seller }) {
           </div>
 
           <div>
-            <span className="text-sm font-medium text-foreground">NID back</span>
+            <span className="text-sm font-semibold text-foreground">NID back</span>
             <div className="mt-2 flex items-start gap-4 rounded-lg border border-dashed border-border p-4">
               {backPreview ? (
                 <>
