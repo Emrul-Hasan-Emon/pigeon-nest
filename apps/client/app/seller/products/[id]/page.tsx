@@ -20,6 +20,7 @@ import { ApiError, NotFoundApiError } from '@/lib/api/http';
 import { clearSellerToken, getSellerToken } from '@/lib/auth/seller-token';
 import type { Product } from '@/types/product';
 import type { Proposal } from '@/types/proposal';
+import { useBreadcrumbTitle } from '@/components/ui/breadcrumbs';
 
 /** What customers can and cannot do with this product right now, in plain words. */
 function visibilityNote(product: Product) {
@@ -45,6 +46,7 @@ export default function SellerProductDetailsPage() {
   const router = useRouter();
   const { showToast } = useToast();
   const [product, setProduct] = useState<Product | null>(null);
+  useBreadcrumbTitle(product?.name);
   const [loading, setLoading] = useState(true);
   const [offers, setOffers] = useState<Proposal[]>([]);
   const [copying, setCopying] = useState(false);

@@ -18,12 +18,14 @@ import { ApiError, NotFoundApiError } from '@/lib/api/http';
 import { clearSellerToken, getSellerToken } from '@/lib/auth/seller-token';
 import type { Product } from '@/types/product';
 import { LoadingBlock } from '@/components/ui/skeleton';
+import { useBreadcrumbTitle } from '@/components/ui/breadcrumbs';
 
 export default function SellerProductEditPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const { showToast } = useToast();
   const [product, setProduct] = useState<Product | null>(null);
+  useBreadcrumbTitle(product?.name);
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(() => {

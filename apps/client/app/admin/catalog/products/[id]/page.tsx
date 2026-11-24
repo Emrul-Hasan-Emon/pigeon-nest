@@ -16,12 +16,14 @@ import {
 import type { Product } from '@/types/product';
 import { LoadingBlock } from '@/components/ui/skeleton';
 import { BirdFactsCard, hasSkuBird, SkuBirdLine } from '@/components/products/bird-fields';
+import { useBreadcrumbTitle } from '@/components/ui/breadcrumbs';
 
 export default function ProductDetailsPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const { showToast } = useToast();
   const [product, setProduct] = useState<Product | null>(null);
+  useBreadcrumbTitle(product?.name);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
