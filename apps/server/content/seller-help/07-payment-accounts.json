@@ -1,0 +1,158 @@
+{
+  "slug": "payment-accounts",
+  "title": "Payment accounts",
+  "icon": "landmark",
+  "order": 70,
+  "summary": "The bKash, Nagad, Rocket, Upay or bank accounts where buyers send you money.",
+  "openPath": "/seller/payment-accounts",
+  "openLabel": "Open payment accounts",
+  "sections": [
+    {
+      "id": "what",
+      "title": "What is this page?",
+      "intro": "This is the list of places where you want to receive money. The website does not take payment for you. The buyer sends the money straight to your own account. Here you tell the website which accounts to show them.",
+      "blocks": [
+        {
+          "type": "words",
+          "title": "The two kinds of account",
+          "items": [
+            {
+              "term": "Mobile money",
+              "means": "bKash, Nagad, Rocket or Upay. You give the provider name, the account number and the account name."
+            },
+            {
+              "term": "Bank",
+              "means": "A bank account. You give the bank name, the branch, the account name and the account number."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "why",
+      "title": "Why do you need it, and how does it help you?",
+      "blocks": [
+        {
+          "type": "points",
+          "items": [
+            "Buyers know where to pay. After they order, your accounts show on their order page, so they do not need to ask you.",
+            "You get paid faster. A buyer who can pay at once does not wait for your message.",
+            "It saves you time. You do not need to send your number again and again to every buyer.",
+            "Fewer mistakes. Buyers copy the number from the page instead of typing it from memory.",
+            "You choose. You can add several accounts, so a buyer can use the one they like. More choice means more buyers who finish the order.",
+            "Your own money, your own account. The money goes straight to you. The marketplace does not hold it."
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "info",
+          "text": "If you have no account on this list, buyers have nowhere to send money for online-payment orders. Add at least one before you start selling."
+        }
+      ]
+    },
+    {
+      "id": "when",
+      "title": "Who sees your accounts, and when?",
+      "blocks": [
+        {
+          "type": "points",
+          "items": [
+            "A buyer sees your accounts on the page of their own order, after they place it.",
+            "They only see accounts that are switched on.",
+            "They do not see them for a cash on delivery order. For those they pay when the order arrives.",
+            "Admins can see your accounts too."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "add",
+      "title": "Add an account",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "Step by step",
+          "steps": [
+            "Press \"Payment accounts\" in the left menu.",
+            "Press \"Add an account\".",
+            "Choose the kind: mobile money or bank.",
+            "For mobile money, choose or type the provider, for example bKash. For a bank, type the bank name and the branch.",
+            "Type the account name. This is the name on the account.",
+            "Type the account number. Check every digit.",
+            "Add a note if you want. Example: \"Write your order number in the reference\". Buyers read it.",
+            "Press Save. The account is on the list and switched on."
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "warn",
+          "text": "A wrong number means a buyer sends money to a stranger. After you save, read the number again and compare it with your real account."
+        }
+      ]
+    },
+    {
+      "id": "manage",
+      "title": "Change, switch off or switch on",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "How to",
+          "steps": [
+            "Press \"Change\" on an account to fix the number, the name or the note. Press Save.",
+            "Press \"Switch off\" if you do not want to receive money on that account for now. Buyers stop seeing it. It shows with an \"Off\" mark.",
+            "Press \"Switch on\" to show it to buyers again."
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "info",
+          "text": "Switch an account off instead of removing it. Your details stay safe and you can turn it back on later. Deleting is switched off in this portal."
+        }
+      ]
+    },
+    {
+      "id": "after",
+      "title": "What happens after a buyer pays",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "The whole path",
+          "steps": [
+            "The buyer orders and sees your accounts.",
+            "The buyer sends the money to one of them.",
+            "You see the money arrive in your bKash, Nagad or bank app.",
+            "You open the order and record the payment with the proof. The order becomes Paid."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "faq",
+      "title": "Questions people ask",
+      "blocks": [
+        {
+          "type": "faq",
+          "title": "Common questions",
+          "items": [
+            {
+              "q": "How many accounts can I add?",
+              "a": "You can add more than one. Add the ones your buyers use most."
+            },
+            {
+              "q": "A buyer sent money to the wrong number. What now?",
+              "a": "The website cannot get it back. Always check your numbers after saving."
+            },
+            {
+              "q": "Does the marketplace take a share of the money the buyer sends?",
+              "a": "No. The buyer pays you directly. The marketplace only charges the system commission, which you pay separately."
+            },
+            {
+              "q": "Why does a buyer not see my account?",
+              "a": "It may be switched off, or the order is cash on delivery."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
