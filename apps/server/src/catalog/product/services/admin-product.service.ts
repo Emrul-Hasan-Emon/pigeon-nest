@@ -21,6 +21,11 @@ import { FileInfo } from '../../../file-management/types/file-info.type';
 import { SellerProduct } from '../../../database/entities/product/seller-product.entity';
 import { SellerProductSku } from '../../../database/entities/product/seller-product-sku.entity';
 import { SellerProductSkuVariant } from '../../../database/entities/product/seller-product-sku-variant.entity';
+import {
+  ParentRole,
+  SellerProductSkuParent,
+} from '../../../database/entities/product/seller-product-sku-parent.entity';
+import { SaveSkuParentDto } from '../dtos/save-sku-parent.dto';
 import { SellerProductMedia } from '../../../database/entities/product-media/seller-product-media.entity';
 import { Seller } from '../../../database/entities/seller/seller.entity';
 import { SellerStatus } from '../../../database/enums/seller-status.enum';
@@ -47,6 +52,7 @@ import { getCursorPaginateData } from '../../../shared/utils/cursor-paginate.uti
 
 const MEDIA_FOLDER = 'products/media';
 const THUMBNAIL_FOLDER = 'products';
+const PARENT_FOLDER = 'products/parents';
 const THUMBNAIL_MAX_BYTES = 10 * 1024 * 1024;
 
 export interface ProductMediaFiles {
@@ -202,6 +208,7 @@ export class AdminProductService {
       throw new BadRequestException('Only one SKU can be the default');
     }
     this.assertNoDuplicateCombos(dto.skus.map((sku) => sku.variants));
+    await this.assertBirdSkus(dto.sellerId, dto.skus);
     const defaultIndex = Math.max(
       dto.skus.findIndex((sku) => sku.isDefault),
       0,
@@ -216,6 +223,7 @@ export class AdminProductService {
           name: dto.name,
           slug,
           description: dto.description,
+          ...this.birdProductFields(dto),
           isFeatured: dto.isFeatured ?? false,
           status,
           activeStatus,
@@ -278,6 +286,7 @@ export class AdminProductService {
       patch.slug = slug;
     }
     if (dto.description !== undefined) patch.description = dto.description;
+    Object.assign(patch, this.birdProductFields(dto));
     if (dto.isFeatured !== undefined) patch.isFeatured = dto.isFeatured;
     if (dto.seoTitle !== undefined) patch.seoTitle = dto.seoTitle;
     if (dto.seoDescription !== undefined) {
@@ -286,7 +295,12 @@ export class AdminProductService {
 
     const plan =
       dto.skus !== undefined || dto.removeSkuIds !== undefined
-        ? await this.planSkuChanges(id, dto.skus ?? [], dto.removeSkuIds ?? [])
+        ? await this.planSkuChanges(
+            id,
+            dto.skus ?? [],
+            dto.removeSkuIds ?? [],
+            product.sellerId,
+          )
         : null;
 
     await this.runTransaction(async (manager) => {
@@ -499,6 +513,329 @@ export class AdminProductService {
     return this.details(id, scope);
   }
 
+  // ---- copy ----
+
+  // "Name (copy)", or "(copy 2)" and so on when that name is taken, within the same seller.
+  private async copyName(sellerId: number, name: string): Promise<string> {
+    const base = name.length > 380 ? name.slice(0, 380).trimEnd() : name;
+    for (let n = 1; n <= 50; n++) {
+      const candidate = n === 1 ? `${base} (copy)` : `${base} (copy ${n})`;
+      const taken = await this.databaseService.sellerProduct.findOne({
+        where: { sellerId, slug: this.buildSlug(candidate) },
+        withDeleted: true,
+      });
+      if (!taken) return candidate;
+    }
+    throw new BadRequestException('Too many copies of this product already exist');
+  }
+
+  /**
+   * A new product made from an existing one: same category, text, bird facts and options, switched off.
+   * Left out on purpose: the SKU codes, ring numbers, hatch and vaccine dates and parents (they belong to one bird),
+   * and stock (it starts at 0). Pictures are copied as new files.
+   */
+  async copy(id: number, actor: Actor, scope?: SellerScope) {
+    const source = await this.findOrThrow(id, scope);
+    const name = await this.copyName(source.sellerId, source.name);
+    const skus = [...(source.skus ?? [])].sort((a, b) => a.id - b.id);
+    if (skus.length === 0) throw new BadRequestException('This product has no options to copy');
+
+    const created = await this.create(
+      {
+        sellerId: source.sellerId,
+        categoryId: source.categoryId,
+        collectionId: source.collectionId,
+        name,
+        description: source.description ?? undefined,
+        seoTitle: source.seoTitle ?? undefined,
+        seoDescription: source.seoDescription ?? undefined,
+        ...this.birdProductFields(source),
+        activeStatus: ProductActiveStatus.INACTIVE,
+        skus: skus.map((k) => ({
+          description: k.description ?? undefined,
+          quantity: 0,
+          lowStockThreshold: k.lowStockThreshold,
+          ...(k.myBuyingPrice != null ? { myBuyingPrice: k.myBuyingPrice } : {}),
+          price: k.price,
+          ...(k.discountedPrice != null ? { discountedPrice: k.discountedPrice } : {}),
+          ...(k.discountedPriceStartDate ? { discountedPriceStartDate: k.discountedPriceStartDate.toISOString() } : {}),
+          ...(k.discountedPriceEndDate ? { discountedPriceEndDate: k.discountedPriceEndDate.toISOString() } : {}),
+          isDefault: k.isDefault,
+          isActive: k.isActive,
+          acceptProposals: k.acceptProposals,
+          ...(k.minProposalPrice != null ? { minProposalPrice: k.minProposalPrice } : {}),
+          variants: (k.variants ?? []).map((v) => ({ attributeId: v.attributeId, attributeValueId: v.attributeValueId })),
+        })),
+      } as CreateProductDto,
+      actor,
+    );
+
+    // Pictures last: a failed picture must not lose the copy, so it is left without that picture.
+    const copied: FileInfo[] = [];
+    try {
+      let thumbnail: FileInfo | undefined;
+      if (source.thumbnailUrl && source.thumbnailPath) {
+        thumbnail = await this.fileUploadService.copyStored({ url: source.thumbnailUrl, path: source.thumbnailPath }, THUMBNAIL_FOLDER, 'thumbnailImage');
+        copied.push(thumbnail);
+      }
+      const rows: Array<{ info: FileInfo; media: SellerProductMedia }> = [];
+      for (const m of (source.media ?? []).filter((x) => x.isActive)) {
+        const info = await this.fileUploadService.copyStored({ url: m.url, path: m.path }, MEDIA_FOLDER, 'mediaFiles');
+        copied.push(info);
+        rows.push({ info, media: m });
+      }
+      await this.dataSource.transaction(async (manager) => {
+        if (thumbnail) {
+          await manager.update(SellerProduct, created.id, { thumbnailUrl: thumbnail.fileUrl, thumbnailPath: thumbnail.filePath });
+        }
+        for (const { info, media } of rows) {
+          await manager.save(
+            manager.create(SellerProductMedia, {
+              sellerProductId: created.id,
+              url: info.fileUrl,
+              path: info.filePath,
+              type: media.type,
+              altText: media.altText,
+              isPrimary: media.isPrimary,
+              sortOrder: media.sortOrder,
+            }),
+          );
+        }
+      });
+    } catch {
+      await this.fileUploadService.removeFiles(copied).catch(() => undefined);
+    }
+    return this.details(created.id, scope);
+  }
+
+  // ---- bird details ----
+
+  private static readonly BIRD_PRODUCT_KEYS = [
+    'breed',
+    'bloodline',
+    'bloodlineNote',
+    'vaccinationNote',
+    'healthNote',
+    'raceRecord',
+  ] as const;
+  private static readonly BIRD_SKU_KEYS = [
+    'ringNumber',
+    'hatchDate',
+    'vaccineName',
+    'vaccinatedOn',
+  ] as const;
+
+  // Only the bird fields the request actually sent. A blank value was turned into null by the DTO.
+  private pickBird<K extends string>(
+    dto: Partial<Record<K, string | null>>,
+    keys: readonly K[],
+  ): Partial<Record<K, string | null>> {
+    const out: Partial<Record<K, string | null>> = {};
+    for (const key of keys) {
+      if (dto[key] !== undefined) out[key] = dto[key];
+    }
+    return out;
+  }
+
+  private birdProductFields(dto: object) {
+    return this.pickBird(
+      dto as Record<string, string | null | undefined>,
+      AdminProductService.BIRD_PRODUCT_KEYS,
+    );
+  }
+
+  private birdSkuFields(dto: object) {
+    return this.pickBird(
+      dto as Record<string, string | null | undefined>,
+      AdminProductService.BIRD_SKU_KEYS,
+    );
+  }
+
+  private assertRealPastDay(label: string, value: string) {
+    const parsed = new Date(`${value}T00:00:00.000Z`);
+    if (
+      Number.isNaN(parsed.getTime()) ||
+      parsed.toISOString().slice(0, 10) !== value
+    ) {
+      throw new BadRequestException(`${label} is not a real date`);
+    }
+    if (value > new Date().toISOString().slice(0, 10)) {
+      throw new BadRequestException(`${label} cannot be in the future`);
+    }
+  }
+
+  // Checks the bird fields of SKUs being created, or of one being updated (`current` is its stored row).
+  // A ring number belongs to one bird, so it can appear only once per seller.
+  private async assertBirdSkus(
+    sellerId: number,
+    items: Array<{
+      ringNumber?: string | null;
+      hatchDate?: string | null;
+      vaccinatedOn?: string | null;
+    }>,
+    current?: SellerProductSku,
+  ) {
+    const seen = new Set<string>();
+    for (const item of items) {
+      const hatch =
+        item.hatchDate !== undefined ? item.hatchDate : current?.hatchDate;
+      const vaccinated =
+        item.vaccinatedOn !== undefined
+          ? item.vaccinatedOn
+          : current?.vaccinatedOn;
+      if (item.hatchDate) this.assertRealPastDay('Hatch date', item.hatchDate);
+      if (item.vaccinatedOn) {
+        this.assertRealPastDay('Vaccination date', item.vaccinatedOn);
+      }
+      if (hatch && vaccinated && vaccinated < hatch) {
+        throw new BadRequestException(
+          'The vaccination date cannot be before the hatch date',
+        );
+      }
+      const ring = item.ringNumber?.trim();
+      if (!ring) continue;
+      const key = ring.toLowerCase();
+      if (seen.has(key)) {
+        throw new BadRequestException(
+          `Ring number ${ring} is used twice in this request`,
+        );
+      }
+      seen.add(key);
+      const qb = this.databaseService.sellerProductSku
+        .createQueryBuilder('sku')
+        .innerJoin('sku.product', 'product')
+        .where('product.sellerId = :sellerId', { sellerId })
+        .andWhere('LOWER(sku.ringNumber) = :key', { key });
+      if (current) qb.andWhere('sku.id != :id', { id: current.id });
+      if (await qb.getExists()) {
+        throw new BadRequestException(
+          `Ring number ${ring} is already on another of your birds`,
+        );
+      }
+    }
+  }
+
+  // Adds or changes the sire or dam of one SKU. Multipart: name, ringNumber, removeImage, image.
+  async saveParent(
+    productId: number,
+    skuId: number,
+    role: ParentRole,
+    dto: SaveSkuParentDto,
+    file: Express.Multer.File | undefined,
+    scope?: SellerScope,
+  ) {
+    const product = await this.loadScoped(productId, scope);
+    if (scope) this.assertSellerCanTouch(product);
+    await this.findSkuOrThrow(productId, skuId);
+
+    if (file) {
+      assertUploadAllowed(file, ['image']);
+      if (file.size > THUMBNAIL_MAX_BYTES) {
+        throw new PayloadTooLargeException('The photo must be 10MB or smaller');
+      }
+      if (dto.removeImage) {
+        throw new BadRequestException(
+          'image and removeImage cannot be used together',
+        );
+      }
+    }
+    const existing = await this.databaseService.sellerProductSkuParent.findOne({
+      where: { sellerProductSkuId: skuId, role },
+    });
+    const sent =
+      dto.name !== undefined ||
+      dto.ringNumber !== undefined ||
+      !!file ||
+      dto.removeImage;
+    if (!sent) {
+      throw new BadRequestException(
+        'Give a name, a ring number or a photo for the parent',
+      );
+    }
+    if (!existing && !dto.name && !dto.ringNumber && !file) {
+      throw new BadRequestException(
+        'Give a name, a ring number or a photo for the parent',
+      );
+    }
+
+    let uploaded: FileInfo | undefined;
+    try {
+      if (file) {
+        uploaded = await this.fileUploadService.uploadFile(file, PARENT_FOLDER);
+      }
+      await this.runTransaction(async (manager) => {
+        if (scope) {
+          const locked = await manager.findOne(SellerProduct, {
+            where: { id: productId },
+            lock: { mode: 'pessimistic_write' },
+          });
+          if (!locked) throw new NotFoundException('Product not found');
+          this.assertSellerCanTouch(locked);
+        }
+        const patch: Record<string, unknown> = {};
+        if (dto.name !== undefined) patch.name = dto.name;
+        if (dto.ringNumber !== undefined) patch.ringNumber = dto.ringNumber;
+        if (uploaded) {
+          patch.imageUrl = uploaded.fileUrl;
+          patch.imagePath = uploaded.filePath;
+        } else if (dto.removeImage) {
+          patch.imageUrl = null;
+          patch.imagePath = null;
+        }
+        if (existing) {
+          await manager.update(SellerProductSkuParent, existing.id, patch);
+        } else {
+          await manager.save(
+            manager.create(SellerProductSkuParent, {
+              ...patch,
+              sellerProductSkuId: skuId,
+              role,
+            }),
+          );
+        }
+      });
+    } catch (error) {
+      if (uploaded) {
+        await this.fileUploadService.removeFile(uploaded.filePath).catch(() => undefined);
+      }
+      throw error;
+    }
+    if ((uploaded || dto.removeImage) && existing?.imagePath) {
+      await this.fileUploadService.removeFile(existing.imagePath).catch(() => undefined);
+    }
+    return this.details(productId, scope);
+  }
+
+  // Takes the sire or dam off a SKU, with its photo.
+  async removeParent(
+    productId: number,
+    skuId: number,
+    role: ParentRole,
+    scope?: SellerScope,
+  ) {
+    const product = await this.loadScoped(productId, scope);
+    if (scope) this.assertSellerCanTouch(product);
+    await this.findSkuOrThrow(productId, skuId);
+    const existing = await this.databaseService.sellerProductSkuParent.findOne({
+      where: { sellerProductSkuId: skuId, role },
+    });
+    if (!existing) throw new NotFoundException('That parent is not on this bird');
+    // A hard delete: the (SKU, role) pair is unique, so a soft-deleted row would block adding it again.
+    await this.databaseService.sellerProductSkuParent.delete(existing.id);
+    if (existing.imagePath) {
+      await this.fileUploadService.removeFile(existing.imagePath).catch(() => undefined);
+    }
+    return this.details(productId, scope);
+  }
+
+  private async findSkuOrThrow(productId: number, skuId: number) {
+    const sku = await this.databaseService.sellerProductSku.findOne({
+      where: { id: skuId, sellerProductId: productId },
+    });
+    if (!sku) throw new NotFoundException('That option does not belong to this product');
+    return sku;
+  }
+
   // ---- SKU helpers ----
 
   private async insertSku(
@@ -546,6 +883,7 @@ export class AdminProductService {
     productId: number,
     items: UpdateProductSkuDto[],
     removeSkuIds: number[],
+    sellerId: number,
   ): Promise<SkuChangePlan> {
     const existing = await this.databaseService.sellerProductSku.find({
       where: { sellerProductId: productId },
@@ -591,6 +929,7 @@ export class AdminProductService {
         if (item.sku !== undefined) {
           throw new BadRequestException('SKU code cannot be changed');
         }
+        await this.assertBirdSkus(sellerId, [item], current);
         this.assertDiscountIsValid(
           item.price ?? current.price,
           item.discountedPrice ?? current.discountedPrice ?? undefined,
@@ -608,6 +947,7 @@ export class AdminProductService {
           throw new BadRequestException('variants are required for a new SKU');
         }
         await this.assertVariantsAreValid(item.variants);
+        await this.assertBirdSkus(sellerId, [item]);
         this.assertDiscountIsValid(
           item.price,
           item.discountedPrice,
@@ -675,6 +1015,7 @@ export class AdminProductService {
       if (dto.acceptProposals !== undefined) patch.acceptProposals = dto.acceptProposals;
       if (dto.minProposalPrice !== undefined) patch.minProposalPrice = dto.minProposalPrice;
       if (dto.isDefault !== undefined) patch.isDefault = dto.isDefault;
+      Object.assign(patch, this.birdSkuFields(dto));
       if (Object.keys(patch).length > 0) {
         await manager.update(SellerProductSku, existing.id, patch);
       }
@@ -779,9 +1120,18 @@ export class AdminProductService {
       ...product,
       seller: this.pickSeller(product.seller),
       skus: product.skus
-        ? [...product.skus].sort(
-            (a, b) => Number(b.isDefault) - Number(a.isDefault) || a.id - b.id,
-          )
+        ? [...product.skus]
+            .sort(
+              (a, b) =>
+                Number(b.isDefault) - Number(a.isDefault) || a.id - b.id,
+            )
+            .map((sku) => ({
+              ...sku,
+              // sire first, then dam
+              parents: sku.parents
+                ? [...sku.parents].sort((a, b) => a.role.localeCompare(b.role) * -1)
+                : undefined,
+            }))
         : undefined,
       media: product.media
         ? [...product.media].sort(
@@ -802,7 +1152,10 @@ export class AdminProductService {
         category: true,
         collection: true,
         media: true,
-        skus: { variants: { attribute: true, attributeValue: true } },
+        skus: {
+          variants: { attribute: true, attributeValue: true },
+          parents: true,
+        },
       },
     });
     if (!product) {

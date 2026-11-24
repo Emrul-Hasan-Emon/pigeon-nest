@@ -48,6 +48,25 @@ export class FileUploadService {
     return filesInfo;
   }
 
+  /**
+   * Makes a new stored file from one that is already stored, so two records never share one file.
+   * Reads the original through its public address, which works for every storage driver.
+   */
+  async copyStored(source: { url: string; path: string; mimeType?: string }, folder: string, fieldname: string): Promise<FileInfo> {
+    const response = await fetch(source.url);
+    if (!response.ok) throw new BadRequestException('The original file could not be read');
+    const buffer = Buffer.from(await response.arrayBuffer());
+    const name = source.path.split('/').pop() ?? 'file';
+    const file = {
+      buffer,
+      size: buffer.length,
+      originalname: name,
+      fieldname,
+      mimetype: source.mimeType ?? response.headers.get('content-type') ?? 'application/octet-stream',
+    } as Express.Multer.File;
+    return this.uploadFile(file, folder);
+  }
+
   async removeFile(filePath: string): Promise<void> {
     await this.provider.remove(filePath);
   }

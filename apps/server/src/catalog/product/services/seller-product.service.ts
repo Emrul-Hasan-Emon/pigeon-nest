@@ -1,3 +1,5 @@
+import { ParentRole } from '../../../database/entities/product/seller-product-sku-parent.entity';
+import { SaveSkuParentDto } from '../dtos/save-sku-parent.dto';
 import { Injectable } from '@nestjs/common';
 import { Seller } from '../../../database/entities/seller/seller.entity';
 import { CursorPagination } from '../../../shared/decorators/cursor-pagination-params.decorator';
@@ -59,6 +61,29 @@ export class SellerProductService {
     return this.productService.updateMediaFiles(id, dto, files, {
       sellerId: seller.id,
     });
+  }
+
+  saveParent(
+    seller: Seller,
+    id: number,
+    skuId: number,
+    role: ParentRole,
+    dto: SaveSkuParentDto,
+    file?: Express.Multer.File,
+  ) {
+    return this.productService.saveParent(id, skuId, role, dto, file, {
+      sellerId: seller.id,
+    });
+  }
+
+  removeParent(seller: Seller, id: number, skuId: number, role: ParentRole) {
+    return this.productService.removeParent(id, skuId, role, {
+      sellerId: seller.id,
+    });
+  }
+
+  copy(seller: Seller, id: number) {
+    return this.productService.copy(id, this.historyService.sellerActor(seller), { sellerId: seller.id });
   }
 
   remove(seller: Seller, id: number) {
