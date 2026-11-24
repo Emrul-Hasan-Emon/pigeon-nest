@@ -1,0 +1,153 @@
+{
+  "slug": "paid-requests",
+  "title": "Paid requests",
+  "icon": "mail-check",
+  "order": 60,
+  "summary": "A buyer of a cash on delivery order says \"I already paid.\" You check the proof and decide.",
+  "openPath": "/seller/payment-claims",
+  "openLabel": "Open paid requests",
+  "sections": [
+    {
+      "id": "what",
+      "title": "What is a paid request?",
+      "intro": "Most cash on delivery buyers pay the delivery person with cash. But sometimes a buyer pays early, for example by bKash, to make sure you send the order. They then tell you \"I paid\" and show a screenshot. That message is a paid request.",
+      "blocks": [
+        {
+          "type": "points",
+          "title": "Key facts",
+          "items": [
+            "It is only for cash on delivery orders.",
+            "The buyer can only send it after you accepted (confirmed) the order.",
+            "The buyer sends one request for each order. Only one, ever.",
+            "The request has three things: the transaction number, the way they paid, and a proof file (a screenshot or photo).",
+            "You can accept or reject it. An admin can also decide."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "why",
+      "title": "Why do you need it?",
+      "blocks": [
+        {
+          "type": "points",
+          "items": [
+            "It saves you time. The buyer sends the proof themselves, so you do not need to ask in a message or phone call.",
+            "It keeps one clear record: the transaction number and the proof are saved with the order.",
+            "It protects you. Nothing is marked as paid until you or an admin check it. A buyer cannot mark their own order as paid.",
+            "It keeps your sales and system commission correct, because only a checked payment makes the order paid."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "when",
+      "title": "When will you see one?",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "How a request comes to you",
+          "steps": [
+            "A buyer orders and chooses cash on delivery.",
+            "You open the order and press Confirm.",
+            "The buyer sees a \"Mark as paid\" form on their order page. They fill in the transaction number and the way they paid, and add a proof file.",
+            "The request appears in \"Paid requests\" in your menu.",
+            "A small number on the menu item shows how many wait for you. The dashboard box \"Mark as paid requests to check\" and the bell show it too."
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "info",
+          "text": "If a buyer never sends a request, nothing happens. They pay on delivery as usual, and you record the payment on the order yourself."
+        }
+      ]
+    },
+    {
+      "id": "decide",
+      "title": "How to decide on a request",
+      "blocks": [
+        {
+          "type": "steps",
+          "title": "Step by step",
+          "steps": [
+            "Press \"Paid requests\" in the left menu. The \"To check\" tab shows the waiting ones.",
+            "Open a request. Read the amount, the way they paid and the transaction number.",
+            "Open the proof file. Look at the amount, the date and the number on the picture.",
+            "Check your own bKash, Nagad or bank app. Search for the same transaction number.",
+            "If the money is there, press \"Accept: mark as paid\". The order becomes Paid.",
+            "If the money is not there, or the proof is wrong, press \"Reject\". Write a short reason, for example \"I cannot find this transaction ID\". The buyer can read it."
+          ]
+        },
+        {
+          "type": "words",
+          "title": "The tabs",
+          "items": [
+            {
+              "term": "To check",
+              "means": "Waiting for you. Do these first."
+            },
+            {
+              "term": "Confirmed",
+              "means": "You or an admin accepted. The order is paid."
+            },
+            {
+              "term": "Not accepted",
+              "means": "Rejected. This is final."
+            },
+            {
+              "term": "All",
+              "means": "Everything together."
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "tone": "warn",
+          "text": "A rejection is final. The buyer cannot send another request for that order. Check carefully before you press Reject."
+        }
+      ]
+    },
+    {
+      "id": "after",
+      "title": "What happens after you decide",
+      "blocks": [
+        {
+          "type": "points",
+          "items": [
+            "Accept: the payment is added to the order for you, with the proof. The order shows as Paid. It counts in your sales and in your system commission.",
+            "Reject: the order stays unpaid. The buyer pays on delivery as normal. They see your reason.",
+            "Either way, the request stays in the list as a record."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "faq",
+      "title": "Questions people ask",
+      "blocks": [
+        {
+          "type": "faq",
+          "title": "Common questions",
+          "items": [
+            {
+              "q": "Why do I see no paid requests?",
+              "a": "Buyers only send one after you confirm a cash on delivery order. If nobody paid early, there is nothing to check."
+            },
+            {
+              "q": "Can the buyer send a second request if I reject?",
+              "a": "No. One request for each order, ever."
+            },
+            {
+              "q": "I forgot to check one. What now?",
+              "a": "It waits in \"To check\". Nothing is lost. But the buyer is waiting, so answer soon."
+            },
+            {
+              "q": "What if I accepted by mistake?",
+              "a": "Open the order and reverse the payment that was added. Only do this if it really was a mistake."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
