@@ -51,7 +51,25 @@ export class StorefrontSellerService {
     const seller = await this.visible().andWhere('s.id = :id', { id }).getOne();
     if (!seller) throw new NotFoundException('Seller not found');
     const counts = await this.products.countBySeller([id]);
-    return this.view(seller, counts.get(id) ?? 0);
+    return { ...this.view(seller, counts.get(id) ?? 0), description: seller.description ?? null, ...(await this.rating(id)) };
+  }
+
+  // The shop's rating over every published review of its products.
+  private async rating(sellerId: number) {
+    const rows: { rating: number; n: number }[] = await this.db.seller.manager.query(
+      `SELECT r.rating, COUNT(*)::int AS n FROM review r JOIN seller_product p ON p.id = r."sellerProductId"
+        WHERE p."sellerId" = $1 AND r.status = 'published' AND r."deletedAt" IS NULL GROUP BY r.rating`,
+      [sellerId],
+    );
+    const breakdown: Record<string, number> = { '1': 0, '2': 0, '3': 0, '4': 0, '5': 0 };
+    let ratingCount = 0;
+    let sum = 0;
+    for (const r of rows) {
+      breakdown[String(r.rating)] = r.n;
+      ratingCount += r.n;
+      sum += r.n * r.rating;
+    }
+    return { ratingCount, ratingAverage: ratingCount === 0 ? 0 : Math.round((sum / ratingCount) * 100) / 100, breakdown };
   }
 
   // Public view: never email, phone, ID images, commission or payout details.
