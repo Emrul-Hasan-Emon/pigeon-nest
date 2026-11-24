@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { ExternalLink } from 'lucide-react';
 import { PhoneInput } from '@/components/phone-input';
 import { SellerFrame } from '@/components/seller/seller-frame';
+import { ShopBreakCard } from '@/components/seller/shop-break';
 import { StatusBanner } from '@/components/seller/status-banner';
 import { useToast } from '@/components/ui/toast';
 import { changeMyPassword, getMyProfile, updateMyProfile } from '@/lib/api/seller-portal';
@@ -151,6 +152,7 @@ export default function SellerProfilePage() {
           </Link>
         </div>
         <StatusBanner seller={seller} />
+        <ShopBreakCard key={`${seller.isEnabledForSell}-${seller.breakStartsOn}-${seller.breakEndsOn}`} seller={seller} onChanged={applySeller} />
 
         <form
           onSubmit={handleSave}
