@@ -1,4 +1,5 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { PushService } from '../../push/services/push.service';
 import { CartOwner } from '../../auth/guards/optional-customer.guard';
 import { CartViewService } from '../../cart/services/cart-view.service';
 import { DatabaseService } from '../../database/database.service';
@@ -25,6 +26,7 @@ export class UserOrderService {
     private readonly carts: CartViewService,
     private readonly shipping: ShippingZoneService,
     private readonly common: CommonOrderService,
+    private readonly push: PushService,
   ) {}
 
   // ---- checkout: one cart becomes one order ----
@@ -144,7 +146,11 @@ export class UserOrderService {
       return id;
     });
 
-    return this.common.detailById(orderId);
+    const detail = await this.common.detailById(orderId);
+    if (detail) {
+      this.push.notifySeller(detail.seller.id, { title: 'New order', body: `${detail.orderNumber}: ${detail.itemCount} ${detail.itemCount === 1 ? 'item' : 'items'}`, data: { route: `/orders/${orderId}` } });
+    }
+    return detail;
   }
 
   private async account(owner: CartOwner) {
