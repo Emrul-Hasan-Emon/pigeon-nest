@@ -19,6 +19,7 @@ import { OrderModule } from './order/order.module';
 import { ProposalModule } from './proposal/proposal.module';
 import { WishlistModule } from './wishlist/wishlist.module';
 import { HelpModule } from './help/help.module';
+import { PushModule } from './push/push.module';
 import { ReturnsModule } from './returns/returns.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { PaymentClaimModule } from './payment-claim/payment-claim.module';
@@ -47,6 +48,7 @@ import { ReviewModule } from './review/review.module';
     OrderModule,
     WishlistModule,
     HelpModule,
+    PushModule,
     ProposalModule,
     ReturnsModule,
     DashboardModule,
