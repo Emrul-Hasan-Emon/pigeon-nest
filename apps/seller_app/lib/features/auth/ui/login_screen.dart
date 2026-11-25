@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/api/api_exception.dart';
 import '../../../core/auth/auth_controller.dart';
@@ -95,6 +96,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white))
                           : const Text('Sign in'),
                     ),
+                    const SizedBox(height: 8),
+                    TextButton(onPressed: _busy ? null : () => context.go('/register'), child: const Text('Open a new shop')),
                   ],
                 ),
               ),

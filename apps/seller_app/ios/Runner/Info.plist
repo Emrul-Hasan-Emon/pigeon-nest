@@ -66,5 +66,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Pigeon Nest needs your photos to add pictures to your shop and products.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Pigeon Nest needs your camera to take pictures for your shop and products.</string>
 </dict>
 </plist>

@@ -32,8 +32,10 @@ class ApiClient {
         handler.next(options);
       },
       onError: (error, handler) {
-        // A 401 on login just means a wrong password; anywhere else it means the session ended.
-        if (error.response?.statusCode == 401 && !error.requestOptions.path.startsWith('/auth/')) {
+        // A 401 on login or on "change password" just means a wrong password; anywhere else the session ended.
+        final path = error.requestOptions.path;
+        final wrongPassword = path.startsWith('/auth/') || path == '/profile/password';
+        if (error.response?.statusCode == 401 && !wrongPassword) {
           _ref.read(unauthorizedHandlerProvider).onUnauthorized?.call();
         }
         handler.next(error);
@@ -47,6 +49,7 @@ class ApiClient {
   Future<T> get<T>(String path, {Map<String, dynamic>? query}) => _run(() => _dio.get(path, queryParameters: query));
   Future<T> post<T>(String path, {Object? body}) => _run(() => _dio.post(path, data: body));
   Future<T> patch<T>(String path, {Object? body}) => _run(() => _dio.patch(path, data: body));
+  Future<T> put<T>(String path, {Object? body}) => _run(() => _dio.put(path, data: body));
 
   Future<T> _run<T>(Future<Response<dynamic>> Function() call) async {
     try {
