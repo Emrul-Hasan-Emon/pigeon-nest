@@ -37,43 +37,43 @@ lib/features/<feature>/
 
 | Feature | Folder | Server routes | Website page | Spec | Status |
 |---|---|---|---|---|---|
-| Register | `features/auth/` | `POST /auth/register` | `/seller/register` | | planned |
-| My profile | `features/profile/` | `GET/PATCH /profile` | `/seller/profile` | | planned |
-| Selling on/off, shop break | `features/profile/` | `PATCH /profile/selling` | `/seller/profile` | | planned |
-| Change password | `features/profile/` | `PATCH /profile/password` | `/seller/profile` | | planned |
-| Shop set-up checklist | `features/onboarding/` | `GET /profile/onboarding` | dashboard card | | planned |
+| Register | `features/account/` | `POST /auth/register` | `/seller/register` | | done |
+| My profile | `features/account/` | `GET/PATCH /profile` | `/seller/profile` | | done |
+| Selling on/off, shop break | `features/account/` | `PATCH /profile/selling` | `/seller/profile` | | done |
+| Change password | `features/account/` | `PATCH /profile/password` | `/seller/profile` | | done |
+| Shop set-up checklist | `features/account/` | `GET /profile/onboarding` | dashboard card | | done |
 
 ### Dashboard (phase 2)
 
 | Feature | Folder | Server routes | Website page | Spec | Status |
 |---|---|---|---|---|---|
-| Dashboard | `features/dashboard/` | `GET /dashboard`, `GET /dashboard/attention` | `/seller/dashboard` | `dashboard-guide.md` | planned |
+| Dashboard | `features/dashboard/` | `GET /dashboard`, `GET /dashboard/attention` | `/seller/dashboard` | `dashboard-guide.md` | done (attention counts come from the one dashboard call) |
 
 ### Orders (phase 3)
 
 | Feature | Folder | Server routes | Website page | Spec | Status |
 |---|---|---|---|---|---|
-| Order list and detail | `features/orders/` | `GET /order`, `GET /order/:id` | `/seller/orders`, `/seller/orders/[id]` | `order-flow.md` | planned |
-| Change status, bulk status | `features/orders/` | `PATCH /order/:id/status`, `POST /order/bulk-status` | same | `order-flow.md` | planned |
-| Payments on an order | `features/orders/` | `POST /order/:id/payments`, `.../payments/:paymentId/reverse` | same | `order-flow.md` | planned |
-| Order updates | `features/orders/` | `POST /order/:id/updates` | same | `order-flow.md` | planned |
-| New order | `features/orders/` | `GET /order/catalog`, `/order/customers`, `/order/options`, customer addresses, `POST /order` | `/seller/orders/new` | `order-flow.md` | planned |
-| Invoice PDF | `features/orders/` | (built on the phone) | `/seller/orders/[id]/print` | | planned |
+| Order list and detail | `features/orders/` | `GET /order`, `GET /order/:id` | `/seller/orders`, `/seller/orders/[id]` | `order-flow.md` | done |
+| Change status, bulk status | `features/orders/` | `PATCH /order/:id/status`, `POST /order/bulk-status` | same | `order-flow.md` | done |
+| Payments on an order | `features/orders/` | `POST /order/:id/payments`, `.../payments/:paymentId/reverse` | same | `order-flow.md` | done |
+| Order updates | `features/orders/` | `POST /order/:id/updates` | same | `order-flow.md` | done |
+| New order | `features/orders/` | `GET /order/catalog`, `/order/customers`, `/order/options`, customer addresses, `POST /order` | `/seller/orders/new` | `order-flow.md` | done |
+| Invoice PDF | `features/orders/` | (built on the phone) | `/seller/orders/[id]/print` | | done |
 
 ### Products (phase 4)
 
 | Feature | Folder | Server routes | Website page | Spec | Status |
 |---|---|---|---|---|---|
-| Product list and detail | `features/products/` | `GET /products`, `GET /products/:id` | `/seller/products`, `/seller/products/[id]` | `product-flow.md` | planned |
-| Create and edit | `features/products/` | `POST /products`, `PATCH /products/:id`, `GET /catalog/*` | `.../new`, `.../[id]/edit` | `product-flow.md` | planned |
-| SKUs, pictures, bird details | `features/products/` | `PUT /products/:id/skus/:skuId/parents/:role`, `PATCH /products/:id/media-files` | same | `product-flow.md` | planned |
-| Copy, bulk, status history | `features/products/` | `POST /products/:id/copy`, `POST /products/bulk`, `GET /products/:id/status-history` | same | `product-flow.md` | planned |
+| Product list and detail | `features/products/` | `GET /products`, `GET /products/:id` | `/seller/products`, `/seller/products/[id]` | `product-flow.md` | done |
+| Create and edit | `features/products/` | `POST /products`, `PATCH /products/:id`, `GET /catalog/*` | `.../new`, `.../[id]/edit` | `product-flow.md` | done |
+| SKUs, pictures, bird details | `features/products/` | `PUT /products/:id/skus/:skuId/parents/:role`, `PATCH /products/:id/media-files` | same | `product-flow.md` | done |
+| Copy, bulk, status history | `features/products/` | `POST /products/:id/copy`, `POST /products/bulk`, `GET /products/:id/status-history` | same | `product-flow.md` | done |
 
 ### Money (phase 5)
 
 | Feature | Folder | Server routes | Website page | Spec | Status |
 |---|---|---|---|---|---|
-| Payments | `features/payments/` | `GET /order/payments`, `GET /order/payments/:id` | `/seller/payments` | | planned |
+| Payments | `features/payments/` | `GET /order/payments`, `GET /order/payments/:id` | `/seller/payments` | | done |
 | Paid requests | `features/payment_claims/` | `GET /payment-claims`, `.../summary`, `POST .../:id/confirm`, `.../reject` | `/seller/payment-claims` | `payment-claim-guide.md` | planned |
 | Payment accounts | `features/payment_accounts/` | `GET/POST /profile/payment-accounts`, `PATCH .../:id` | `/seller/payment-accounts` | `payment-claim-guide.md` | planned |
 | Returns | `features/returns/` | `GET /returns`, `GET /returns/:id`, `POST .../accept`, `processing`, `reject`, `returning-money` | `/seller/returns` | `returns-flow.md` | planned |
@@ -105,9 +105,10 @@ Built in phase 0 and used by many features. Add each one here when it is created
 | Part | Folder | What it does | Status |
 |---|---|---|---|
 | Placeholder page | `shared/widgets/placeholder_page.dart` | "Coming soon" page | done |
-| Big button, card, badge | `shared/widgets/` | common look | planned |
-| Loading, empty, error views | `shared/widgets/` | common states | planned |
-| Paging helpers | `shared/` | page and cursor lists | planned |
-| Money and date formats | `shared/format/` | USD money and dates | planned |
-| Picture picker and upload | `shared/` | choose and send pictures | planned |
-| Access banners | `shared/widgets/` | pending, suspended, closed shop | planned |
+| Big button, card, badge | `shared/widgets/primary_button.dart`, `app_card.dart`, `status_badge.dart` | common look | done |
+| Loading, empty, error views | `shared/widgets/loading_view.dart`, `empty_view.dart`, `error_view.dart` | common states | done |
+| Paging helpers | `shared/paging/page_list_controller.dart`, `cursor_list_controller.dart` | page and cursor lists | done |
+| Money and date formats | `shared/format/money.dart`, `date_format.dart` | USD money and dates | done |
+| Picture picker and upload | `shared/media/image_picker_helper.dart`, `multipart_upload.dart` | choose and send pictures | done |
+| Access banners | `shared/widgets/access_banner.dart`, `core/auth/seller_access.dart` | pending, suspended, closed shop | done |
+| More menu | `features/more/ui/more_menu_screen.dart` | lists every planned section | done |

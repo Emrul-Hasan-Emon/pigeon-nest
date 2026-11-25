@@ -2,7 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/auth/auth_controller.dart';
+import '../../../core/auth/seller_access.dart';
+import '../../../shared/widgets/access_banner.dart';
 import '../../../shared/widgets/placeholder_page.dart';
+import '../../account/ui/checklist_screen.dart';
+import '../../dashboard/ui/dashboard_screen.dart';
+import '../../more/ui/more_menu_screen.dart';
+import '../../orders/ui/orders_screen.dart';
+import '../../products/ui/products_screen.dart';
 
 /// The signed-in frame: a bottom bar with the main seller sections.
 /// Each tab is a placeholder until its feature is built under lib/features/.
@@ -38,7 +45,13 @@ class _HomeShellState extends ConsumerState<HomeShell> {
           ),
         ],
       ),
-      body: PlaceholderPage(title: tab.label, icon: tab.icon),
+      body: switch (_index) {
+        0 => _HomeTab(access: auth.access),
+        1 => const OrdersScreen(),
+        2 => const ProductsScreen(),
+        3 => const MoreMenuScreen(),
+        _ => PlaceholderPage(title: tab.label, icon: tab.icon),
+      },
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
         onDestinationSelected: (i) => setState(() => _index = i),
@@ -46,6 +59,26 @@ class _HomeShellState extends ConsumerState<HomeShell> {
           for (final t in _tabs) NavigationDestination(icon: Icon(t.icon), selectedIcon: Icon(t.active), label: t.label),
         ],
       ),
+    );
+  }
+}
+
+/// The Home tab's own body: the access banner (hidden once the seller can
+/// fully manage their shop) above the dashboard placeholder.
+class _HomeTab extends StatelessWidget {
+  const _HomeTab({required this.access});
+
+  final SellerAccess? access;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        if (access != null) AccessBanner(access: access!),
+        const ChecklistCard(),
+        // Dashboard figures are for approved, active sellers only.
+        if (access?.canManage ?? true) const Expanded(child: DashboardScreen()) else const Spacer(),
+      ],
     );
   }
 }

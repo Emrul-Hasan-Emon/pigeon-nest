@@ -15,44 +15,44 @@ Each phase can be released on its own.
 - [x] Sign in, session restore, sign out
 - [x] Router that sends signed-out sellers to login
 - [x] Home with bottom bar (placeholders)
-- [ ] Shared parts: big button, card, status badge, loading, empty and error states
-- [ ] List paging helpers (the API uses both page-number and cursor paging)
-- [ ] Money (USD, one formatter) and date formatting
-- [ ] Picture picker and multipart upload
-- [ ] Access banners: awaiting approval, suspended, rejected, shop closed
-- [ ] More menu that lists every section
+- [x] Shared parts: big button, card, status badge, loading, empty and error states
+- [x] List paging helpers (the API uses both page-number and cursor paging)
+- [x] Money (USD, one formatter) and date formatting
+- [x] Picture picker and multipart upload
+- [x] Access banners: awaiting approval, suspended, rejected, shop closed
+- [x] More menu that lists every section
 
 ### Phase 1. Account
-- [ ] Register (with photos and ID images)
-- [ ] My profile: view and edit, avatar, ID images
-- [ ] Selling on and off, shop break dates
-- [ ] Change password
-- [ ] Shop set-up checklist (onboarding)
+- [x] Register (with photos and ID images)
+- [x] My profile: view and edit, avatar, ID images
+- [x] Selling on and off, shop break dates
+- [x] Change password
+- [x] Shop set-up checklist (onboarding)
 
 ### Phase 2. Dashboard
-- [ ] Date range filter
-- [ ] "You keep" card and support numbers
-- [ ] Sales and refunds chart
-- [ ] To-do tiles (needs attention)
-- [ ] Orders by status, top products, reviews
-- [ ] Product counts and wishlist insights
+- [x] Date range filter
+- [x] "You keep" card and support numbers
+- [x] Sales and refunds chart
+- [x] To-do tiles (needs attention)
+- [x] Orders by status, top products, reviews
+- [x] Product counts and wishlist insights
 
 ### Phase 3. Orders
-- [ ] Order list: filters, search, paging
-- [ ] Order detail
-- [ ] Change status, bulk status
-- [ ] Record a payment, reverse a payment
-- [ ] Order updates (notes)
-- [ ] New order: customer, address, items, options
-- [ ] Share or print the invoice (PDF)
+- [x] Order list: filters, search, paging
+- [x] Order detail
+- [x] Change status, bulk status
+- [x] Record a payment, reverse a payment
+- [x] Order updates (notes)
+- [x] New order: customer, address, items, options
+- [x] Share or print the invoice (PDF)
 
 ### Phase 4. Products
-- [ ] Product list and detail
-- [ ] Create and edit product
-- [ ] SKU editor
-- [ ] Pictures and media
-- [ ] Bird details
-- [ ] Copy product, bulk actions, status history
+- [x] Product list and detail
+- [x] Create and edit product
+- [x] SKU editor
+- [x] Pictures and media
+- [x] Bird details
+- [x] Copy product, bulk actions, status history
 
 ### Phase 5. Money
 - [ ] Payments list and detail
@@ -88,9 +88,9 @@ Fill these in before the phase that needs them.
 |---|---|---|---|
 | 1 | Push notifications: in phase 8, or earlier? | Phase 3 | |
 | 2 | Language: English only, or Bangla too? | Phase 0 | |
-| 3 | Invoice as a PDF to share or print? | Phase 3 | |
-| 4 | Register in the app, or log in only? | Phase 1 | |
-| 5 | Login expiry: sign in again, or add a refresh token on the server? | Phase 1 | |
+| 3 | Invoice as a PDF to share or print? | Phase 3 | Yes, PDF with the share/print sheet (built) |
+| 4 | Register in the app, or log in only? | Phase 1 | Register in the app (built) |
+| 5 | Login expiry: sign in again, or add a refresh token on the server? | Phase 1 | Sign in again (current) |
 | 6 | Phone only, or tablet layouts too? | Phase 0 | |
 | 7 | First store release: after phase 4, or after everything? | Phase 4 | |
 
