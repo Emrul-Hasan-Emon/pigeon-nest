@@ -1,4 +1,5 @@
 import '../../../shared/format/text.dart';
+import '../../../shared/models/attachment.dart';
 double _d(Object? v) => (v as num?)?.toDouble() ?? 0;
 int _i(Object? v) => (v as num?)?.toInt() ?? 0;
 String? _s(Object? v) => (v is String && v.isNotEmpty) ? v : null;
@@ -46,15 +47,6 @@ class OrderRow {
   final Customer customer;
   final List<String> allowedStatuses;
   final DateTime createdAt;
-}
-
-class Attachment {
-  Attachment(Map<String, dynamic> j)
-      : fileName = j['fileName'] as String? ?? 'file',
-        url = j['url'] as String? ?? '',
-        kind = j['kind'] as String? ?? 'file';
-  final String fileName, url, kind;
-  bool get isImage => kind == 'image';
 }
 
 class OrderItem {
@@ -116,7 +108,7 @@ class OrderPayment {
         recordedByType = _s(_m(j['recordedBy'])['type']),
         reversed = j['reversal'] != null,
         reversalReason = _s(_m(j['reversal'])['reason']),
-        attachments = [for (final a in _l(j['attachments'])) Attachment(a)];
+        attachments = Attachment.list(j['attachments']);
   final int id;
   final String status;
   final double amount;
@@ -144,7 +136,7 @@ class OrderUpdate {
       : message = _s(j['message']),
         by = _s(_m(j['by'])['name']),
         at = _t(j['createdAt']),
-        attachments = [for (final a in _l(j['attachments'])) Attachment(a)];
+        attachments = Attachment.list(j['attachments']);
   final String? message, by;
   final DateTime at;
   final List<Attachment> attachments;
