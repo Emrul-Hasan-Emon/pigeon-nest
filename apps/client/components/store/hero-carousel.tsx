@@ -24,7 +24,7 @@ export function HeroCarousel({ banners }: { banners: StoreBanner[] }) {
     <section
       aria-roledescription="carousel"
       aria-label="Featured"
-      className="relative isolate h-[36svh] max-h-[340px] min-h-[270px] w-full overflow-hidden bg-st-ink text-white"
+      className="relative isolate h-[46svh] max-h-[430px] min-h-[330px] w-full overflow-hidden bg-st-ink text-white"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocus={() => setPaused(true)}
