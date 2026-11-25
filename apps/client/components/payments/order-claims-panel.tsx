@@ -1,9 +1,9 @@
 'use client';
 
-import { money } from '@/components/orders/ui';
 import { formatDateTime } from '@/lib/datetime';
 import { ClaimBadge, ClaimDecision, ClaimFacts } from './claim-actions';
 import type { OrderDetail } from '@/types/order';
+import { formatMoney } from '@/lib/money';
 
 const card = 'rounded-xl border border-border bg-card p-4 shadow-sm';
 
@@ -48,7 +48,7 @@ export function OrderClaimsPanel({ role, order, onChanged }: { role: 'admin' | '
               </li>
             ))}
           </ul>
-          {order.totals.balanceDue > 0 && <p className="mt-2 text-sm text-muted-foreground">Still to pay: ৳{money(order.totals.balanceDue)}</p>}
+          {order.totals.balanceDue > 0 && <p className="mt-2 text-sm text-muted-foreground">Still to pay: {formatMoney(order.totals.balanceDue)}</p>}
         </div>
       )}
     </section>

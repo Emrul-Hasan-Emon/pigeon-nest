@@ -15,7 +15,7 @@ import {
 } from '@/lib/api/payment-claims';
 import type { PaymentAccount, PaymentAccountInput } from '@/types/payment';
 
-const PROVIDERS = ['bKash', 'Nagad', 'Rocket', 'Upay'];
+const PROVIDERS = ['PayPal', 'Wise', 'Zelle', 'Venmo'];
 const input = 'mt-1 w-full rounded-md border border-input px-3 py-2';
 
 function AccountForm({ initial, onSave, onClose, busy, error }: { initial: PaymentAccount | null; onSave: (v: PaymentAccountInput) => void; onClose: () => void; busy: boolean; error: string | null }) {
@@ -41,14 +41,14 @@ function AccountForm({ initial, onSave, onClose, busy, error }: { initial: Payme
             {(['mfs', 'bank'] as const).map((k) => (
               <label key={k} className={`flex flex-1 cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 font-medium ${kind === k ? 'border-primary bg-accent' : 'border-border'}`}>
                 <input type="radio" name="kind" checked={kind === k} onChange={() => { setKind(k); setProvider(''); }} />
-                {k === 'mfs' ? 'Mobile money' : 'Bank account'}
+                {k === 'mfs' ? 'Online wallet' : 'Bank account'}
               </label>
             ))}
           </fieldset>
         )}
         <label className="block text-sm">
           {bank ? 'Bank name' : 'Service'}
-          <input list={bank ? undefined : 'providers'} className={input} value={provider} onChange={(e) => setProvider(e.target.value)} placeholder={bank ? 'For example: City Bank' : 'For example: bKash'} required maxLength={80} />
+          <input list={bank ? undefined : 'providers'} className={input} value={provider} onChange={(e) => setProvider(e.target.value)} placeholder={bank ? 'For example: Chase Bank' : 'For example: PayPal'} required maxLength={80} />
           {!bank && <datalist id="providers">{PROVIDERS.map((p) => <option key={p} value={p} />)}</datalist>}
         </label>
         <label className="block text-sm">
@@ -80,7 +80,7 @@ function AccountForm({ initial, onSave, onClose, busy, error }: { initial: Payme
 }
 
 /**
- * The bank and mobile money accounts where buyers send money for a seller's orders. The seller manages their own;
+ * The bank and online wallet accounts where buyers send money for a seller's orders. The seller manages their own;
  * the admin can see and fix any seller's. Accounts are switched off, never deleted.
  */
 export function PaymentAccounts({ role, sellerId }: { role: 'seller' | 'admin'; sellerId?: number }) {
@@ -142,7 +142,7 @@ export function PaymentAccounts({ role, sellerId }: { role: 'seller' | 'admin'; 
       {rows === null ? (
         <p className="py-6 text-center text-muted-foreground">Loading…</p>
       ) : rows.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-border px-4 py-8 text-center text-muted-foreground">No payment account yet. Add your bKash, Nagad or bank account so buyers know where to pay.</p>
+        <p className="rounded-xl border border-dashed border-border px-4 py-8 text-center text-muted-foreground">No payment account yet. Add your PayPal, Wise or bank account so buyers know where to pay.</p>
       ) : (
         <ul className="grid gap-3 md:grid-cols-2">
           {rows.map((a) => (

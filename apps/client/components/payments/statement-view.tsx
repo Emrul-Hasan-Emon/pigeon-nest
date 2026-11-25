@@ -3,13 +3,12 @@
 import { useEffect, useState } from 'react';
 import { Printer } from 'lucide-react';
 import { LoadingBlock } from '@/components/ui/skeleton';
-import { money } from '@/components/orders/ui';
 import { ApiError } from '@/lib/api/http';
 import { getMyStatement, getSellerStatement } from '@/lib/api/payment-claims';
 import { formatDate } from '@/lib/datetime';
 import type { Statement } from '@/types/payment';
+import { formatMoney } from '@/lib/money';
 
-const taka = (n: number) => `৳${money(n)}`;
 const monthInput = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
 const monthName = (m: string) => new Date(`${m}-01T12:00:00`).toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
 
@@ -85,11 +84,11 @@ export function StatementView({ role, sellerId }: { role: 'seller' | 'admin'; se
               <dl className="mt-2 grid gap-x-8 gap-y-1 text-base sm:grid-cols-2">
                 {([
                   ['Paid orders', String(s.paidOrders)],
-                  ['Sales', taka(s.sales)],
-                  ['System commission charged', taka(s.systemCommission)],
-                  ['System commission given back (returns)', taka(s.systemCommissionGivenBack)],
-                  ['Refunds to buyers', taka(s.refunds)],
-                  ['What you keep', taka(s.youKeep)],
+                  ['Sales', formatMoney(s.sales)],
+                  ['System commission charged', formatMoney(s.systemCommission)],
+                  ['System commission given back (returns)', formatMoney(s.systemCommissionGivenBack)],
+                  ['Refunds to buyers', formatMoney(s.refunds)],
+                  ['What you keep', formatMoney(s.youKeep)],
                 ] as const).map(([k, v]) => (
                   <div key={k} className="flex justify-between border-b border-neutral-200 py-1"><dt>{k}</dt><dd className="font-semibold tabular-nums">{v}</dd></div>
                 ))}
@@ -99,10 +98,10 @@ export function StatementView({ role, sellerId }: { role: 'seller' | 'admin'; se
             <section className="mt-5 rounded-lg border-2 border-neutral-900 p-4">
               <h2 className="text-sm font-bold uppercase text-neutral-600">What you owe the marketplace (system commission)</h2>
               <dl className="mt-2 space-y-1 text-base">
-                <div className="flex justify-between"><dt>Owed at the start of the month</dt><dd className="tabular-nums">{taka(s.owedAtStart)}</dd></div>
-                <div className="flex justify-between"><dt>Added this month (net of returns)</dt><dd className="tabular-nums">{taka(s.netSystemCommission)}</dd></div>
-                <div className="flex justify-between"><dt>You paid the marketplace</dt><dd className="tabular-nums">−{taka(s.paidToMarketplace)}</dd></div>
-                <div className="flex justify-between border-t-2 border-neutral-900 pt-1 text-lg font-bold"><dt>Owed at the end of the month</dt><dd className="tabular-nums">{taka(s.owedAtEnd)}</dd></div>
+                <div className="flex justify-between"><dt>Owed at the start of the month</dt><dd className="tabular-nums">{formatMoney(s.owedAtStart)}</dd></div>
+                <div className="flex justify-between"><dt>Added this month (net of returns)</dt><dd className="tabular-nums">{formatMoney(s.netSystemCommission)}</dd></div>
+                <div className="flex justify-between"><dt>You paid the marketplace</dt><dd className="tabular-nums">−{formatMoney(s.paidToMarketplace)}</dd></div>
+                <div className="flex justify-between border-t-2 border-neutral-900 pt-1 text-lg font-bold"><dt>Owed at the end of the month</dt><dd className="tabular-nums">{formatMoney(s.owedAtEnd)}</dd></div>
               </dl>
               {s.owedAtEnd < 0 && <p className="mt-1 text-sm text-neutral-600">A negative number means the marketplace owes you.</p>}
             </section>
@@ -116,7 +115,7 @@ export function StatementView({ role, sellerId }: { role: 'seller' | 'admin'; se
                   <thead><tr className="border-y-2 border-neutral-900 text-left"><th className="py-1.5 pr-2">Order</th><th className="py-1.5 pr-2">Date</th><th className="py-1.5 pr-2 text-right">Amount</th><th className="py-1.5 pr-2 text-right">System commission</th><th className="py-1.5 text-right">You keep</th></tr></thead>
                   <tbody>
                     {data.orders.map((o) => (
-                      <tr key={o.id} className="border-b border-neutral-300"><td className="py-1.5 pr-2">{o.orderNumber}</td><td className="py-1.5 pr-2">{formatDate(`${o.date}T12:00:00`)}</td><td className="py-1.5 pr-2 text-right tabular-nums">{taka(o.amount)}</td><td className="py-1.5 pr-2 text-right tabular-nums">{taka(o.systemCommission)}</td><td className="py-1.5 text-right tabular-nums">{taka(o.youKeep)}</td></tr>
+                      <tr key={o.id} className="border-b border-neutral-300"><td className="py-1.5 pr-2">{o.orderNumber}</td><td className="py-1.5 pr-2">{formatDate(`${o.date}T12:00:00`)}</td><td className="py-1.5 pr-2 text-right tabular-nums">{formatMoney(o.amount)}</td><td className="py-1.5 pr-2 text-right tabular-nums">{formatMoney(o.systemCommission)}</td><td className="py-1.5 text-right tabular-nums">{formatMoney(o.youKeep)}</td></tr>
                     ))}
                   </tbody>
                 </table>
@@ -130,7 +129,7 @@ export function StatementView({ role, sellerId }: { role: 'seller' | 'admin'; se
                   <thead><tr className="border-y-2 border-neutral-900 text-left"><th className="py-1.5 pr-2">Return</th><th className="py-1.5 pr-2">Date</th><th className="py-1.5 pr-2 text-right">Refund</th><th className="py-1.5 text-right">System commission given back</th></tr></thead>
                   <tbody>
                     {data.refunds.map((r) => (
-                      <tr key={r.id} className="border-b border-neutral-300"><td className="py-1.5 pr-2">{r.returnNumber}</td><td className="py-1.5 pr-2">{formatDate(`${r.date}T12:00:00`)}</td><td className="py-1.5 pr-2 text-right tabular-nums">{taka(r.refund)}</td><td className="py-1.5 text-right tabular-nums">{taka(r.systemCommissionGivenBack)}</td></tr>
+                      <tr key={r.id} className="border-b border-neutral-300"><td className="py-1.5 pr-2">{r.returnNumber}</td><td className="py-1.5 pr-2">{formatDate(`${r.date}T12:00:00`)}</td><td className="py-1.5 pr-2 text-right tabular-nums">{formatMoney(r.refund)}</td><td className="py-1.5 text-right tabular-nums">{formatMoney(r.systemCommissionGivenBack)}</td></tr>
                     ))}
                   </tbody>
                 </table>
@@ -146,7 +145,7 @@ export function StatementView({ role, sellerId }: { role: 'seller' | 'admin'; se
                   <thead><tr className="border-y-2 border-neutral-900 text-left"><th className="py-1.5 pr-2">Payment</th><th className="py-1.5 pr-2">Date</th><th className="py-1.5 pr-2">Note</th><th className="py-1.5 text-right">Amount</th></tr></thead>
                   <tbody>
                     {data.payments.map((p) => (
-                      <tr key={p.id} className="border-b border-neutral-300"><td className="py-1.5 pr-2">#{p.id}</td><td className="py-1.5 pr-2">{formatDate(`${p.date}T12:00:00`)}</td><td className="py-1.5 pr-2">{p.note ?? ''}</td><td className="py-1.5 text-right tabular-nums">{taka(p.amount)}</td></tr>
+                      <tr key={p.id} className="border-b border-neutral-300"><td className="py-1.5 pr-2">#{p.id}</td><td className="py-1.5 pr-2">{formatDate(`${p.date}T12:00:00`)}</td><td className="py-1.5 pr-2">{p.note ?? ''}</td><td className="py-1.5 text-right tabular-nums">{formatMoney(p.amount)}</td></tr>
                     ))}
                   </tbody>
                 </table>

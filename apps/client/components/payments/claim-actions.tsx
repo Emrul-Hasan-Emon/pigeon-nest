@@ -5,8 +5,8 @@ import { Modal } from '@/components/ui/modal';
 import { useToast } from '@/components/ui/toast';
 import { ApiError } from '@/lib/api/http';
 import { confirmPaymentClaim, rejectPaymentClaim } from '@/lib/api/payment-claims';
-import { money } from '@/components/orders/ui';
 import type { PaymentClaim } from '@/types/payment';
+import { formatMoney } from '@/lib/money';
 
 const field = 'mt-1 w-full rounded-md border border-input px-3 py-2';
 
@@ -53,8 +53,8 @@ export function ClaimDecision({ role, claim, onDone, balance }: { role: 'admin' 
           <div className="space-y-3 p-5">
             {mode === 'confirm' ? (
               <>
-                <p className="text-sm text-muted-foreground">Check the proof first. Accepting marks the order as paid and records the money on it{balance !== undefined ? ` (still to pay: ৳${money(balance)})` : ''}.</p>
-                <label className="block text-sm">Amount you received (৳)<input inputMode="decimal" className={field} value={amount} onChange={(e) => setAmount(e.target.value)} /></label>
+                <p className="text-sm text-muted-foreground">Check the proof first. Accepting marks the order as paid and records the money on it{balance !== undefined ? ` (still to pay: ${formatMoney(balance)})` : ''}.</p>
+                <label className="block text-sm">Amount you received (USD)<input inputMode="decimal" className={field} value={amount} onChange={(e) => setAmount(e.target.value)} /></label>
                 <label className="block text-sm">Note (optional)<input className={field} maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} /></label>
               </>
             ) : (
@@ -87,7 +87,7 @@ export function ClaimBadge({ status }: { status: PaymentClaim['status'] }) {
 /** The facts a claim gives, to compare with the account statement. */
 export function ClaimFacts({ claim }: { claim: PaymentClaim }) {
   const items = [
-    ['Amount', `৳${money(claim.amount)}`],
+    ['Amount', `${formatMoney(claim.amount)}`],
     claim.transactionId ? ['Transaction ID', claim.transactionId] : null,
     claim.method ? ['Paid with', claim.method] : null,
     claim.senderNumber ? ['Paid from', claim.senderNumber] : null,

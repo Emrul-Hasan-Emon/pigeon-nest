@@ -8,6 +8,7 @@ import { formatDateTime } from '@/lib/datetime';
 import { ApiError } from '@/lib/api/http';
 import { ClaimBadge, ClaimDecision, ClaimFacts } from './claim-actions';
 import type { ClaimPage, PaymentClaimStatus } from '@/types/payment';
+import { formatMoney, roundMoney } from '@/lib/money';
 
 const TABS: { value: PaymentClaimStatus | 'all'; label: string }[] = [
   { value: 'pending', label: 'To check' },
@@ -60,11 +61,11 @@ export function PaymentClaimsList({ role }: { role: 'admin' | 'seller' }) {
                 <Link href={`/${role}/orders/${c.order.id}`} className="font-semibold text-primary hover:underline">{c.order.orderNumber}</Link>
                 <ClaimBadge status={c.status} />
                 <span className="text-sm text-muted-foreground">{c.buyerName} · {formatDateTime(c.createdAt)}</span>
-                <span className="ml-auto text-sm text-muted-foreground">Order total ৳{c.order.payable.toLocaleString()} · paid ৳{c.order.paid.toLocaleString()}</span>
+                <span className="ml-auto text-sm text-muted-foreground">Order total {formatMoney(c.order.payable)} · paid {formatMoney(c.order.paid)}</span>
               </div>
               <ClaimFacts claim={c} />
               {c.status === 'pending' ? (
-                <div className="mt-3"><ClaimDecision role={role} claim={c} balance={Math.max(0, c.order.payable - c.order.paid)} onDone={load} /></div>
+                <div className="mt-3"><ClaimDecision role={role} claim={c} balance={Math.max(0, roundMoney(c.order.payable - c.order.paid))} onDone={load} /></div>
               ) : (
                 (c.decisionNote || c.decidedByName) && <p className="mt-2 text-sm text-muted-foreground">{c.decidedByName ? `${c.decidedByName}: ` : ''}{c.decisionNote}</p>
               )}
