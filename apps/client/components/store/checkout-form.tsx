@@ -199,7 +199,7 @@ export function CheckoutForm({ cartId }: { cartId: number }) {
   const cart = data.cart;
   return (
     <form onSubmit={submit} className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_22rem]">
-      <div className="space-y-5">
+      <div className="min-w-0 space-y-5">
         {!signedIn && (
           <p className="rounded-xl border border-st-line bg-white px-4 py-3 text-sm text-st-slate">
             You are checking out as a guest. Keep the order number we give you, or{' '}
@@ -230,7 +230,7 @@ export function CheckoutForm({ cartId }: { cartId: number }) {
               <label className={label} htmlFor="co-email">Email (optional)</label>
               <input id="co-email" type="email" className={input} value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" maxLength={255} />
             </div>
-            <div className="sm:col-span-2">
+            <div className="min-w-0 sm:col-span-2">
               <label className={label} htmlFor="co-phone">Phone</label>
               <PhoneInput id="co-phone" key={phoneDefault} defaultValue={phoneDefault} onChange={setPhone} />
             </div>
@@ -327,7 +327,7 @@ export function CheckoutForm({ cartId }: { cartId: number }) {
         </section>
       </div>
 
-      <aside className="h-fit space-y-3 rounded-xl border border-st-line bg-white p-4 sm:p-5 lg:sticky lg:top-32">
+      <aside className="h-fit min-w-0 space-y-3 rounded-xl border border-st-line bg-white p-4 sm:p-5 lg:sticky lg:top-32">
         <h2 className="font-display text-lg font-semibold text-st-ink">Your order with {cart.seller.name}</h2>
         <ul className="divide-y divide-st-line text-sm">
           {cart.lines.map((l) => (

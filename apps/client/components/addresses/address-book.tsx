@@ -94,7 +94,7 @@ function AddressForm({
           <label className={st.label} htmlFor="ad-name">Recipient name</label>
           <input id="ad-name" className={st.input} value={f.recipientName} onChange={set('recipientName')} maxLength={255} />
         </div>
-        <div>
+        <div className="min-w-0">
           <label className={st.label} htmlFor="ad-phone">Phone</label>
           <PhoneInput id="ad-phone" defaultValue={initial?.phone ?? ''} onChange={(v) => setF((x) => ({ ...x, phone: v }))} />
         </div>

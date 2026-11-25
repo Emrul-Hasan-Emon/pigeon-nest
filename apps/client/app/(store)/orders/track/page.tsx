@@ -47,7 +47,7 @@ export default function TrackOrderPage() {
           <label htmlFor="tr-number" className="mb-1 block text-xs font-medium text-st-slate">Order number</label>
           <input id="tr-number" className={input} value={number} onChange={(e) => setNumber(e.target.value)} placeholder="PN260520-K7M2QX" maxLength={60} />
         </div>
-        <div>
+        <div className="min-w-0">
           <label htmlFor="tr-phone" className="mb-1 block text-xs font-medium text-st-slate">Phone</label>
           <PhoneInput id="tr-phone" onChange={setPhone} />
         </div>

@@ -70,8 +70,8 @@ export function PhoneInput({
   const invalid = touched && national.length > 0 && !parsed?.isValid();
 
   return (
-    <div>
-      <div className="flex gap-2">
+    <div className="min-w-0">
+      <div className="flex min-w-0 gap-2">
         <select
           aria-label="Country"
           value={country}
@@ -81,7 +81,7 @@ export function PhoneInput({
             setCountry(next);
             emit(next, national);
           }}
-          className="w-44 shrink-0 rounded-md border border-input bg-card px-2 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none"
+          className="w-44 min-w-0 shrink-0 rounded-md border border-input bg-card px-2 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none"
         >
           {countries.map((c) => (
             <option key={c.code} value={c.code}>
