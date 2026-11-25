@@ -3,6 +3,7 @@
 import type { ReturnDetail } from '@/types/returns';
 import { AddRefundRecord } from './refund-actions';
 import { RefundRecords } from './refund-records';
+import { formatMoney } from '@/lib/money';
 
 /**
  * The money records on a return. The seller's own "returning money" steps stay in the return's history; this holds
@@ -19,7 +20,7 @@ export function ReturnMoney({ ret, admin, tone = 'staff', onChanged }: { ret: Re
       <RefundRecords records={records} tone={tone} empty="No extra money records." />
       {canAdd && onChanged && (
         <div className="mt-3 border-t border-border pt-3">
-          <p className="mb-2 text-xs text-muted-foreground">If the buyer says the money never came, record what really happened. The amount must be exactly ৳{ret.refundAmount.toLocaleString('en-US')}.</p>
+          <p className="mb-2 text-xs text-muted-foreground">If the buyer says the money never came, record what really happened. The amount must be exactly {formatMoney(ret.refundAmount)}.</p>
           <AddRefundRecord returnId={ret.id} expected={ret.refundAmount} label="Add a money record" onDone={onChanged} />
         </div>
       )}

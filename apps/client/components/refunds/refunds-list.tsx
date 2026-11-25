@@ -10,6 +10,7 @@ import { useDebouncedValue } from '@/lib/hooks/use-debounced-value';
 import { REFUND_STATUS_WORD, type RefundPage, type RefundRecord, type RefundRow, type RefundStatus } from '@/types/refund';
 import { AddRefundRecord, RefundActions } from './refund-actions';
 import { RefundBadge, RefundRecords } from './refund-records';
+import { formatMoney } from '@/lib/money';
 
 const TABS: { value: RefundStatus | 'all'; label: string }[] = [
   { value: 'needs_to_refund', label: 'To refund' },
@@ -45,8 +46,8 @@ function Row({ role, row, onDone }: { role: 'admin' | 'seller'; row: RefundRow; 
         <span className="ml-auto text-sm text-muted-foreground">Cancelled order · {formatDateTime(row.createdAt)}</span>
       </div>
       <p className="mt-2 text-base text-foreground">
-        To refund: <span className="font-semibold">৳{row.expectedAmount.toLocaleString('en-US')}</span>
-        {row.status === 'refunded' && row.amount !== null && <> · Sent back: <span className="font-semibold">৳{row.amount.toLocaleString('en-US')}</span></>}
+        To refund: <span className="font-semibold">{formatMoney(row.expectedAmount)}</span>
+        {row.status === 'refunded' && row.amount !== null && <> · Sent back: <span className="font-semibold">{formatMoney(row.amount)}</span></>}
         {row.recordsOnOrder > 1 && <span className="ml-2 text-sm text-muted-foreground">({row.recordsOnOrder} records on this order)</span>}
       </p>
       <div className="mt-3 flex flex-wrap gap-2">

@@ -2,8 +2,8 @@
 
 import { formatDateTime } from '@/lib/datetime';
 import { REFUND_STATUS_WORD, type RefundRecord, type RefundStatus } from '@/types/refund';
+import { formatMoney } from '@/lib/money';
 
-const taka = (n: number) => `৳${n.toLocaleString('en-US', { maximumFractionDigits: 2 })}`;
 
 export function RefundBadge({ status }: { status: RefundStatus }) {
   const tone = status === 'refunded' ? 'bg-emerald-100 text-emerald-800' : status === 'processing' ? 'bg-sky-100 text-sky-900' : status === 'needs_to_refund' ? 'bg-amber-100 text-amber-900' : 'bg-gray-100 text-gray-600';
@@ -29,8 +29,8 @@ export function RefundRecords({ records, empty, tone = 'staff' }: { records: Ref
             <span className={`text-xs ${muted}`}>{formatDateTime(r.createdAt)}</span>
           </div>
           <p className={`mt-1 text-sm ${ink}`}>
-            To refund: <span className="font-semibold">{taka(r.expectedAmount)}</span>
-            {r.status === 'refunded' && r.amount !== null && <> · Sent back: <span className="font-semibold">{taka(r.amount)}</span>{r.refundedAt ? ` on ${formatDateTime(r.refundedAt)}` : ''}{r.refundedByName ? ` by ${r.refundedByName}` : ''}</>}
+            To refund: <span className="font-semibold">{formatMoney(r.expectedAmount)}</span>
+            {r.status === 'refunded' && r.amount !== null && <> · Sent back: <span className="font-semibold">{formatMoney(r.amount)}</span>{r.refundedAt ? ` on ${formatDateTime(r.refundedAt)}` : ''}{r.refundedByName ? ` by ${r.refundedByName}` : ''}</>}
           </p>
           {r.transactionId && <p className={`text-xs ${muted}`}>Transaction {r.transactionId}</p>}
           {r.proof.length > 0 && (
@@ -44,7 +44,7 @@ export function RefundRecords({ records, empty, tone = 'staff' }: { records: Ref
             {r.history.map((h) => (
               <li key={h.id} className={`text-xs ${muted}`}>
                 <span className={`font-semibold ${ink}`}>{REFUND_STATUS_WORD[h.status]}</span>
-                {h.amount !== null && <> · {taka(h.amount)}</>}
+                {h.amount !== null && <> · {formatMoney(h.amount)}</>}
                 <span className="block">{h.by ?? 'System'} · {formatDateTime(h.createdAt)}</span>
                 {h.note && <span className="block whitespace-pre-wrap">{h.note}</span>}
               </li>

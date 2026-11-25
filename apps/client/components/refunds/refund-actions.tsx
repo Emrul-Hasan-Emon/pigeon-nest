@@ -6,6 +6,7 @@ import { useToast } from '@/components/ui/toast';
 import { ApiError } from '@/lib/api/http';
 import { addOrderRefundRecord, addReturnMoneyRecord, changeRefundStatus } from '@/lib/api/refunds';
 import { REFUND_STATUS_WORD, type RefundStatus } from '@/types/refund';
+import { formatMoney } from '@/lib/money';
 
 const field = 'mt-1 w-full rounded-md border border-input px-3 py-2';
 
@@ -65,9 +66,9 @@ function RefundModal({ role, target, expected, initial, onClose, onDone }: { rol
         )}
         {refunded ? (
           <>
-            <p className="text-sm text-muted-foreground">The amount must be exactly what the buyer paid: <span className="font-semibold">৳{expected.toLocaleString('en-US')}</span>. Any other amount is refused.</p>
-            <label className="block text-sm font-semibold">Amount you sent back (৳)<input inputMode="decimal" className={field} value={amount} onChange={(e) => setAmount(e.target.value)} /></label>
-            <label className="block text-sm font-semibold">Note: how and when you sent it<input className={field} maxLength={1000} value={note} onChange={(e) => setNote(e.target.value)} placeholder="For example: Sent by bKash to 01799990001 today at 3 pm" /></label>
+            <p className="text-sm text-muted-foreground">The amount must be exactly what the buyer paid: <span className="font-semibold">{formatMoney(expected)}</span>. Any other amount is refused.</p>
+            <label className="block text-sm font-semibold">Amount you sent back (USD)<input inputMode="decimal" className={field} value={amount} onChange={(e) => setAmount(e.target.value)} /></label>
+            <label className="block text-sm font-semibold">Note: how and when you sent it<input className={field} maxLength={1000} value={note} onChange={(e) => setNote(e.target.value)} placeholder="For example: Sent by PayPal to 01799990001 today at 3 pm" /></label>
             <label className="block text-sm font-semibold">Transaction ID (optional)<input className={field} maxLength={120} value={txn} onChange={(e) => setTxn(e.target.value)} /></label>
             <label className="block text-sm font-semibold">Proof{role === 'seller' ? '' : ' (optional)'}: a screenshot or file<input type="file" accept="image/*,.pdf" multiple className="mt-1 block w-full text-sm" onChange={(e) => setFiles(Array.from(e.target.files ?? []).slice(0, 5))} /></label>
           </>

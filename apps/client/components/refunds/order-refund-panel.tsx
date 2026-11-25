@@ -3,6 +3,7 @@
 import type { OrderDetail } from '@/types/order';
 import { AddRefundRecord, RefundActions } from './refund-actions';
 import { RefundBadge, RefundRecords } from './refund-records';
+import { formatMoney } from '@/lib/money';
 
 const card = 'rounded-xl border border-border bg-card p-4 shadow-sm';
 
@@ -20,7 +21,7 @@ export function OrderRefundPanel({ role, order, onChanged }: { role: 'admin' | '
       <div className="flex flex-wrap items-center gap-2">
         <h2 className="text-sm font-semibold text-foreground">Refund of the money paid</h2>
         {order.refundStatus && <RefundBadge status={order.refundStatus} />}
-        <span className="text-xs text-muted-foreground">Paid by the buyer: ৳{order.totals.amountPaid.toLocaleString('en-US')}</span>
+        <span className="text-xs text-muted-foreground">Paid by the buyer: {formatMoney(order.totals.amountPaid)}</span>
       </div>
       {records.length === 0 ? (
         <p className="mt-2 text-sm text-muted-foreground">No refund record yet.</p>
