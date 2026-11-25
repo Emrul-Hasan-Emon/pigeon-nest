@@ -51,6 +51,7 @@ import { CursorPagination } from '../../../shared/decorators/cursor-pagination-p
 import { getCursorPaginateData } from '../../../shared/utils/cursor-paginate.util';
 import { StockReason } from '../../../database/enums/stock-movement.enum';
 import { recordStockMovements } from '../../../shared/utils/stock-movement.util';
+import { tidy } from '../../../shared/utils/money.util';
 
 const MEDIA_FOLDER = 'products/media';
 const THUMBNAIL_FOLDER = 'products';
@@ -1394,7 +1395,7 @@ export class AdminProductService {
         const change = (n: number) => {
           const next = dto.mode === 'percent' ? n * (1 + factor / 100) : n + factor;
           if (next < 1) throw new BadRequestException('A price would drop below 1. Lower it by less.');
-          return Math.round((next + Number.EPSILON) * 100) / 100;
+          return tidy(next);
         };
         const skus = (product.skus ?? []).filter((k) => !k.deletedAt);
         if (skus.length === 0) throw new BadRequestException('This product has no options to change');

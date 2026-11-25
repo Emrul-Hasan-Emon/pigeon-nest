@@ -5,7 +5,9 @@
  */
 const SCALE = 100;
 
-export const tidy = (n: number): number => Math.round((n + Number.EPSILON) * SCALE) / SCALE;
+// Round half away from zero to 2 decimals. `toPrecision(15)` first strips the binary noise, so 1.005 (stored as
+// 1.00499999999999989...) rounds to 1.01 like a person and like PostgreSQL's round(numeric, 2) does.
+export const tidy = (n: number): number => Math.sign(n) * Math.round(Number((Math.abs(n) * SCALE).toPrecision(15))) / SCALE;
 
 /** True when two money values are the same after tidying. */
 export const sameMoney = (a: number, b: number): boolean => tidy(a) === tidy(b);
