@@ -22,9 +22,14 @@ import { OrderItem } from './order-item.entity';
 import { Cart } from '../cart/cart.entity';
 import { OrderStatusHistory } from './order-status-history.entity';
 import { RefundStatus } from '../../enums/refund-status.enum';
+import { DEFAULT_CURRENCY } from '../../enums/currency';
 
 @Entity()
 export class Order extends BaseEntity {
+  // ISO 4217 code of every amount on this row.
+  @Column({ type: 'char', length: 3, default: DEFAULT_CURRENCY })
+  currency: string;
+
   @Column({ unique: true })
   orderNumber: string;
 

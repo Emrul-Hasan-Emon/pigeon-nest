@@ -4,9 +4,14 @@ import { Order } from './order.entity';
 import { SellerProduct } from '../product/seller-product.entity';
 import { SellerProductSku } from '../product/seller-product-sku.entity';
 import { SkuPriceProposal } from '../proposal/sku-price-proposal.entity';
+import { DEFAULT_CURRENCY } from '../../enums/currency';
 
 @Entity()
 export class OrderItem extends BaseEntity {
+  // ISO 4217 code of every amount on this row.
+  @Column({ type: 'char', length: 3, default: DEFAULT_CURRENCY })
+  currency: string;
+
   @Index()
   @Column()
   orderId: number;

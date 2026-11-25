@@ -4,6 +4,7 @@ import { Cart } from './cart.entity';
 import { SellerProduct } from '../product/seller-product.entity';
 import { SellerProductSku } from '../product/seller-product-sku.entity';
 import { SkuPriceProposal } from '../proposal/sku-price-proposal.entity';
+import { DEFAULT_CURRENCY } from '../../enums/currency';
 
 @Entity()
 @Index('UQ_cart_item_cart_sku', ['cartId', 'sellerProductSkuId'], {
@@ -11,6 +12,10 @@ import { SkuPriceProposal } from '../proposal/sku-price-proposal.entity';
   where: '"deletedAt" IS NULL',
 })
 export class CartItem extends BaseEntity {
+  // ISO 4217 code of every amount on this row.
+  @Column({ type: 'char', length: 3, default: DEFAULT_CURRENCY })
+  currency: string;
+
   @Index()
   @Column()
   cartId: number;

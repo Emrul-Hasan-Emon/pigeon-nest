@@ -12,6 +12,7 @@ import { User } from '../person/user.entity';
 import { Seller } from '../seller/seller.entity';
 import { CartItem } from './cart-item.entity';
 import { Order } from '../order/order.entity';
+import { DEFAULT_CURRENCY } from '../../enums/currency';
 
 // One active cart per owner (customer or guest session) and seller.
 @Entity()
@@ -24,6 +25,10 @@ import { Order } from '../order/order.entity';
   where: '"isActive" = true AND "sessionId" IS NOT NULL AND "deletedAt" IS NULL',
 })
 export class Cart extends BaseEntity {
+  // ISO 4217 code of every amount on this row.
+  @Column({ type: 'char', length: 3, default: DEFAULT_CURRENCY })
+  currency: string;
+
   @Column({ type: 'int', nullable: true })
   userId: number | null;
 
