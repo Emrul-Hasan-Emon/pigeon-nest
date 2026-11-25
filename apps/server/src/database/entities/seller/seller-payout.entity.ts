@@ -2,9 +2,14 @@ import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 import { BaseEntity } from '../base.entity';
 import { Seller } from './seller.entity';
 import { PayoutStatus } from '../../enums/payout-status.enum';
+import { DEFAULT_CURRENCY } from '../../enums/currency';
 
 @Entity()
 export class SellerPayout extends BaseEntity {
+  // ISO 4217 code of every amount on this row.
+  @Column({ type: 'char', length: 3, default: DEFAULT_CURRENCY })
+  currency: string;
+
   @Index()
   @Column()
   sellerId: number;

@@ -8,6 +8,7 @@ import { CommissionStatus } from '../../enums/commission-status.enum';
 import { CommissionHistoryType } from '../../enums/commission-history-type.enum';
 import { CommissionType } from '../../enums/commission-type.enum';
 import { SystemCommissionDisburse } from './system-commission-disburse.entity';
+import { DEFAULT_CURRENCY } from '../../enums/currency';
 
 // The ledger. One row per commission earned from an order, one per payment the
 // seller made. An order row is soft-deleted (deletedAt) when its payment is
@@ -19,6 +20,10 @@ import { SystemCommissionDisburse } from './system-commission-disburse.entity';
   where: `"type" = 'order_commission' AND "deletedAt" IS NULL`,
 })
 export class SystemCommissionHistory extends BaseEntity {
+  // ISO 4217 code of every amount on this row.
+  @Column({ type: 'char', length: 3, default: DEFAULT_CURRENCY })
+  currency: string;
+
   @Index('IDX_system_commission_history_sellerId')
   @Column()
   sellerId: number;
