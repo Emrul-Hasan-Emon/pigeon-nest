@@ -3,6 +3,7 @@ import { BaseEntity } from '../base.entity';
 import { Order } from '../order/order.entity';
 import { User } from '../person/user.entity';
 import { PaymentClaimStatus } from '../../enums/payment-claim.enum';
+import { DEFAULT_CURRENCY } from '../../enums/currency';
 
 export interface ClaimAttachment {
   kind: 'image' | 'file';
@@ -21,6 +22,10 @@ export interface ClaimAttachment {
 @Index('UQ_payment_claim_order', ['orderId'], { unique: true, where: '"deletedAt" IS NULL' })
 @Index('IDX_payment_claim_seller_status', ['sellerId', 'status'])
 export class PaymentClaim extends BaseEntity {
+  // ISO 4217 code of every amount on this row.
+  @Column({ type: 'char', length: 3, default: DEFAULT_CURRENCY })
+  currency: string;
+
   @Column()
   orderId: number;
 
@@ -44,7 +49,7 @@ export class PaymentClaim extends BaseEntity {
   @Column({ type: 'varchar', length: 120, nullable: true })
   transactionId: string | null;
 
-  // bKash, Nagad, bank transfer...
+  // PayPal, Wise, bank transfer...
   @Column({ type: 'varchar', length: 60, nullable: true })
   method: string | null;
 

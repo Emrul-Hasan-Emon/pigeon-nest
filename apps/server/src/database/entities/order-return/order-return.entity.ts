@@ -9,12 +9,17 @@ import { ReturnStatus } from '../../enums/return-status.enum';
 import { OrderReturnAttachment } from './order-return-attachment.entity';
 import { OrderReturnItem } from './order-return-item.entity';
 import { OrderReturnStatusHistory } from './order-return-status-history.entity';
+import { DEFAULT_CURRENCY } from '../../enums/currency';
 
 // A request to send back a whole order or some of its items. A customer gets
 // one request per order or item for good; an admin can open more while the
 // goods are still not returned.
 @Entity()
 export class OrderReturn extends BaseEntity {
+  // ISO 4217 code of every amount on this row.
+  @Column({ type: 'char', length: 3, default: DEFAULT_CURRENCY })
+  currency: string;
+
   @Column({ unique: true })
   returnNumber: string;
 

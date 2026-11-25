@@ -5,9 +5,14 @@ import { PaymentGateway } from './payment-gateway.entity';
 import { PaymentStatus } from '../../enums/payment-status.enum';
 import { User } from '../person/user.entity';
 import { AuthUserType } from '../../enums/auth-user-type.enum';
+import { DEFAULT_CURRENCY } from '../../enums/currency';
 
 @Entity()
 export class Payment extends BaseEntity {
+  // ISO 4217 code of every amount on this row.
+  @Column({ type: 'char', length: 3, default: DEFAULT_CURRENCY })
+  currency: string;
+
   @Index()
   @Column()
   orderId: number;

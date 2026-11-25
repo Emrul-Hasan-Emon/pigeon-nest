@@ -3,6 +3,7 @@ import { BaseEntity } from '../base.entity';
 import { RefundKind, RefundStatus } from '../../enums/refund-status.enum';
 import { Order } from './order.entity';
 import { OrderRefundStatusHistory } from './order-refund-status-history.entity';
+import { DEFAULT_CURRENCY } from '../../enums/currency';
 
 export interface RefundProof {
   kind: 'image' | 'file';
@@ -21,6 +22,10 @@ export interface RefundProof {
 @Index('IDX_order_refund_order', ['orderId'])
 @Index('IDX_order_refund_seller_status', ['sellerId', 'status'])
 export class OrderRefund extends BaseEntity {
+  // ISO 4217 code of every amount on this row.
+  @Column({ type: 'char', length: 3, default: DEFAULT_CURRENCY })
+  currency: string;
+
   @Column()
   orderId: number;
 
