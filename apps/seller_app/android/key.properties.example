@@ -1,0 +1,6 @@
+# Copy to key.properties (never commit it) and fill in. Create the keystore once with:
+#   keytool -genkey -v -keystore ~/pigeon-nest-seller.jks -keyalg RSA -keysize 2048 -validity 10000 -alias seller
+storePassword=
+keyPassword=
+keyAlias=seller
+storeFile=/absolute/path/to/pigeon-nest-seller.jks
