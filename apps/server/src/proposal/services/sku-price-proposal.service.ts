@@ -1,3 +1,4 @@
+import { PushService } from '../../push/services/push.service';
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
@@ -81,6 +82,7 @@ export class SkuPriceProposalService {
   constructor(
     @InjectRepository(SkuPriceProposal) private readonly repo: Repository<SkuPriceProposal>,
     private readonly storefront: StorefrontProductService,
+    private readonly push: PushService,
   ) {}
 
   // ---- reading ----
@@ -312,6 +314,9 @@ export class SkuPriceProposalService {
         throw new ConflictException('You already have an open proposal for this item');
       }
       throw e;
+    }
+    if (!declined) {
+      this.push.notifySeller(product.sellerId, { title: 'New price offer', body: `${product.name}: ${dto.quantity} x ${dto.price}`, data: { route: `/more/offers/${id}` } });
     }
     return this.one(id, AuthUserType.USER, { userId: user.id });
   }
