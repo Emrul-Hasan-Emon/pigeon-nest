@@ -1,4 +1,5 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { PushService } from '../../push/services/push.service';
 import { DatabaseService } from '../../database/database.service';
 import { User } from '../../database/entities/person/user.entity';
 import { AuthUserType } from '../../database/enums/auth-user-type.enum';
@@ -15,6 +16,7 @@ export class UserPaymentClaimService {
   constructor(
     private readonly db: DatabaseService,
     private readonly files: AttachmentFileService,
+    private readonly push: PushService,
   ) {}
 
   async create(user: User, orderId: number, dto: CreatePaymentClaimDto, uploads?: Express.Multer.File[]) {
@@ -51,6 +53,7 @@ export class UserPaymentClaimService {
         creatorType: AuthUserType.USER,
         creatorName: user.name,
       });
+      this.push.notifySeller(order.sellerId, { title: 'Payment request', body: `${order.orderNumber}: the buyer says they paid ${dto.amount}`, data: { route: '/more/payment-claims' } });
       return { id: saved.id, status: saved.status };
     } catch (e) {
       await this.files.discard(stored);
