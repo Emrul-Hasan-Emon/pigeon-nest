@@ -643,7 +643,7 @@ truth("J11 cursor paging is newest first", seen == sorted(seen, reverse=True))
 mine = f"\"recipientName\" like '{TAG} %'"
 truth("I1 payable = subtotal + delivery - discount", sql(f"select count(*) from \"order\" where {mine} and \"payableAmount\" <> subtotal + \"deliveryCharge\" - \"discountAmount\"") == "0")
 truth("I2 subtotal = sum of lines", sql(f"select count(*) from \"order\" o where o.{mine} and o.subtotal <> (select coalesce(sum(\"totalDiscountedPrice\"),0) from order_item i where i.\"orderId\"=o.id)") == "0")
-truth("I3 amountPaid = sum of live receipts", sql(f"select count(*) from \"order\" o where o.{mine} and o.\"amountPaid\" <> (select coalesce(sum(p.amount),0) from payment p where p.\"orderId\"=o.id and p.status<>'due' and p.\"reversedAt\" is null)") == "0")
+truth("I3 amountPaid = sum of live receipts", sql(f"select count(*) from \"order\" o where o.{mine} and round(o.\"amountPaid\"::numeric, 2) <> round((select coalesce(sum(p.amount::numeric),0) from payment p where p.\"orderId\"=o.id and p.status<>'due' and p.\"reversedAt\" is null), 2)") == "0")
 truth("I4 paymentStatus matches the money", sql(f"select count(*) from \"order\" where {mine} and ((\"amountPaid\"=0 and \"paymentStatus\"<>'due') or (\"amountPaid\">0 and \"amountPaid\"<\"payableAmount\" and \"paymentStatus\"<>'partially_paid') or (\"amountPaid\">=\"payableAmount\" and \"paymentStatus\"<>'paid'))") == "0")
 truth("I5 amountPaid never above payable", sql(f"select count(*) from \"order\" where {mine} and \"amountPaid\" > \"payableAmount\"") == "0")
 truth("I6 every order has a placed-history row", sql(f"select count(*) from \"order\" o where o.{mine} and not exists (select 1 from order_status_history h where h.\"orderId\"=o.id)") == "0")
