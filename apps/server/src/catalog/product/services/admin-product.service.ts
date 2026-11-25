@@ -1394,7 +1394,7 @@ export class AdminProductService {
         const factor = (dto.direction === 'decrease' ? -1 : 1) * (dto.value ?? 0);
         const change = (n: number) => {
           const next = dto.mode === 'percent' ? n * (1 + factor / 100) : n + factor;
-          if (next < 1) throw new BadRequestException('A price would drop below 1. Lower it by less.');
+          if (next < 1) throw new BadRequestException('A price would drop below 1.00 USD. Lower it by less.');
           return tidy(next);
         };
         const skus = (product.skus ?? []).filter((k) => !k.deletedAt);

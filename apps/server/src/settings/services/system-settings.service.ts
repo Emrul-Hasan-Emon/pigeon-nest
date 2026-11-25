@@ -24,8 +24,8 @@ export interface SettingDefinition {
 export const SETTING_DEFINITIONS: SettingDefinition[] = [
   {
     key: 'shipping.defaultCharge',
-    label: 'Default delivery charge',
-    description: 'Charged when no active shipping zone covers the destination country and delivery type.',
+    label: 'Default delivery charge (USD)',
+    description: 'In US dollars. Charged when no active shipping zone covers the destination country and delivery type. 0 means free delivery.',
     group: 'shipping',
     type: 'decimal',
     min: 0,
@@ -63,7 +63,7 @@ export const SETTING_DEFINITIONS: SettingDefinition[] = [
     key: 'commission.amount',
     label: 'Commission amount',
     description:
-      'A percentage (0 to 100) of each item\'s price, or a fixed amount per item, depending on the type.',
+      'A percentage (0 to 100) of each item\'s price, or a fixed amount in US dollars per item, depending on the type. 0 means no commission.',
     group: 'commission',
     type: 'decimal',
     min: 0,
