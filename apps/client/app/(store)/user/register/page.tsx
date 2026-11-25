@@ -9,9 +9,10 @@ import { ApiError } from '@/lib/api/http';
 import { setUserToken } from '@/lib/auth/user-token';
 import { safeNextPath, useNextQuery } from '@/lib/auth/next-path';
 import { mergeGuestCarts } from '@/lib/api/cart';
+import { Container } from '@/components/store/page-parts';
 
 const INPUT =
-  'mt-1 w-full rounded-md border border-input px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none';
+  'mt-1 w-full rounded-sm border border-st-line px-3 py-2 text-sm font-normal focus:border-st-teal focus:outline-none focus:ring-2 focus:ring-st-teal/25';
 
 export default function UserRegisterPage() {
   const router = useRouter();
@@ -51,41 +52,41 @@ export default function UserRegisterPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-6">
+    <Container className="flex min-h-[calc(100svh-18rem)] items-center justify-center py-16">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-md rounded-xl border border-border bg-card p-8 shadow-sm"
+        className="w-full max-w-md border border-st-line bg-white p-8"
       >
-        <h1 className="mb-1 text-lg font-semibold text-foreground">Create an account</h1>
-        <p className="mb-6 text-sm text-muted-foreground">
+        <h1 className="font-display mb-1 text-2xl font-semibold text-st-ink">Create an account</h1>
+        <p className="mb-6 text-sm text-st-slate">
           Register with your phone number and a password.
         </p>
 
         {error && (
-          <p className="mb-4 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          <p className="mb-4 rounded-sm bg-destructive/10 px-3 py-2 text-sm text-destructive">
             {error}
           </p>
         )}
 
         <div className="space-y-4">
-          <label className="block text-sm text-foreground">
+          <label className="block text-sm font-medium text-st-ink">
             Name *
             <input required value={name} onChange={(e) => setName(e.target.value)} className={INPUT} />
           </label>
-          <div className="text-sm text-foreground">
+          <div className="text-sm font-medium text-st-ink">
             <span className="mb-1 block">Phone number *</span>
             <PhoneInput onChange={setPhone} required />
           </div>
-          <label className="block text-sm text-foreground">
+          <label className="block text-sm font-medium text-st-ink">
             Email (optional)
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={INPUT} />
           </label>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <label className="block text-sm text-foreground">
+            <label className="block text-sm font-medium text-st-ink">
               Password *
               <input type="password" required autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} className={INPUT} />
             </label>
-            <label className="block text-sm text-foreground">
+            <label className="block text-sm font-medium text-st-ink">
               Confirm password *
               <input type="password" required autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} className={INPUT} />
             </label>
@@ -95,18 +96,18 @@ export default function UserRegisterPage() {
         <button
           type="submit"
           disabled={submitting}
-          className="mt-6 w-full rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-50"
+          className="mt-6 w-full rounded-full bg-st-ink px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-st-teal disabled:opacity-50"
         >
           {submitting ? 'Creating…' : 'Register'}
         </button>
 
-        <p className="mt-4 text-center text-sm text-muted-foreground">
+        <p className="mt-4 text-center text-sm text-st-slate">
           Already registered?{' '}
-          <Link href={`/user/login${nextQuery}`} className="font-medium text-primary hover:opacity-70">
+          <Link href={`/user/login${nextQuery}`} className="font-medium text-st-ink underline-offset-2 hover:underline">
             Sign in
           </Link>
         </p>
       </form>
-    </div>
+    </Container>
   );
 }

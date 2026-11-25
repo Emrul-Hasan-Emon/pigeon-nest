@@ -9,6 +9,7 @@ import { ApiError } from '@/lib/api/http';
 import { setUserToken } from '@/lib/auth/user-token';
 import { mergeGuestCarts } from '@/lib/api/cart';
 import { safeNextPath, useNextQuery } from '@/lib/auth/next-path';
+import { Container } from '@/components/store/page-parts';
 
 export default function UserLoginPage() {
   const router = useRouter();
@@ -39,28 +40,28 @@ export default function UserLoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-6">
+    <Container className="flex min-h-[calc(100svh-18rem)] items-center justify-center py-16">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-md rounded-xl border border-border bg-card p-8 shadow-sm"
+        className="w-full max-w-md border border-st-line bg-white p-8"
       >
-        <h1 className="mb-1 text-lg font-semibold text-foreground">Login</h1>
-        <p className="mb-6 text-sm text-muted-foreground">
-          Sign in with your phone number and password.
+        <h1 className="font-display mb-1 text-2xl font-semibold text-st-ink">Sign in</h1>
+        <p className="mb-6 text-sm text-st-slate">
+          Your orders, offers and saved birds are waiting.
         </p>
 
         {error && (
-          <p className="mb-4 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          <p className="mb-4 rounded-sm bg-destructive/10 px-3 py-2 text-sm text-destructive">
             {error}
           </p>
         )}
 
-        <div className="mb-4 text-sm text-foreground">
-          <span className="mb-1 block">Phone number</span>
+        <div className="mb-4 text-sm text-st-ink">
+          <span className="mb-1 block font-medium">Phone number</span>
           <PhoneInput onChange={setPhone} required />
         </div>
 
-        <label className="mb-6 block text-sm text-foreground">
+        <label className="mb-6 block text-sm font-medium text-st-ink">
           Password
           <input
             type="password"
@@ -68,25 +69,25 @@ export default function UserLoginPage() {
             autoComplete="current-password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
-            className="mt-1 w-full rounded-md border border-input px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none"
+            className="mt-1 w-full rounded-sm border border-st-line px-3 py-2 text-sm font-normal focus:border-st-teal focus:outline-none focus:ring-2 focus:ring-st-teal/25"
           />
         </label>
 
         <button
           type="submit"
           disabled={submitting}
-          className="w-full rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-50"
+          className="w-full rounded-full bg-st-ink px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-st-teal disabled:opacity-50"
         >
           {submitting ? 'Signing in…' : 'Sign in'}
         </button>
 
-        <p className="mt-4 text-center text-sm text-muted-foreground">
+        <p className="mt-4 text-center text-sm text-st-slate">
           New here?{' '}
-          <Link href={`/user/register${nextQuery}`} className="font-medium text-primary hover:opacity-70">
-            Register
+          <Link href={`/user/register${nextQuery}`} className="font-medium text-st-ink underline-offset-2 hover:underline">
+            Create an account
           </Link>
         </p>
       </form>
-    </div>
+    </Container>
   );
 }
