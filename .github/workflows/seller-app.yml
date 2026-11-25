@@ -1,0 +1,70 @@
+name: Seller app
+
+# Checks every change to the Flutter seller app, and builds the files for the stores when asked.
+on:
+  push:
+    branches: [main]
+    paths: ['apps/seller_app/**', '.github/workflows/seller-app.yml']
+  pull_request:
+    paths: ['apps/seller_app/**', '.github/workflows/seller-app.yml']
+  workflow_dispatch:
+    inputs:
+      release:
+        description: 'Build the signed Android bundle (needs the signing secrets)'
+        type: boolean
+        default: false
+
+defaults:
+  run:
+    working-directory: apps/seller_app
+
+jobs:
+  check:
+    name: Analyze, test, build APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '21' }
+      - uses: subosito/flutter-action@v2
+        with: { channel: stable, cache: true }
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+      - run: flutter build apk --release --dart-define=API_BASE_URL=${{ vars.SELLER_API_BASE_URL || 'https://api.example.com/v1/api' }}
+      - uses: actions/upload-artifact@v4
+        with: { name: seller-app-apk, path: apps/seller_app/build/app/outputs/flutter-apk/app-release.apk }
+
+  ios:
+    name: Build iOS (no signing)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with: { channel: stable, cache: true }
+      - run: flutter pub get
+      - run: flutter build ios --release --no-codesign --dart-define=API_BASE_URL=${{ vars.SELLER_API_BASE_URL || 'https://api.example.com/v1/api' }}
+
+  release-android:
+    name: Signed Android bundle
+    if: github.event_name == 'workflow_dispatch' && inputs.release
+    needs: check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '21' }
+      - uses: subosito/flutter-action@v2
+        with: { channel: stable, cache: true }
+      # Secrets to create in the repository settings: ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD,
+      # ANDROID_KEY_PASSWORD, ANDROID_KEY_ALIAS, and optionally GOOGLE_SERVICES_JSON for push notifications.
+      - name: Signing files
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/release.jks
+          printf 'storePassword=%s\nkeyPassword=%s\nkeyAlias=%s\nstoreFile=app/release.jks\n' \
+            '${{ secrets.ANDROID_KEYSTORE_PASSWORD }}' '${{ secrets.ANDROID_KEY_PASSWORD }}' '${{ secrets.ANDROID_KEY_ALIAS }}' > android/key.properties
+          if [ -n '${{ secrets.GOOGLE_SERVICES_JSON }}' ]; then echo '${{ secrets.GOOGLE_SERVICES_JSON }}' > android/app/google-services.json; fi
+      - run: flutter pub get
+      - run: flutter build appbundle --release --dart-define=API_BASE_URL=${{ vars.SELLER_API_BASE_URL }}
+      - uses: actions/upload-artifact@v4
+        with: { name: seller-app-aab, path: apps/seller_app/build/app/outputs/bundle/release/app-release.aab }
