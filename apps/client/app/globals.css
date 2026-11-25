@@ -359,7 +359,15 @@ aside nav { scrollbar-width: thin; scrollbar-color: rgb(255 255 255 / 0.16) tran
 .seller-shell .seller-main label { font-weight: 600; color: hsl(var(--foreground)); }
 .seller-shell .seller-main label :is(input, select, textarea) { font-weight: 400; }
 
-/* ---------- Storefront ---------- */
+/* ---------- Storefront: a fine-livestock auction catalogue, not a product grid ----------
+   Pigeons bought here carry pedigree and can be worth a great deal, so the storefront reads
+   like a catalogue plate for each lot (hairline frame, running lot number, breeder credit)
+   rather than a generic card grid. Fraunces (already loaded for the admin figure voice)
+   becomes the catalogue's headline hand; Inter stays the working voice for price, spec and
+   instruction so buyers anywhere can scan fast. The iridescent teal-to-violet neck sheen
+   (--s-sheen-a/b, the same hues as --color-sheen-a/b used sparingly elsewhere) is spent in
+   exactly one place per screen — the hero rule and the sold ribbon — never as a repeating
+   decoration. */
 .store {
   --s-ink: #11151b;
   --s-ink-2: #1b222b;
@@ -369,12 +377,66 @@ aside nav { scrollbar-width: thin; scrollbar-color: rgb(255 255 255 / 0.16) tran
   --s-slate: #59636f;
   --s-teal: #1f7f7a;
   --s-brass: #b08a4a;
+  --s-sheen-a: #2aa6a0;
+  --s-sheen-b: #7a5bd0;
+  --s-sheen: linear-gradient(90deg, var(--s-sheen-a), var(--s-sheen-b));
   background: var(--s-dove);
   color: var(--s-ink);
 }
 .store .font-display {
+  font-family: var(--font-serif), Georgia, serif;
+  font-weight: 560;
+  letter-spacing: -0.01em;
+  font-variation-settings: "opsz" 40;
+}
+/* The small running hand for a lot number, a breeder credit or a spec line — Bricolage reads
+   as a deliberately different face from both the serif headline and the Inter body, used in
+   sentence case only (the brief's own warning against tracked-out capitals applies here too). */
+.store .font-mark {
   font-family: var(--font-display), var(--font-sans);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
+}
+/* One hairline rule in the neck-sheen gradient: the hero backdrop, the header's underline,
+   or a divider — never more than once on a screen. */
+.store-sheen-rule { background-image: var(--s-sheen); }
+/* A catalogue plate: the photograph sits inside a mat, not a shadowed card. Depth comes from
+   the hairline and the paper tone shift, not blur. */
+.store-plate {
+  position: relative;
+  padding: 0.3rem;
+  background: var(--s-paper);
+  border: 1px solid var(--s-line);
+  border-radius: 0.375rem;
+  transition: border-color 0.15s ease;
+}
+.store-plate:hover, .store-plate:focus-within { border-color: var(--s-ink); }
+.store-plate > .store-plate-frame { border-radius: 0.25rem; overflow: hidden; }
+/* The same hairline discipline on every other card across the storefront (cart lines, order
+   summaries, proposal and return panels, ...), not only the catalogue plates above — so no
+   page is left in the generic rounded-corner-plus-soft-shadow kit. */
+.store :is(.rounded-xl, .rounded-2xl, .rounded-lg) { border-radius: 0.375rem; }
+/* A bordered white panel's hover state reads as a plate, not a shadow lift. */
+.store a.border.bg-white:hover, .store button.border.bg-white:hover { box-shadow: none; }
+
+/* A lot number, set like a plate caption — only ever the item's real position in its list. */
+.store-lot {
+  position: absolute;
+  left: 0.55rem;
+  top: 0.55rem;
+  z-index: 1;
+  display: inline-flex;
+  min-width: 1.6rem;
+  height: 1.6rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.4rem;
+  background: rgb(17 21 27 / 0.72);
+  color: #fff;
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 0.75rem;
+  line-height: 1;
+  border-radius: 0.25rem;
+  backdrop-filter: blur(2px);
 }
 .store-scroll {
   scrollbar-width: none;

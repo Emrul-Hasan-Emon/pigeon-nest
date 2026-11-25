@@ -127,20 +127,22 @@ export function ProductDetailView({ product }: { product: ProductDetail }) {
       <div className="grid gap-6 md:grid-cols-[minmax(0,26rem)_1fr] lg:grid-cols-[minmax(0,30rem)_1fr] lg:gap-10">
         {/* gallery */}
         <div>
-          <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-st-ink-2 md:aspect-square">
-            {shown ? (
-              shown.type === 'video' ? (
-                <video key={shown.url} src={shown.url} controls className="h-full w-full object-cover" />
+          <div className="store-plate">
+            <div className="store-plate-frame relative aspect-[4/3] bg-st-ink-2 md:aspect-square">
+              {shown ? (
+                shown.type === 'video' ? (
+                  <video key={shown.url} src={shown.url} controls className="h-full w-full object-cover" />
+                ) : (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img key={shown.url} src={shown.url} alt={shown.alt} className="h-full w-full object-cover" />
+                )
               ) : (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img key={shown.url} src={shown.url} alt={shown.alt} className="h-full w-full object-cover" />
-              )
-            ) : (
-              <div className="flex h-full items-center justify-center font-display text-6xl text-white/25">{product.name.charAt(0)}</div>
-            )}
-            {off !== null && (
-              <span className="absolute left-3 top-3 rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-st-teal">{off}% off</span>
-            )}
+                <div className="flex h-full items-center justify-center font-display text-6xl text-white/25">{product.name.charAt(0)}</div>
+              )}
+              {off !== null && (
+                <span className="absolute left-3 top-3 rounded-sm bg-white px-2.5 py-1 text-xs font-semibold text-st-teal">{off}% off</span>
+              )}
+            </div>
           </div>
           {gallery.length > 1 && (
             <ul className="store-scroll mt-2 flex gap-2 overflow-x-auto pb-1" aria-label="Product images">
@@ -151,7 +153,7 @@ export function ProductDetailView({ product }: { product: ProductDetail }) {
                     aria-label={`Show image ${i + 1}`}
                     aria-current={i === active}
                     onClick={() => setActive(i)}
-                    className={`relative block h-14 w-14 overflow-hidden rounded-lg border-2 bg-st-ink-2 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-st-teal ${i === active ? 'border-st-ink' : 'border-transparent hover:border-st-line'}`}
+                    className={`relative block h-14 w-14 overflow-hidden rounded-sm border-2 bg-st-ink-2 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-st-teal ${i === active ? 'border-st-ink' : 'border-transparent hover:border-st-line'}`}
                   >
                     {g.type === 'video' ? (
                       <span className="flex h-full w-full items-center justify-center text-white">▶</span>

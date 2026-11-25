@@ -49,13 +49,14 @@ export function HeroCarousel({ banners }: { banners: StoreBanner[] }) {
             <div className="absolute inset-0 bg-gradient-to-r from-st-ink/55 via-transparent to-transparent" />
             {active && (
               <div key={`copy-${banner.id}`} className="store-rise absolute inset-x-0 bottom-0 mx-auto w-full max-w-7xl px-4 pb-[5.5rem] sm:px-6">
+                <span className="store-sheen-rule mb-3 block h-[2px] w-10" />
                 <h1 className="font-display max-w-[18ch] text-[clamp(1.5rem,3.6vw,2.7rem)] font-semibold leading-[1.05] text-balance">
                   {banner.title}
                 </h1>
                 {banner.linkUrl && (
                   <Link
                     href={banner.linkUrl}
-                    className="mt-4 inline-flex items-center rounded-full bg-white px-5 py-2 text-sm font-semibold text-st-ink transition-colors hover:bg-st-dove focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                    className="mt-4 inline-flex items-center rounded-sm bg-white px-5 py-2 text-sm font-semibold text-st-ink transition-colors hover:bg-st-dove focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                   >
                     Shop now
                   </Link>

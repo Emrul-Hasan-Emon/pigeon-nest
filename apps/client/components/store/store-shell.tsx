@@ -12,8 +12,9 @@ import type { CategoryNode } from '@/types/storefront';
 
 export function Wordmark({ className = '' }: { className?: string }) {
   return (
-    <span className={`font-display text-xl font-semibold tracking-tight ${className}`}>
-      Pigeon Nest
+    <span className={`inline-flex flex-col ${className}`}>
+      <span className="font-display text-xl font-semibold tracking-tight">Pigeon Nest</span>
+      <span className="store-sheen-rule mt-0.5 h-[2px] w-full" />
     </span>
   );
 }

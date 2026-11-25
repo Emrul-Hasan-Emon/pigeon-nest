@@ -235,8 +235,8 @@ export function WishlistList() {
             <option key={id} value={id}>{name}</option>
           ))}
         </select>
-        <input type="number" min={0} step="0.01" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} placeholder="Min ৳" aria-label="Lowest price" className={`${field} w-24`} />
-        <input type="number" min={0} step="0.01" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} placeholder="Max ৳" aria-label="Highest price" className={`${field} w-24`} />
+        <input type="number" min={0} step="0.01" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} placeholder="Min $" aria-label="Lowest price" className={`${field} w-24`} />
+        <input type="number" min={0} step="0.01" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} placeholder="Max $" aria-label="Highest price" className={`${field} w-24`} />
         {filtered && (
           <button
             type="button"

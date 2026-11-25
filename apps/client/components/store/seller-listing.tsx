@@ -123,7 +123,7 @@ export function SellerListing() {
             <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {data.results.map((s) => (
                 <li key={s.id}>
-                  <Link href={`/sellers/${s.id}`} className="flex items-center gap-3 rounded-xl border border-st-line bg-white p-3 transition-shadow hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-st-teal">
+                  <Link href={`/sellers/${s.id}`} className="flex items-center gap-3 rounded-xl border border-st-line bg-white p-3 transition-colors hover:border-st-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-st-teal">
                     <SellerAvatar name={s.name} url={s.avatarUrl} size={44} />
                     <div className="min-w-0">
                       <p className="truncate font-medium text-st-ink">{s.name}</p>

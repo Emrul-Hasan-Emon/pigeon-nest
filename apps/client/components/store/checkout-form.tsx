@@ -16,6 +16,7 @@ import { useCart } from '@/lib/cart/cart-context';
 import { COUNTRIES } from '@/lib/countries';
 import type { AddressView } from '@/types/address';
 import type { DeliveryType } from '@/types/order';
+import { roundMoney } from '@/lib/money';
 
 const input =
   'w-full rounded-lg border border-st-line bg-white px-3 py-2 text-sm text-st-ink placeholder:text-st-slate/70 focus:border-st-teal focus:outline-none focus:ring-2 focus:ring-st-teal/20';
@@ -125,7 +126,7 @@ export function CheckoutForm({ cartId }: { cartId: number }) {
   const gateway = data?.paymentGateways.find((g) => g.id === gatewayId) ?? null;
   const delivery = data?.deliveryOptions.find((d) => d.deliveryType === deliveryType) ?? null;
   const subtotal = data?.cart.totals.payableTotal ?? 0;
-  const payable = subtotal + (delivery?.charge ?? 0);
+  const payable = roundMoney(subtotal + (delivery?.charge ?? 0));
   const countryName = useMemo(() => COUNTRIES.find((c) => c.code === countryCode)?.name, [countryCode]);
 
   async function submit(e: React.FormEvent) {

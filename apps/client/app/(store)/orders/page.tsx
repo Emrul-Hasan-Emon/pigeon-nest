@@ -77,7 +77,7 @@ export default function MyOrdersPage() {
           <ul className="space-y-3">
             {data.results.map((o) => (
               <li key={o.id}>
-                <Link href={`/orders/${o.id}`} className="block rounded-xl border border-st-line bg-white p-4 transition-shadow hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-st-teal">
+                <Link href={`/orders/${o.id}`} className="block rounded-xl border border-st-line bg-white p-4 transition-colors hover:border-st-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-st-teal">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <p className="font-display font-semibold text-st-ink">{o.orderNumber}</p>
                     <div className="flex gap-2"><OrderBadge status={o.status} /><PaymentBadge status={o.paymentStatus} /></div>

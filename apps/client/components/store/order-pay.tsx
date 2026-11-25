@@ -58,7 +58,7 @@ function MarkPaidForm({ order, onChanged }: { order: OrderDetail; onChanged: () 
     const value = Number(amount);
     if (!amount || Number.isNaN(value) || value <= 0) return setError('Enter how much you paid.');
     if (!txn.trim()) return setError('Write the transaction ID.');
-    if (!method.trim()) return setError('Say how you paid (bKash, Nagad, bank…).');
+    if (!method.trim()) return setError('Say how you paid (PayPal, Wise, bank…).');
     if (files.length === 0) return setError('Attach a screenshot or a file that proves your payment.');
     setBusy(true);
     try {
@@ -74,9 +74,9 @@ function MarkPaidForm({ order, onChanged }: { order: OrderDetail; onChanged: () 
     <form onSubmit={submit} className="space-y-3">
       <p className="text-sm text-st-slate">Already paid for this order before it arrives? Send proof and the seller will check it. <span className="font-semibold text-st-ink">You can send only one request for an order.</span></p>
       <div className="grid gap-3 sm:grid-cols-2">
-        <label className="text-sm font-medium text-st-ink">Amount you paid (৳)<input inputMode="decimal" className={input} value={amount} onChange={(e) => setAmount(e.target.value)} /></label>
+        <label className="text-sm font-medium text-st-ink">Amount you paid (USD)<input inputMode="decimal" className={input} value={amount} onChange={(e) => setAmount(e.target.value)} /></label>
         <label className="text-sm font-medium text-st-ink">Transaction ID<input className={input} maxLength={120} value={txn} onChange={(e) => setTxn(e.target.value)} placeholder="From your payment message" /></label>
-        <label className="text-sm font-medium text-st-ink">How you paid<input className={input} maxLength={60} value={method} onChange={(e) => setMethod(e.target.value)} placeholder="bKash, Nagad, bank…" /></label>
+        <label className="text-sm font-medium text-st-ink">How you paid<input className={input} maxLength={60} value={method} onChange={(e) => setMethod(e.target.value)} placeholder="PayPal, Wise, bank…" /></label>
         <label className="text-sm text-st-ink">Number you paid from (optional)<input className={input} maxLength={40} value={from} onChange={(e) => setFrom(e.target.value)} /></label>
       </div>
       <label className="block text-sm text-st-ink">Note (optional)<input className={input} maxLength={1000} value={note} onChange={(e) => setNote(e.target.value)} /></label>

@@ -77,7 +77,7 @@ export function MyReturns() {
           <ul className="space-y-3">
             {data.results.map((r) => (
               <li key={r.id}>
-                <Link href={`/returns/${r.id}`} className="block rounded-xl border border-st-line bg-white p-4 transition-shadow hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-st-teal">
+                <Link href={`/returns/${r.id}`} className="block rounded-xl border border-st-line bg-white p-4 transition-colors hover:border-st-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-st-teal">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <p className="font-medium text-st-ink">{r.returnNumber} <span className="font-normal text-st-slate">· order {r.order.orderNumber}</span></p>
                     <ReturnStateBadge status={r.status} />

@@ -210,9 +210,9 @@ export function ProductListing({
           </button>
         )}
         <form onSubmit={applyPrice} className="flex items-center gap-1.5">
-          <input aria-label="Minimum price" inputMode="decimal" placeholder="Min ৳" value={minInput} onChange={(e) => setMinInput(e.target.value)} className={`${control} w-24`} />
+          <input aria-label="Minimum price" inputMode="decimal" placeholder="Min $" value={minInput} onChange={(e) => setMinInput(e.target.value)} className={`${control} w-24`} />
           <span className="text-st-slate" aria-hidden>–</span>
-          <input aria-label="Maximum price" inputMode="decimal" placeholder="Max ৳" value={maxInput} onChange={(e) => setMaxInput(e.target.value)} className={`${control} w-24`} />
+          <input aria-label="Maximum price" inputMode="decimal" placeholder="Max $" value={maxInput} onChange={(e) => setMaxInput(e.target.value)} className={`${control} w-24`} />
           <button type="submit" className="h-9 rounded-full bg-st-ink px-4 text-sm font-medium text-white transition-colors hover:bg-st-teal">Apply</button>
         </form>
         {filtered && (
@@ -237,7 +237,7 @@ export function ProductListing({
       </p>
 
       {failed ? (
-        <div className="rounded-xl border border-st-line bg-white px-6 py-14 text-center">
+        <div className="rounded-sm border border-st-line bg-white px-6 py-14 text-center">
           <p className="font-display text-lg font-semibold">We couldn&apos;t load products</p>
           <p className="mt-1 text-sm text-st-slate">Check your connection and try again.</p>
           <button type="button" onClick={() => setAttempt((a) => a + 1)} className="mt-4 rounded-full bg-st-ink px-5 py-2 text-sm font-semibold text-white hover:bg-st-teal">Try again</button>
@@ -245,11 +245,11 @@ export function ProductListing({
       ) : loading && !data ? (
         <div className="store-skeleton grid grid-cols-2 gap-x-3 gap-y-5 sm:grid-cols-4 lg:grid-cols-6" aria-busy="true">
           {Array.from({ length: 12 }).map((_, i) => (
-            <div key={i} className="aspect-square rounded-xl bg-st-line" />
+            <div key={i} className="aspect-square rounded-sm bg-st-line" />
           ))}
         </div>
       ) : data && data.results.length === 0 ? (
-        <div className="rounded-xl border border-st-line bg-white px-6 py-14 text-center">
+        <div className="rounded-sm border border-st-line bg-white px-6 py-14 text-center">
           <p className="font-display text-lg font-semibold">{filtered ? 'No products match these filters' : 'Nothing here yet'}</p>
           <p className="mt-1 text-sm text-st-slate">{filtered ? 'Try a different search, or widen the price range.' : 'New listings will show up here.'}</p>
           {filtered && (
@@ -260,8 +260,8 @@ export function ProductListing({
         data && (
           <div className={loading ? 'opacity-60 transition-opacity' : 'transition-opacity'}>
             <div className="grid grid-cols-2 gap-x-3 gap-y-5 sm:grid-cols-4 sm:gap-x-4 lg:grid-cols-6">
-              {data.results.map((p) => (
-                <ProductCard key={p.id} product={p} />
+              {data.results.map((p, i) => (
+                <ProductCard key={p.id} product={p} lot={from + i} />
               ))}
             </div>
             <Pagination page={data.page} totalPages={data.totalPages} onChange={goToPage} />
