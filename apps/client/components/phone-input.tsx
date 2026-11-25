@@ -8,7 +8,7 @@ import {
   type CountryCode,
 } from 'libphonenumber-js';
 
-const DEFAULT_COUNTRY: CountryCode = 'BD';
+const DEFAULT_COUNTRY: CountryCode = 'US';
 
 const noopSubscribe = () => () => undefined;
 /** false during SSR/hydration, true afterwards (no setState-in-effect needed). */
@@ -27,7 +27,7 @@ function countryName(code: CountryCode): string {
 
 /**
  * International phone field: a country dropdown plus the national number.
- * Reports the number in E.164 (e.g. +8801712345678) once it is valid, or an
+ * Reports the number in E.164 (e.g. +14155552671) once it is valid, or an
  * empty string while it is incomplete/invalid.
  */
 export function PhoneInput({
