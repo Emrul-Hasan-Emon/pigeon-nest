@@ -1,3 +1,4 @@
+import { PushService } from '../../push/services/push.service';
 import { ConflictException, Injectable } from '@nestjs/common';
 import { AuthUserType } from '../../database/enums/auth-user-type.enum';
 import { ReturnStatus } from '../../database/enums/return-status.enum';
@@ -12,6 +13,7 @@ export class UserReturnService {
   constructor(
     private readonly common: CommonReturnService,
     private readonly views: ReturnViewService,
+    private readonly push: PushService,
   ) {}
 
   list(userId: number, query: ListReturnsQueryDto) {
@@ -29,7 +31,9 @@ export class UserReturnService {
 
   async create(user: Actor, dto: CreateReturnDto, uploads?: Express.Multer.File[]) {
     const id = await this.common.create(dto, uploads, user);
-    return this.get(user.id, id);
+    const view = await this.get(user.id, id);
+    this.push.notifySeller(view.seller.id, { title: 'Return requested', body: `${view.returnNumber}: ${view.reason ?? 'a buyer wants to return'}`, data: { route: `/more/returns/${id}` } });
+    return view;
   }
 
   /** The customer withdraws a request that nobody has answered yet. */
