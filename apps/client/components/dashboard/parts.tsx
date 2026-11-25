@@ -3,10 +3,9 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { ArrowRight, CircleCheck, Feather } from 'lucide-react';
-import { money } from '@/components/orders/ui';
 import type { DashboardPoint, DashboardRange, DashboardStatusCount } from '@/types/dashboard';
+import { formatMoney } from '@/lib/money';
 
-export const taka = (n: number) => `৳${money(n)}`;
 
 const RANGES: { value: DashboardRange; label: string }[] = [
   { value: '7d', label: '7 days' },
@@ -208,9 +207,9 @@ export function SalesChart({ series, bucket }: { series: DashboardPoint[]; bucke
             <>
               <span className="font-medium text-foreground">{labelFor(shown.date, bucket)}</span>
               <span className="mx-1.5">·</span>
-              {taka(shown.grossSales)} sales
+              {formatMoney(shown.grossSales)} sales
               <span className="mx-1.5">·</span>
-              {taka(shown.refunds)} refunds
+              {formatMoney(shown.refunds)} refunds
               <span className="mx-1.5">·</span>
               {shown.orders} {shown.orders === 1 ? 'order' : 'orders'}
             </>
@@ -226,8 +225,8 @@ export function SalesChart({ series, bucket }: { series: DashboardPoint[]; bucke
 
       <div className="relative mt-1 pl-12">
         <div className="pointer-events-none absolute inset-y-0 left-0 flex w-10 flex-col justify-between pb-0.5 text-right text-[11px] text-muted-foreground">
-          <span>{empty ? '' : taka(top)}</span>
-          <span>{empty ? '' : taka(top / 2)}</span>
+          <span>{empty ? '' : formatMoney(top)}</span>
+          <span>{empty ? '' : formatMoney(top / 2)}</span>
           <span>0</span>
         </div>
         <svg
@@ -386,7 +385,7 @@ export function Ranking({ rows, empty }: { rows: { key: string | number; name: s
           <div className="min-w-0 flex-1">
             <div className="flex items-baseline justify-between gap-3">
               {r.href ? <Link href={r.href} className="truncate font-medium text-foreground hover:text-primary">{r.name}</Link> : <span className="truncate font-medium text-foreground">{r.name}</span>}
-              <span className="shrink-0 tabular-nums text-foreground">{taka(r.amount)}</span>
+              <span className="shrink-0 tabular-nums text-foreground">{formatMoney(r.amount)}</span>
             </div>
             <div className="mt-1.5 h-1.5 rounded-full bg-muted"><div className="h-1.5 rounded-full bg-gold" style={{ width: `${(r.amount / max) * 100}%` }} /></div>
             <p className="mt-1 text-xs text-muted-foreground">{r.detail}</p>

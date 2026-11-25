@@ -6,7 +6,8 @@ import { ApiError } from '@/lib/api/http';
 import type { AdminDashboard as Data, DashboardRange } from '@/types/dashboard';
 import { adminTodoItems } from './admin-todo';
 import { DashboardSkeleton } from './dashboard-skeleton';
-import { DashboardHeader, Definition, HeroKpi, Panel, Ranking, rangeLabel, SalesChart, StatStrip, StatusBars, taka, Todo } from './parts';
+import { DashboardHeader, Definition, HeroKpi, Panel, Ranking, rangeLabel, SalesChart, StatStrip, StatusBars, Todo } from './parts';
+import { formatMoney } from '@/lib/money';
 
 export function AdminDashboardView() {
   const [range, setRange] = useState<DashboardRange>('30d');
@@ -43,14 +44,14 @@ export function AdminDashboardView() {
           <div className="grid gap-5 lg:grid-cols-3">
             <HeroKpi
               label="Net sales"
-              value={taka(t.netSales)}
+              value={formatMoney(t.netSales)}
               change={t.change.netSales}
               note="Nothing to compare with yet"
               spark={data.series.map((p) => p.grossSales - p.refunds)}
               support={[
-                { label: 'Sales', value: taka(t.grossSales) },
-                { label: 'Refunds', value: `${taka(t.refunds.amount)} (${t.refunds.count})` },
-                { label: 'System commission earned', value: taka(t.commission.net) },
+                { label: 'Sales', value: formatMoney(t.grossSales) },
+                { label: 'Refunds', value: `${formatMoney(t.refunds.amount)} (${t.refunds.count})` },
+                { label: 'System commission earned', value: formatMoney(t.commission.net) },
               ]}
             />
             <Panel title="Sales over time" note="Sales and refunds, day by day." className="lg:col-span-2">
@@ -65,16 +66,16 @@ export function AdminDashboardView() {
                 stats={[
                   { label: 'Orders placed', value: String(t.orders.placed), change: t.change.orders },
                   { label: 'Paid orders', value: String(t.orders.paid), change: t.change.paidOrders },
-                  { label: 'Average order', value: taka(t.averageOrder), change: t.change.averageOrder },
+                  { label: 'Average order', value: formatMoney(t.averageOrder), change: t.change.averageOrder },
                   { label: 'Return rate', value: `${t.returnRate}%`, hint: 'Of paid orders' },
                 ]}
               />
               <StatStrip
                 title="System commission"
                 stats={[
-                  { label: 'Earned this period', value: taka(t.commission.net), change: t.change.netCommission },
-                  { label: 'Owed by sellers', value: taka(data.balances.due), hint: `${data.balances.sellersOwing} ${data.balances.sellersOwing === 1 ? 'seller' : 'sellers'} owing` },
-                  { label: 'Paid in so far', value: taka(data.balances.paid), hint: `${taka(data.balances.total)} earned in total` },
+                  { label: 'Earned this period', value: formatMoney(t.commission.net), change: t.change.netCommission },
+                  { label: 'Owed by sellers', value: formatMoney(data.balances.due), hint: `${data.balances.sellersOwing} ${data.balances.sellersOwing === 1 ? 'seller' : 'sellers'} owing` },
+                  { label: 'Paid in so far', value: formatMoney(data.balances.paid), hint: `${formatMoney(data.balances.total)} earned in total` },
                 ]}
               />
             </div>
@@ -99,7 +100,7 @@ export function AdminDashboardView() {
             <Panel title="Top sellers" note="By sales in this period.">
               <Ranking
                 empty="No sales in this period."
-                rows={data.topSellers.map((s) => ({ key: s.id, name: s.name, detail: `${s.orders} paid ${s.orders === 1 ? 'order' : 'orders'} · system commission ${taka(s.commission)}`, amount: s.grossSales, href: `/admin/sellers/${s.id}` }))}
+                rows={data.topSellers.map((s) => ({ key: s.id, name: s.name, detail: `${s.orders} paid ${s.orders === 1 ? 'order' : 'orders'} · system commission ${formatMoney(s.commission)}`, amount: s.grossSales, href: `/admin/sellers/${s.id}` }))}
               />
             </Panel>
             <Panel title="Top products" note="By sales, returned items left out.">

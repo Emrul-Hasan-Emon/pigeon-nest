@@ -11,7 +11,8 @@ import { WishlistInsightsView } from '@/components/wishlist/seller-wishlist-insi
 import type { DashboardRange, SellerOverview as Data } from '@/types/dashboard';
 import { sellerTodoItems } from './seller-todo';
 import { DashboardSkeleton } from './dashboard-skeleton';
-import { ActionTiles, DashboardHeader, Definition, HeroKpi, Panel, Ranking, rangeLabel, SalesChart, StatStrip, StatusBars, taka } from './parts';
+import { ActionTiles, DashboardHeader, Definition, HeroKpi, Panel, Ranking, rangeLabel, SalesChart, StatStrip, StatusBars } from './parts';
+import { formatMoney } from '@/lib/money';
 
 /** The whole seller dashboard, from one API call: sales, earnings, to-do list, product counts and wishlist demand. */
 export function SellerOverviewView({ title = 'Dashboard' }: { title?: string }) {
@@ -63,14 +64,14 @@ export function SellerOverviewView({ title = 'Dashboard' }: { title?: string }) 
           <div className="grid gap-5 lg:grid-cols-3">
             <HeroKpi
               label="You keep"
-              value={taka(t.sellerEarnings)}
+              value={formatMoney(t.sellerEarnings)}
               change={t.change.sellerEarnings}
               note="After system commission and refunds"
               spark={data.series.map((p) => p.grossSales - p.refunds)}
               support={[
-                { label: 'Sales', value: taka(t.grossSales) },
-                { label: 'System commission', value: taka(t.commission.net) },
-                { label: 'Refunds', value: `${taka(t.refunds.amount)} (${t.refunds.count})` },
+                { label: 'Sales', value: formatMoney(t.grossSales) },
+                { label: 'System commission', value: formatMoney(t.commission.net) },
+                { label: 'Refunds', value: `${formatMoney(t.refunds.amount)} (${t.refunds.count})` },
               ]}
             />
             <Panel title="Sales over time" note="Sales and refunds, day by day." className="lg:col-span-2">
@@ -85,16 +86,16 @@ export function SellerOverviewView({ title = 'Dashboard' }: { title?: string }) 
                 stats={[
                   { label: 'Orders placed', value: String(t.orders.placed), change: t.change.orders },
                   { label: 'Paid orders', value: String(t.orders.paid), change: t.change.paidOrders },
-                  { label: 'Average order', value: taka(t.averageOrder), change: t.change.averageOrder },
+                  { label: 'Average order', value: formatMoney(t.averageOrder), change: t.change.averageOrder },
                   { label: 'Return rate', value: `${t.returnRate}%`, hint: 'Of paid orders' },
                 ]}
               />
               <StatStrip
                 title="System commission"
                 stats={[
-                  { label: "On this period's sales", value: taka(t.commission.net), change: t.change.netCommission, hint: rate ? `Your rate: ${rate}` : undefined },
-                  { label: 'You owe', value: taka(data.balance.due), hint: 'The marketplace, right now' },
-                  { label: 'Paid so far', value: taka(data.balance.paid), hint: `${taka(data.balance.total)} charged in total` },
+                  { label: "On this period's sales", value: formatMoney(t.commission.net), change: t.change.netCommission, hint: rate ? `Your rate: ${rate}` : undefined },
+                  { label: 'You owe', value: formatMoney(data.balance.due), hint: 'The marketplace, right now' },
+                  { label: 'Paid so far', value: formatMoney(data.balance.paid), hint: `${formatMoney(data.balance.total)} charged in total` },
                 ]}
               />
             </div>
