@@ -46,7 +46,18 @@ class ApiClient {
   final Ref _ref;
   final Dio _dio;
 
-  Future<T> get<T>(String path, {Map<String, dynamic>? query}) => _run(() => _dio.get(path, queryParameters: query));
+  /// A read is tried again twice (after 1 and 2 seconds) when the network drops or is slow.
+  /// Writes are never repeated: the server may already have done them.
+  Future<T> get<T>(String path, {Map<String, dynamic>? query}) async {
+    for (var attempt = 0;; attempt++) {
+      try {
+        return await _run<T>(() => _dio.get(path, queryParameters: query));
+      } on ApiException catch (e) {
+        if (!e.isNetwork || attempt >= 2) rethrow;
+        await Future<void>.delayed(Duration(seconds: attempt + 1));
+      }
+    }
+  }
   Future<T> post<T>(String path, {Object? body}) => _run(() => _dio.post(path, data: body));
   Future<T> patch<T>(String path, {Object? body}) => _run(() => _dio.patch(path, data: body));
   Future<T> put<T>(String path, {Object? body}) => _run(() => _dio.put(path, data: body));

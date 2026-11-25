@@ -9,6 +9,9 @@ class ApiException implements Exception {
 
   bool get isUnauthorized => statusCode == 401;
 
+  /// The request never got an answer (no internet, or the server was too slow). Safe to try a read again.
+  bool get isNetwork => statusCode == null;
+
   factory ApiException.from(Object error) {
     if (error is ApiException) return error;
     if (error is DioException) {
@@ -21,6 +24,9 @@ class ApiException implements Exception {
       }
       if (error.type == DioExceptionType.connectionError || error.type == DioExceptionType.connectionTimeout) {
         return ApiException('We could not reach the server. Check your internet and try again.');
+      }
+      if (error.type == DioExceptionType.receiveTimeout || error.type == DioExceptionType.sendTimeout) {
+        return ApiException('The server is slow to answer. Please try again.');
       }
       return ApiException('Something went wrong. Please try again.', statusCode: status);
     }
