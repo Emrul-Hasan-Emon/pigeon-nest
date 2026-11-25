@@ -302,14 +302,14 @@ address, so editing or deleting one never changes an order.
 
 | Method | Path | What |
 |---|---|---|
-| `GET` | `/addresses` | Your addresses, default first, then newest: `{ "results": [...] }` |
-| `POST` | `/addresses` | Add one |
-| `GET` | `/addresses/{id}` | One |
-| `PATCH` | `/addresses/{id}` | Change fields |
-| `DELETE` | `/addresses/{id}` | Delete (`204`) |
+| `GET` | `/profile/addresses` | Your addresses, default first, then newest: `{ "results": [...] }` |
+| `POST` | `/profile/addresses` | Add one |
+| `GET` | `/profile/addresses/{id}` | One |
+| `PATCH` | `/profile/addresses/{id}` | Change fields |
+| `DELETE` | `/profile/addresses/{id}` | Delete (`204`) |
 
 ```json
-POST /addresses
+POST /profile/addresses
 { "recipientName": "Aisha Rahman", "phone": "+8801712345678", "countryCode": "BD",
   "state": "Dhaka Division", "city": "Dhaka",
   "address": "Flat 4B, Road 9, Banani, near the lake gate", "zipCode": "1213", "isDefault": true }
@@ -344,7 +344,7 @@ Rules:
 At checkout (the screen): your saved addresses are offered in a list and the default is filled in. Pick
 another to fill the fields, or type a new address. When what is typed is not a saved address (or you
 changed a saved one), a **Save this address** button appears; pressing it saves it to your address book
-(`POST /addresses`) and selects it. Guests have no address book and just type an address.
+(`POST /profile/addresses`) and selects it. Guests have no address book and just type an address.
 
 ## 9. Endpoint summary
 
@@ -367,8 +367,8 @@ All under `/v1/api/user`.
 | GET | `/order/{id}` | guest or customer | One order in full |
 | POST | `/order/{id}/cancel` | guest or customer | Cancel while pending |
 | GET | `/order/track` | anyone | Find an order by number and phone |
-| GET/POST | `/addresses` | customer | List / add addresses |
-| GET/PATCH/DELETE | `/addresses/{id}` | customer | One address |
+| GET/POST | `/profile/addresses` | customer | List / add addresses |
+| GET/PATCH/DELETE | `/profile/addresses/{id}` | customer | One address |
 
 ## 10. Errors
 

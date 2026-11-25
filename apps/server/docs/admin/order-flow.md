@@ -265,7 +265,7 @@ Typical phone order. The screen does these calls in order.
 | 1. Find the customer | `GET /order/customers?q=<email or mobile>` | Exact email (any case) or a mobile in any common format. Returns up to 5 `{ id, name, email, phone, canOrder, status }`. Empty list = no account; use a walk-in customer. A suspended account is returned with `canOrder: false` |
 | 2. Pick the seller | `GET /seller?search=&status=approved&activeStatus=active` | The normal seller list |
 | 3. See their products | `GET /order/catalog?sellerId=5&search=` | Approved, active products with active variants: `id`, `label`, live `price`, `payable`, `quantity` |
-| 4. Saved address (optional) | `GET /users/{userId}/addresses` | The customer's saved addresses (default first); picking one fills the address fields. If you type an address that is not saved yet, `POST /users/{userId}/addresses` saves it to their book and the screen selects it |
+| 4. Saved address (optional) | `GET /user/{userId}/addresses` | The customer's saved addresses (default first); picking one fills the address fields. If you type an address that is not saved yet, `POST /user/{userId}/addresses` saves it to their book and the screen selects it |
 | 5. Delivery and payment choices | `GET /order/options?countryCode=BD&subtotal=6400` | `countries`, `deliveryOptions` (charge, days, zone, payable) and active `paymentGateways` |
 | 6. Create | `POST /order` | below |
 
@@ -314,11 +314,11 @@ Same rules as the customer's own address book (see `docs/user/order-flow.md` sec
 
 | Method | Path |
 |---|---|
-| `GET` | `/users/{userId}/addresses` |
-| `POST` | `/users/{userId}/addresses` |
-| `GET` | `/users/{userId}/addresses/{id}` |
-| `PATCH` | `/users/{userId}/addresses/{id}` |
-| `DELETE` | `/users/{userId}/addresses/{id}` (`204`) | **Switched off for now** (404) |
+| `GET` | `/user/{userId}/addresses` |
+| `POST` | `/user/{userId}/addresses` |
+| `GET` | `/user/{userId}/addresses/{id}` |
+| `PATCH` | `/user/{userId}/addresses/{id}` |
+| `DELETE` | `/user/{userId}/addresses/{id}` (`204`) | **Switched off for now** (404) |
 
 An address of another user is `404` through this user's path. Changes are recorded as made by the
 admin. An admin can manage a suspended customer's addresses.
@@ -349,8 +349,8 @@ All under `/v1/api/admin`.
 | POST | `/order/{id}/payments/{paymentId}/reverse` | Reverse a payment |
 | POST | `/order/{id}/updates` | Post an update |
 | GET | `/order/payments`, `/order/payments/{id}` | Payments |
-| GET/POST | `/users/{userId}/addresses` | A customer's addresses |
-| GET/PATCH | `/users/{userId}/addresses/{id}` | One address (DELETE is switched off) |
+| GET/POST | `/user/{userId}/addresses` | A customer's addresses |
+| GET/PATCH | `/user/{userId}/addresses/{id}` | One address (DELETE is switched off) |
 
 ## 12. Errors
 
