@@ -11,9 +11,14 @@ import { SellerProduct } from './seller-product.entity';
 import { SellerProductSkuVariant } from './seller-product-sku-variant.entity';
 import { SellerProductSkuParent } from './seller-product-sku-parent.entity';
 import { DiscountType } from '../../enums/discount-type.enum';
+import { DEFAULT_CURRENCY } from '../../enums/currency';
 
 @Entity()
 export class SellerProductSku extends BaseEntity {
+  // ISO 4217 code of every amount on this row.
+  @Column({ type: 'char', length: 3, default: DEFAULT_CURRENCY })
+  currency: string;
+
   @Index()
   @Column()
   sellerProductId: number;

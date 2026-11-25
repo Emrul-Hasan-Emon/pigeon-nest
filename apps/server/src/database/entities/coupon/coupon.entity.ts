@@ -2,9 +2,14 @@ import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 import { BaseEntity } from '../base.entity';
 import { Seller } from '../seller/seller.entity';
 import { CouponType } from '../../enums/coupon-type.enum';
+import { DEFAULT_CURRENCY } from '../../enums/currency';
 
 @Entity()
 export class Coupon extends BaseEntity {
+  // ISO 4217 code of every amount on this row.
+  @Column({ type: 'char', length: 3, default: DEFAULT_CURRENCY })
+  currency: string;
+
   @Column({ unique: true })
   code: string;
 

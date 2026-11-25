@@ -7,6 +7,7 @@ import { SellerProductSku } from '../product/seller-product-sku.entity';
 import { Order } from '../order/order.entity';
 import { AuthUserType } from '../../enums/auth-user-type.enum';
 import { ProposalParty, SkuPriceProposalStatus } from '../../enums/sku-price-proposal.enums';
+import { DEFAULT_CURRENCY } from '../../enums/currency';
 
 // A buyer's own price for one SKU, private to that buyer and the seller.
 // One row is the whole negotiation: `price` and `quantity` hold the latest
@@ -23,6 +24,10 @@ import { ProposalParty, SkuPriceProposalStatus } from '../../enums/sku-price-pro
 @Index('IDX_sku_price_proposal_seller_status', ['sellerId', 'status'])
 @Index('IDX_sku_price_proposal_user_status', ['userId', 'status'])
 export class SkuPriceProposal extends BaseEntity {
+  // ISO 4217 code of every amount on this row.
+  @Column({ type: 'char', length: 3, default: DEFAULT_CURRENCY })
+  currency: string;
+
   // The buyer.
   @Column()
   userId: number;
