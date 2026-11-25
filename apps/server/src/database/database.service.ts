@@ -29,6 +29,7 @@ import { OrderRefund } from './entities/order/order-refund.entity';
 import { OrderRefundStatusHistory } from './entities/order/order-refund-status-history.entity';
 import { PaymentClaim } from './entities/payment/payment-claim.entity';
 import { SellerPaymentAccount } from './entities/payment/seller-payment-account.entity';
+import { SellerDevice } from './entities/seller/seller-device.entity';
 import { SellerProductSkuParent } from './entities/product/seller-product-sku-parent.entity';
 import { SellerProductMedia } from './entities/product-media/seller-product-media.entity';
 import { Order } from './entities/order/order.entity';
@@ -89,6 +90,7 @@ export class DatabaseService implements OnApplicationBootstrap {
   orderRefund: Repository<OrderRefund>;
   orderRefundStatusHistory: Repository<OrderRefundStatusHistory>;
   sellerPaymentAccount: Repository<SellerPaymentAccount>;
+  sellerDevice: Repository<SellerDevice>;
   sellerProductMedia: Repository<SellerProductMedia>;
   order: Repository<Order>;
   orderItem: Repository<OrderItem>;
@@ -164,6 +166,7 @@ export class DatabaseService implements OnApplicationBootstrap {
     @InjectRepository(OrderRefund) private orderRefundRepository: Repository<OrderRefund>,
     @InjectRepository(OrderRefundStatusHistory) private orderRefundStatusHistoryRepository: Repository<OrderRefundStatusHistory>,
     @InjectRepository(SellerPaymentAccount) private sellerPaymentAccountRepository: Repository<SellerPaymentAccount>,
+    @InjectRepository(SellerDevice) private sellerDeviceRepository: Repository<SellerDevice>,
     @InjectRepository(SellerProductMedia)
     private sellerProductMediaRepository: Repository<SellerProductMedia>,
     @InjectRepository(Order) private orderRepository: Repository<Order>,
@@ -245,6 +248,7 @@ export class DatabaseService implements OnApplicationBootstrap {
     this.orderRefund = this.orderRefundRepository;
     this.orderRefundStatusHistory = this.orderRefundStatusHistoryRepository;
     this.sellerPaymentAccount = this.sellerPaymentAccountRepository;
+    this.sellerDevice = this.sellerDeviceRepository;
     this.sellerProductMedia = this.sellerProductMediaRepository;
     this.order = this.orderRepository;
     this.orderItem = this.orderItemRepository;
