@@ -12,6 +12,7 @@ import type { ProposalDetail, ProposalHistoryAction, ProposalHistoryEntry } from
 import { ProposalStatusBadge } from './proposal-list';
 import { LoadingBlock } from '@/components/ui/skeleton';
 import { useBreadcrumbTitle } from '@/components/ui/breadcrumbs';
+import { roundMoney } from '@/lib/money';
 
 const section = 'rounded-xl border border-border bg-card p-4 shadow-sm';
 const textarea = 'w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:border-foreground focus:outline-none';
@@ -92,7 +93,7 @@ function Timeline({ history }: { history: ProposalHistoryEntry[] }) {
     <ol className="space-y-4 border-l border-border pl-5">
       {history.map((h, i) => {
         const prev = history[i - 1];
-        const moved = prev && prev.price !== h.price ? h.price - prev.price : 0;
+        const moved = prev && prev.price !== h.price ? roundMoney(h.price - prev.price) : 0;
         return (
           <li key={h.id} className="relative text-sm">
             <span className="absolute -left-[26px] top-1.5 h-2.5 w-2.5 rounded-full bg-primary" />
@@ -102,7 +103,7 @@ function Timeline({ history }: { history: ProposalHistoryEntry[] }) {
               {moved !== 0 && <span className={`ml-1 text-xs ${moved < 0 ? 'text-emerald-700' : 'text-amber-700'}`}>({moved < 0 ? '↓' : '↑'} {money(Math.abs(moved))} on the last figure)</span>}
             </p>
             <p className="text-xs text-muted-foreground">
-              {formatDateTime(h.createdAt)} · total {money(h.price * h.quantity)} · SKU price then {money(h.skuPriceAtTime)}
+              {formatDateTime(h.createdAt)} · total {money(roundMoney(h.price * h.quantity))} · SKU price then {money(h.skuPriceAtTime)}
             </p>
             {h.note && <p className="mt-1 whitespace-pre-wrap text-muted-foreground">“{h.note}”</p>}
           </li>

@@ -96,8 +96,8 @@ export function AdminProposalList({ userId, sellerId }: { userId?: number; selle
       <div className="mb-4 flex flex-wrap items-end gap-3">
         <Lbl text="Offered from (date)"><input type="date" className={field} value={f.from} onChange={set('from')} /></Lbl>
         <Lbl text="Offered until (date)"><input type="date" className={field} value={f.to} onChange={set('to')} /></Lbl>
-        <Lbl text="Offer at least (per item)"><input type="number" min={0} className={`${field} w-36`} placeholder="Lowest" value={f.minPrice} onChange={set('minPrice')} /></Lbl>
-        <Lbl text="Offer at most (per item)"><input type="number" min={0} className={`${field} w-36`} placeholder="Highest" value={f.maxPrice} onChange={set('maxPrice')} /></Lbl>
+        <Lbl text="Offer at least (per item)"><input type="number" min={0} step="0.01" className={`${field} w-36`} placeholder="Lowest" value={f.minPrice} onChange={set('minPrice')} /></Lbl>
+        <Lbl text="Offer at most (per item)"><input type="number" min={0} step="0.01" className={`${field} w-36`} placeholder="Highest" value={f.maxPrice} onChange={set('maxPrice')} /></Lbl>
         {scope.userId !== undefined && (
           <button type="button" onClick={() => setScope((s) => ({ ...s, userId: undefined }))} className="rounded-full bg-muted px-3 py-1 text-sm text-foreground hover:bg-border" title="Remove this filter">
             Buyer #{scope.userId} ✕

@@ -2,11 +2,11 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { Coins, Download, Package, ReceiptText, Trophy, TrendingUp, Undo2 } from 'lucide-react';
-import { money } from '@/components/orders/ui';
 import { LoadingBlock } from '@/components/ui/skeleton';
 import { downloadReportCsv } from '@/lib/csv';
 import { ApiError } from '@/lib/api/http';
 import type { ProductReportKind, Report, ReportColumn, ReportGroup, ReportKind, ReportName, ReportParams, ReturnReportBy, SellerRankSort } from '@/types/report';
+import { formatMoney } from '@/lib/money';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 const dayInput = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -63,7 +63,7 @@ const RANK_SORTS: { value: SellerRankSort; label: string }[] = [
 
 function show(value: string | number | null, kind: ReportKind) {
   if (value === null || value === '') return '—';
-  if (kind === 'money') return `৳${money(Number(value))}`;
+  if (kind === 'money') return `${formatMoney(Number(value))}`;
   if (kind === 'number') return Number(value).toLocaleString();
   if (kind === 'percent') return `${value}%`;
   if (kind === 'hours') return `${value} hours`;

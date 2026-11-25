@@ -311,22 +311,24 @@ export function ProductSkuEditor({
                     />
                   </SkuField>
                 )}
-                <SkuField label="Price (৳)" required hint="What one costs a customer.">
+                <SkuField label="Price (USD)" required hint="What one costs a customer.">
                   <input
                     className={inputClass}
                     type="number"
                     min={0}
-                    placeholder="e.g. 3800"
+                    step="0.01"
+                    placeholder="e.g. 38.00"
                     value={draft.price}
                     onChange={(event) => patch(draft.key, { price: event.target.value })}
                   />
                 </SkuField>
-                <SkuField label="Discounted price (৳)" hint="Lower price on offer. Leave empty for none.">
+                <SkuField label="Discounted price (USD)" hint="Lower price on offer. Leave empty for none.">
                   <input
                     className={inputClass}
                     type="number"
                     min={0}
-                    placeholder="e.g. 3500"
+                    step="0.01"
+                    placeholder="e.g. 35.00"
                     value={draft.discountedPrice}
                     onChange={(event) => patch(draft.key, { discountedPrice: event.target.value })}
                   />

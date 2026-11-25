@@ -18,6 +18,7 @@ import type { Product } from '@/types/product';
 import { LoadingBlock } from '@/components/ui/skeleton';
 import { BirdFactsCard, hasSkuBird, SkuBirdLine } from '@/components/products/bird-fields';
 import { useBreadcrumbTitle } from '@/components/ui/breadcrumbs';
+import { formatMoney } from '@/lib/money';
 
 export default function ProductDetailsPage() {
   const params = useParams<{ id: string }>();
@@ -247,8 +248,8 @@ export default function ProductDetailsPage() {
                       .map((v) => `${v.attribute.name}: ${v.attributeValue.name}`)
                       .join(', ') || '—'}
                   </td>
-                  <td>৳{sku.price}</td>
-                  <td>{sku.discountedPrice != null ? `৳${sku.discountedPrice}` : '—'}</td>
+                  <td>{formatMoney(sku.price)}</td>
+                  <td>{sku.discountedPrice != null ? `${formatMoney(sku.discountedPrice)}` : '—'}</td>
                   <td>{sku.quantity}</td>
                   <td>
                     <span
