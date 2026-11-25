@@ -238,9 +238,9 @@ check("customer 1 and 2 each see their own list", call("GET", "/user/returns", U
 
 print("--- every authenticated route refuses a missing token (sweep)")
 paths = {
-    "admin": ["/admin/dashboard", "/admin/dashboard/attention", "/admin/auth/me", "/admin/order", "/admin/returns", "/admin/commission/balances", "/admin/commission/changes", "/admin/settings", "/admin/products", "/admin/seller", "/admin/users", "/admin/proposals", "/admin/payment-gateways", "/admin/carts"],
+    "admin": ["/admin/dashboard", "/admin/dashboard/attention", "/admin/auth/me", "/admin/order", "/admin/returns", "/admin/commission/balances", "/admin/commission/changes", "/admin/settings", "/admin/products", "/admin/seller", "/admin/user", "/admin/proposals", "/admin/payment-gateways", "/admin/carts"],
     "seller": ["/seller/dashboard", "/seller/dashboard/attention", "/seller/order", "/seller/returns", "/seller/commission/balance", "/seller/profile", "/seller/proposals", "/seller/products", "/seller/dashboard"],
-    "user": ["/user/returns", "/user/profile", "/user/proposals", "/user/wishlist", "/user/addresses"],
+    "user": ["/user/returns", "/user/profile", "/user/proposals", "/user/wishlist", "/user/profile/addresses"],
 }
 for role, plist in paths.items():
     for pth in plist:
