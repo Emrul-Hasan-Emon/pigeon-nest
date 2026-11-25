@@ -4,8 +4,8 @@ import { formatDateTime } from '@/lib/datetime';
 import type { Proposal } from '@/types/proposal';
 import type { Sku } from '@/types/product';
 import { SkuBirdBlock } from '@/components/seller/product-bird';
+import { formatMoney } from '@/lib/money';
 
-const taka = (n: number | string) => `৳${Number(n).toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
 
 /** A figure with its name above it, so no number is ever left to guess at. */
 function Figure({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
@@ -38,8 +38,8 @@ function SkuOffers({ offers }: { offers: Proposal[] }) {
             <div className="min-w-0">
               <p className="text-base text-foreground">
                 <span className="font-semibold">{o.buyer.name}</span> offered{' '}
-                <span className="font-semibold">{taka(o.price)}</span> each for {o.quantity}
-                <span className="text-muted-foreground"> · {taka(o.total)} in all</span>
+                <span className="font-semibold">{formatMoney(o.price)}</span> each for {o.quantity}
+                <span className="text-muted-foreground"> · {formatMoney(o.total)} in all</span>
               </p>
               <p className="text-sm text-muted-foreground">
                 {formatDateTime(o.createdAt)}
@@ -91,9 +91,9 @@ export function ProductSkuCard({ sku, offers = [] }: { sku: Sku; offers?: Propos
       </header>
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Figure label="Price">{taka(sku.price)}</Figure>
+        <Figure label="Price">{formatMoney(sku.price)}</Figure>
         <Figure label="Discounted price" hint={discounted ? 'Customers pay this' : 'Not on offer'}>
-          {discounted ? taka(sku.discountedPrice as number) : '—'}
+          {discounted ? formatMoney(sku.discountedPrice as number) : '—'}
         </Figure>
         <Figure label="Quantity in stock" hint={stock.text}>
           <span className={stock.tone}>{sku.quantity}</span>
@@ -105,7 +105,7 @@ export function ProductSkuCard({ sku, offers = [] }: { sku: Sku; offers?: Propos
 
       <p className="mt-4 text-base text-muted-foreground">
         <span className="font-medium text-foreground">Price offers from customers: </span>
-        {sku.acceptProposals ? (floor ? `accepted, lowest price you will consider is ${taka(sku.minProposalPrice as number)}` : 'accepted') : 'not accepted'}
+        {sku.acceptProposals ? (floor ? `accepted, lowest price you will consider is ${formatMoney(sku.minProposalPrice as number)}` : 'accepted') : 'not accepted'}
       </p>
 
       <SkuBirdBlock sku={sku} />

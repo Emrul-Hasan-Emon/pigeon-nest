@@ -97,7 +97,7 @@ export function BirdSkuFields({ draft, onPatch }: { draft: SkuBirdDraft; onPatch
     <div className="grid grid-cols-1 gap-x-3 gap-y-3 sm:grid-cols-2 lg:grid-cols-4">
       <label className="block text-sm font-medium text-foreground">
         Ring number <Opt />
-        <input className={inputClass} maxLength={60} placeholder="e.g. BD-2026-001" value={draft.ringNumber} onChange={(e) => onPatch({ ringNumber: e.target.value })} />
+        <input className={inputClass} maxLength={60} placeholder="e.g. US-2026-001" value={draft.ringNumber} onChange={(e) => onPatch({ ringNumber: e.target.value })} />
         <span className="mt-1 block text-xs font-normal text-muted-foreground">One ring = one bird. Add each ringed bird as its own option.</span>
       </label>
       <label className="block text-sm font-medium text-foreground">

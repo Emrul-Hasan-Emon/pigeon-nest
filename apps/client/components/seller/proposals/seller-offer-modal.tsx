@@ -2,17 +2,17 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { field, money as plainMoney, outlineButton, primaryButton, useApiError } from '@/components/orders/ui';
+import { field, outlineButton, primaryButton, useApiError } from '@/components/orders/ui';
 import { OfferStatusBadge, OfferTimeline } from '@/components/seller/proposals/offer-parts';
 import { Modal } from '@/components/ui/modal';
 import { useToast } from '@/components/ui/toast';
 import { getSellerProposal, sellerAcceptProposal, sellerCounterProposal, sellerRejectProposal } from '@/lib/api/proposals';
 import { formatDateTime } from '@/lib/datetime';
 import type { ProposalDetail } from '@/types/proposal';
+import { formatMoney, roundMoney } from '@/lib/money';
 
 type Mode = 'counter' | 'reject' | null;
 
-const money = (n: number) => `৳${plainMoney(n)}`;
 
 function Fig({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
@@ -35,10 +35,10 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
 
 /** How far the offer is from the shop's price, in words. */
 function gap(o: ProposalDetail) {
-  const diff = o.skuPriceNow - o.price;
+  const diff = roundMoney(o.skuPriceNow - o.price);
   if (diff <= 0) return 'The buyer is offering your full price or more.';
   const pct = Math.round((diff / o.skuPriceNow) * 100);
-  return `The buyer wants ${money(diff)} off each piece (${pct}% less than your price). For ${o.quantity} ${o.quantity === 1 ? 'piece' : 'pieces'}, you would earn ${money(diff * o.quantity)} less in all.`;
+  return `The buyer wants ${formatMoney(diff)} off each piece (${pct}% less than your price). For ${o.quantity} ${o.quantity === 1 ? 'piece' : 'pieces'}, you would earn ${formatMoney(diff * o.quantity)} less in all.`;
 }
 
 /** What is happening with this offer, and whose move it is. */
@@ -155,10 +155,10 @@ export function SellerOfferModal({ id, onClose, onChanged }: { id: number; onClo
           <section aria-label="The offer">
             <h3 className="mb-2 text-base font-semibold text-foreground">What the buyer is asking</h3>
             <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              <Fig label="Buyer offers (each)" value={money(offer.price)} />
+              <Fig label="Buyer offers (each)" value={formatMoney(offer.price)} />
               <Fig label="How many they want" value={String(offer.quantity)} />
-              <Fig label="They would pay in all" value={money(offer.total)} />
-              <Fig label="Your selling price (each)" value={money(offer.skuPriceNow)} hint={offer.skuPriceNow !== offer.skuPriceAtCreate ? `Was ${money(offer.skuPriceAtCreate)} when offered` : undefined} />
+              <Fig label="They would pay in all" value={formatMoney(offer.total)} />
+              <Fig label="Your selling price (each)" value={formatMoney(offer.skuPriceNow)} hint={offer.skuPriceNow !== offer.skuPriceAtCreate ? `Was ${formatMoney(offer.skuPriceAtCreate)} when offered` : undefined} />
             </dl>
             <p className="mt-2 text-base text-foreground">{gap(offer)}</p>
             <p className={`mt-1 text-base ${offer.quantity > offer.stock ? 'font-medium text-red-700' : 'text-muted-foreground'}`}>
@@ -168,7 +168,7 @@ export function SellerOfferModal({ id, onClose, onChanged }: { id: number; onClo
 
           {offer.skuPriceNowLower && (
             <p className="rounded-md bg-amber-50 px-4 py-3 text-base text-amber-800">
-              Your price is now {money(offer.skuPriceNow)}, lower than this offer. The buyer will pay the lower price.
+              Your price is now {formatMoney(offer.skuPriceNow)}, lower than this offer. The buyer will pay the lower price.
             </p>
           )}
           {offer.status === 'accepted' && (
@@ -205,7 +205,7 @@ export function SellerOfferModal({ id, onClose, onChanged }: { id: number; onClo
             <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-3">
               <div className="flex flex-wrap gap-3">
                 <label className="text-sm text-foreground">Your new price for each piece
-                  <input className={`${field} mt-1 block w-40`} type="number" min={0} value={price} onChange={(e) => setPrice(e.target.value)} />
+                  <input className={`${field} mt-1 block w-40`} type="number" min={0} step="0.01" value={price} onChange={(e) => setPrice(e.target.value)} />
                 </label>
                 <label className="text-sm text-foreground">How many pieces
                   <input className={`${field} mt-1 block w-28`} type="number" min={1} value={qty} onChange={(e) => setQty(e.target.value)} />

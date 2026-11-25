@@ -5,6 +5,7 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useToast } from '@/components/ui/toast';
 import { ApiError } from '@/lib/api/http';
 import type { BulkProductAction, BulkProductPayload, BulkProductResult } from '@/types/product';
+import { formatMoney } from '@/lib/money';
 
 const SELLER_ACTIONS: { value: BulkProductAction; label: string }[] = [
   { value: 'activate', label: 'Switch on (show to buyers)' },
@@ -97,7 +98,7 @@ export function BulkProductBar({
 
   const summary =
     action === 'price'
-      ? `${direction === 'increase' ? 'Raise' : 'Lower'} the price of every option of ${n} ${n === 1 ? 'product' : 'products'} by ${mode === 'percent' ? `${value}%` : `৳${value}`}. Offer prices change the same way.`
+      ? `${direction === 'increase' ? 'Raise' : 'Lower'} the price of every option of ${n} ${n === 1 ? 'product' : 'products'} by ${mode === 'percent' ? `${value}%` : `${formatMoney(value)}`}. Offer prices change the same way.`
       : `Apply "${(admin ? ADMIN_ACTIONS : SELLER_ACTIONS).find((a) => a.value === action)?.label ?? ''}" to ${n} ${n === 1 ? 'product' : 'products'}.`;
 
   return (
@@ -127,9 +128,9 @@ export function BulkProductBar({
               By
               <span className="mt-1 flex gap-2">
                 <input inputMode="decimal" className={`${field} w-24`} value={value} onChange={(e) => setValue(e.target.value)} placeholder={mode === 'percent' ? '10' : '100'} aria-label="Amount" />
-                <select className={field} value={mode} onChange={(e) => setMode(e.target.value as 'percent' | 'amount')} aria-label="Percent or taka">
+                <select className={field} value={mode} onChange={(e) => setMode(e.target.value as 'percent' | 'amount')} aria-label="Percent or dollars">
                   <option value="percent">%</option>
-                  <option value="amount">৳ (taka)</option>
+                  <option value="amount">$ (dollars)</option>
                 </select>
               </span>
             </label>

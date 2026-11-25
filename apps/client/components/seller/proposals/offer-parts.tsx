@@ -1,6 +1,6 @@
-import { money } from '@/components/orders/ui';
 import { formatDateTime } from '@/lib/datetime';
 import type { Proposal, ProposalHistoryEntry } from '@/types/proposal';
+import { formatMoney, roundMoney } from '@/lib/money';
 
 /** Status pill; an open offer says whose turn it is. */
 export function OfferStatusBadge({ proposal }: { proposal: Proposal }) {
@@ -30,7 +30,6 @@ export function OfferStatusBadge({ proposal }: { proposal: Proposal }) {
   return <span className={`whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-medium ${tone}`}>{label}</span>;
 }
 
-const taka = (n: number) => `৳${money(n)}`;
 
 function who(e: ProposalHistoryEntry) {
   if (e.actorType === 'seller') return 'You';
@@ -40,12 +39,12 @@ function who(e: ProposalHistoryEntry) {
 
 /** One step said as a full sentence, so nobody has to decode it. */
 function step(e: ProposalHistoryEntry) {
-  const deal = `${taka(e.price)} each for ${e.quantity} (${taka(e.price * e.quantity)} in all)`;
+  const deal = `${formatMoney(e.price)} each for ${e.quantity} (${formatMoney(roundMoney(e.price * e.quantity))} in all)`;
   switch (e.action) {
     case 'created':
-      return { title: `${who(e)} made an offer`, detail: `Asked to pay ${deal}. Your price then was ${taka(e.skuPriceAtTime)} each.` };
+      return { title: `${who(e)} made an offer`, detail: `Asked to pay ${deal}. Your price then was ${formatMoney(e.skuPriceAtTime)} each.` };
     case 'countered':
-      return { title: `${who(e)} suggested a new price`, detail: `Now asking ${deal}. The shop price then was ${taka(e.skuPriceAtTime)} each.` };
+      return { title: `${who(e)} suggested a new price`, detail: `Now asking ${deal}. The shop price then was ${formatMoney(e.skuPriceAtTime)} each.` };
     case 'accepted':
       return { title: `${who(e)} said yes`, detail: `Agreed on ${deal}.` };
     case 'rejected':

@@ -101,12 +101,12 @@ export function QuickEdit({
               <p className="mb-3 text-base font-semibold text-foreground">{r.label}</p>
               <div className="grid gap-3 sm:grid-cols-3">
                 <label className="text-sm font-medium text-foreground">
-                  Price (৳) <Req />
-                  <input className={`${input} mt-1`} type="number" min={0} value={r.price} onChange={(e) => patch(r.id, { price: e.target.value })} />
+                  Price (USD) <Req />
+                  <input className={`${input} mt-1`} type="number" min={0} step="0.01" value={r.price} onChange={(e) => patch(r.id, { price: e.target.value })} />
                 </label>
                 <label className="text-sm font-medium text-foreground">
-                  Offer price (৳) <Opt />
-                  <input className={`${input} mt-1`} type="number" min={0} placeholder="No offer" value={r.discountedPrice} onChange={(e) => patch(r.id, { discountedPrice: e.target.value })} />
+                  Offer price (USD) <Opt />
+                  <input className={`${input} mt-1`} type="number" min={0} step="0.01" placeholder="No offer" value={r.discountedPrice} onChange={(e) => patch(r.id, { discountedPrice: e.target.value })} />
                 </label>
                 <label className="text-sm font-medium text-foreground">
                   In stock <Req />

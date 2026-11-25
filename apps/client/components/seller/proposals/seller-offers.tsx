@@ -156,12 +156,12 @@ export function SellerOffers() {
           <input type="date" className={`${field} mt-1 block w-44`} value={to} onChange={(e) => setTo(e.target.value)} />
         </label>
         <label className="block text-base text-foreground">
-          Buyer offers at least (৳)
-          <input type="number" min={0} className={`${field} mt-1 block w-44`} placeholder="Lowest" value={minP} onChange={(e) => setMinP(e.target.value)} />
+          Buyer offers at least (USD)
+          <input type="number" min={0} step="0.01" className={`${field} mt-1 block w-44`} placeholder="Lowest" value={minP} onChange={(e) => setMinP(e.target.value)} />
         </label>
         <label className="block text-base text-foreground">
-          Buyer offers at most (৳)
-          <input type="number" min={0} className={`${field} mt-1 block w-44`} placeholder="Highest" value={maxP} onChange={(e) => setMaxP(e.target.value)} />
+          Buyer offers at most (USD)
+          <input type="number" min={0} step="0.01" className={`${field} mt-1 block w-44`} placeholder="Highest" value={maxP} onChange={(e) => setMaxP(e.target.value)} />
         </label>
         {dirty && <button type="button" className={outlineButton} onClick={() => { setSearch(''); setBuyer(''); setSku(''); setFrom(''); setTo(''); setMinP(''); setMaxP(''); }}>Clear all filters</button>}
       </div>
