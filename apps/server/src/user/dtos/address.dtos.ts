@@ -8,7 +8,7 @@ import { IsInternationalPhone } from '../../shared/validators/international-phon
 
 const upperTrim = ({ value }: { value: unknown }): unknown =>
   typeof value === 'string' ? value.trim().toUpperCase() : value;
-const COUNTRY_MESSAGE = 'countryCode must be a 2-letter country code, e.g. BD';
+const COUNTRY_MESSAGE = 'countryCode must be a 2-letter country code, e.g. US';
 
 export class CreateAddressDto {
   @IsDefinedWhenPresent()

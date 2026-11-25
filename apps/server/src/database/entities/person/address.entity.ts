@@ -28,7 +28,7 @@ export class Address extends BaseEntity {
   @Column({ type: 'varchar', length: 20 })
   phone: string;
 
-  // ISO 3166-1 alpha-2, e.g. BD
+  // ISO 3166-1 alpha-2, e.g. US
   @Column({ type: 'varchar', length: 2 })
   countryCode: string;
 
