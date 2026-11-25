@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { PushService } from '../../push/services/push.service';
 import { DatabaseService } from '../../database/database.service';
 import { User } from '../../database/entities/person/user.entity';
 import { AuthUserType } from '../../database/enums/auth-user-type.enum';
@@ -18,6 +19,7 @@ export class UserQuestionService {
     private readonly db: DatabaseService,
     private readonly storefront: StorefrontProductService,
     private readonly common: CommonQuestionService,
+    private readonly push: PushService,
   ) {}
 
   private async visibleProduct(productId: number) {
@@ -61,6 +63,7 @@ export class UserQuestionService {
       creatorType: AuthUserType.USER,
       creatorName: user.name,
     });
+    this.push.notifySeller(product.sellerId, { title: 'New question', body: `${product.name}: ${dto.question.slice(0, 100)}`, data: { route: '/more/questions' } });
     const row = await this.common.withRelations().andWhere('q.id = :id', { id: saved.id }).getOneOrFail();
     return this.common.publicView(row);
   }
