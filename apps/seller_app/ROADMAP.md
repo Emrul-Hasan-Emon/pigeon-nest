@@ -55,30 +55,30 @@ Each phase can be released on its own.
 - [x] Copy product, bulk actions, status history
 
 ### Phase 5. Money
-- [ ] Payments list and detail
-- [ ] Paid requests (confirm and reject)
-- [ ] Payment accounts
-- [ ] Returns: list, detail, accept, processing, reject, returning money
-- [ ] Refunds: list, detail, status
-- [ ] System commission: balance, history, disbursements
-- [ ] Statements
-- [ ] Reports: sales, orders, products, returns, earnings
+- [x] Payments list and detail
+- [x] Paid requests (confirm and reject)
+- [x] Payment accounts
+- [x] Returns: list, detail, accept, processing, reject, returning money
+- [x] Refunds: list, detail, status
+- [x] System commission: balance, history, disbursements
+- [x] Statements
+- [x] Reports: sales, orders, products, returns, earnings
 
 ### Phase 6. Customers
-- [ ] Price offers: accept, counter, reject
-- [ ] Questions: answer
-- [ ] Reviews: list, reply, report
-- [ ] Wishlist insights
+- [x] Price offers: accept, counter, reject
+- [x] Questions: answer
+- [x] Reviews: list, reply, report
+- [x] Wishlist insights
 
 ### Phase 7. Help
-- [ ] Help topics from `/seller/help`, same steps and icons as the website
+- [x] Help topics from `/seller/help`, same steps and icons as the website
 
 ### Phase 8. Release
-- [ ] Push notifications (needs new server work: save phone tokens, send on events)
-- [ ] Offline and slow network handling
-- [ ] App name, icon, splash screen
-- [ ] Signing, store listings, test builds on both stores
-- [ ] Build automation
+- [x] Push notifications: server saves phone tokens and sends on buyer events, app registers and opens the right screen. Dormant until the Firebase files are added (`RELEASE.md`)
+- [x] Offline and slow network handling: no-internet bar, reads tried again twice, clear slow-server message
+- [x] App name, icon, splash screen (the bird is a placeholder; replace `assets/brand/*`)
+- [x] Signing key made, signed Android bundle built and verified, store listing drafted (`store/listing.md`). Still yours, because they need your accounts: Play and App Store accounts, screenshots, privacy policy URL, upload to the test tracks (`RELEASE.md`)
+- [x] Build automation (`.github/workflows/seller-app.yml`)
 
 ## Open decisions
 

@@ -47,3 +47,7 @@ lib/
 Read `ROADMAP.md` (what to build, in order) and `FEATURES.md` (which feature lives where). The rules are in the root `rules.md`, rules 5 to 8.
 
 Add a section by creating `lib/features/<name>/` and putting its screens, API calls and state there.
+
+## Release
+
+Signing, push notifications, store listings and the build workflow are in `RELEASE.md`.

@@ -74,29 +74,30 @@ lib/features/<feature>/
 | Feature | Folder | Server routes | Website page | Spec | Status |
 |---|---|---|---|---|---|
 | Payments | `features/payments/` | `GET /order/payments`, `GET /order/payments/:id` | `/seller/payments` | | done |
-| Paid requests | `features/payment_claims/` | `GET /payment-claims`, `.../summary`, `POST .../:id/confirm`, `.../reject` | `/seller/payment-claims` | `payment-claim-guide.md` | planned |
-| Payment accounts | `features/payment_accounts/` | `GET/POST /profile/payment-accounts`, `PATCH .../:id` | `/seller/payment-accounts` | `payment-claim-guide.md` | planned |
-| Returns | `features/returns/` | `GET /returns`, `GET /returns/:id`, `POST .../accept`, `processing`, `reject`, `returning-money` | `/seller/returns` | `returns-flow.md` | planned |
-| Refunds | `features/refunds/` | `GET /order/refunds`, `.../summary`, `.../:id`, `POST .../:id/status` | `/seller/refunds` | `returns-flow.md` | planned |
-| System commission | `features/commission/` | `GET /commission/balance`, `history`, `changes`, `disbursements`, `setting` | `/seller/commission` | `commission-flow.md` | planned |
-| Statements | `features/statements/` | `GET /reports/statement` | `/seller/statements` | `report-flow.md` | planned |
-| Reports | `features/reports/` | `GET /reports/sales`, `orders`, `products`, `returns`, `earnings` | `/seller/reports` | `report-flow.md` | planned |
+| Paid requests | `features/payments/` | `GET /payment-claims`, `.../summary`, `POST .../:id/confirm`, `.../reject` | `/seller/payment-claims` | `payment-claim-guide.md` | done |
+| Payment accounts | `features/payments/` | `GET/POST /profile/payment-accounts`, `PATCH .../:id` | `/seller/payment-accounts` | `payment-claim-guide.md` | done |
+| Returns | `features/returns/` | `GET /returns`, `GET /returns/:id`, `POST .../accept`, `processing`, `reject`, `returning-money` | `/seller/returns` | `returns-flow.md` | done |
+| Refunds | `features/returns/` | `GET /order/refunds`, `.../summary`, `.../:id`, `POST .../:id/status` | `/seller/refunds` | `returns-flow.md` | done |
+| System commission | `features/commission/` | `GET /commission/balance`, `history`, `setting/history`, `disbursements`, `disbursements/:id` | `/seller/commission` | `commission-flow.md` | done |
+| Statements | `features/reports/` | `GET /reports/statement` | `/seller/statements` | `report-flow.md` | done |
+| Reports | `features/reports/` | `GET /reports/sales`, `orders`, `products`, `returns`, `earnings` | `/seller/reports` | `report-flow.md` | done |
 
 ### Customers (phase 6)
 
 | Feature | Folder | Server routes | Website page | Spec | Status |
 |---|---|---|---|---|---|
-| Price offers | `features/offers/` | `GET /proposals`, `summary`, `:id`, `accept`, `counter`, `reject` | `/seller/offers` | `proposals-flow.md` | planned |
-| Questions | `features/questions/` | `GET /questions`, `summary`, `POST .../:id/answer` | `/seller/questions` | | planned |
-| Reviews | `features/reviews/` | `GET /review`, `summary`, replies, reports | `/seller/reviews` | `review-flow.md` | planned |
-| Wishlist insights | `features/wishlist/` | `GET /wishlist/insights` | `/seller/wishlist` | `wishlist-flow.md` | planned |
+| Price offers | `features/offers/` | `GET /proposals`, `summary`, `:id`, `accept`, `counter`, `reject` | `/seller/offers` | `proposals-flow.md` | done |
+| Questions | `features/questions/` | `GET /questions`, `summary`, `POST .../:id/answer` | `/seller/questions` | | done |
+| Reviews | `features/reviews/` | `GET /review`, `summary`, replies, reports | `/seller/reviews` | `review-flow.md` | done |
+| Wishlist insights | `features/wishlist/` | `GET /wishlist/insights` | `/seller/wishlist` | `wishlist-flow.md` | done |
 
 ### Help and release (phases 7 and 8)
 
 | Feature | Folder | Server routes | Website page | Status |
 |---|---|---|---|---|
-| Help topics | `features/help/` | `GET /help`, `GET /help/:slug` | `/seller/help` | planned |
-| Push notifications | `core/notifications/` | new server routes needed | | planned |
+| Help topics | `features/help/` | `GET /help`, `GET /help/:slug` | `/seller/help` | done |
+| Push notifications | `core/notifications/`, server `src/push/` | `POST /devices`, `POST /devices/unregister` | | `push-flow.md` | done (needs Firebase files) |
+| Offline bar and read retry | `core/network/`, `core/api/api_client.dart` | | | | done |
 
 ## Shared parts
 
@@ -104,7 +105,6 @@ Built in phase 0 and used by many features. Add each one here when it is created
 
 | Part | Folder | What it does | Status |
 |---|---|---|---|
-| Placeholder page | `shared/widgets/placeholder_page.dart` | "Coming soon" page | done |
 | Big button, card, badge | `shared/widgets/primary_button.dart`, `app_card.dart`, `status_badge.dart` | common look | done |
 | Loading, empty, error views | `shared/widgets/loading_view.dart`, `empty_view.dart`, `error_view.dart` | common states | done |
 | Paging helpers | `shared/paging/page_list_controller.dart`, `cursor_list_controller.dart` | page and cursor lists | done |
@@ -112,3 +112,8 @@ Built in phase 0 and used by many features. Add each one here when it is created
 | Picture picker and upload | `shared/media/image_picker_helper.dart`, `multipart_upload.dart` | choose and send pictures | done |
 | Access banners | `shared/widgets/access_banner.dart`, `core/auth/seller_access.dart` | pending, suspended, closed shop | done |
 | More menu | `features/more/ui/more_menu_screen.dart` | lists every planned section | done |
+| Image thumb, key-value row, section title | `shared/widgets/` | Small picture, label and value line, block heading | done |
+| Attachment strip and model | `shared/widgets/attachment_strip.dart`, `shared/models/attachment.dart` | Proof pictures and files (orders say `url`, refunds say `fileUrl`) | done |
+| Photo picker row | `shared/widgets/photo_picker_row.dart` | Pick, show and remove proof pictures | done |
+| Paged list, cursor list | `shared/widgets/paged_list.dart`, `cursor_list.dart` | Endless lists with refresh and an empty state | done |
+| Status text | `shared/format/text.dart` | `partially_paid` to `Partially paid` | done |
