@@ -2,7 +2,7 @@
 
 ## Payment accounts (where the buyer pays)
 
-A seller keeps up to 10 bank and mobile money accounts (bKash, Nagad, Rocket, Upay or a bank). After ordering, the buyer sees the ones that are switched on, with a Copy number button, on the order page. Staff see all of them on the order, including switched-off ones. Accounts are switched off, never deleted.
+A seller keeps up to 10 bank and online wallet accounts (PayPal, Wise, Zelle or a bank). After ordering, the buyer sees the ones that are switched on, with a Copy number button, on the order page. Staff see all of them on the order, including switched-off ones. Accounts are switched off, never deleted.
 
 | Role | Route |
 |---|---|
@@ -15,7 +15,7 @@ A bank account needs the account holder name. The order detail (`GET /user/order
 
 For a **cash on delivery** order, once the seller has **accepted** it (confirmed, packed, shipped or delivered), the buyer can say they already paid and send proof. It is kept in its own table, `payment_claim`, with a unique index: **one request per order, ever**.
 
-- `POST /user/orders/:orderId/payment-claims` (multipart): `amount`, `transactionId` and `method` (how it was paid: bKash, Nagad, bank), and at least one proof file in `files` (all required); optional `senderNumber`, `paidOn`, `note`.
+- `POST /user/orders/:orderId/payment-claims` (multipart): `amount`, `transactionId` and `method` (how it was paid: PayPal, Wise, bank), and at least one proof file in `files` (all required); optional `senderNumber`, `paidOn`, `note`.
 - Refused: another buyer's order (404); an order that is not cash on delivery (400); an order still pending, or cancelled (409); a fully paid order (409); an amount above what is still to pay (400); missing transaction ID, method or file (400); a second request for the same order, whatever happened to the first (409). A buyer cannot take a request back.
 - Seller: `GET /seller/payment-claims?status=`, `GET /seller/payment-claims/summary`, `POST /seller/payment-claims/:id/confirm` (`{ amount?, note? }`), `POST /seller/payment-claims/:id/reject` (`{ reason }`). Admin: the same under `/admin/payment-claims` for every seller.
 - **Accept** records a normal payment on the order (same rules, history and commission as "Mark as paid"), so the order is marked paid (or partly paid if the seller accepts a smaller amount). If the order cannot take it, nothing changes and the request stays open.

@@ -50,7 +50,7 @@ Key facts:
   checkout, three separate orders.
 - Prices and stock come from the server. A cart always shows today's price and stock, and the
   server re-checks them the moment you place the order.
-- You **pay the seller directly** (cash on delivery, bank, mobile money). The seller or admin
+- You **pay the seller directly** (cash on delivery, bank, online wallet). The seller or admin
   marks your order paid after checking. Entering a transaction ID at checkout does not mark it paid
   by itself.
 - You can **cancel only while the order is `pending`**. After the seller confirms, you cannot.
@@ -155,7 +155,7 @@ The cart must be yours and active (`404` otherwise, including a cart that was al
     { "id": 2, "name": "Cash on Delivery", "slug": "cash-on-delivery", "type": "cod", "typeLabel": "Cash on delivery",
       "description": null, "iconUrl": null, "accountName": null, "accountNumber": null, "bankName": null, "branchName": null,
       "proofFields": [] },
-    { "id": 38, "name": "bKash", "type": "mfs", "accountNumber": "01711111111",
+    { "id": 38, "name": "PayPal", "type": "mfs", "accountNumber": "01711111111",
       "description": "Send the total, then enter the transaction ID.",
       "proofFields": [ { "key": "transactionId", "label": "Transaction ID", "required": true } ] } ] }
 ```
@@ -168,7 +168,7 @@ details, and ask for each `proofFields` entry.
 
 ```json
 POST /order/checkout/{cartId}/place
-{ "recipientName": "Aisha Rahman", "recipientPhone": "+8801712345678",
+{ "recipientName": "Aisha Rahman", "recipientPhone": "+14155552671",
   "contactEmail": "aisha@example.com", "countryCode": "BD", "state": "Dhaka Division",
   "city": "Dhaka", "addressLine": "House 7, Road 3, Banani", "postalCode": "1213",
   "deliveryType": "standard", "paymentGatewayId": 38,
@@ -310,7 +310,7 @@ address, so editing or deleting one never changes an order.
 
 ```json
 POST /profile/addresses
-{ "recipientName": "Aisha Rahman", "phone": "+8801712345678", "countryCode": "BD",
+{ "recipientName": "Aisha Rahman", "phone": "+14155552671", "countryCode": "BD",
   "state": "Dhaka Division", "city": "Dhaka",
   "address": "Flat 4B, Road 9, Banani, near the lake gate", "zipCode": "1213", "isDefault": true }
 ```

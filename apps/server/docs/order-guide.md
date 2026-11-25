@@ -119,7 +119,7 @@ There are five types, and each asks the customer for different details:
   Type              Example                What the customer enters
   ----------------  ---------------------  --------------------------------
   Cash on delivery  Pay when it arrives    Nothing
-  Mobile banking    bKash, Nagad           Transaction ID (required)
+  Online wallet    PayPal, Wise           Transaction ID (required)
   Bank transfer     A bank account         Name on the sending account and
                                            the transfer reference (both required)
   Card              Card payment           Payment reference (required)
@@ -389,7 +389,7 @@ to make right now. A note can be added and everyone on the order sees it.
 
 ### 7.1 Why recording a payment is a manual step
 
-The customer pays the seller outside the website (cash, bank, mobile money).
+The customer pays the seller outside the website (cash, bank, online wallet).
 So the order starts as PAYMENT DUE, and the seller or admin marks it paid once
 the money has really arrived. This works the same whatever the customer chose
 (even if the customer entered a transaction ID at checkout).
@@ -407,7 +407,7 @@ the money has really arrived. This works the same whatever the customer chose
 On the order page, under Payments, "Mark as paid". The form needs:
 
 ```text
-  Description    REQUIRED. How it was paid, e.g. "bKash to the shop number" or
+  Description    REQUIRED. How it was paid, e.g. "PayPal to the shop email" or
                  "cash at pickup".
   Files          REQUIRED, at least one (image or document, up to 10).
                  For example a screenshot of the payment or a bank slip.
@@ -959,7 +959,7 @@ These do not exist yet, so they are not described above as features:
   Payment status Whether money has been recorded: due, partially paid, paid.
   Receipt       One recorded payment (an order can have several).
   Reversal      Undoing a recorded payment, keeping a record of it.
-  Gateway       A way to pay (cash on delivery, bKash, bank transfer ...).
+  Gateway       A way to pay (cash on delivery, PayPal, bank transfer ...).
   Shipping zone A set of countries with a delivery price and time.
   Walk-in       A customer without an account, entered by staff.
   Guest         A visitor shopping without signing in.

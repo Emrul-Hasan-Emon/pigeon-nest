@@ -78,7 +78,7 @@ Create example:
 
 ```json
 POST /payment-gateways
-{ "name": "bKash personal", "type": "mfs", "accountNumber": "01711111111",
+{ "name": "PayPal personal", "type": "mfs", "accountNumber": "01711111111",
   "description": "Send the total, then enter the transaction ID." }
 ```
 
@@ -273,7 +273,7 @@ Typical phone order. The screen does these calls in order.
 POST /order
 { "sellerId": 5, "userId": 129,
   "items": [ { "sellerProductId": 94, "sellerProductSkuId": 119, "quantity": 2 } ],
-  "recipientName": "Aisha Rahman", "recipientPhone": "+8801712345678",
+  "recipientName": "Aisha Rahman", "recipientPhone": "+14155552671",
   "contactEmail": "aisha@example.com", "countryCode": "BD", "state": "Dhaka Division",
   "city": "Dhaka", "addressLine": "House 7, Road 3, Banani", "postalCode": "1213",
   "deliveryType": "standard", "paymentGatewayId": 2, "note": "Phone order" }

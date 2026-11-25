@@ -68,7 +68,7 @@ Payment is recorded (any time)       Payment: PARTIALLY_PAID -> PAID
 - **Cancel**: only while the order is `pending`. After confirming, it can only move forward. If
   something goes wrong later, ask an admin.
 - **Payment is separate from the order status.** The customer pays you outside the website (cash,
-  bank, mobile money). You mark the payment as received, with proof, whenever the money arrives
+  bank, online wallet). You mark the payment as received, with proof, whenever the money arrives
   (before shipping, at delivery, in instalments).
 - Stock leaves the shelf when the order is placed and returns if the order is cancelled.
 
@@ -143,7 +143,7 @@ POST /order/{id}/payments        (multipart/form-data)
 
 | Field | Required | Notes |
 |---|---|---|
-| `description` | yes | 3 to 1000 characters: how it was paid ("bKash to the shop number") |
+| `description` | yes | 3 to 1000 characters: how it was paid ("PayPal to the shop email") |
 | `files` | yes, 1 to 10 | image, pdf, doc(x), xls(x), txt, csv; 10 MB each |
 | `amount` | no | up to 2 decimals, at least 0.01; default = the whole balance; may not exceed the balance |
 | `transactionId` | no | max 100 |
@@ -202,7 +202,7 @@ for **your** shop.
 POST /order
 { "userId": 129,
   "items": [ { "sellerProductId": 94, "sellerProductSkuId": 119, "quantity": 2 } ],
-  "recipientName": "Aisha Rahman", "recipientPhone": "+8801712345678",
+  "recipientName": "Aisha Rahman", "recipientPhone": "+14155552671",
   "countryCode": "BD", "city": "Dhaka", "addressLine": "House 7, Road 3, Banani",
   "deliveryType": "standard", "paymentGatewayId": 2 }
 ```

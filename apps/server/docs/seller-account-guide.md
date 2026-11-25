@@ -296,7 +296,7 @@ to be exact and unique.
     sent directly; the country must be included.
   - A number that is not a real number for its country is refused.
   - The same number can belong to only one seller. "+880 1712-345678" and
-    "+8801712345678" are the SAME number, so the second is refused as a
+    "+14155552671" are the SAME number, so the second is refused as a
     duplicate.
 
 Existing sellers created before this feature were converted to the standard
@@ -412,7 +412,7 @@ Story 6 - Switched off, not frozen
   business. Setting activity to active restores everything.
 
 Story 7 - Duplicate phone
-  Someone registers with +8801712345678, but another seller already has it
+  Someone registers with +14155552671, but another seller already has it
   (even if typed as "+880 1712 345678"). Registration is refused. Nothing is
   created. If two people submit the same number at the very same moment, only
   one succeeds.
