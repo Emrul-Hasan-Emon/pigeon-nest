@@ -133,13 +133,13 @@ export const ENDPOINTS = {
     ...staffOrders,
 
     users: {
-      ...resource('/users'),
-      addresses: (userId: Id) => `/users/${userId}/addresses`,
-      address: (userId: Id, id: Id) => `/users/${userId}/addresses/${id}`,
+      ...resource('/user'),
+      addresses: (userId: Id) => `/user/${userId}/addresses`,
+      address: (userId: Id, id: Id) => `/user/${userId}/addresses/${id}`,
       wishlist: (userId: Id) => `/users/${userId}/wishlist`,
       reviews: (userId: Id) => `/review/users/${userId}`,
     },
-    userStatusHistory: { list: '/user-status-history' },
+    userStatusHistory: { list: '/user/status-history' },
   },
 
   // Seller-facing APIs (the seller's own portal).
@@ -223,7 +223,7 @@ export const ENDPOINTS = {
       detail: (slug: string) => `/collections/${encodeURIComponent(slug)}`,
     },
     sellers: resource('/sellers'),
-    addresses: resource('/addresses'),
+    addresses: resource('/profile/addresses'),
     checkout: {
       options: (cartId: Id) => `/order/checkout/${cartId}`,
       place: (cartId: Id) => `/order/checkout/${cartId}/place`,
