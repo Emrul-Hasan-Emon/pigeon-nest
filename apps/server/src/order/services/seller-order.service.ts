@@ -4,7 +4,7 @@ import { AuthUserType } from '../../database/enums/auth-user-type.enum';
 import { CursorPagination } from '../../shared/decorators/cursor-pagination-params.decorator';
 import { PageRequest } from '../../shared/utils/page-paginate.util';
 import { CreateAddressDto } from '../../user/dtos/address.dtos';
-import { AddressService } from '../../user/services/address.service';
+import { CommonUserService } from '../../user/services/common-user.service';
 import {
   BulkChangeOrderStatusDto,
   ChangeOrderStatusDto,
@@ -27,7 +27,7 @@ const { SELLER } = AuthUserType;
 export class SellerOrderService {
   constructor(
     private readonly common: CommonOrderService,
-    private readonly addresses: AddressService,
+    private readonly users: CommonUserService,
   ) {}
 
   private actor(seller: Seller) {
@@ -48,14 +48,14 @@ export class SellerOrderService {
 
   // While entering an order: the customer's saved addresses to pick from...
   async customerAddresses(userId: number) {
-    await this.addresses.ensureUser(userId);
-    return this.addresses.list(userId);
+    await this.users.ensureUser(userId);
+    return this.users.listAddresses(userId);
   }
 
   // ...and a way to save a new one to the customer's address book.
   async saveCustomerAddress(seller: Seller, userId: number, dto: CreateAddressDto) {
-    await this.addresses.ensureActiveUser(userId);
-    return this.addresses.create(userId, dto, this.actor(seller));
+    await this.users.ensureActiveUser(userId);
+    return this.users.createAddress(userId, dto, this.actor(seller));
   }
 
   catalog(seller: Seller, query: StaffCatalogQueryDto) {
