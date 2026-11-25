@@ -302,7 +302,7 @@ check("J1b money columns are double precision", (200, sql("select count(*) from 
 # ====================================================================================================
 # J2  CUSTOMER: account, address book, MFS proof, cancel, admin reopen, forward chain
 # ====================================================================================================
-check("J2 saved address", call("POST", "/user/addresses", U1, {"recipientName": f"{TAG} Home", "phone": "+8801712345678", "countryCode": "BD", "state": "Dhaka", "city": "Dhaka", "address": "House 9"}), 201)
+check("J2 saved address", call("POST", "/user/profile/addresses", U1, {"recipientName": f"{TAG} Home", "phone": "+8801712345678", "countryCode": "BD", "state": "Dhaka", "city": "Dhaka", "address": "House 9"}), 201)
 st122 = stock(122)
 cid = add_item(token=U1, product=95, sku=122, qty=3)
 check("J2 checkout with MFS and no proof -> 400", call("POST", f"{CK}/{cid}/place", token=U1, body=pay_body(MFS)), 400)

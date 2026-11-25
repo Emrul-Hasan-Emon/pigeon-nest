@@ -62,7 +62,7 @@ U1, ID1 = register(1)
 U2, ID2 = register(2)
 U3, ID3 = register(3)
 sql(f"update \"user\" set status='suspended' where id={ID3}")
-A = "/user/addresses"
+A = "/user/profile/addresses"
 body = lambda **o: {**{"recipientName": "T Addr Home", "phone": "+8801712345678", "countryCode": "BD", "city": "Dhaka", "address": "House 1, Road 2, Dhanmondi"}, **o}
 
 
@@ -167,12 +167,12 @@ c, again = P(body(recipientName="T Addr Again"))
 check("D the next one added is the default again", (c, again), 201, pred=lambda v: v["isDefault"] is True)
 
 # ================================================================= E admin on behalf
-AD = f"/admin/users/{ID1}/addresses"
+AD = f"/admin/user/{ID1}/addresses"
 check("E no token -> 401", call("GET", AD), 401)
 check("E customer token -> 403", call("GET", AD, U1), 403)
-check("E unknown user -> 404", call("GET", "/admin/users/99999999/addresses", ADMIN), 404)
-check("E unknown user on create -> 404", call("POST", "/admin/users/99999999/addresses", ADMIN, body()), 404)
-check("E bad user id -> 400", call("GET", "/admin/users/abc/addresses", ADMIN), 400)
+check("E unknown user -> 404", call("GET", "/admin/user/99999999/addresses", ADMIN), 404)
+check("E unknown user on create -> 404", call("POST", "/admin/user/99999999/addresses", ADMIN, body()), 404)
+check("E bad user id -> 400", call("GET", "/admin/user/abc/addresses", ADMIN), 400)
 check("E admin lists the customer's addresses", call("GET", AD, ADMIN), 200, pred=lambda v: [r["id"] for r in v["results"]] == [again["id"]])
 check("E validation applies", call("POST", AD, ADMIN, body(countryCode="ZZ")), 400)
 check("E unknown field -> 400", call("POST", AD, ADMIN, body(userId=5)), 400)
@@ -182,12 +182,12 @@ check("E recorded as created by the admin", (200, sql(f"select \"creatorType\"||
 check("E the customer sees it", call("GET", A, U1), 200, pred=lambda v: v["results"][0]["id"] == ad1["id"] and v["results"][0]["isDefault"])
 check("E admin edits it", call("PATCH", f"{AD}/{ad1['id']}", ADMIN, {"city": "Westminster"}), 200, pred=lambda v: v["city"] == "Westminster")
 check("E updater recorded as the admin", (200, sql(f"select \"updaterType\" from address where id={ad1['id']}")), 200, pred=lambda v: v == "admin")
-check("E admin cannot reach another customer's address through this customer", call("GET", f"/admin/users/{ID2}/addresses/{ad1['id']}", ADMIN), 404)
-check("E admin cannot edit it through another customer either", call("PATCH", f"/admin/users/{ID2}/addresses/{ad1['id']}", ADMIN, {"city": "X"}), 404)
+check("E admin cannot reach another customer's address through this customer", call("GET", f"/admin/user/{ID2}/addresses/{ad1['id']}", ADMIN), 404)
+check("E admin cannot edit it through another customer either", call("PATCH", f"/admin/user/{ID2}/addresses/{ad1['id']}", ADMIN, {"city": "X"}), 404)
 check("E admin gets one", call("GET", f"{AD}/{ad1['id']}", ADMIN), 200, pred=lambda v: v["id"] == ad1["id"])
 check("E admin deletes it", call("DELETE", f"{AD}/{ad1['id']}", ADMIN), 204)
 check("E ...the earlier address is the default again", call("GET", A, U1), 200, pred=lambda v: v["results"][0]["id"] == again["id"] and v["results"][0]["isDefault"])
-check("E admin can manage a suspended customer's addresses", call("POST", f"/admin/users/{ID3}/addresses", ADMIN, body()), 201)
+check("E admin can manage a suspended customer's addresses", call("POST", f"/admin/user/{ID3}/addresses", ADMIN, body()), 201)
 
 # ================================================================= F integrity
 check("F never more than one default per customer", (200, sql("select count(*) from (select \"userId\" from address where \"isDefault\" and \"deletedAt\" is null group by \"userId\" having count(*) > 1) x")), 200, pred=lambda v: v == "0")

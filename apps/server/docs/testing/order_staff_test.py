@@ -185,9 +185,9 @@ check("B2 recorded as created by the seller", (200, sql(f"select \"creatorType\"
 c, sa2 = call("POST", SA(UID1), S1, addr_body(recipientName="T Staff Office", countryCode="US", city="Austin", address="500 Congress Ave, Suite 4", phone="+14155550123"))
 check("B2 the second is not the default", (c, sa2), 201, pred=lambda v: v["isDefault"] is False)
 check("B2 the seller reads the list, default first", call("GET", SA(UID1), S1), 200, pred=lambda v: [r["id"] for r in v["results"]] == [sa1["id"], sa2["id"]])
-check("B2 the customer sees them in their own address book", call("GET", "/user/addresses", UT1), 200, pred=lambda v: {r["id"] for r in v["results"]} == {sa1["id"], sa2["id"]})
+check("B2 the customer sees them in their own address book", call("GET", "/user/profile/addresses", UT1), 200, pred=lambda v: {r["id"] for r in v["results"]} == {sa1["id"], sa2["id"]})
 check("B2 the other seller can use the same customer lookup", call("GET", SA(UID1), S2), 200, pred=lambda v: len(v["results"]) == 2)
-check("B2 admin lists them through the admin route too", call("GET", f"/admin/users/{UID1}/addresses", ADMIN), 200, pred=lambda v: len(v["results"]) == 2)
+check("B2 admin lists them through the admin route too", call("GET", f"/admin/user/{UID1}/addresses", ADMIN), 200, pred=lambda v: len(v["results"]) == 2)
 sql(f"delete from address where \"userId\"={UID1}")
 
 # ================================================================= C catalog and options
