@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 
 /// One entry in the More menu: a label, an icon, and where it goes.
-/// Most of these routes still open a [PlaceholderPage] until their phase is built.
 class MoreMenuEntry {
   const MoreMenuEntry(this.label, this.icon, this.route);
   final String label;

@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/auth/auth_controller.dart';
 import '../../../core/auth/seller_access.dart';
 import '../../../shared/widgets/access_banner.dart';
-import '../../../shared/widgets/placeholder_page.dart';
 import '../../account/ui/checklist_screen.dart';
 import '../../dashboard/ui/dashboard_screen.dart';
 import '../../more/ui/more_menu_screen.dart';
@@ -14,14 +13,15 @@ import '../../products/ui/products_screen.dart';
 /// The signed-in frame: a bottom bar with the main seller sections.
 /// Each tab is a placeholder until its feature is built under lib/features/.
 class HomeShell extends ConsumerStatefulWidget {
-  const HomeShell({super.key});
+  const HomeShell({super.key, this.initialTab = 0});
+  final int initialTab;
 
   @override
   ConsumerState<HomeShell> createState() => _HomeShellState();
 }
 
 class _HomeShellState extends ConsumerState<HomeShell> {
-  int _index = 0;
+  late int _index = widget.initialTab.clamp(0, 3);
 
   static const _tabs = [
     (label: 'Home', icon: Icons.home_outlined, active: Icons.home),
@@ -50,7 +50,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
         1 => const OrdersScreen(),
         2 => const ProductsScreen(),
         3 => const MoreMenuScreen(),
-        _ => PlaceholderPage(title: tab.label, icon: tab.icon),
+        _ => const SizedBox.shrink(),
       },
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
