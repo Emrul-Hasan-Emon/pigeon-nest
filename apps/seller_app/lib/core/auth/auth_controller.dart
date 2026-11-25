@@ -5,6 +5,7 @@ import '../api/api_exception.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../shared/media/multipart_upload.dart';
+import '../notifications/push_service.dart';
 import 'seller_access.dart';
 
 enum AuthStatus { unknown, signedOut, signedIn }
@@ -102,6 +103,8 @@ class AuthController extends Notifier<AuthState> {
   }
 
   Future<void> signOut() async {
+    // While the token still works, stop this phone's notifications for the shop.
+    await ref.read(pushServiceProvider).unregister();
     await ref.read(tokenStoreProvider).clear();
     state = const AuthState(AuthStatus.signedOut);
   }
