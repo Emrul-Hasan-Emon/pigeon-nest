@@ -190,8 +190,8 @@ export function PaymentList({ role }: { role: StaffRole }) {
               <option value="false">Hide reversed ones</option>
             </select>
           </Lbl>
-          <Lbl text="Amount from (৳)"><input className={`${field} w-full`} inputMode="decimal" placeholder="Lowest" value={filters.minAmount} onChange={set('minAmount')} /></Lbl>
-          <Lbl text="Amount up to (৳)"><input className={`${field} w-full`} inputMode="decimal" placeholder="Highest" value={filters.maxAmount} onChange={set('maxAmount')} /></Lbl>
+          <Lbl text="Amount from (USD)"><input className={`${field} w-full`} inputMode="decimal" placeholder="Lowest" value={filters.minAmount} onChange={set('minAmount')} /></Lbl>
+          <Lbl text="Amount up to (USD)"><input className={`${field} w-full`} inputMode="decimal" placeholder="Highest" value={filters.maxAmount} onChange={set('maxAmount')} /></Lbl>
           <Lbl text="Payment added from"><input type="date" className={`${field} w-full`} value={filters.createdFrom} onChange={set('createdFrom')} /></Lbl>
           <Lbl text="Payment added until"><input type="date" className={`${field} w-full`} value={filters.createdTo} onChange={set('createdTo')} /></Lbl>
           <Lbl text="Money received from"><input type="date" className={`${field} w-full`} value={filters.paidFrom} onChange={set('paidFrom')} /></Lbl>
@@ -209,7 +209,7 @@ export function PaymentList({ role }: { role: StaffRole }) {
           <table className="min-w-full divide-y divide-border text-sm">
             <thead className="bg-muted">
               <tr>
-                {['Payment no.', 'Order', 'Customer', ...(role === 'admin' ? ['Seller'] : []), 'Paid by', 'Amount (৳)', 'Status', 'Proof files', 'Money received on'].map((h) => (
+                {['Payment no.', 'Order', 'Customer', ...(role === 'admin' ? ['Seller'] : []), 'Paid by', 'Amount (USD)', 'Status', 'Proof files', 'Money received on'].map((h) => (
                   <th key={h} className="px-4 py-3 text-left font-medium text-muted-foreground">{h}</th>
                 ))}
                 <th className="px-4 py-3" />

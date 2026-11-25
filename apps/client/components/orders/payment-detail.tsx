@@ -10,13 +10,13 @@ import {
   actorLabel,
   AttachmentList,
   base,
-  money,
   OrderStatusBadge,
   PAYMENT_STATUS_LABEL,
   PaymentStatusBadge,
 } from './ui';
 import { LoadingBlock } from '@/components/ui/skeleton';
 import { useBreadcrumbTitle } from '@/components/ui/breadcrumbs';
+import { formatMoney } from '@/lib/money';
 
 const card = 'rounded-xl border border-border bg-card p-5 shadow-sm';
 
@@ -54,10 +54,10 @@ export function PaymentDetailView({ role, id }: { role: StaffRole; id: number })
   const reversed = Boolean(payment.reversal);
   const o = payment.order;
   const summary = reversed
-    ? `This payment of ৳${money(payment.amount)} was taken back (reversed). It no longer counts as money received.`
+    ? `This payment of ${formatMoney(payment.amount)} was taken back (reversed). It no longer counts as money received.`
     : payment.status === 'due'
-      ? `৳${money(payment.amount)} is still to be paid by ${payment.customer?.name ?? 'the customer'} (${payment.gateway.name}).`
-      : `৳${money(payment.amount)} was received${payment.paidAt ? ` on ${formatDateTime(payment.paidAt)}` : ''}, paid by ${payment.gateway.name}.`;
+      ? `${formatMoney(payment.amount)} is still to be paid by ${payment.customer?.name ?? 'the customer'} (${payment.gateway.name}).`
+      : `${formatMoney(payment.amount)} was received${payment.paidAt ? ` on ${formatDateTime(payment.paidAt)}` : ''}, paid by ${payment.gateway.name}.`;
 
   return (
     <div className="max-w-4xl space-y-5">
@@ -75,7 +75,7 @@ export function PaymentDetailView({ role, id }: { role: StaffRole; id: number })
         <div className={card}>
           <h2 className="mb-3 text-lg font-semibold text-foreground">The money</h2>
           <dl className="space-y-3">
-            <Row label={payment.status === 'due' ? 'Amount to be paid' : 'Amount received'}><span className="text-2xl font-semibold">৳{money(payment.amount)}</span></Row>
+            <Row label={payment.status === 'due' ? 'Amount to be paid' : 'Amount received'}><span className="text-2xl font-semibold">{formatMoney(payment.amount)}</span></Row>
             <Row label="Paid by">{payment.gateway.name}</Row>
             <Row label="Money received on">{payment.paidAt ? formatDateTime(payment.paidAt) : 'Not received yet'}</Row>
             <Row label="Transaction ID">{payment.transactionId ?? 'None given'}</Row>
@@ -86,9 +86,9 @@ export function PaymentDetailView({ role, id }: { role: StaffRole; id: number })
           <dl className="space-y-3">
             <Row label="Order number"><Link href={`${root}/orders/${o.id}`} className="text-primary hover:underline">{o.orderNumber}</Link> <span className="text-sm font-normal text-muted-foreground">(tap to open)</span></Row>
             <Row label="Order status"><span className="mr-2 inline-block"><OrderStatusBadge status={o.status} /></span></Row>
-            <Row label="Whole order costs">৳{money(o.payable)}</Row>
-            <Row label="Received so far">৳{money(o.amountPaid)}</Row>
-            <Row label="Still to pay">{o.balanceDue > 0 ? <span className="text-amber-700">৳{money(o.balanceDue)}</span> : <span className="text-emerald-700">Nothing, fully paid</span>}</Row>
+            <Row label="Whole order costs">{formatMoney(o.payable)}</Row>
+            <Row label="Received so far">{formatMoney(o.amountPaid)}</Row>
+            <Row label="Still to pay">{o.balanceDue > 0 ? <span className="text-amber-700">{formatMoney(o.balanceDue)}</span> : <span className="text-emerald-700">Nothing, fully paid</span>}</Row>
           </dl>
         </div>
         <div className={card}>
@@ -133,8 +133,8 @@ export function PaymentDetailView({ role, id }: { role: StaffRole; id: number })
                 {h.fromStatus ? <>{PAYMENT_STATUS_LABEL[h.fromStatus]} → </> : null}<strong>{PAYMENT_STATUS_LABEL[h.status]}</strong>
                 {h.paymentId === payment.id && <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-sm text-primary">this payment</span>}
               </p>
-              {h.amount > 0 && <p className="text-base text-foreground">৳{money(h.amount)} received. ৳{money(h.amountPaidAfter)} received in all.</p>}
-              {h.amount < 0 && <p className="text-base text-destructive">৳{money(-h.amount)} taken back. ৳{money(h.amountPaidAfter)} left in all.</p>}
+              {h.amount > 0 && <p className="text-base text-foreground">{formatMoney(h.amount)} received. {formatMoney(h.amountPaidAfter)} received in all.</p>}
+              {h.amount < 0 && <p className="text-base text-destructive">{formatMoney(-h.amount)} taken back. {formatMoney(h.amountPaidAfter)} left in all.</p>}
               {h.note && <p className="text-base text-muted-foreground">Note: {h.note}</p>}
               <p className="text-sm text-muted-foreground">{actorLabel(h.by)} · {formatDateTime(h.createdAt)}</p>
             </li>

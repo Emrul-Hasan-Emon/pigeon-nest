@@ -6,6 +6,7 @@ import { SellerFrame } from '@/components/seller/seller-frame';
 import { ApiError } from '@/lib/api/http';
 import { clearSellerToken, getSellerToken } from '@/lib/auth/seller-token';
 import type { Actor, Attachment, OrderStatus, PaymentStatus, StaffRole } from '@/types/order';
+import { plainMoney } from '@/lib/money';
 
 export const field =
   'rounded-md border border-input bg-card px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none';
@@ -49,7 +50,7 @@ export function PaymentStatusBadge({ status }: { status: PaymentStatus }) {
   return <span className={`whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-medium ${PAYMENT_TONE[status]}`}>{PAYMENT_STATUS_LABEL[status]}</span>;
 }
 
-export const money = (n: number) => n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+export const money = plainMoney;
 
 export function actorLabel(a: Actor) {
   const kind = a.type === 'user' ? 'customer' : a.type;

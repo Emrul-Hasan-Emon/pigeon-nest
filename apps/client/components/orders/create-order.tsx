@@ -19,6 +19,7 @@ import type {
   StaffRole,
 } from '@/types/order';
 import { base, field, money, outlineButton, primaryButton, useApiError } from './ui';
+import { roundMoney } from '@/lib/money';
 
 interface Line {
   productId: number;
@@ -82,7 +83,7 @@ export function CreateOrderForm({ role }: { role: StaffRole }) {
   const [formError, setFormError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  const subtotal = lines.reduce((n, l) => n + l.unit * l.quantity, 0);
+  const subtotal = roundMoney(lines.reduce((n, l) => n + l.unit * l.quantity, 0));
   const sellerId = role === 'admin' ? seller?.id : undefined;
   const sellerReady = role === 'seller' || !!seller;
 
@@ -112,7 +113,7 @@ export function CreateOrderForm({ role }: { role: StaffRole }) {
 
   const gateway = options?.paymentGateways.find((g) => g.id === gatewayId);
   const delivery = options?.deliveryOptions.find((d) => d.deliveryType === deliveryType);
-  const payable = subtotal + (delivery?.charge ?? 0);
+  const payable = roundMoney(subtotal + (delivery?.charge ?? 0));
 
   async function search(e: React.FormEvent) {
     e.preventDefault();
@@ -198,7 +199,7 @@ export function CreateOrderForm({ role }: { role: StaffRole }) {
     if (role === 'admin' && !seller) return setFormError('Choose the seller first.');
     if (!customer && !walkIn) return setFormError('Find the customer, or choose to enter a walk-in customer.');
     if (lines.length === 0) return setFormError('Add at least one item.');
-    if (!recipientName.trim() || !recipientPhone.trim()) return setFormError('Enter the recipient name and phone (with country code, e.g. +8801712345678).');
+    if (!recipientName.trim() || !recipientPhone.trim()) return setFormError('Enter the recipient name and phone (with country code, e.g. +14155552671).');
     if (!countryCode || !city.trim() || addressLine.trim().length < 5) return setFormError('Enter the country, city and a street address.');
     if (!gateway) return setFormError('Choose a payment method.');
     setBusy(true);
@@ -375,7 +376,7 @@ export function CreateOrderForm({ role }: { role: StaffRole }) {
         )}
         <div className="mt-2 grid gap-3 md:grid-cols-2">
           <input className={field} placeholder="Recipient name" value={recipientName} onChange={(e) => setRecipientName(e.target.value)} />
-          <input className={field} placeholder="Phone with country code, +8801712345678" value={recipientPhone} onChange={(e) => setRecipientPhone(e.target.value)} />
+          <input className={field} placeholder="Phone with country code, +14155552671" value={recipientPhone} onChange={(e) => setRecipientPhone(e.target.value)} />
           <input className={field} type="email" placeholder="Email (optional)" value={email} onChange={(e) => setEmail(e.target.value)} />
           <select className={field} value={countryCode} onChange={(e) => setCountryCode(e.target.value)} aria-label="Country">
             <option value="">Country</option>

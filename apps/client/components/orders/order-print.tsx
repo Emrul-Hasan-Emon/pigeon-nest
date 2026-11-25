@@ -9,8 +9,9 @@ import { formatDate } from '@/lib/datetime';
 import { ageText } from '@/lib/bird';
 import { LoadingBlock } from '@/components/ui/skeleton';
 import { useBreadcrumbTitle } from '@/components/ui/breadcrumbs';
-import { base, money, PAYMENT_STATUS_LABEL } from './ui';
+import { base, PAYMENT_STATUS_LABEL } from './ui';
 import type { OrderDetail, OrderItemView, StaffRole } from '@/types/order';
+import { formatMoney } from '@/lib/money';
 
 export type PrintType = 'invoice' | 'slip';
 
@@ -144,8 +145,8 @@ export function OrderPrintView({ role, id, initialType = 'invoice' }: { role: St
                     )}
                   </td>
                   <td className="py-3 pr-2 text-right tabular-nums">{i.quantity}</td>
-                  {invoice && <td className="py-3 pr-2 text-right tabular-nums">৳{money(i.unitPayable)}</td>}
-                  {invoice && <td className="py-3 text-right tabular-nums">৳{money(i.lineTotal)}</td>}
+                  {invoice && <td className="py-3 pr-2 text-right tabular-nums">{formatMoney(i.unitPayable)}</td>}
+                  {invoice && <td className="py-3 text-right tabular-nums">{formatMoney(i.lineTotal)}</td>}
                 </tr>
               );
             })}
@@ -154,18 +155,18 @@ export function OrderPrintView({ role, id, initialType = 'invoice' }: { role: St
 
         {invoice ? (
           <dl className="ml-auto mt-4 w-full max-w-xs space-y-1 text-sm">
-            <div className="flex justify-between"><dt>Items</dt><dd className="tabular-nums">৳{money(order.totals.subtotal)}</dd></div>
-            {order.totals.discountAmount > 0 && <div className="flex justify-between"><dt>Discount</dt><dd className="tabular-nums">−৳{money(order.totals.discountAmount)}</dd></div>}
-            <div className="flex justify-between"><dt>Delivery</dt><dd className="tabular-nums">৳{money(order.totals.deliveryCharge)}</dd></div>
-            <div className="flex justify-between border-t-2 border-neutral-900 pt-1 text-base font-bold"><dt>Total</dt><dd className="tabular-nums">৳{money(order.totals.payable)}</dd></div>
-            <div className="flex justify-between"><dt>Paid</dt><dd className="tabular-nums">৳{money(order.totals.amountPaid)}</dd></div>
-            <div className="flex justify-between font-semibold"><dt>Still to pay</dt><dd className="tabular-nums">৳{money(order.totals.balanceDue)}</dd></div>
+            <div className="flex justify-between"><dt>Items</dt><dd className="tabular-nums">{formatMoney(order.totals.subtotal)}</dd></div>
+            {order.totals.discountAmount > 0 && <div className="flex justify-between"><dt>Discount</dt><dd className="tabular-nums">−{formatMoney(order.totals.discountAmount)}</dd></div>}
+            <div className="flex justify-between"><dt>Delivery</dt><dd className="tabular-nums">{formatMoney(order.totals.deliveryCharge)}</dd></div>
+            <div className="flex justify-between border-t-2 border-neutral-900 pt-1 text-base font-bold"><dt>Total</dt><dd className="tabular-nums">{formatMoney(order.totals.payable)}</dd></div>
+            <div className="flex justify-between"><dt>Paid</dt><dd className="tabular-nums">{formatMoney(order.totals.amountPaid)}</dd></div>
+            <div className="flex justify-between font-semibold"><dt>Still to pay</dt><dd className="tabular-nums">{formatMoney(order.totals.balanceDue)}</dd></div>
           </dl>
         ) : (
           <div className="mt-6 grid gap-6 sm:grid-cols-2">
             <div>
               <h2 className="text-sm font-bold uppercase text-neutral-600">Collect on delivery</h2>
-              <p className="mt-1 text-lg font-bold">{order.totals.balanceDue > 0 ? `৳${money(order.totals.balanceDue)}` : 'Nothing: paid in full'}</p>
+              <p className="mt-1 text-lg font-bold">{order.totals.balanceDue > 0 ? `${formatMoney(order.totals.balanceDue)}` : 'Nothing: paid in full'}</p>
             </div>
             <div>
               <h2 className="text-sm font-bold uppercase text-neutral-600">Packed by / date</h2>

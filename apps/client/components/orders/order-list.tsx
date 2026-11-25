@@ -218,7 +218,7 @@ export function OrderList({ role }: { role: StaffRole }) {
               </select>
             </FilterField>
             <FilterField label="Country code">
-              <input className={`${field} w-full`} placeholder="BD" maxLength={2} value={filters.countryCode} onChange={set('countryCode')} />
+              <input className={`${field} w-full`} placeholder="US" maxLength={2} value={filters.countryCode} onChange={set('countryCode')} />
             </FilterField>
             <span className="hidden md:block" />
             <FilterField label="Payable from">

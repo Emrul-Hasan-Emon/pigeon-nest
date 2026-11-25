@@ -466,7 +466,7 @@ function PaymentPanel({
             <input className={field} maxLength={100} placeholder="Transaction ID (optional)" value={transactionId} onChange={(e) => setTransactionId(e.target.value)} />
             <input className={field} type="datetime-local" aria-label="When it was paid" value={paidAt} onChange={(e) => setPaidAt(e.target.value)} />
           </div>
-          <textarea className={`${field} w-full`} rows={2} maxLength={1000} placeholder="How was it paid? e.g. bKash to the shop number, cash at pickup" value={description} onChange={(e) => setDescription(e.target.value)} />
+          <textarea className={`${field} w-full`} rows={2} maxLength={1000} placeholder="How was it paid? e.g. PayPal to the shop email, cash at pickup" value={description} onChange={(e) => setDescription(e.target.value)} />
           <FilePicker files={files} onChange={setFiles} />
           {formError && <p role="alert" className="text-sm text-destructive">{formError}</p>}
           <button type="submit" disabled={busy} className={primaryButton}>{busy ? 'Saving…' : 'Record payment'}</button>
