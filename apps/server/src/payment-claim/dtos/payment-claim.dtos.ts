@@ -22,10 +22,10 @@ export class CreatePaymentClaimDto {
   @MaxLength(120)
   transactionId: string;
 
-  // How the money was sent: bKash, Nagad, bank transfer...
+  // How the money was sent: PayPal, Wise, bank transfer...
   @Transform(trimString)
   @IsString()
-  @IsNotEmpty({ message: 'Say how you paid (bKash, Nagad, bank...)' })
+  @IsNotEmpty({ message: 'Say how you paid (PayPal, Wise, bank...)' })
   @MaxLength(60)
   method: string;
 

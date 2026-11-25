@@ -18,7 +18,7 @@ export class SellerPaymentAccount extends BaseEntity {
   @Column({ type: 'varchar', length: 10 })
   kind: PaymentAccountKind;
 
-  // "bKash", "Nagad", "Rocket", or the bank's name.
+  // "PayPal", "Wise", "Rocket", or the bank's name.
   @Column({ type: 'varchar', length: 80 })
   provider: string;
 

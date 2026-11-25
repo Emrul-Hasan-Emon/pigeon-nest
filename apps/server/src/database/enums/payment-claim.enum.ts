@@ -6,7 +6,7 @@ export enum PaymentClaimStatus {
   CANCELLED = 'cancelled',
 }
 
-/** Where a seller takes payment: a mobile money number (bKash, Nagad...) or a bank account. */
+/** Where a seller takes payment: a online wallet number (PayPal, Wise...) or a bank account. */
 export enum PaymentAccountKind {
   MFS = 'mfs',
   BANK = 'bank',

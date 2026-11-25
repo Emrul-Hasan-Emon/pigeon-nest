@@ -67,7 +67,7 @@ export function proofFieldsFor(type: PaymentGatewayType): ProofField[] {
 
 export const GATEWAY_TYPE_LABELS: Record<PaymentGatewayType, string> = {
   [PaymentGatewayType.COD]: 'Cash on delivery',
-  [PaymentGatewayType.MFS]: 'Mobile banking',
+  [PaymentGatewayType.MFS]: 'Online wallet',
   [PaymentGatewayType.CARD]: 'Card',
   [PaymentGatewayType.BANK]: 'Bank transfer',
   [PaymentGatewayType.MANUAL]: 'Other (manual)',

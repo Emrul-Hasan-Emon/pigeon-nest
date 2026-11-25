@@ -3,12 +3,12 @@ import { IsBoolean, IsEnum, IsNotEmpty, IsOptional, IsString, MaxLength, MinLeng
 import { PaymentAccountKind } from '../../database/enums/payment-claim.enum';
 import { emptyToNull, trimString } from '../../shared/utils/transform.util';
 
-/** A bank or mobile money account where buyers send money for this seller's orders. */
+/** A bank or online wallet account where buyers send money for this seller's orders. */
 export class CreatePaymentAccountDto {
   @IsEnum(PaymentAccountKind)
   kind: PaymentAccountKind;
 
-  // "bKash", "Nagad", "Rocket", or the bank's name.
+  // "PayPal", "Wise", "Rocket", or the bank's name.
   @Transform(trimString)
   @IsString()
   @IsNotEmpty()
