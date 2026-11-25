@@ -10,6 +10,7 @@ import { DisburseList } from './disburse-list';
 import { LedgerList } from './ledger-list';
 import { SettingHistory } from './setting-history';
 import { LoadingBlock } from '@/components/ui/skeleton';
+import { formatMoney } from '@/lib/money';
 
 type Tab = 'ledger' | 'changes' | 'payments' | 'rule';
 
@@ -23,7 +24,7 @@ function RateCard({ rate, global }: { rate: EffectiveRule; global: CommissionRul
       <div>
         <p className="text-sm font-semibold text-muted-foreground">Your system commission rate</p>
         <p className="mt-1 font-[family-name:var(--font-serif)] text-4xl font-semibold text-foreground">
-          {percent ? `${rate.value}%` : `৳${money(rate.value)}`}
+          {percent ? `${rate.value}%` : `${formatMoney(rate.value)}`}
           <span className="ml-2 text-base font-normal text-muted-foreground">{percent ? 'of each item' : 'for each item'}</span>
         </p>
       </div>

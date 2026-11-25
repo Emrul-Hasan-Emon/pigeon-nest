@@ -72,10 +72,10 @@ export function LedgerList({ role, sellerId }: { role: CommissionRole; sellerId?
               {showSeller && <Th>Seller</Th>}
               <Th hint="What happened on this line">What happened</Th>
               <Th hint="The order, or the payment, this line is about">Order or payment</Th>
-              <Th hint="System commission added to what is owed. A minus sign means it was paid or taken back.">System commission (৳)</Th>
+              <Th hint="System commission added to what is owed. A minus sign means it was paid or taken back.">System commission (USD)</Th>
               <Th hint="Was the order itself paid when this line was written?">Order paid?</Th>
-              <Th hint="System commission still unpaid right after this line">Still to pay after (৳)</Th>
-              <Th hint="System commission paid in all, right after this line">Paid so far (৳)</Th>
+              <Th hint="System commission still unpaid right after this line">Still to pay after (USD)</Th>
+              <Th hint="System commission paid in all, right after this line">Paid so far (USD)</Th>
               <Th hint="Counted lines are part of the balance. Cancelled-out lines were undone, for example when an order was cancelled.">Counts?</Th>
             </tr>
           </thead>

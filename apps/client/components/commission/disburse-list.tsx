@@ -26,8 +26,8 @@ export function DisburseList({ role, sellerId }: { role: CommissionRole; sellerI
       </p>
       <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-4">
         {showSeller && <Lbl text="Seller ID"><input className={`${field} w-full`} inputMode="numeric" placeholder="Seller number" value={f.sellerId} onChange={set('sellerId')} /></Lbl>}
-        <Lbl text="Amount from (৳)"><input className={`${field} w-full`} inputMode="decimal" placeholder="Lowest" value={f.minAmount} onChange={set('minAmount')} /></Lbl>
-        <Lbl text="Amount up to (৳)"><input className={`${field} w-full`} inputMode="decimal" placeholder="Highest" value={f.maxAmount} onChange={set('maxAmount')} /></Lbl>
+        <Lbl text="Amount from (USD)"><input className={`${field} w-full`} inputMode="decimal" placeholder="Lowest" value={f.minAmount} onChange={set('minAmount')} /></Lbl>
+        <Lbl text="Amount up to (USD)"><input className={`${field} w-full`} inputMode="decimal" placeholder="Highest" value={f.maxAmount} onChange={set('maxAmount')} /></Lbl>
         <Lbl text="Date from"><input type="date" className={`${field} w-full`} value={f.from} onChange={set('from')} /></Lbl>
         <Lbl text="Date until"><input type="date" className={`${field} w-full`} value={f.to} onChange={set('to')} /></Lbl>
         {dirty && <button type="button" onClick={() => setF(EMPTY)} className={`${outlineButton} self-end`}>Clear all filters</button>}
@@ -39,10 +39,10 @@ export function DisburseList({ role, sellerId }: { role: CommissionRole; sellerI
               <Th>Payment no.</Th>
               <Th>Date</Th>
               {showSeller && <Th>Seller</Th>}
-              <Th hint="The money paid in this payment">Amount paid (৳)</Th>
-              <Th hint="Total system commission at the time of this payment">Total system commission then (৳)</Th>
-              <Th hint="System commission still to pay right after this payment">Still to pay after (৳)</Th>
-              <Th hint="All system commission paid so far, including this payment">Total paid so far (৳)</Th>
+              <Th hint="The money paid in this payment">Amount paid (USD)</Th>
+              <Th hint="Total system commission at the time of this payment">Total system commission then (USD)</Th>
+              <Th hint="System commission still to pay right after this payment">Still to pay after (USD)</Th>
+              <Th hint="All system commission paid so far, including this payment">Total paid so far (USD)</Th>
               <Th hint="Receipts or photos attached to this payment">Proof files</Th>
               <th className={th} />
             </tr>

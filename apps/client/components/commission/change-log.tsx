@@ -67,9 +67,9 @@ export function ChangeLog({ role, sellerId }: { role: CommissionRole; sellerId?:
               <Th>Date</Th>
               {showSeller && <Th>Seller</Th>}
               <Th hint="Why the numbers moved">What happened</Th>
-              <Th hint="All system commission on fully paid orders, before → after (৳)">Total system commission (৳)</Th>
-              <Th hint="System commission not paid yet, before → after (৳)">Still to pay (৳)</Th>
-              <Th hint="System commission already paid, before → after (৳)">Already paid (৳)</Th>
+              <Th hint="All system commission on fully paid orders, before → after (USD)">Total system commission (USD)</Th>
+              <Th hint="System commission not paid yet, before → after (USD)">Still to pay (USD)</Th>
+              <Th hint="System commission already paid, before → after (USD)">Already paid (USD)</Th>
               <Th hint="Who caused the change">Done by</Th>
             </tr>
           </thead>
