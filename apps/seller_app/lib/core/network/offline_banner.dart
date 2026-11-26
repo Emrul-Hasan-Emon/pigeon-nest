@@ -7,7 +7,8 @@ import '../theme/app_theme.dart';
 /// True while the phone has no network at all.
 final offlineProvider = StreamProvider<bool>((ref) async* {
   final connectivity = Connectivity();
-  bool none(List<ConnectivityResult> r) => r.isEmpty || r.every((c) => c == ConnectivityResult.none);
+  bool none(List<ConnectivityResult> r) =>
+      r.isEmpty || r.every((c) => c == ConnectivityResult.none);
   yield none(await connectivity.checkConnectivity());
   yield* connectivity.onConnectivityChanged.map(none);
 });
@@ -19,15 +20,30 @@ class OfflineBanner extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (ref.watch(offlineProvider).value != true) return const SizedBox.shrink();
-    return Container(
-      width: double.infinity,
+    // The app shell sits above the Scaffolds, so the bar needs its own Material for the text style.
+    return Material(
       color: AppTheme.ink,
-      padding: EdgeInsets.fromLTRB(AppSpacing.m, MediaQuery.of(context).padding.top + 6, AppSpacing.m, 6),
-      child: const Row(children: [
-        Icon(Icons.wifi_off, color: Colors.white, size: 18),
-        SizedBox(width: AppSpacing.s),
-        Expanded(child: Text('No internet. Pull down to refresh when it is back.', style: TextStyle(color: Colors.white, fontSize: 13))),
-      ]),
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.fromLTRB(
+          AppSpacing.m,
+          MediaQuery.of(context).padding.top + 6,
+          AppSpacing.m,
+          6,
+        ),
+        child: const Row(
+          children: [
+            Icon(Icons.wifi_off, color: Colors.white, size: 18),
+            SizedBox(width: AppSpacing.s),
+            Expanded(
+              child: Text(
+                'No internet. Pull down to refresh when it is back.',
+                style: TextStyle(color: Colors.white, fontSize: 13),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

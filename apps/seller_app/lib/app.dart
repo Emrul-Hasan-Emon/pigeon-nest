@@ -32,7 +32,11 @@ class _SellerAppState extends ConsumerState<SellerApp> {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       routerConfig: ref.watch(routerProvider),
-      builder: (context, child) => Column(children: [const OfflineBanner(), Expanded(child: child ?? const SizedBox.shrink())]),
+      // While the bar is showing it already covers the status bar, so the screens below must not pad for it again.
+      builder: (context, child) => Column(children: [
+        const OfflineBanner(),
+        Expanded(child: MediaQuery.removePadding(context: context, removeTop: ref.watch(offlineProvider).value == true, child: child ?? const SizedBox.shrink())),
+      ]),
     );
   }
 }
