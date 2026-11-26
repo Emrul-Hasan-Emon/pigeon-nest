@@ -349,6 +349,8 @@ export class SkuPriceProposalService {
     action: ProposalActionName,
     dto: { price?: number; quantity?: number; note?: string },
   ) {
+    let buyerId: number | null = null;
+    let productId: number | null = null;
     await this.repo.manager.transaction(async (m) => {
       // Checkout and the cart lock the cart first and the proposal second; take
       // the carts holding this proposal first too, so the two never deadlock.
@@ -367,6 +369,8 @@ export class SkuPriceProposalService {
         (actor.type === AuthUserType.USER && p?.userId === actor.id) ||
         (actor.type === AuthUserType.SELLER && p?.sellerId === actor.id);
       if (!p || !owns) throw new NotFoundException('Proposal not found');
+      buyerId = p.userId;
+      productId = p.sellerProductId;
 
       if (!actionsFor(p.status, p.awaitingParty, actor.type).includes(action)) {
         throw new ConflictException(this.whyNot(p, actor.type));
@@ -446,6 +450,15 @@ export class SkuPriceProposalService {
         );
       }
     });
+    if (actor.type === AuthUserType.SELLER && buyerId) {
+      const [product] = await this.repo.query(`SELECT name FROM seller_product WHERE id = $1`, [productId]);
+      const verb = action === 'accept' ? 'accepted' : action === 'counter' ? 'countered' : action === 'reject' ? 'rejected' : 'cancelled';
+      this.push.notifyUser(buyerId, {
+        title: 'Price offer update',
+        body: `${product?.name ?? 'Your offer'}: the seller ${verb} your offer.`,
+        data: { route: `/offers/${id}` },
+      });
+    }
     return this.one(id, actor.type, {
       userId: actor.type === AuthUserType.USER ? actor.id : undefined,
       sellerId: actor.type === AuthUserType.SELLER ? actor.id : undefined,
