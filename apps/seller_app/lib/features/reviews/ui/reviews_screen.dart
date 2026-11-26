@@ -32,6 +32,7 @@ class ReviewsScreen extends ConsumerStatefulWidget {
 class _ReviewsScreenState extends ConsumerState<ReviewsScreen> {
   int? _rating;
   bool _unreplied = false;
+  int _version = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -78,13 +79,14 @@ class _ReviewsScreenState extends ConsumerState<ReviewsScreen> {
         Expanded(
           child: CursorList<Review>(
             fetch: ref.read(reviewsApiProvider).listFetcher(rating: _rating, unreplied: _unreplied),
-            reloadKey: '$_rating|$_unreplied',
+            reloadKey: '$_rating|$_unreplied|$_version',
             emptyText: 'No reviews here.',
             emptyIcon: Icons.star_outline,
             itemBuilder: (context, r) => AppCard(
               onTap: () async {
                 await context.push('/more/reviews/${r.id}', extra: r);
                 ref.invalidate(reviewSummaryProvider);
+                if (mounted) setState(() => _version++);
               },
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Row(children: [Stars(r.rating), const Spacer(), Text(formatDate(r.createdAt), style: const TextStyle(color: AppTheme.neutral, fontSize: 12))]),
