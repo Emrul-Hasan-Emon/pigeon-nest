@@ -1,3 +1,4 @@
+import '../../core/config/app_config.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -28,7 +29,7 @@ class PhotoField extends StatelessWidget {
     if (picked != null) {
       image = Image.file(File(picked!.path), fit: BoxFit.cover);
     } else if (savedUrl != null) {
-      image = Image.network(savedUrl!, fit: BoxFit.cover, errorBuilder: (_, _, _) => const _Empty(text: 'Picture not available'));
+      image = Image.network(AppConfig.mediaUrl(savedUrl!), fit: BoxFit.cover, errorBuilder: (_, _, _) => const _Empty(text: 'Picture not available'));
     } else {
       image = const _Empty(text: 'Tap to add');
     }

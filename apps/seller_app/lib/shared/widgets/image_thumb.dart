@@ -1,3 +1,4 @@
+import '../../core/config/app_config.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_theme.dart';
@@ -17,7 +18,7 @@ class ImageThumb extends StatelessWidget {
           color: AppTheme.border,
           child: url == null
               ? const Icon(Icons.image_outlined, color: AppTheme.neutral)
-              : Image.network(url!, fit: BoxFit.cover, errorBuilder: (_, _, _) => const Icon(Icons.image_not_supported_outlined, color: AppTheme.neutral)),
+              : Image.network(AppConfig.mediaUrl(url!), fit: BoxFit.cover, errorBuilder: (_, _, _) => const Icon(Icons.image_not_supported_outlined, color: AppTheme.neutral)),
         ),
       );
 }

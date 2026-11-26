@@ -1,3 +1,4 @@
+import '../../core/config/app_config.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_theme.dart';
@@ -14,7 +15,7 @@ class AttachmentStrip extends StatelessWidget {
         for (final a in items)
           a.isImage
               ? InkWell(
-                  onTap: () => showDialog<void>(context: context, builder: (_) => Dialog(child: InteractiveViewer(child: Image.network(a.url)))),
+                  onTap: () => showDialog<void>(context: context, builder: (_) => Dialog(child: InteractiveViewer(child: Image.network(AppConfig.mediaUrl(a.url))))),
                   child: ImageThumb(a.url, size: 64),
                 )
               : Chip(avatar: const Icon(Icons.attach_file, size: 16), label: Text(a.fileName, overflow: TextOverflow.ellipsis)),
