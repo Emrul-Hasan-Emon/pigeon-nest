@@ -43,7 +43,11 @@ class _RecordPaymentScreenState extends ConsumerState<RecordPaymentScreen> {
 
   Future<void> _add() async {
     final picked = await ImagePickerHelper.pickMultipleFromGallery(limit: 10 - _files.length);
-    setState(() => _files.addAll(picked.take(10 - _files.length)));
+    // A picture is there now, so the old "add a picture" message no longer applies.
+    setState(() {
+      _files.addAll(picked.take(10 - _files.length));
+      _error = null;
+    });
   }
 
   Future<void> _save() async {

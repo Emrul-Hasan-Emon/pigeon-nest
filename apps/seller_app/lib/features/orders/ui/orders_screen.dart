@@ -1,3 +1,4 @@
+import '../../../shared/state/list_refresh.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -117,6 +118,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(listRefreshProvider('orders'), (_, _) => _reload());
     final access = ref.watch(authProvider).access;
     if (access != null && !access.canManage) {
       return const EmptyView(message: 'Orders open once your shop is approved and active.', icon: Icons.receipt_long_outlined);

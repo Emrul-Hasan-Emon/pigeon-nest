@@ -1,3 +1,4 @@
+import '../../../shared/state/list_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -130,6 +131,7 @@ class _CreateOrderScreenState extends ConsumerState<CreateOrderScreen> {
     final picked = await showModalBottomSheet<CatalogSku>(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       builder: (_) => const _CatalogSheet(),
     );
     if (picked == null) return;
@@ -171,6 +173,7 @@ class _CreateOrderScreenState extends ConsumerState<CreateOrderScreen> {
         if (_note.text.trim().isNotEmpty) 'note': _note.text.trim(),
         'expectedItemsTotal': _subtotal,
       });
+      ref.read(listRefreshProvider('orders').notifier).bump();
       if (!mounted) return;
       context.pushReplacement('/orders/$id');
     } on ApiException catch (e) {
