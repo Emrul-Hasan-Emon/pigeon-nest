@@ -1,3 +1,4 @@
+import '../../../shared/state/list_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -27,6 +28,7 @@ class _ProductPicturesScreenState extends ConsumerState<ProductPicturesScreen> {
     try {
       await action();
       ref.invalidate(productDetailProvider(widget.productId));
+      ref.read(listRefreshProvider('products').notifier).bump();
     } on ApiException catch (e) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
     } finally {

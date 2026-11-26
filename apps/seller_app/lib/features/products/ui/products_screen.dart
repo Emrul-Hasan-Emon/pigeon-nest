@@ -1,3 +1,4 @@
+import '../../../shared/state/list_refresh.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -159,6 +160,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(listRefreshProvider('products'), (_, _) => _reload());
     final access = ref.watch(authProvider).access;
     if (access != null && !access.canManage) {
       return const EmptyView(message: 'Products open once your shop is approved and active.', icon: Icons.inventory_2_outlined);

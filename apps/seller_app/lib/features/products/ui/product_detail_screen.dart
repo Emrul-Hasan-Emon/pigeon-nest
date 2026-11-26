@@ -1,3 +1,4 @@
+import '../../../shared/state/list_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -70,6 +71,7 @@ class _BodyState extends ConsumerState<_Body> {
     try {
       await ref.read(productRepositoryProvider).setActive(p.row.id, !p.row.isActive);
       ref.invalidate(productDetailProvider(p.row.id));
+      ref.read(listRefreshProvider('products').notifier).bump();
     } on ApiException catch (e) {
       if (mounted) _say(e.message);
     } finally {
@@ -81,6 +83,7 @@ class _BodyState extends ConsumerState<_Body> {
     setState(() => _busy = true);
     try {
       final id = await ref.read(productRepositoryProvider).copy(p.row.id);
+      ref.read(listRefreshProvider('products').notifier).bump();
       if (!mounted) return;
       _say('Copied. It is switched off until you turn it on.');
       context.pushReplacement('/products/$id/edit');

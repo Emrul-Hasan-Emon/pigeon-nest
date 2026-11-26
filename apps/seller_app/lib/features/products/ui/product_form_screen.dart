@@ -1,3 +1,4 @@
+import '../../../shared/state/list_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -79,8 +80,10 @@ class _FormState extends ConsumerState<_Form> {
     final picked = await showModalBottomSheet<Category>(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       builder: (_) => _CategorySheet(items: widget.lookups.categories),
     );
+    FocusManager.instance.primaryFocus?.unfocus();
     if (picked != null) setState(() => _categoryId = picked.id);
   }
 
@@ -88,6 +91,8 @@ class _FormState extends ConsumerState<_Form> {
     final result = await Navigator.of(context).push<SkuDraft>(MaterialPageRoute(
       builder: (_) => SkuEditorScreen(draft: draft ?? SkuDraft(isDefault: _skus.isEmpty), attributes: widget.lookups.attributes, productId: _p?.row.id),
     ));
+    // Coming back from the option screen must not pop the keyboard up on the field that had focus before.
+    FocusManager.instance.primaryFocus?.unfocus();
     if (result == null) return;
     setState(() {
       if (result.isDefault) {
@@ -154,6 +159,7 @@ class _FormState extends ConsumerState<_Form> {
           if (_removed.isNotEmpty) 'removeSkuIds': _removed,
         });
         ref.invalidate(productDetailProvider(_p!.row.id));
+        ref.read(listRefreshProvider('products').notifier).bump();
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Product saved')));
         context.pop();
@@ -163,6 +169,7 @@ class _FormState extends ConsumerState<_Form> {
           'activeStatus': _startActive ? 'active' : 'inactive',
           'skus': [for (final s in _skus) s.toCreateJson()],
         });
+        ref.read(listRefreshProvider('products').notifier).bump();
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Product added. Add its pictures next.')));
         context.pushReplacement('/products/$id/pictures');
@@ -282,7 +289,8 @@ class _CategorySheetState extends State<_CategorySheet> {
     final shown = widget.items.where((c) => c.path.toLowerCase().contains(_q.toLowerCase())).toList();
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-      child: SizedBox(
+      child: SafeArea(
+        child: SizedBox(
         height: MediaQuery.of(context).size.height * 0.75,
         child: Column(children: [
           Padding(
@@ -293,6 +301,7 @@ class _CategorySheetState extends State<_CategorySheet> {
             child: ListView(children: [for (final c in shown) ListTile(title: Text(c.path), onTap: () => Navigator.pop(context, c))]),
           ),
         ]),
+      ),
       ),
     );
   }
