@@ -6,6 +6,12 @@
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--dir", "apps/client", "dev", "--port", "3201"],
       "port": 3201
+    },
+    {
+      "name": "buyer-app-web",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": ["-c", "cd apps/buyer_app && flutter run -d web-server --web-port 3302 --web-hostname 0.0.0.0 --dart-define=API_BASE_URL=http://localhost:3100/v1/api"],
+      "port": 3302
     }
   ]
 }
