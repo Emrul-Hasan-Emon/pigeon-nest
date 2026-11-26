@@ -7,6 +7,7 @@ import { likeContains } from '../../shared/utils/like.util';
 import { PageRequest, pageResult } from '../../shared/utils/page-paginate.util';
 import { AnsweredFilter, AnswerQuestionDto, ListSellerQuestionsQueryDto } from '../dtos/question.dtos';
 import { CommonQuestionService } from './common-question.service';
+import { PushService } from '../../push/services/push.service';
 
 /** A seller reads the questions on their own products and answers them. Never another seller's. */
 @Injectable()
@@ -14,6 +15,7 @@ export class SellerQuestionService {
   constructor(
     private readonly db: DatabaseService,
     private readonly common: CommonQuestionService,
+    private readonly push: PushService,
   ) {}
 
   async list(seller: Seller, query: ListSellerQuestionsQueryDto, page: PageRequest) {
@@ -45,6 +47,7 @@ export class SellerQuestionService {
     const row = await this.db.productQuestion.findOne({ where: { id, sellerId: seller.id } });
     if (!row) throw new NotFoundException('Question not found');
     if (row.status !== QuestionStatus.PUBLISHED) throw new ConflictException('This question was hidden by a moderator');
+    const wasAnswered = row.answeredAt !== null;
     row.answer = dto.answer;
     row.answeredAt = row.answeredAt ?? new Date();
     row.updatedBy = seller.id;
@@ -52,6 +55,13 @@ export class SellerQuestionService {
     row.updaterName = seller.name;
     await this.db.productQuestion.save(row);
     const full = await this.common.withRelations().andWhere('q.id = :id', { id }).getOneOrFail();
+    if (!wasAnswered) {
+      this.push.notifyUser(row.userId, {
+        title: 'Your question was answered',
+        body: full.product?.name ? `${full.product.name}: ${dto.answer}` : dto.answer,
+        data: { route: `/products/${row.sellerProductId}` },
+      });
+    }
     return this.common.staffView(full);
   }
 }
