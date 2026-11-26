@@ -29,6 +29,7 @@ class RefundsScreen extends ConsumerStatefulWidget {
 
 class _RefundsScreenState extends ConsumerState<RefundsScreen> {
   String? _status = 'needs_to_refund';
+  int _version = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -52,13 +53,14 @@ class _RefundsScreenState extends ConsumerState<RefundsScreen> {
         Expanded(
           child: PagedList<RefundRecord>(
             fetch: ref.read(returnsApiProvider).refundsFetcher(status: _status),
-            reloadKey: _status,
+            reloadKey: '$_status|$_version',
             emptyText: 'No refunds here.',
             emptyIcon: Icons.currency_exchange,
             itemBuilder: (context, r) => AppCard(
               onTap: () async {
                 await context.push('/more/refunds/${r.id}');
                 ref.invalidate(refundSummaryProvider);
+                if (mounted) setState(() => _version++);
               },
               child: Row(children: [
                 Expanded(

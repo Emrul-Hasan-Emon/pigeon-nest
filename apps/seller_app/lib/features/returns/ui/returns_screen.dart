@@ -31,6 +31,7 @@ class ReturnsScreen extends ConsumerStatefulWidget {
 class _ReturnsScreenState extends ConsumerState<ReturnsScreen> {
   String? _status;
   String _search = '';
+  int _version = 0;
   Timer? _debounce;
 
   @override
@@ -71,11 +72,14 @@ class _ReturnsScreenState extends ConsumerState<ReturnsScreen> {
           Expanded(
             child: PagedList<ReturnRow>(
               fetch: ref.read(returnsApiProvider).returnsFetcher(status: _status, search: _search),
-              reloadKey: '$_status|$_search',
+              reloadKey: '$_status|$_search|$_version',
               emptyText: 'No returns.',
               emptyIcon: Icons.assignment_return_outlined,
               itemBuilder: (context, r) => AppCard(
-                onTap: () => context.push('/more/returns/${r.id}'),
+                onTap: () async {
+                  await context.push('/more/returns/${r.id}');
+                  if (mounted) setState(() => _version++);
+                },
                 child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Expanded(
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

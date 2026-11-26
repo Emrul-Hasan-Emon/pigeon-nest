@@ -45,8 +45,11 @@ class _RefundDetailScreenState extends ConsumerState<RefundDetailScreen> {
             child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
               if (next == 'refunded') ...[
                 Text('The amount must be exactly what the buyer paid: ${formatUsd(r.expectedAmount)}.'),
+                const SizedBox(height: AppSpacing.m),
                 TextField(controller: amount, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: const InputDecoration(labelText: 'Amount sent (USD)', prefixText: '\$ ')),
+                const SizedBox(height: AppSpacing.s),
                 TextField(controller: txn, maxLength: 120, decoration: const InputDecoration(labelText: 'Transaction ID (optional)')),
+                const SizedBox(height: AppSpacing.s),
               ],
               TextField(controller: note, maxLines: 2, maxLength: 1000, decoration: InputDecoration(labelText: next == 'refunded' ? 'How you sent it (required)' : 'Note (optional)')),
               if (next == 'refunded') ...[const Text('Proof (at least one picture)'), const SizedBox(height: AppSpacing.xs), PhotoPickerRow(files: files, onChanged: (f) => set(() => files = f))],
