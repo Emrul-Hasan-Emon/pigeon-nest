@@ -42,7 +42,9 @@ class _ClaimsScreenState extends ConsumerState<ClaimsScreen> {
         title: const Text('Confirm this payment'),
         content: Column(mainAxisSize: MainAxisSize.min, children: [
           const Text('Only confirm after the money reached you. Change the amount if you got a different one.'),
+          const SizedBox(height: AppSpacing.m),
           TextField(controller: amount, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: const InputDecoration(labelText: 'Amount received (USD)', prefixText: '\$ ')),
+          const SizedBox(height: AppSpacing.s),
           TextField(controller: note, maxLength: 500, decoration: const InputDecoration(labelText: 'Note (optional)')),
         ]),
         actions: [
