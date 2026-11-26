@@ -29,6 +29,7 @@ import { OrderRefundStatusHistory } from './entities/order/order-refund-status-h
 import { PaymentClaim } from './entities/payment/payment-claim.entity';
 import { SellerPaymentAccount } from './entities/payment/seller-payment-account.entity';
 import { SellerDevice } from './entities/seller/seller-device.entity';
+import { UserDevice } from './entities/person/user-device.entity';
 import { SellerProductSkuParent } from './entities/product/seller-product-sku-parent.entity';
 import { SellerProductMedia } from './entities/product-media/seller-product-media.entity';
 import { Order } from './entities/order/order.entity';
@@ -104,6 +105,7 @@ export const DATABASE_ENTITIES = [
   OrderRefundStatusHistory,
   SellerPaymentAccount,
   SellerDevice,
+  UserDevice,
   SellerProductMedia,
   Order,
   OrderItem,
