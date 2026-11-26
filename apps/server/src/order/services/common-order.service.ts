@@ -65,6 +65,7 @@ import { getCursorPaginateData } from '../../shared/utils/cursor-paginate.util';
 import { likeContains } from '../../shared/utils/like.util';
 import { effectivePrice } from '../../storefront/storefront-product.service';
 import { PageRequest, pageResult } from '../../shared/utils/page-paginate.util';
+import { PushService } from '../../push/services/push.service';
 
 export interface SkuSnapshot {
   code?: string;
@@ -139,6 +140,8 @@ export interface StatusChange {
   orderId: number;
   from: OrderStatus;
   to: OrderStatus;
+  /** Null for a guest order: there is no account to push a notification to. */
+  userId: number | null;
 }
 
 const FOLDER_PAYMENTS = 'order-payments';
@@ -183,6 +186,7 @@ export class CommonOrderService {
     private readonly shipping: ShippingZoneService,
     private readonly commission: CommonCommissionService,
     private readonly files: AttachmentFileService,
+    private readonly push: PushService,
   ) {}
 
   // ---- the order as every role sees it (the view) ----
@@ -828,7 +832,17 @@ export class CommonOrderService {
         creatorType: actor.type,
         creatorName: actor.name,
       });
-      return { orderId: order.id, from, to };
+      return { orderId: order.id, from, to, userId: order.userId };
+    });
+  }
+
+  /** Tells the buyer their order moved, unless they are the one who moved it. */
+  notifyOrderStatusChange(change: StatusChange, actor: StatusActor) {
+    if (!change.userId || actor.type === AuthUserType.USER) return;
+    this.push.notifyUser(change.userId, {
+      title: 'Order update',
+      body: `Your order is now ${change.to.replace(/_/g, ' ')}.`,
+      data: { route: `/orders/${change.orderId}` },
     });
   }
 
@@ -1302,7 +1316,8 @@ export class CommonOrderService {
   }
 
   async changeStatus(id: number, dto: ChangeOrderStatusDto, actor: StatusActor, viewer: AuthUserType, scope: OrderScope = {}) {
-    await this.changeOrderStatus(id, dto.status, actor, { note: dto.note, scope });
+    const change = await this.changeOrderStatus(id, dto.status, actor, { note: dto.note, scope });
+    this.notifyOrderStatusChange(change, actor);
     return this.orderDetail(id, viewer, scope);
   }
 
@@ -1326,7 +1341,8 @@ export class CommonOrderService {
     const results: Array<{ id: number; orderNumber: string; ok: boolean; error?: string }> = [];
     for (const o of [...orders].sort((a, b) => a.id - b.id)) {
       try {
-        await this.changeOrderStatus(o.id, dto.status, actor, { note: dto.note, scope });
+        const change = await this.changeOrderStatus(o.id, dto.status, actor, { note: dto.note, scope });
+        this.notifyOrderStatusChange(change, actor);
         results.push({ id: o.id, orderNumber: o.orderNumber, ok: true });
       } catch (e) {
         results.push({ id: o.id, orderNumber: o.orderNumber, ok: false, error: e instanceof Error ? e.message : 'Could not change this order' });
