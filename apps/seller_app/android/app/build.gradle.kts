@@ -36,6 +36,8 @@ android {
         // flag during build.
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        // Plain HTTP is refused unless the build is started with ALLOW_HTTP=true (a phone test against a dev server).
+        manifestPlaceholders["usesCleartext"] = System.getenv("ALLOW_HTTP") ?: "false"
     }
 
     signingConfigs {
