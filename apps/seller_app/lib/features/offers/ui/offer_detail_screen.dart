@@ -54,7 +54,9 @@ class _OfferDetailScreenState extends ConsumerState<OfferDetailScreen> {
           content: Column(mainAxisSize: MainAxisSize.min, children: [
             if (counter) ...[
               TextField(controller: price, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: const InputDecoration(labelText: 'Your price for each (USD)', prefixText: '\$ ')),
+              const SizedBox(height: AppSpacing.s),
               TextField(controller: qty, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Quantity')),
+              const SizedBox(height: AppSpacing.s),
             ],
             TextField(controller: note, maxLength: 500, decoration: const InputDecoration(labelText: 'Note for the buyer (optional)')),
             if (error != null) Text(error!, style: const TextStyle(color: AppTheme.danger)),

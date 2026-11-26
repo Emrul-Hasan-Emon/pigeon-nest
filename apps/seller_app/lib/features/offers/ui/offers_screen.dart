@@ -29,6 +29,7 @@ class OffersScreen extends ConsumerStatefulWidget {
 class _OffersScreenState extends ConsumerState<OffersScreen> {
   // 'you' = waiting for the seller; otherwise a status or null for all.
   String? _filter = 'you';
+  int _version = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -54,13 +55,15 @@ class _OffersScreenState extends ConsumerState<OffersScreen> {
         Expanded(
           child: CursorList<Offer>(
             fetch: ref.read(offersApiProvider).listFetcher(status: _filter == 'you' ? null : _filter, awaitingYou: _filter == 'you'),
-            reloadKey: _filter,
+            reloadKey: '$_filter|$_version',
             emptyText: 'No offers here.',
             emptyIcon: Icons.local_offer_outlined,
             itemBuilder: (context, o) => AppCard(
               onTap: () async {
                 await context.push('/more/offers/${o.id}');
                 ref.invalidate(offerSummaryProvider);
+                // The offer may have been answered, so the list is loaded again.
+                if (mounted) setState(() => _version++);
               },
               child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 ImageThumb(o.productImage, size: 56),
